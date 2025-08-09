@@ -64,7 +64,6 @@ export default function Home() {
           <span className="text-xs">Telegram Mini Apps Directory</span>
         </div>
       </div>
-
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Hero Section */}
         <section className="mb-12">
@@ -78,7 +77,7 @@ export default function Home() {
                 
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-                    <div className="text-2xl font-bold">$300</div>
+                    <div className="text-2xl font-bold">От $300</div>
                     <div className="text-sm text-blue-100">вместо $25,000</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur rounded-lg p-4">
@@ -89,7 +88,7 @@ export default function Home() {
                 
                 <Button className="bg-success hover:bg-success/90 text-white px-8 py-3 rounded-lg font-semibold">
                   <MessageSquare className="w-4 h-4 mr-2" />
-                  Связаться с @balilegend
+                  Написать в техподдержку
                 </Button>
               </div>
               
@@ -260,7 +259,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
               <Button className="bg-success hover:bg-success/90 text-white px-8 py-3 font-semibold">
                 <MessageSquare className="w-4 h-4 mr-2" />
-                Связаться с @balilegend
+                Получить прототип
               </Button>
               <div className="text-blue-100 text-sm">
                 Консультация бесплатна • Прототип за 1 день
@@ -284,7 +283,6 @@ export default function Home() {
           </Card>
         </section>
       </main>
-
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-8">
         <div className="container mx-auto px-4">
