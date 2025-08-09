@@ -78,7 +78,7 @@ export default function Home() {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-white/10 backdrop-blur rounded-lg p-4">
                     <div className="text-2xl font-bold">От $300</div>
-                    <div className="text-sm text-blue-100">вместо $25,000</div>
+                    <div className="text-sm text-blue-100">вместо $10,000</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur rounded-lg p-4">
                     <div className="text-2xl font-bold">1 день</div>
