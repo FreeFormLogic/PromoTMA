@@ -20,28 +20,50 @@ interface ModuleCardProps {
   module: Module;
 }
 
+// Import all module images
+import showcaseSystemImage from "@assets/generated_images/Product_showcase_system_6e15e772.png";
+import cartSyncImage from "@assets/generated_images/Cart_synchronization_system_e2ad4fc7.png";
+import paymentAutomationImage from "@assets/generated_images/Payment_automation_system_0e82adde.png";
+import customerCrmImage from "@assets/generated_images/Customer_CRM_system_6b6b44be.png";
+import inventoryControlImage from "@assets/generated_images/Inventory_control_system_e1c53b74.png";
+import reviewSystemImage from "@assets/generated_images/Review_system_interface_e77f1e40.png";
+import salesFunnelImage from "@assets/generated_images/Sales_funnel_analytics_35a72059.png";
+import recommendationEngineImage from "@assets/generated_images/Recommendation_engine_interface_6fdb2bb8.png";
+import abTestingImage from "@assets/generated_images/AB_testing_interface_6d8bd52a.png";
+import loyaltyProgramImage from "@assets/generated_images/Loyalty_program_interface_4e67f31f.png";
+import gamificationImage from "@assets/generated_images/Gamification_streak_system_a66cb6f3.png";
+import lmsEducationImage from "@assets/generated_images/LMS_education_platform_af5ad5b0.png";
+import videoCourseImage from "@assets/generated_images/Video_course_platform_b56e9407.png";
+import bookingCalendarImage from "@assets/generated_images/Booking_calendar_system_efd0e54a.png";
+import realtimeBookingImage from "@assets/generated_images/Realtime_booking_system_8c2c4c26.png";
+import telegramStarsImage from "@assets/generated_images/Telegram_Stars_payment_dc27b5b6.png";
+import multiCurrencyWalletImage from "@assets/generated_images/Multi_currency_wallet_cd1b9e1e.png";
+import newsFeedImage from "@assets/generated_images/News_feed_algorithm_31d894b5.png";
+import blogEditorImage from "@assets/generated_images/Blog_editor_SEO_b8e12f86.png";
+import videoStreamingImage from "@assets/generated_images/Video_streaming_platform_87a4c0f5.png";
+
 // Module images mapping
 const moduleImages: Record<string, string> = {
-  "Витрина товаров с AI-описаниями и умными фильтрами": ecommerceImage,
-  "Корзина с сохранением между сессиями": shoppingCartImage,
-  "Автоматический прием платежей": paymentImage,
-  "CRM для управления клиентами": crmImage,
-  "Управление складом и остатками": inventoryImage,
-  "Система отзывов и рейтингов товаров": reviewsImage,
-  "Система лидов и воронки продаж": marketingImage,
-  "Персонализированные рекомендации": marketingImage,
-  "A/B тестирование интерфейса": marketingImage,
-  "Программа лояльности с начислением баллов": loyaltyImage,
-  "Ежедневные задания и streak-система": loyaltyImage,
-  "LMS платформа с прогрессом и сертификатами": educationImage,
-  "Платформа курсов с видео и интерактивными тестами": educationImage,
-  "Календарь записи с автоматическим подтверждением": bookingImage,
-  "Онлайн-запись с календарем в реальном времени": bookingImage,
-  "Прием Telegram Stars (0% комиссия)": fintechImage,
-  "Мультивалютный кошелек с конвертацией": fintechImage,
-  "Лента новостей с алгоритмической подачей": contentImage,
-  "Встроенный блог с редактором и SEO": contentImage,
-  "Стриминг видео с адаптивным качеством": contentImage
+  "Витрина товаров с AI-описаниями и умными фильтрами": showcaseSystemImage,
+  "Корзина с сохранением между сессиями": cartSyncImage,
+  "Автоматический прием платежей": paymentAutomationImage,
+  "CRM для управления клиентами": customerCrmImage,
+  "Управление складом и остатками": inventoryControlImage,
+  "Система отзывов и рейтингов товаров": reviewSystemImage,
+  "Система лидов и воронки продаж": salesFunnelImage,
+  "Персонализированные рекомендации": recommendationEngineImage,
+  "A/B тестирование интерфейса": abTestingImage,
+  "Программа лояльности с начислением баллов": loyaltyProgramImage,
+  "Ежедневные задания и streak-система": gamificationImage,
+  "LMS платформа с прогрессом и сертификатами": lmsEducationImage,
+  "Платформа курсов с видео и интерактивными тестами": videoCourseImage,
+  "Календарь записи с автоматическим подтверждением": bookingCalendarImage,
+  "Онлайн-запись с календарем в реальном времени": realtimeBookingImage,
+  "Прием Telegram Stars (0% комиссия)": telegramStarsImage,
+  "Мультивалютный кошелек с конвертацией": multiCurrencyWalletImage,
+  "Лента новостей с алгоритмической подачей": newsFeedImage,
+  "Встроенный блог с редактором и SEO": blogEditorImage,
+  "Стриминг видео с адаптивным качеством": videoStreamingImage
 };
 
 export function ModuleCard({ module }: ModuleCardProps) {

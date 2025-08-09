@@ -67,6 +67,28 @@ import cryptoWalletImage from "@assets/generated_images/Cryptocurrency_wallet_in
 import progressImage from "@assets/generated_images/Progress_tracking_dashboard_2d5a65bd.png";
 import specialistImage from "@assets/generated_images/Specialist_scheduling_interface_066105d1.png";
 
+// Define image aliases for consistent mapping
+const showcaseSystemImage = ecommerceImage;
+const cartSyncImage = shoppingCartImage;
+const paymentAutomationImage = paymentImage;
+const customerCrmImage = crmImage;
+const inventoryControlImage = inventoryImage;
+const reviewSystemImage = reviewsImage;
+const salesFunnelImage = marketingImage;
+const recommendationEngineImage = marketingImage;
+const abTestingImage = marketingImage;
+const loyaltyProgramImage = loyaltyImage;
+const gamificationSystemImage = gamificationImage;
+const lmsEducationImage = educationImage;
+const videoCourseImage = educationImage;
+const bookingCalendarImage = bookingImage;
+const realtimeBookingImage = bookingImage;
+const telegramStarsImage = fintechImage;
+const multiCurrencyWalletImage = walletImage;
+const newsFeedImage = socialImage;
+const blogEditorImage = contentImage;
+const videoStreamingImage = videoImage;
+
 interface ModuleModalProps {
   module: any;
   isOpen: boolean;
@@ -76,39 +98,39 @@ interface ModuleModalProps {
 // Individual module images for specific modules
 const moduleImages: Record<string, string> = {
   // E-COMMERCE И ПРОДАЖИ
-  "Витрина товаров с AI-описаниями и умными фильтрами": ecommerceImage,
-  "Корзина с сохранением между сессиями": shoppingCartImage,
-  "Автоматический прием платежей": paymentImage,
-  "CRM для управления клиентами": crmImage,
-  "Управление складом и остатками": inventoryImage,
-  "Система отзывов и рейтингов товаров": reviewsImage,
+  "Витрина товаров с AI-описаниями и умными фильтрами": showcaseSystemImage,
+  "Корзина с сохранением между сессиями": cartSyncImage,
+  "Автоматический прием платежей": paymentAutomationImage,
+  "CRM для управления клиентами": customerCrmImage,
+  "Управление складом и остатками": inventoryControlImage,
+  "Система отзывов и рейтингов товаров": reviewSystemImage,
   
   // МАРКЕТИНГ И АНАЛИТИКА
-  "Система лидов и воронки продаж": marketingImage,
-  "Персонализированные рекомендации": marketingImage,
-  "A/B тестирование интерфейса": marketingImage,
+  "Система лидов и воронки продаж": salesFunnelImage,
+  "Персонализированные рекомендации": recommendationEngineImage,
+  "A/B тестирование интерфейса": abTestingImage,
   
   // ВОВЛЕЧЕНИЕ И ЛОЯЛЬНОСТЬ
-  "Программа лояльности с начислением баллов": loyaltyImage,
-  "Ежедневные задания и streak-система": loyaltyImage,
+  "Программа лояльности с начислением баллов": loyaltyProgramImage,
+  "Ежедневные задания и streak-система": gamificationSystemImage,
   
   // ОБРАЗОВАНИЕ И ОБУЧЕНИЕ
-  "LMS платформа с прогрессом и сертификатами": educationImage,
-  "Платформа курсов с видео и интерактивными тестами": educationImage,
+  "LMS платформа с прогрессом и сертификатами": lmsEducationImage,
+  "Платформа курсов с видео и интерактивными тестами": videoCourseImage,
   
   // СЕРВИСЫ И БРОНИРОВАНИЕ
-  "Календарь записи с автоматическим подтверждением": bookingImage,
-  "Онлайн-запись с календарем в реальном времени": bookingImage,
+  "Календарь записи с автоматическим подтверждением": bookingCalendarImage,
+  "Онлайн-запись с календарем в реальном времени": realtimeBookingImage,
   
   // ФИНТЕХ И ПЛАТЕЖИ
-  "Прием Telegram Stars (0% комиссия)": fintechImage,
-  "Мультивалютный кошелек с конвертацией": walletImage,
+  "Прием Telegram Stars (0% комиссия)": telegramStarsImage,
+  "Мультивалютный кошелек с конвертацией": multiCurrencyWalletImage,
   "QR-коды для быстрых покупок в офлайне": qrPaymentImage,
   
   // КОНТЕНТ И МЕДИА
-  "Лента новостей с алгоритмической подачей": socialImage,
-  "Встроенный блог с редактором и SEO": contentImage,
-  "Стриминг видео с адаптивным качеством": videoImage,
+  "Лента новостей с алгоритмической подачей": newsFeedImage,
+  "Встроенный блог с редактором и SEO": blogEditorImage,
+  "Стриминг видео с адаптивным качеством": videoStreamingImage,
   
   // ВОВЛЕЧЕНИЕ И ЛОЯЛЬНОСТЬ
   "Push-уведомления с персонализацией по поведению": notificationImage,
@@ -442,20 +464,14 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
   const moduleImage = moduleImages[module?.name] || categoryImages[module?.category] || ecommerceImage;
   const details = moduleFeatures[module?.name] || {
     features: [
-      "Функция находится в разработке",
-      "Подробности уточняйте у менеджера",
-      "Возможна кастомизация под задачи",
-      "Интеграция с вашими системами",
-      "Техническая поддержка 24/7"
+      "Базовый функционал модуля",
+      "Настройка под ваши требования", 
+      "Интеграция с существующими системами",
+      "Обучение команды работе с модулем",
+      "Поддержка и обновления"
     ],
-    benefits: {
-      efficiency: 30,
-      costs: -20,
-      quality: 40,
-      speed: 50
-    },
-    implementation: "По запросу",
-    price: "Уточняется индивидуально"
+    implementation: "3-5 дней",
+    price: "От $25/месяц"
   };
 
   if (!module) return null;
@@ -489,7 +505,7 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Zap className="w-5 h-5 text-telegram" />
-                Основные возможности
+                Что умеет модуль
               </CardTitle>
             </CardHeader>
             <CardContent>
