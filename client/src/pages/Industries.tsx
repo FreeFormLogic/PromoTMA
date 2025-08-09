@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { IndustryCard } from "@/components/IndustryCard";
+import { IndustryModal } from "@/components/IndustryModal";
 import { Check, AlertTriangle, Building2, MessageSquare, Puzzle, Search, Filter, Grid3X3, List } from "lucide-react";
 import { type Industry, type Module } from "@shared/schema";
 import { industries } from "@/data/industries";
@@ -15,6 +16,8 @@ export default function Industries() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedIndustry, setSelectedIndustry] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: industryData = [], isLoading } = useQuery<Industry[]>({
     queryKey: ["/api/industries"],
@@ -39,6 +42,11 @@ export default function Industries() {
     const matchesTag = selectedTag === "all" || industry.tags?.includes(selectedTag);
     return matchesSearch && matchesTag;
   });
+
+  const handleIndustryClick = (industry: any) => {
+    setSelectedIndustry(industry);
+    setIsModalOpen(true);
+  };
 
   if (isLoading) {
     return (
@@ -71,84 +79,64 @@ export default function Industries() {
           </p>
         </div>
 
+        {/* Search and Filter */}
+        <div className="mb-8 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Input
+              type="text"
+              placeholder="Поиск по отраслям и решениям..."
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          {allTags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={selectedTag === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedTag("all")}
+              >
+                Все отрасли
+              </Button>
+              {allTags.map((tag) => (
+                <Button
+                  key={tag}
+                  variant={selectedTag === tag ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedTag(tag)}
+                >
+                  {tag}
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Industries Grid */}
         <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-4 mb-12">
-          {industries.map((industry) => (
-            <IndustryCard key={industry.id} industry={industry} />
+          {filteredIndustries.map((industry) => (
+            <IndustryCard 
+              key={industry.name} 
+              industry={industry} 
+              onClick={() => handleIndustryClick(industry)}
+            />
           ))}
         </div>
 
-        {/* Detailed Industry Examples */}
-        <div className="space-y-8">
-          {industries.slice(0, 3).map((industry) => (
-            <Card key={industry.id} className="overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-3">
-                  <div className="p-2 bg-telegram/10 rounded-lg">
-                    <Building2 className="w-5 h-5 text-telegram" />
-                  </div>
-                  <span>{industry.name}</span>
-                </CardTitle>
-                <p className="text-gray-600">{industry.description}</p>
-              </CardHeader>
-              
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                      <AlertTriangle className="w-4 h-4 text-orange-500 mr-2" />
-                      Проблемы отрасли
-                    </h4>
-                    <ul className="space-y-2">
-                      {(industry.painPoints as string[]).map((pain, index) => (
-                        <li key={index} className="text-sm text-gray-600 flex items-start">
-                          <div className="w-1 h-1 bg-orange-500 rounded-full mt-2 mr-2 flex-shrink-0"></div>
-                          <span>{pain}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                      <Check className="w-4 h-4 text-success mr-2" />
-                      Наши решения
-                    </h4>
-                    <ul className="space-y-2">
-                      {(industry.solutions as string[]).map((solution, index) => (
-                        <li key={index} className="text-sm text-gray-600 flex items-start">
-                          <Check className="w-4 h-4 text-success mr-2 mt-0.5 flex-shrink-0" />
-                          <span>{solution}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Related Modules */}
-        <div className="mt-12 mb-12">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            Популярные модули для всех отраслей
-          </h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {modules.filter(m => m.isPopular).slice(0, 8).map((module) => (
-              <Card key={module.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
-                <div className="flex items-center space-x-3 mb-3">
-                  <div className="p-2 bg-telegram/10 rounded-lg">
-                    <Puzzle className="w-4 h-4 text-telegram" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900 text-sm">{module.name}</h4>
-                </div>
-                <p className="text-xs text-gray-600 line-clamp-2 mb-2">{module.description}</p>
-                <div className="text-xs text-telegram font-medium">{module.category}</div>
-              </Card>
-            ))}
-          </div>
-        </div>
+        {/* Industry Modal */}
+        {selectedIndustry && (
+          <IndustryModal
+            industry={selectedIndustry}
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false);
+              setSelectedIndustry(null);
+            }}
+          />
+        )}
 
         {/* CTA */}
         <div className="mt-12 bg-gradient-to-r from-telegram to-telegram-dark text-white rounded-xl p-8 text-center">
