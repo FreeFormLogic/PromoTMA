@@ -38,6 +38,34 @@ import referralImage from "@assets/generated_images/Referral_program_dashboard_6
 import webinarImage from "@assets/generated_images/Webinar_platform_interface_08798c44.png";
 import qrPaymentImage from "@assets/generated_images/QR_code_payment_bb3e760b.png";
 import walletImage from "@assets/generated_images/Multi-currency_wallet_3d2e930e.png";
+import galleryImage from "@assets/generated_images/Photo_gallery_interface_6bd7c076.png";
+import podcastImage from "@assets/generated_images/Podcast_platform_interface_9dd5dba9.png";
+import apiImage from "@assets/generated_images/API_integration_dashboard_093d07e8.png";
+import trackingImage from "@assets/generated_images/Order_tracking_interface_3f251983.png";
+import discountImage from "@assets/generated_images/Discount_system_interface_f78c73cf.png";
+import surveyImage from "@assets/generated_images/Survey_feedback_interface_3627f690.png";
+import gamificationImage from "@assets/generated_images/Gamification_achievement_system_98016851.png";
+import subscriptionImage from "@assets/generated_images/Subscription_management_interface_fa28e3e6.png";
+import calendarImage from "@assets/generated_images/Event_calendar_interface_d83b440e.png";
+import exportImage from "@assets/generated_images/Data_export_interface_b4896729.png";
+import invoiceImage from "@assets/generated_images/Invoice_generation_system_095a3194.png";
+import supportImage from "@assets/generated_images/Support_ticket_system_9757c018.png";
+import analyticsImage from "@assets/generated_images/User_behavior_analytics_84bd440f.png";
+import deliveryImage from "@assets/generated_images/Delivery_tracking_map_778e4633.png";
+import certificateImage from "@assets/generated_images/Digital_certificate_system_f7dc8e8b.png";
+import aiContentImage from "@assets/generated_images/AI_content_generation_ec932f54.png";
+import leadImage from "@assets/generated_images/Lead_management_system_28d5ec63.png";
+import homeworkImage from "@assets/generated_images/Homework_assignment_platform_4253b9e8.png";
+import emailMarketingImage from "@assets/generated_images/Email_marketing_campaign_420ae8af.png";
+import liveStreamImage from "@assets/generated_images/Live_streaming_interface_acbc10aa.png";
+import formBuilderImage from "@assets/generated_images/Form_builder_interface_373046a0.png";
+import queueImage from "@assets/generated_images/Queue_management_system_64d9ab31.png";
+import socialSharingImage from "@assets/generated_images/Social_sharing_interface_e0a57791.png";
+import videoCallImage from "@assets/generated_images/Video_call_interface_345c3934.png";
+import libraryImage from "@assets/generated_images/Digital_library_interface_588c6eee.png";
+import cryptoWalletImage from "@assets/generated_images/Cryptocurrency_wallet_interface_4ff3d809.png";
+import progressImage from "@assets/generated_images/Progress_tracking_dashboard_2d5a65bd.png";
+import specialistImage from "@assets/generated_images/Specialist_scheduling_interface_066105d1.png";
 
 interface ModuleModalProps {
   module: any;
@@ -90,7 +118,79 @@ const moduleImages: Record<string, string> = {
   "Вебинары и live-стримы с чатом": webinarImage,
   
   // ИНТЕГРАЦИИ И API
-  "Чат-боты с AI для автоматизации поддержки": chatImage
+  "Чат-боты с AI для автоматизации поддержки": chatImage,
+  "Синхронизация с внешними сервисами": apiImage,
+  "Экспорт данных в популярные форматы": exportImage,
+  
+  // More E-COMMERCE modules
+  "Система скидок и промокодов": discountImage,
+  "Система статусов заказов с real-time трекингом": trackingImage,
+  "Интеграция с СДЭК, Boxberry, Почтой России": deliveryImage,
+  
+  // More MARKETING modules  
+  "Дашборд бизнес-аналитики с real-time метриками": leadImage,
+  "Аналитика поведения пользователей": analyticsImage,
+  "Опросы и сбор обратной связи": surveyImage,
+  
+  // More EDUCATION modules
+  "Система сертификатов и дипломов с верификацией": certificateImage,
+  "Домашние задания с проверкой и обратной связью": homeworkImage,
+  "Трекинг прогресса обучения и статистика": trackingImage,
+  
+  // More FINTECH modules
+  "Система подписок и рекуррентных платежей": subscriptionImage,
+  "Выставление счетов и актов для юрлиц": invoiceImage,
+  
+  // More CONTENT modules
+  "Галерея фото/видео с категориями": galleryImage,
+  "Подкасты и аудиоконтент с плейлистами": podcastImage,
+  "Генерация контента через AI (тексты, изображения)": aiContentImage,
+  
+  // More ENGAGEMENT modules
+  "Система достижений и бейджей за активность": gamificationImage,
+  
+  // More SERVICES modules
+  "Расписание занятий с напоминаниями": calendarImage,
+  "Управление расписанием специалистов": calendarImage,
+  
+  // More INTEGRATION modules
+  "Техподдержка через тикет-систему": supportImage,
+  "Конструктор форм с логикой и валидацией": formBuilderImage,
+  
+  // Additional E-COMMERCE modules
+  "Карточка товара с 360° галереей и видео-обзорами": galleryImage,
+  "AI-персонализация с умными рекомендациями": aiContentImage,
+  
+  // Additional MARKETING modules
+  "Email и SMS рассылки с сегментацией": emailMarketingImage,
+  "Интеграция с соцсетями для вирального роста": socialSharingImage,
+  
+  // Additional LOYALTY modules
+  "Social Proof с живыми уведомлениями о покупках": socialSharingImage,
+  
+  // Additional EDUCATION modules
+  "Интерактивные тесты и квизы с мгновенными результатами": formBuilderImage,
+  "Видео-уроки с таймкодами и заметками": videoImage,
+  
+  // Additional SERVICES modules
+  "Система управления очередями": queueImage,
+  "Бронирование номеров и столиков в реальном времени": bookingImage,
+  "Система напоминаний о записи": notificationImage,
+  
+  // Additional FINTECH modules
+  "P2P переводы между пользователями": walletImage,
+  "Система кредитования и рассрочек": subscriptionImage,
+  "Интеграция с банковскими API": apiImage,
+  "Криптовалютные платежи и токены": cryptoWalletImage,
+  
+  // Additional CONTENT modules
+  "Система комментариев с модерацией": socialImage,
+  "Фото и видеогалереи с тегированием": galleryImage,
+  "Документооборот и файлообменник": libraryImage,
+  
+  // Additional INTEGRATION modules
+  "Интеграция с 1С и другими учетными системами": apiImage,
+  "Веб-хуки для уведомлений": notificationImage
 };
 
 const categoryImages: Record<string, string> = {

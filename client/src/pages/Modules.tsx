@@ -43,6 +43,75 @@ import { type Module, type Industry } from "@shared/schema";
 import { moduleCategories } from "@/data/modules";
 import { ModuleModal } from "@/components/ModuleModal";
 
+// Function to get unique icon for each module
+function getModuleIcon(moduleName: string, category: string) {
+  const iconMap: Record<string, any> = {
+    // E-COMMERCE И ПРОДАЖИ
+    "Витрина товаров с AI-описаниями и умными фильтрами": <ShoppingCart className="w-8 h-8 text-telegram" />,
+    "Корзина с сохранением между сессиями": <Package className="w-8 h-8 text-telegram" />,
+    "Автоматический прием платежей": <CreditCard className="w-8 h-8 text-telegram" />,
+    "CRM для управления клиентами": <Users className="w-8 h-8 text-telegram" />,
+    "Управление складом и остатками": <Warehouse className="w-8 h-8 text-telegram" />,
+    "Система отзывов и рейтингов товаров": <Star className="w-8 h-8 text-telegram" />,
+    
+    // МАРКЕТИНГ И АНАЛИТИКА
+    "Система лидов и воронки продаж": <Target className="w-8 h-8 text-telegram" />,
+    "Персонализированные рекомендации": <Eye className="w-8 h-8 text-telegram" />,
+    "A/B тестирование интерфейса": <BarChart3 className="w-8 h-8 text-telegram" />,
+    "Аналитика поведения пользователей": <BarChart3 className="w-8 h-8 text-telegram" />,
+    
+    // ВОВЛЕЧЕНИЕ И ЛОЯЛЬНОСТЬ
+    "Ежедневные задания и streak-система": <Gift className="w-8 h-8 text-telegram" />,
+    "Колесо фортуны и мини-игры для вовлечения": <Gift className="w-8 h-8 text-telegram" />,
+    "Программа лояльности с начислением баллов": <Heart className="w-8 h-8 text-telegram" />,
+    
+    // ОБРАЗОВАНИЕ И ОБУЧЕНИЕ
+    "LMS платформа с прогрессом и сертификатами": <GraduationCap className="w-8 h-8 text-telegram" />,
+    "Платформа курсов с видео и интерактивными тестами": <Video className="w-8 h-8 text-telegram" />,
+    "Система сертификатов и дипломов с верификацией": <Shield className="w-8 h-8 text-telegram" />,
+    
+    // СЕРВИСЫ И БРОНИРОВАНИЕ  
+    "Календарь записи с автоматическим подтверждением": <Calendar className="w-8 h-8 text-telegram" />,
+    "Онлайн-запись с календарем в реальном времени": <Calendar className="w-8 h-8 text-telegram" />,
+    "Система управления очередями": <Users className="w-8 h-8 text-telegram" />,
+    
+    // ФИНТЕХ И ПЛАТЕЖИ
+    "Прием Telegram Stars (0% комиссия)": <Star className="w-8 h-8 text-telegram" />,
+    "Мультивалютный кошелек с конвертацией": <DollarSign className="w-8 h-8 text-telegram" />,
+    "Внутренние P2P переводы между пользователями": <ArrowRight className="w-8 h-8 text-telegram" />,
+    
+    // КОНТЕНТ И МЕДИА
+    "Лента новостей с алгоритмической подачей": <FileText className="w-8 h-8 text-telegram" />,
+    "Встроенный блог с редактором и SEO": <FileText className="w-8 h-8 text-telegram" />,
+    "Галерея фото/видео с категориями": <Camera className="w-8 h-8 text-telegram" />,
+    "Стриминг видео с адаптивным качеством": <Video className="w-8 h-8 text-telegram" />,
+    "Система подкастов с монетизацией": <Headphones className="w-8 h-8 text-telegram" />,
+    
+    // ИНТЕГРАЦИИ И API
+    "Синхронизация с внешними сервисами": <Cloud className="w-8 h-8 text-telegram" />,
+    "Веб-хуки для уведомлений": <Bell className="w-8 h-8 text-telegram" />,
+    "Экспорт данных в популярные форматы": <Database className="w-8 h-8 text-telegram" />
+  };
+  
+  // Return specific icon for module, or default based on category
+  return iconMap[moduleName] || getCategoryIcon(category);
+}
+
+function getCategoryIcon(category: string) {
+  const categoryIcons: Record<string, any> = {
+    "E-COMMERCE И ПРОДАЖИ": <ShoppingCart className="w-8 h-8 text-telegram" />,
+    "МАРКЕТИНГ И АНАЛИТИКА": <BarChart3 className="w-8 h-8 text-telegram" />,
+    "ВОВЛЕЧЕНИЕ И ЛОЯЛЬНОСТЬ": <Gift className="w-8 h-8 text-telegram" />,
+    "ОБРАЗОВАНИЕ И ОБУЧЕНИЕ": <GraduationCap className="w-8 h-8 text-telegram" />,
+    "СЕРВИСЫ И БРОНИРОВАНИЕ": <Calendar className="w-8 h-8 text-telegram" />,
+    "ФИНТЕХ И ПЛАТЕЖИ": <DollarSign className="w-8 h-8 text-telegram" />,
+    "КОНТЕНТ И МЕДИА": <FileText className="w-8 h-8 text-telegram" />,
+    "ИНТЕГРАЦИИ И API": <Settings className="w-8 h-8 text-telegram" />
+  };
+  
+  return categoryIcons[category] || <Zap className="w-8 h-8 text-telegram" />;
+}
+
 export default function Modules() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState<string>("");
