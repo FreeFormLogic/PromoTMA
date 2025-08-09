@@ -19,6 +19,8 @@ import { type Industry } from "@shared/schema";
 import retailImage from "@assets/generated_images/Retail_e-commerce_industry_2d9f6898.png";
 import restaurantImage from "@assets/generated_images/Restaurant_food_delivery_a5d568f6.png";
 import hotelImage from "@assets/generated_images/Hotel_tourism_industry_91b816d2.png";
+import healthcareImage from "@assets/generated_images/Healthcare_medicine_industry_df8a9904.png";
+import beautyImage from "@assets/generated_images/Beauty_salon_services_3ede7a8c.png";
 
 interface IndustryCardProps {
   industry: any;
@@ -40,6 +42,10 @@ const industryImages: Record<string, string> = {
   "Розничная торговля и e-commerce": retailImage,
   "Рестораны и доставка еды": restaurantImage,
   "Гостиничный бизнес и туризм": hotelImage,
+  "Медицина и здравоохранение": healthcareImage,
+  "Красота и салонные услуги": beautyImage,
+  "Образование и онлайн-обучение": retailImage,
+  "Фитнес и спортивные клубы": healthcareImage,
 };
 
 export function IndustryCard({ industry, onClick }: IndustryCardProps) {

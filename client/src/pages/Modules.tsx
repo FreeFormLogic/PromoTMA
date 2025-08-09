@@ -7,14 +7,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModuleCard } from "@/components/ModuleCard";
-import { Grid3X3, Filter, Building2, Search, List } from "lucide-react";
+import { Grid3X3, Filter, Building2, Search, List, ArrowRight } from "lucide-react";
 import { type Module, type Industry } from "@shared/schema";
 import { moduleCategories } from "@/data/modules";
+import { ModuleModal } from "@/components/ModuleModal";
 
 export default function Modules() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedModule, setSelectedModule] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: modules = [], isLoading } = useQuery<Module[]>({
     queryKey: ["/api/modules"],
@@ -164,22 +166,7 @@ export default function Modules() {
                 className="pl-10"
               />
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-              >
-                <Grid3X3 className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-              >
-                <List className="w-4 h-4" />
-              </Button>
-            </div>
+
           </div>
         </div>
 
@@ -244,39 +231,37 @@ export default function Modules() {
               </div>
             </div>
             
-            <div className={`grid gap-4 ${
-              viewMode === "grid" 
-                ? "lg:grid-cols-2 xl:grid-cols-3" 
-                : "grid-cols-1"
-            }`}>
+            <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
               {filteredModules.map((module) => (
-                <Card key={module.id} className={`${
-                  viewMode === "list" ? "p-4" : "p-6"
-                } hover:shadow-md transition-shadow`}>
-                  <div className={`${
-                    viewMode === "list" ? "flex items-center justify-between" : ""
-                  }`}>
+                <Card 
+                  key={module.id} 
+                  className="p-6 hover:shadow-lg transition-all cursor-pointer group"
+                  onClick={() => {
+                    setSelectedModule(module);
+                    setIsModalOpen(true);
+                  }}
+                >
+                  <div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-gray-900">{module.name}</h3>
+                        <h3 className="font-semibold text-gray-900 group-hover:text-telegram transition-colors">
+                          {module.name}
+                        </h3>
                         {module.isPopular && (
                           <Badge variant="default" className="bg-orange-100 text-orange-800 text-xs">
                             Популярный
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 mb-3">{module.description}</p>
-                      <div className="flex items-center gap-2">
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{module.description}</p>
+                      <div className="flex items-center justify-between">
                         <Badge variant="outline" className="text-xs">
                           {module.category}
                         </Badge>
+                        <ArrowRight className="w-4 h-4 text-telegram opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </div>
-                    {viewMode === "list" && (
-                      <Button variant="outline" size="sm" className="ml-4">
-                        Подробнее
-                      </Button>
-                    )}
+
                   </div>
                 </Card>
               ))}
@@ -338,6 +323,18 @@ export default function Modules() {
             </div>
           </div>
         </div>
+        
+        {/* Module Modal */}
+        {selectedModule && (
+          <ModuleModal
+            module={selectedModule}
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false);
+              setSelectedModule(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );

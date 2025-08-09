@@ -79,41 +79,7 @@ export default function Industries() {
           </p>
         </div>
 
-        {/* Search and Filter */}
-        <div className="mb-8 space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <Input
-              type="text"
-              placeholder="Поиск по отраслям и решениям..."
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          {allTags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant={selectedTag === "all" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedTag("all")}
-              >
-                Все отрасли
-              </Button>
-              {allTags.map((tag) => (
-                <Button
-                  key={tag}
-                  variant={selectedTag === tag ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedTag(tag)}
-                >
-                  {tag}
-                </Button>
-              ))}
-            </div>
-          )}
-        </div>
+
 
         {/* Industries Grid */}
         <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-4 mb-12">
