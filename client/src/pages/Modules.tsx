@@ -4,12 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModuleCard } from "@/components/ModuleCard";
-import { Grid3X3, Filter, Building2 } from "lucide-react";
+import { Grid3X3, Filter, Building2, Search, List } from "lucide-react";
 import { type Module, type Industry } from "@shared/schema";
+import { moduleCategories } from "@/data/modules";
 
 export default function Modules() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const { data: modules = [], isLoading } = useQuery<Module[]>({
     queryKey: ["/api/modules"],
@@ -19,17 +24,26 @@ export default function Modules() {
     queryKey: ["/api/industries"],
   });
 
-  const moduleCategories = modules.reduce((acc, module) => {
-    if (!acc[module.category]) {
-      acc[module.category] = [];
-    }
-    acc[module.category].push(module);
-    return acc;
-  }, {} as Record<string, Module[]>);
+  // Create modules from our comprehensive data
+  const allModules = Object.entries(moduleCategories).flatMap(([category, moduleList]) =>
+    moduleList.map((moduleName, index) => ({
+      id: `${category}-${index}`,
+      name: moduleName.split(' - ')[0] || moduleName.slice(0, 50),
+      description: moduleName,
+      category,
+      isPopular: index < 3, // First 3 in each category are popular
+      tags: [category.toLowerCase()]
+    }))
+  );
 
-  const filteredModules = selectedCategory === "all" 
-    ? modules 
-    : modules.filter(module => module.category === selectedCategory);
+  const filteredModules = allModules.filter(module => {
+    const matchesCategory = selectedCategory === "all" || module.category === selectedCategory;
+    const matchesSearch = searchTerm === "" || 
+      module.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      module.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      module.category.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   if (isLoading) {
     return (
@@ -62,6 +76,37 @@ export default function Modules() {
           </p>
         </div>
 
+        {/* Search and Filters */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Поиск модулей..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+              >
+                <Grid3X3 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
         <div className="grid lg:grid-cols-12 gap-8">
           {/* Categories Sidebar */}
           <div className="lg:col-span-3">
@@ -69,7 +114,7 @@ export default function Modules() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center">
                   <Filter className="w-5 h-5 mr-2" />
-                  Категории
+                  Категории ({Object.keys(moduleCategories).length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -86,7 +131,7 @@ export default function Modules() {
                       Все модули
                     </span>
                     <Badge variant="secondary" className="text-xs">
-                      {modules.length}
+                      {allModules.length}
                     </Badge>
                   </Button>
                   
@@ -123,10 +168,50 @@ export default function Modules() {
               </div>
             </div>
             
-            <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className={`grid gap-4 ${
+              viewMode === "grid" 
+                ? "lg:grid-cols-2 xl:grid-cols-3" 
+                : "grid-cols-1"
+            }`}>
               {filteredModules.map((module) => (
-                <ModuleCard key={module.id} module={module} />
+                <Card key={module.id} className={`${
+                  viewMode === "list" ? "p-4" : "p-6"
+                } hover:shadow-md transition-shadow`}>
+                  <div className={`${
+                    viewMode === "list" ? "flex items-center justify-between" : ""
+                  }`}>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-gray-900">{module.name}</h3>
+                        {module.isPopular && (
+                          <Badge variant="default" className="bg-orange-100 text-orange-800 text-xs">
+                            Популярный
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">{module.description}</p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">
+                          {module.category}
+                        </Badge>
+                      </div>
+                    </div>
+                    {viewMode === "list" && (
+                      <Button variant="outline" size="sm" className="ml-4">
+                        Подробнее
+                      </Button>
+                    )}
+                  </div>
+                </Card>
               ))}
+              
+              {filteredModules.length === 0 && (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-gray-500">
+                    Модули не найдены. Попробуйте изменить поисковый запрос или категорию.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

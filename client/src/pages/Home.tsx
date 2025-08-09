@@ -187,62 +187,60 @@ export default function Home() {
 
         {/* Quick Stats */}
         <section className="mb-12">
-          <div className="grid md:grid-cols-4 gap-4">
-            <Card className="text-center p-6">
-              <div className="text-3xl font-bold text-telegram mb-2">60+</div>
-              <div className="text-sm text-gray-600">Готовых модулей</div>
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Готовые решения для бизнеса</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100">
+              <div className="text-3xl font-bold text-telegram mb-1">60+</div>
+              <div className="text-sm text-gray-700 font-medium">Готовых модулей</div>
             </Card>
-            <Card className="text-center p-6">
-              <div className="text-3xl font-bold text-telegram mb-2">30+</div>
-              <div className="text-sm text-gray-600">Отраслевых ниш</div>
+            <Card className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100">
+              <div className="text-3xl font-bold text-success mb-1">30+</div>
+              <div className="text-sm text-gray-700 font-medium">Отраслевых ниш</div>
             </Card>
-            <Card className="text-center p-6">
-              <div className="text-3xl font-bold text-telegram mb-2">25+</div>
-              <div className="text-sm text-gray-600">Ключевых УТП</div>
+            <Card className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100">
+              <div className="text-3xl font-bold text-purple-600 mb-1">25+</div>
+              <div className="text-sm text-gray-700 font-medium">Ключевых УТП</div>
             </Card>
-            <Card className="text-center p-6">
-              <div className="text-3xl font-bold text-telegram mb-2">$300</div>
-              <div className="text-sm text-gray-600">Стартовая цена</div>
+            <Card className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100">
+              <div className="text-3xl font-bold text-orange-600 mb-1">$300</div>
+              <div className="text-sm text-gray-700 font-medium">Стартовая цена</div>
             </Card>
           </div>
         </section>
 
-        {/* Quick Links */}
+        {/* Quick Navigation */}
         <section className="mb-12">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Навигация по разделам</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link href="/modules">
-              <Card className="cursor-pointer hover:shadow-md transition-shadow p-6 text-center">
-                <Puzzle className="w-8 h-8 text-telegram mx-auto mb-2" />
-                <h3 className="font-semibold mb-1">Модули</h3>
-                <p className="text-sm text-gray-600">60+ готовых функций</p>
-                <ArrowRight className="w-4 h-4 text-telegram mx-auto mt-2" />
+              <Card className="cursor-pointer hover:shadow-md hover:scale-105 transition-all p-4 text-center group">
+                <Puzzle className="w-6 h-6 text-telegram mx-auto mb-2" />
+                <h3 className="font-semibold text-sm mb-1">Модули</h3>
+                <p className="text-xs text-gray-600">60+ готовых функций</p>
               </Card>
             </Link>
 
             <Link href="/industries">
-              <Card className="cursor-pointer hover:shadow-md transition-shadow p-6 text-center">
-                <Building2 className="w-8 h-8 text-telegram mx-auto mb-2" />
-                <h3 className="font-semibold mb-1">Отрасли</h3>
-                <p className="text-sm text-gray-600">30+ бизнес-ниш</p>
-                <ArrowRight className="w-4 h-4 text-telegram mx-auto mt-2" />
+              <Card className="cursor-pointer hover:shadow-md hover:scale-105 transition-all p-4 text-center group">
+                <Building2 className="w-6 h-6 text-telegram mx-auto mb-2" />
+                <h3 className="font-semibold text-sm mb-1">Отрасли</h3>
+                <p className="text-xs text-gray-600">30+ бизнес-ниш</p>
               </Card>
             </Link>
 
             <Link href="/pricing">
-              <Card className="cursor-pointer hover:shadow-md transition-shadow p-6 text-center">
-                <DollarSign className="w-8 h-8 text-telegram mx-auto mb-2" />
-                <h3 className="font-semibold mb-1">Цены</h3>
-                <p className="text-sm text-gray-600">$300 vs $25,000</p>
-                <ArrowRight className="w-4 h-4 text-telegram mx-auto mt-2" />
+              <Card className="cursor-pointer hover:shadow-md hover:scale-105 transition-all p-4 text-center group">
+                <DollarSign className="w-6 h-6 text-telegram mx-auto mb-2" />
+                <h3 className="font-semibold text-sm mb-1">Цены</h3>
+                <p className="text-xs text-gray-600">$300 vs $25,000</p>
               </Card>
             </Link>
 
             <Link href="/process">
-              <Card className="cursor-pointer hover:shadow-md transition-shadow p-6 text-center">
-                <Rocket className="w-8 h-8 text-telegram mx-auto mb-2" />
-                <h3 className="font-semibold mb-1">Процесс</h3>
-                <p className="text-sm text-gray-600">1-5 дней запуск</p>
-                <ArrowRight className="w-4 h-4 text-telegram mx-auto mt-2" />
+              <Card className="cursor-pointer hover:shadow-md hover:scale-105 transition-all p-4 text-center group">
+                <Rocket className="w-6 h-6 text-telegram mx-auto mb-2" />
+                <h3 className="font-semibold text-sm mb-1">Процесс</h3>
+                <p className="text-xs text-gray-600">1-5 дней запуск</p>
               </Card>
             </Link>
           </div>
@@ -250,34 +248,34 @@ export default function Home() {
 
         {/* CTA Section */}
         <section className="mb-12">
-          <Card className="bg-gradient-to-r from-telegram to-telegram-dark text-white p-8 text-center">
-            <h2 className="text-3xl font-bold mb-4">Готовы начать?</h2>
-            <p className="text-xl mb-6 text-blue-100">
-              Получите прототип вашего Telegram Mini App уже завтра
+          <Card className="bg-gradient-to-r from-telegram to-telegram-dark text-white p-6 text-center">
+            <h2 className="text-2xl font-bold mb-3">Готовы получить прототип завтра?</h2>
+            <p className="text-blue-100 mb-4">
+              Запустим ваш проект в рекордные сроки
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-              <Button className="bg-success hover:bg-success/90 text-white px-8 py-3 font-semibold">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+              <Button className="bg-success hover:bg-success/90 text-white px-6 py-2 font-semibold">
                 <MessageSquare className="w-4 h-4 mr-2" />
-                Получить прототип
+                Начать проект прямо сейчас
               </Button>
               <div className="text-blue-100 text-sm">
                 Консультация бесплатна • Прототип за 1 день
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold">$300</div>
-                <div className="text-sm text-blue-100">Единовременно</div>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="bg-white/10 rounded-lg p-3">
+                <div className="text-xl font-bold">1 день</div>
+                <div className="text-xs text-blue-100">До прототипа</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold">$15</div>
-                <div className="text-sm text-blue-100">В месяц</div>
+              <div className="bg-white/10 rounded-lg p-3">
+                <div className="text-xl font-bold">1-5 дней</div>
+                <div className="text-xs text-blue-100">До запуска</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold">1-5</div>
-                <div className="text-sm text-blue-100">Дней запуск</div>
+              <div className="bg-white/10 rounded-lg p-3">
+                <div className="text-xl font-bold">24/7</div>
+                <div className="text-xs text-blue-100">Поддержка</div>
               </div>
             </div>
           </Card>

@@ -1,18 +1,43 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { IndustryCard } from "@/components/IndustryCard";
-import { Check, AlertTriangle, Building2, MessageSquare, Puzzle } from "lucide-react";
+import { Check, AlertTriangle, Building2, MessageSquare, Puzzle, Search, Filter, Grid3X3, List } from "lucide-react";
 import { type Industry, type Module } from "@shared/schema";
+import { industries } from "@/data/industries";
+import { moduleCategories } from "@/data/modules";
 
 export default function Industries() {
-  const { data: industries = [], isLoading } = useQuery<Industry[]>({
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedTag, setSelectedTag] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  const { data: industryData = [], isLoading } = useQuery<Industry[]>({
     queryKey: ["/api/industries"],
   });
 
   const { data: modules = [] } = useQuery<Module[]>({
     queryKey: ["/api/modules"],
+  });
+
+  // Use our comprehensive industries data
+  const allIndustries = industries;
+  
+  // Get all unique tags from industries
+  const allTags = Array.from(new Set(allIndustries.flatMap(industry => industry.tags || [])));
+  
+  // Filter industries based on search and tags
+  const filteredIndustries = allIndustries.filter(industry => {
+    const matchesSearch = searchTerm === "" || 
+      industry.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      industry.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      industry.solutions.some(solution => solution.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesTag = selectedTag === "all" || industry.tags?.includes(selectedTag);
+    return matchesSearch && matchesTag;
   });
 
   if (isLoading) {
