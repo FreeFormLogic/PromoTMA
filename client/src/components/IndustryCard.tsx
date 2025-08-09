@@ -21,6 +21,10 @@ import restaurantImage from "@assets/generated_images/Restaurant_food_delivery_a
 import hotelImage from "@assets/generated_images/Hotel_tourism_industry_91b816d2.png";
 import healthcareImage from "@assets/generated_images/Healthcare_medicine_industry_df8a9904.png";
 import beautyImage from "@assets/generated_images/Beauty_salon_services_3ede7a8c.png";
+import fitnessImage from "@assets/generated_images/Fitness_gym_industry_59ad0f82.png";
+import educationImage from "@assets/generated_images/Education_online_learning_34175a04.png";
+import realEstateImage from "@assets/generated_images/Real_estate_property_e7fdd0e9.png";
+import automotiveImage from "@assets/generated_images/Automotive_car_services_47d4008d.png";
 
 interface IndustryCardProps {
   industry: any;
@@ -44,8 +48,10 @@ const industryImages: Record<string, string> = {
   "Гостиничный бизнес и туризм": hotelImage,
   "Медицина и здравоохранение": healthcareImage,
   "Красота и салонные услуги": beautyImage,
-  "Образование и онлайн-обучение": retailImage,
-  "Фитнес и спортивные клубы": healthcareImage,
+  "Образование и онлайн-обучение": educationImage,
+  "Фитнес и спортивные клубы": fitnessImage,
+  "Недвижимость и риелторские услуги": realEstateImage,
+  "Автомобильные услуги": automotiveImage,
 };
 
 export function IndustryCard({ industry, onClick }: IndustryCardProps) {

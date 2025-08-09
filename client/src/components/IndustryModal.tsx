@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -69,14 +69,36 @@ const industryMetrics: Record<string, any> = {
   }
 };
 
+// Required modules for each industry
+const requiredModules: Record<string, string[]> = {
+  "Розничная торговля и e-commerce": [
+    "Витрина товаров с AI-описаниями и умными фильтрами",
+    "Корзина с сохранением между сессиями", 
+    "Автоматический прием платежей",
+    "Управление складом и остатками"
+  ],
+  "Рестораны и доставка еды": [
+    "Система приема заказов",
+    "Интеграция с курьерскими службами",
+    "Автоматический прием платежей",
+    "Управление меню и остатками"
+  ],
+  "Гостиничный бизнес и туризм": [
+    "Система бронирования номеров",
+    "Календарь доступности",
+    "Автоматический прием платежей",
+    "CRM для гостей"
+  ]
+};
+
 export function IndustryModal({ industry, isOpen, onClose }: IndustryModalProps) {
   const metrics = industryMetrics[industry.name] || {
-    uspTitle: "Готовое решение для вашего бизнеса",
+    uspTitle: "Цифровые решения для вашей отрасли",
     usps: [
-      "Снижение операционных затрат на 40%",
-      "Увеличение конверсии в 2 раза",
-      "Автоматизация 70% процессов",
-      "Рост лояльности клиентов на 35%"
+      "Повышение эффективности бизнес-процессов",
+      "Увеличение клиентской базы и лояльности",
+      "Автоматизация рутинных операций",
+      "Улучшение качества обслуживания"
     ],
     metrics: {
       revenue: { value: 30, label: "Рост выручки" },
@@ -93,15 +115,16 @@ export function IndustryModal({ industry, isOpen, onClose }: IndustryModalProps)
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">{industry.name}</DialogTitle>
-          <p className="text-gray-600 mt-2">{industry.description}</p>
+          <DialogDescription className="text-gray-600 mt-2">
+            {industry.description}
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="overview" className="mt-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Обзор</TabsTrigger>
             <TabsTrigger value="problems">Проблемы</TabsTrigger>
             <TabsTrigger value="solutions">Решения</TabsTrigger>
-            <TabsTrigger value="impact">Влияние</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -145,6 +168,30 @@ export function IndustryModal({ industry, isOpen, onClose }: IndustryModalProps)
                       </div>
                       <Badge variant="outline" className="text-xs">
                         Включено
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-telegram" />
+                  Обязательные модули
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3">
+                  {(requiredModules[industry.name] || []).map((module: string, index: number) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-telegram/5 rounded-lg border border-telegram/20">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-4 h-4 text-telegram" />
+                        <span className="text-sm font-medium">{module}</span>
+                      </div>
+                      <Badge variant="default" className="text-xs bg-telegram">
+                        Обязательно
                       </Badge>
                     </div>
                   ))}
@@ -211,55 +258,17 @@ export function IndustryModal({ industry, isOpen, onClose }: IndustryModalProps)
             </Card>
           </TabsContent>
 
-          <TabsContent value="impact" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-telegram" />
-                  Влияние на бизнес-метрики
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {Object.entries(metrics.metrics).map(([key, metric]: [string, any]) => (
-                  <div key={key} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{metric.label}</span>
-                      <span className="text-lg font-bold text-telegram">+{metric.value}%</span>
-                    </div>
-                    <Progress value={metric.value} className="h-2" />
-                  </div>
-                ))}
-                
-                <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t">
-                  <div className="text-center">
-                    <DollarSign className="w-8 h-8 text-success mx-auto mb-2" />
-                    <p className="text-2xl font-bold">$300</p>
-                    <p className="text-xs text-gray-600">Стартовая цена</p>
-                  </div>
-                  <div className="text-center">
-                    <Clock className="w-8 h-8 text-telegram mx-auto mb-2" />
-                    <p className="text-2xl font-bold">1-5</p>
-                    <p className="text-xs text-gray-600">Дней до запуска</p>
-                  </div>
-                  <div className="text-center">
-                    <Users className="w-8 h-8 text-orange-500 mx-auto mb-2" />
-                    <p className="text-2xl font-bold">24/7</p>
-                    <p className="text-xs text-gray-600">Поддержка</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            <div className="flex gap-4">
-              <Button className="flex-1 bg-success hover:bg-success/90">
-                Получить персональное предложение
-              </Button>
-              <Button variant="outline" onClick={onClose}>
-                Закрыть
-              </Button>
-            </div>
-          </TabsContent>
         </Tabs>
+
+        <div className="flex gap-4 mt-6">
+          <Button className="flex-1 bg-telegram hover:bg-telegram/90 text-white">
+            Получить персональное предложение
+          </Button>
+          <Button variant="outline" onClick={onClose}>
+            Закрыть
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
