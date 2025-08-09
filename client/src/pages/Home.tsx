@@ -165,7 +165,7 @@ export default function Home() {
                 <ul className="space-y-3 text-green-700">
                   <li className="flex items-center">
                     <DollarSign className="w-5 h-5 mr-3 text-success" />
-                    <span>$300 + $15/месяц</span>
+                    <span>От $300 + от $15/месяц</span>
                   </li>
                   <li className="flex items-center">
                     <Rocket className="w-5 h-5 mr-3 text-success" />
