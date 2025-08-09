@@ -1,13 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IndustryCard } from "@/components/IndustryCard";
-import { Check, AlertTriangle } from "lucide-react";
-import { type Industry } from "@shared/schema";
+import { Check, AlertTriangle, Building2, MessageSquare, Puzzle } from "lucide-react";
+import { type Industry, type Module } from "@shared/schema";
 
 export default function Industries() {
   const { data: industries = [], isLoading } = useQuery<Industry[]>({
     queryKey: ["/api/industries"],
+  });
+
+  const { data: modules = [] } = useQuery<Module[]>({
+    queryKey: ["/api/modules"],
   });
 
   if (isLoading) {
@@ -55,7 +60,7 @@ export default function Industries() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-3">
                   <div className="p-2 bg-telegram/10 rounded-lg">
-                    <Store className="w-5 h-5 text-telegram" />
+                    <Building2 className="w-5 h-5 text-telegram" />
                   </div>
                   <span>{industry.name}</span>
                 </CardTitle>
@@ -97,6 +102,27 @@ export default function Industries() {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Related Modules */}
+        <div className="mt-12 mb-12">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+            Популярные модули для всех отраслей
+          </h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {modules.filter(m => m.isPopular).slice(0, 8).map((module) => (
+              <Card key={module.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="p-2 bg-telegram/10 rounded-lg">
+                    <Puzzle className="w-4 h-4 text-telegram" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 text-sm">{module.name}</h4>
+                </div>
+                <p className="text-xs text-gray-600 line-clamp-2 mb-2">{module.description}</p>
+                <div className="text-xs text-telegram font-medium">{module.category}</div>
+              </Card>
+            ))}
+          </div>
         </div>
 
         {/* CTA */}

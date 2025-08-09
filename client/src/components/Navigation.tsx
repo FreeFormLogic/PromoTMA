@@ -1,16 +1,19 @@
 import { Link, useLocation } from "wouter";
+import { useState } from "react";
 import { 
   MessageSquare, 
   Puzzle, 
   Building2, 
-  DollarSign, 
   Rocket,
-  LogOut
+  LogOut,
+  Menu,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Navigation() {
   const [location] = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('telegram_auth');
@@ -21,8 +24,7 @@ export function Navigation() {
     { path: "/", label: "Главная", icon: MessageSquare },
     { path: "/modules", label: "Модули", icon: Puzzle },
     { path: "/industries", label: "Отрасли", icon: Building2 },
-    { path: "/pricing", label: "Цены", icon: DollarSign },
-    { path: "/process", label: "Процесс", icon: Rocket },
+    { path: "/process", label: "Разработка", icon: Rocket },
   ];
 
   return (
@@ -71,15 +73,49 @@ export function Navigation() {
               variant="ghost" 
               size="sm" 
               className="md:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              <div className="w-5 h-5 flex flex-col justify-center space-y-1">
-                <div className="w-full h-0.5 bg-gray-700"></div>
-                <div className="w-full h-0.5 bg-gray-700"></div>
-                <div className="w-full h-0.5 bg-gray-700"></div>
-              </div>
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </div>
         </nav>
+        
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 bg-white">
+            <div className="px-4 py-4 space-y-2">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location === item.path;
+                
+                return (
+                  <Link key={item.path} href={item.path}>
+                    <div 
+                      className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors cursor-pointer ${
+                        isActive 
+                          ? 'bg-telegram text-white' 
+                          : 'text-gray-700 hover:text-telegram hover:bg-telegram/10'
+                      }`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="font-medium">{item.label}</span>
+                    </div>
+                  </Link>
+                );
+              })}
+              
+              <Button 
+                variant="outline" 
+                onClick={handleLogout}
+                className="w-full justify-start mt-4"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Выйти
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

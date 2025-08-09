@@ -77,8 +77,8 @@ export default function Home() {
                 
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-                    <div className="text-2xl font-bold">От $300</div>
-                    <div className="text-sm text-blue-100">вместо $10,000</div>
+                    <div className="text-2xl font-bold">$300</div>
+                    <div className="text-sm text-blue-100">вместо $25,000</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur rounded-lg p-4">
                     <div className="text-2xl font-bold">1 день</div>
@@ -105,7 +105,7 @@ export default function Home() {
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-success mr-2" />
-                    Интеграция с Telegram Stars (0% комиссии)
+                    Интеграция популярных платежей: Международные, Российские, Крипта, GoPay
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-success mr-2" />
@@ -165,7 +165,7 @@ export default function Home() {
                 <ul className="space-y-3 text-green-700">
                   <li className="flex items-center">
                     <DollarSign className="w-5 h-5 mr-3 text-success" />
-                    <span>От $300 + от $15/месяц</span>
+                    <span>$300 + $15/месяц</span>
                   </li>
                   <li className="flex items-center">
                     <Rocket className="w-5 h-5 mr-3 text-success" />
@@ -232,7 +232,7 @@ export default function Home() {
               <Card className="cursor-pointer hover:shadow-md transition-shadow p-6 text-center">
                 <DollarSign className="w-8 h-8 text-telegram mx-auto mb-2" />
                 <h3 className="font-semibold mb-1">Цены</h3>
-                <p className="text-sm text-gray-600">$300 vs $10,000</p>
+                <p className="text-sm text-gray-600">$300 vs $25,000</p>
                 <ArrowRight className="w-4 h-4 text-telegram mx-auto mt-2" />
               </Card>
             </Link>
@@ -317,7 +317,7 @@ export default function Home() {
                 <li>✓ 60+ готовых модулей</li>
                 <li>✓ 30+ отраслевых решений</li>
                 <li>✓ Запуск за 1-5 дней</li>
-                <li>✓ $300 вместо $10,000</li>
+                <li>✓ $300 вместо $25,000</li>
               </ul>
             </div>
           </div>

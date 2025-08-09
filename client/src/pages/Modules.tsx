@@ -1,13 +1,22 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ModuleCard } from "@/components/ModuleCard";
-import { type Module } from "@shared/schema";
+import { Grid3X3, Filter, Building2 } from "lucide-react";
+import { type Module, type Industry } from "@shared/schema";
 
 export default function Modules() {
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
   const { data: modules = [], isLoading } = useQuery<Module[]>({
     queryKey: ["/api/modules"],
+  });
+
+  const { data: industries = [] } = useQuery<Industry[]>({
+    queryKey: ["/api/industries"],
   });
 
   const moduleCategories = modules.reduce((acc, module) => {
@@ -17,6 +26,10 @@ export default function Modules() {
     acc[module.category].push(module);
     return acc;
   }, {} as Record<string, Module[]>);
+
+  const filteredModules = selectedCategory === "all" 
+    ? modules 
+    : modules.filter(module => module.category === selectedCategory);
 
   if (isLoading) {
     return (
@@ -54,19 +67,43 @@ export default function Modules() {
           <div className="lg:col-span-3">
             <Card className="sticky top-24">
               <CardHeader>
-                <CardTitle className="text-lg">Категории</CardTitle>
+                <CardTitle className="text-lg flex items-center">
+                  <Filter className="w-5 h-5 mr-2" />
+                  Категории
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
+                  <Button
+                    variant={selectedCategory === "all" ? "default" : "ghost"}
+                    className={`w-full justify-between ${
+                      selectedCategory === "all" ? "bg-telegram hover:bg-telegram/90" : ""
+                    }`}
+                    onClick={() => setSelectedCategory("all")}
+                  >
+                    <span className="flex items-center">
+                      <Grid3X3 className="w-4 h-4 mr-2" />
+                      Все модули
+                    </span>
+                    <Badge variant="secondary" className="text-xs">
+                      {modules.length}
+                    </Badge>
+                  </Button>
+                  
                   {Object.entries(moduleCategories).map(([category, categoryModules]) => (
-                    <div key={category} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
-                      <span className="text-sm font-medium text-gray-700 line-clamp-1">
-                        {category}
-                      </span>
+                    <Button
+                      key={category}
+                      variant={selectedCategory === category ? "default" : "ghost"}
+                      className={`w-full justify-between text-left ${
+                        selectedCategory === category ? "bg-telegram hover:bg-telegram/90" : ""
+                      }`}
+                      onClick={() => setSelectedCategory(category)}
+                    >
+                      <span className="truncate pr-2">{category}</span>
                       <Badge variant="secondary" className="text-xs">
                         {categoryModules.length}
                       </Badge>
-                    </div>
+                    </Button>
                   ))}
                 </div>
               </CardContent>
@@ -75,23 +112,43 @@ export default function Modules() {
 
           {/* Modules Grid */}
           <div className="lg:col-span-9">
-            {Object.entries(moduleCategories).map(([category, categoryModules]) => (
-              <div key={category} className="mb-12">
-                <div className="flex items-center mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mr-3">
-                    {category}
-                  </h2>
-                  <Badge variant="outline" className="text-telegram">
-                    {categoryModules.length} модулей
-                  </Badge>
-                </div>
-                
-                <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {categoryModules.map((module) => (
-                    <ModuleCard key={module.id} module={module} />
-                  ))}
-                </div>
+            <div className="mb-6">
+              <div className="flex items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-900 mr-3">
+                  {selectedCategory === "all" ? "Все модули" : selectedCategory}
+                </h2>
+                <Badge variant="outline" className="text-telegram">
+                  {filteredModules.length} модулей
+                </Badge>
               </div>
+            </div>
+            
+            <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {filteredModules.map((module) => (
+                <ModuleCard key={module.id} module={module} />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Related Industries */}
+        <div className="mt-12 mb-12">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+            Отрасли, которые используют наши модули
+          </h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {industries.slice(0, 6).map((industry) => (
+              <Card key={industry.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-telegram/10 rounded-lg">
+                    <Building2 className="w-5 h-5 text-telegram" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 text-sm">{industry.name}</h4>
+                    <p className="text-xs text-gray-600 line-clamp-2">{industry.description}</p>
+                  </div>
+                </div>
+              </Card>
             ))}
           </div>
         </div>
