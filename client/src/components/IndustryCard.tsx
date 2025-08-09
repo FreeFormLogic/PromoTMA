@@ -54,6 +54,22 @@ const industryImages: Record<string, string> = {
   "Автомобильные услуги": automotiveImage,
 };
 
+// Business examples for each industry
+function getBusinessExamples(industryName: string): string[] {
+  const examples: Record<string, string[]> = {
+    "Розничная торговля и e-commerce": ["Магазин одежды", "Электроника", "Продукты питания"],
+    "Рестораны и доставка еды": ["Пиццерия", "Суши-бар", "Кофейня"],
+    "Гостиничный бизнес и туризм": ["Отель", "Хостел", "Экскурсии"],
+    "Медицина и здравоохранение": ["Частная клиника", "Стоматология", "Лаборатория"],
+    "Красота и салонные услуги": ["Салон красоты", "Спа-центр", "Барбершоп"],
+    "Образование и онлайн-обучение": ["Языковые курсы", "IT-школа", "Детский центр"],
+    "Фитнес и спортивные клубы": ["Тренажерный зал", "Йога-студия", "Бассейн"],
+    "Недвижимость и риелторские услуги": ["Агентство", "Застройщик", "Брокер"],
+    "Автомобильные услуги": ["Автосалон", "СТО", "Автомойка"]
+  };
+  return examples[industryName] || ["Бизнес", "Услуги", "Компания"];
+}
+
 export function IndustryCard({ industry, onClick }: IndustryCardProps) {
   const IconComponent = iconMap[industry.icon] || Building2;
   const industryImage = industryImages[industry.name];
@@ -90,34 +106,15 @@ export function IndustryCard({ industry, onClick }: IndustryCardProps) {
       </CardHeader>
       
       <CardContent className="flex-1 flex flex-col justify-between pt-0">
-        {industry.tags && industry.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
-            {industry.tags.slice(0, 3).map((tag: string, index: number) => (
-              <Badge key={index} variant="secondary" className="text-xs py-0">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
-        
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 p-2 bg-success/10 rounded-lg">
-            <TrendingUp className="w-3 h-3 text-success" />
-            <span className="text-xs font-semibold text-success">ROI за 2-4 недели</span>
-          </div>
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="w-full group-hover:bg-telegram group-hover:text-white transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              onClick?.();
-            }}
-          >
-            Подробнее
-            <ArrowRight className="w-3 h-3 ml-2" />
-          </Button>
+        <div className="flex flex-wrap gap-1 mb-3">
+          {getBusinessExamples(industry.name).slice(0, 3).map((example: string, index: number) => (
+            <span 
+              key={index}
+              className="text-xs px-2 py-1 bg-telegram/10 text-telegram rounded-full"
+            >
+              {example}
+            </span>
+          ))}
         </div>
       </CardContent>
     </Card>

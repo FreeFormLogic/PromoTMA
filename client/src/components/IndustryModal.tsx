@@ -75,30 +75,84 @@ const requiredModules: Record<string, string[]> = {
     "Витрина товаров с AI-описаниями и умными фильтрами",
     "Корзина с сохранением между сессиями", 
     "Автоматический прием платежей",
-    "Управление складом и остатками"
+    "Управление складом и остатками",
+    "Система скидок и промокодов",
+    "Отзывы и рейтинги товаров"
   ],
   "Рестораны и доставка еды": [
     "Система приема заказов",
-    "Интеграция с курьерскими службами",
+    "Интеграция с курьерскими службами", 
     "Автоматический прием платежей",
-    "Управление меню и остатками"
+    "Управление меню и остатками",
+    "Калькулятор доставки",
+    "Отслеживание заказов в реальном времени"
   ],
   "Гостиничный бизнес и туризм": [
     "Система бронирования номеров",
     "Календарь доступности",
-    "Автоматический прием платежей",
-    "CRM для гостей"
+    "Автоматический прием платежей", 
+    "CRM для гостей",
+    "Управление тарифами по сезонам",
+    "Интеграция с booking.com"
+  ],
+  "Медицина и здоровье": [
+    "Запись на прием к врачам",
+    "Электронная медкарта",
+    "Телемедицинские консультации",
+    "Система напоминаний о приеме лекарств",
+    "Интеграция с медоборудованием",
+    "HIPAA-совместимое хранение данных"
+  ],
+  "Образование и онлайн-курсы": [
+    "LMS платформа с прогрессом обучения",
+    "Система тестирования и сертификатов",
+    "Видео-уроки с интерактивными элементами",
+    "Домашние задания с автопроверкой",
+    "Форум для общения студентов",
+    "Расписание занятий и напоминания"
+  ],
+  "Красота и wellness": [
+    "Онлайн-запись к мастерам",
+    "Портфолио работ специалистов",
+    "Калькулятор стоимости услуг",
+    "Программа лояльности для клиентов",
+    "Напоминания о записи",
+    "Отзывы и рейтинги мастеров"
+  ],
+  "Фитнес и спорт": [
+    "Расписание тренировок и занятий",
+    "Система абонементов и заморозок",
+    "Трекер физической активности",
+    "Планы питания и калории",
+    "Онлайн-тренировки и видео",
+    "Социальная сеть спортсменов"
+  ],
+  "Недвижимость": [
+    "Каталог объектов с фильтрами",
+    "Виртуальные туры 360°",
+    "Калькулятор ипотеки",
+    "CRM для риелторов",
+    "Планировщик просмотров",
+    "Юридическое сопровождение сделок"
+  ],
+  "Автомобильный бизнес": [
+    "Каталог автомобилей с характеристиками",
+    "Система trade-in оценки",
+    "Запись на тест-драйв",
+    "Калькулятор кредита и лизинга",
+    "CRM для автосалонов",
+    "Сервисная книжка и ТО"
   ]
 };
 
 export function IndustryModal({ industry, isOpen, onClose }: IndustryModalProps) {
   const metrics = industryMetrics[industry.name] || {
-    uspTitle: "Цифровые решения для вашей отрасли",
+    uspTitle: "Специализированные решения",
     usps: [
-      "Повышение эффективности бизнес-процессов",
-      "Увеличение клиентской базы и лояльности",
-      "Автоматизация рутинных операций",
-      "Улучшение качества обслуживания"
+      "Готовые модули под специфику отрасли",
+      "Интеграция с отраслевыми стандартами", 
+      "Соответствие регулятивным требованиям",
+      "Проверенные на практике решения"
     ],
     metrics: {
       revenue: { value: 30, label: "Рост выручки" },
@@ -121,10 +175,9 @@ export function IndustryModal({ industry, isOpen, onClose }: IndustryModalProps)
         </DialogHeader>
 
         <Tabs defaultValue="overview" className="mt-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="overview">Обзор</TabsTrigger>
-            <TabsTrigger value="problems">Проблемы</TabsTrigger>
-            <TabsTrigger value="solutions">Решения</TabsTrigger>
+            <TabsTrigger value="solutions">Проблемы и решения</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -166,9 +219,7 @@ export function IndustryModal({ industry, isOpen, onClose }: IndustryModalProps)
                         <Zap className="w-4 h-4 text-orange-500" />
                         <span className="text-sm">{solution}</span>
                       </div>
-                      <Badge variant="outline" className="text-xs">
-                        Включено
-                      </Badge>
+
                     </div>
                   ))}
                 </div>
@@ -200,60 +251,46 @@ export function IndustryModal({ industry, isOpen, onClose }: IndustryModalProps)
             </Card>
           </TabsContent>
 
-          <TabsContent value="problems" className="space-y-4">
+          <TabsContent value="solutions" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-destructive" />
-                  Главные проблемы отрасли
+                  Проблемы и решения
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {metrics.painKillers.length > 0 ? (
                   <div className="space-y-4">
                     {metrics.painKillers.map((item: any, index: number) => (
-                      <div key={index} className="border-l-4 border-destructive pl-4">
-                        <p className="font-semibold text-destructive mb-1">{item.pain}</p>
-                        <p className="text-sm text-gray-600 flex items-center gap-2">
-                          <ArrowRight className="w-4 h-4 text-success" />
+                      <div key={index} className="border-l-4 border-destructive/20 pl-4 py-3 bg-gray-50 rounded-r-lg">
+                        <p className="font-semibold text-destructive mb-2 flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4" />
+                          {item.pain}
+                        </p>
+                        <p className="text-sm text-gray-700 flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-success mt-0.5" />
                           <span className="text-success font-medium">{item.solution}</span>
                         </p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <ul className="space-y-3">
-                    {industry.painPoints.map((pain: string, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <AlertTriangle className="w-5 h-5 text-destructive mt-0.5" />
-                        <span>{pain}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="solutions" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-success" />
-                  Наши решения
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {industry.solutions.map((solution: string, index: number) => (
-                    <div key={index} className="flex items-start gap-3 p-3 bg-success/5 rounded-lg">
-                      <CheckCircle className="w-5 h-5 text-success mt-0.5" />
-                      <div>
-                        <p className="font-medium">{solution}</p>
+                  <div className="space-y-4">
+                    {industry.painPoints.slice(0, 3).map((pain: string, index: number) => (
+                      <div key={index} className="border-l-4 border-destructive/20 pl-4 py-3 bg-gray-50 rounded-r-lg">
+                        <p className="font-semibold text-destructive mb-2 flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4" />
+                          {pain}
+                        </p>
+                        <p className="text-sm text-gray-700 flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-success mt-0.5" />
+                          <span className="text-success font-medium">Автоматизируем через Telegram Mini App</span>
+                        </p>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

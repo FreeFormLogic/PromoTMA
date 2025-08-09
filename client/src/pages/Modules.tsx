@@ -7,7 +7,38 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModuleCard } from "@/components/ModuleCard";
-import { Grid3X3, Filter, Building2, Search, List, ArrowRight } from "lucide-react";
+import { 
+  Grid3X3, 
+  Filter, 
+  Building2, 
+  Search, 
+  List, 
+  ArrowRight,
+  ShoppingCart,
+  BarChart3,
+  Gift,
+  GraduationCap,
+  Calendar,
+  DollarSign,
+  FileText,
+  Zap,
+  Users,
+  Star,
+  Eye,
+  Heart,
+  Target,
+  Shield,
+  Settings,
+  Bell,
+  Cloud,
+  Database,
+  Camera,
+  Video,
+  Headphones,
+  CreditCard,
+  Package,
+  Warehouse
+} from "lucide-react";
 import { type Module, type Industry } from "@shared/schema";
 import { moduleCategories } from "@/data/modules";
 import { ModuleModal } from "@/components/ModuleModal";
@@ -117,7 +148,7 @@ export default function Modules() {
     // ФИНТЕХ И ПЛАТЕЖИ
     "Прием Telegram Stars (0% комиссия)": "Мгновенные переводы без комиссий, автоматическая конвертация в рубли",
     "Мультивалютный кошелек с конвертацией": "20+ валют, выгодные курсы, история операций, лимиты",
-    "P2P переводы между пользователями": "Переводы по номеру телефона, запросы на оплату, разделение счета",
+    "Внутренние P2P переводы между пользователями": "Переводы по номеру телефона, запросы на оплату, разделение счета",
     "Криптовалютные платежи (Bitcoin, USDT, TON)": "Автоматическая конвертация, холодные кошельки, минимальные комиссии",
     "Рассрочка и кредитование через партнеров": "Интеграция с Тинькофф, Сбер, одобрение за 2 минуты",
     "Система подписок и рекуррентных платежей": "Автопродление, пробные периоды, управление подписками",
@@ -130,7 +161,7 @@ export default function Modules() {
     "Галерея фото/видео с категориями": "Автоматическая обработка, водяные знаки, защита от скачивания",
     "Подкасты и аудиоконтент с плейлистами": "Фоновое воспроизведение, закладки, скорость воспроизведения",
     "Прямые трансляции и stories": "Эфемерный контент, реакции, опросы, стикеры, музыка",
-    "Система комментариев с модерацией": "Древовидные комментарии, реакции, автомодерация, жалобы",
+    "Система комментариев с AI-модерацией": "Древовидные комментарии, реакции, автомодерация, жалобы",
     "Генерация контента через AI (тексты, изображения)": "GPT для текстов, DALL-E для изображений, автопостинг",
     "Планировщик публикаций и контент-календарь": "Отложенный постинг, оптимальное время, календарный вид"
   };
@@ -267,37 +298,53 @@ export default function Modules() {
               </div>
             </div>
             
-            <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
               {filteredModules.map((module) => (
                 <Card 
                   key={module.id} 
-                  className="p-6 hover:shadow-lg transition-all cursor-pointer group"
+                  className="overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group border-0 bg-gradient-to-br from-white to-gray-50/80"
                   onClick={() => {
                     setSelectedModule(module);
                     setIsModalOpen(true);
                   }}
                 >
-                  <div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-gray-900 group-hover:text-telegram transition-colors">
-                          {module.name}
-                        </h3>
-                        {module.isPopular && (
-                          <Badge variant="default" className="bg-orange-100 text-orange-800 text-xs">
-                            Популярный
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{module.description}</p>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="text-xs">
-                          {module.category}
-                        </Badge>
-                        <ArrowRight className="w-4 h-4 text-telegram opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative">
+                    {/* Module Icon/Image Header */}
+                    <div className="h-32 bg-gradient-to-br from-telegram/10 via-blue-50 to-indigo-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                      <div className="w-16 h-16 bg-white/90 rounded-2xl shadow-lg flex items-center justify-center">
+                        {getModuleIcon(module.name, module.category)}
                       </div>
                     </div>
-
+                    
+                    {/* Content */}
+                    <div className="p-5">
+                      <div className="flex items-start gap-2 mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-bold text-gray-900 group-hover:text-telegram transition-colors text-base line-clamp-2 leading-tight">
+                            {module.name}
+                          </h3>
+                          {module.isPopular && (
+                            <Badge className="bg-gradient-to-r from-orange-400 to-orange-500 text-white text-xs mt-2 border-0">
+                              🔥 Популярный
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed">
+                        {module.description}
+                      </p>
+                      
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className="text-xs bg-telegram/5 text-telegram border-telegram/20">
+                          {module.category.split(' ')[0]}
+                        </Badge>
+                        <div className="flex items-center gap-1 text-telegram opacity-70 group-hover:opacity-100 transition-opacity">
+                          <span className="text-xs font-medium">Подробнее</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </Card>
               ))}
