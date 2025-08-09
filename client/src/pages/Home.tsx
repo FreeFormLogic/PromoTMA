@@ -232,7 +232,7 @@ export default function Home() {
               <Card className="cursor-pointer hover:shadow-md transition-shadow p-6 text-center">
                 <DollarSign className="w-8 h-8 text-telegram mx-auto mb-2" />
                 <h3 className="font-semibold mb-1">Цены</h3>
-                <p className="text-sm text-gray-600">$300 vs $25,000</p>
+                <p className="text-sm text-gray-600">$300 vs $10,000</p>
                 <ArrowRight className="w-4 h-4 text-telegram mx-auto mt-2" />
               </Card>
             </Link>
