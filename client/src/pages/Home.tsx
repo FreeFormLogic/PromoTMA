@@ -136,7 +136,7 @@ export default function Home() {
                 <ul className="space-y-3 text-red-700">
                   <li className="flex items-center">
                     <DollarSign className="w-5 h-5 mr-3 text-red-500" />
-                    <span>$,000 - $25,000</span>
+                    <span>$7,000 - $25,000</span>
                   </li>
                   <li className="flex items-center">
                     <Clock className="w-5 h-5 mr-3 text-red-500" />
