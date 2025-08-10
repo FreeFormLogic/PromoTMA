@@ -9,8 +9,8 @@ import {
   GraduationCap, Calendar, DollarSign, FileText, Zap, Users, Star, Eye, Heart,
   Target, Shield, Settings, Bell, Cloud, Database, Camera, Video, Headphones,
   CreditCard, Package, Warehouse, Bot, Link, BookOpen, UserCheck, Group, Milestone, 
-  Trophy, Ticket, Puzzle, Repeat, History, Baseline, TestTube2, Mail, 
-  MousePointerClick, Library, Aperture, Presentation, PenTool, ClipboardCheck, Briefcase
+  Trophy, Ticket, Puzzle, Repeat, History, Baseline, TestTube2, Mail, Users2,
+  MousePointerClick, Library, Aperture, Presentation, PenTool, ClipboardCheck, Briefcase, MessageSquare
 } from "lucide-react";
 
 // Полный и корректный список ВСЕХ 97 модулей
