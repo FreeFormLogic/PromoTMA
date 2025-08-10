@@ -13,7 +13,7 @@ import {
   MousePointerClick, Library, Aperture, Presentation, PenTool, ClipboardCheck, Briefcase, MessageSquare
 } from "lucide-react";
 
-// Полный и корректный список ВСЕХ 97 модулей
+// Полный и корректный список ВСЕХ 58 модулей
 const allModules = [
     // E-COMMERCE (15 Модулей)
     {
