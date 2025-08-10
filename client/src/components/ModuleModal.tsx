@@ -66,6 +66,7 @@ import libraryImage from "@assets/generated_images/Digital_library_interface_588
 import cryptoWalletImage from "@assets/generated_images/Cryptocurrency_wallet_interface_4ff3d809.png";
 import progressImage from "@assets/generated_images/Progress_tracking_dashboard_2d5a65bd.png";
 import specialistImage from "@assets/generated_images/Specialist_scheduling_interface_066105d1.png";
+import storiesImage from "@assets/generated_images/Interactive_stories_mobile_interface_fce6f857.png";
 
 // Define image aliases for consistent mapping
 const showcaseSystemImage = ecommerceImage;
@@ -131,6 +132,7 @@ const moduleImages: Record<string, string> = {
   "Лента новостей с алгоритмической подачей": newsFeedImage,
   "Встроенный блог с редактором и SEO": blogEditorImage,
   "Стриминг видео с адаптивным качеством": videoStreamingImage,
+  "Кружочки сторис с интерактивными элементами": storiesImage,
   
   // ВОВЛЕЧЕНИЕ И ЛОЯЛЬНОСТЬ
   "Push-уведомления с персонализацией по поведению": notificationImage,
@@ -501,6 +503,17 @@ const moduleFeatures: Record<string, any> = {
     ],
     implementation: "4-5 дней",
     price: "$50/месяц"
+  },
+  "Кружочки сторис с интерактивными элементами": {
+    features: [
+      "Интеграция с Telegram: возможность делиться понравившимися сториз в личные чаты и групповые каналы Telegram",
+      "Аналитика просмотров: детальная статистика по охвату, завершенности просмотров, взаимодействиям и конверсии",
+      "Интерактивные call-to-action: встроенные кнопки, формы, опросы и ссылки для стимулирования целевых действий пользователя",
+      "Разнообразный контент: поддержка фото, видео, анимаций, текстовых наложений и интерактивных элементов в едином формате",
+      "Вертикальный формат историй: полноэкранные истории в стиле Instagram с плавными переходами и интуитивной навигацией через тапы и свайпы"
+    ],
+    implementation: "3-4 дня",
+    price: "$35/месяц"
   }
 };
 
