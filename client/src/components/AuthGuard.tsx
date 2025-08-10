@@ -17,7 +17,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     if (storedAuth) {
       try {
         const authData = JSON.parse(storedAuth);
-        if (authData.user && authData.user.isAuthorized) {
+        if (authData && authData.user && authData.user.isAuthorized) {
           setIsAuthenticated(true);
         }
       } catch (error) {
@@ -26,6 +26,13 @@ export function AuthGuard({ children }: AuthGuardProps) {
     }
     setIsLoading(false);
   }, []);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      setLocation('/login');
+    }
+  }, [isLoading, isAuthenticated, setLocation]);
 
   if (isLoading) {
     return (
@@ -39,7 +46,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   if (!isAuthenticated) {
-    setLocation('/login');
     return null;
   }
 
