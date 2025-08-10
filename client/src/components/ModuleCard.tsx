@@ -63,11 +63,15 @@ const moduleImages: Record<string, string> = {
   "Мультивалютный кошелек с конвертацией": multiCurrencyWalletImage,
   "Лента новостей с алгоритмической подачей": newsFeedImage,
   "Встроенный блог с редактором и SEO": blogEditorImage,
-  "Стриминг видео с адаптивным качеством": videoStreamingImage
+  "Стриминг видео с адаптивным качеством": videoStreamingImage,
+  "Push-уведомления с персонализацией по поведению": notificationImage,
+  "Система скидок и промокодов": discountImage,
+  "Система статусов заказов с real-time трекингом": trackingImage,
+  "Интеграция с СДЭК, Boxberry, Почтой России": deliveryImage
 };
 
 export function ModuleCard({ module }: ModuleCardProps) {
-  const moduleImage = moduleImages[module.name] || ecommerceImage;
+  const moduleImage = moduleImages[module.name] || showcaseSystemImage;
 
   return (
     <Card className="h-full hover:shadow-md transition-shadow duration-200 border border-gray-200">
