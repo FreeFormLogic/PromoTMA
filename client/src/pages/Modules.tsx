@@ -3,15 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ModuleCard } from "@/components/ModuleCard"; // Предполагается, что этот компонент существует
-import { ModuleModal } from "@/components/ModuleModal"; // Предполагается, что этот компонент существует
+import { ModuleModal } from "@/components/ModuleModal";
 import { 
   Grid3X3, Filter, Building2, Search, ArrowRight, ShoppingCart, BarChart3, Gift,
   GraduationCap, Calendar, DollarSign, FileText, Zap, Users, Star, Eye, Heart,
   Target, Shield, Settings, Bell, Cloud, Database, Camera, Video, Headphones,
   CreditCard, Package, Warehouse, Bot, Code, Globe, MessageSquare, Briefcase,
   KeyRound, Users2, Tv, Presentation, PenTool, ClipboardCheck, Link, BookOpen,
-  UserCheck, Group, Milestone, Trophy, Ticket, Puzzle, Repeat, History
+  UserCheck, Group, Milestone, Trophy, Ticket, Puzzle, Repeat, History,
+  Baseline, TestTube2, Mail, MousePointerClick, Donut, Library, Aperture
 } from "lucide-react";
 
 // Полный и корректный список модулей
@@ -774,12 +774,11 @@ const allModules = [
             "Назначение бадди (наставника) и организация встреч.",
             "Аналитика и контроль процесса адаптации для HR-менеджера."
         ]
-    },
-    // Добавляем оставшиеся категории, если они были в исходном ТЗ
+    }
 ];
 
 // Функция для получения иконки модуля
-function getModuleIcon(moduleTitle: string, category: string) {
+function getModuleIcon(moduleTitle: string, category: string): JSX.Element {
     const lowerTitle = moduleTitle.toLowerCase();
 
     // E-COMMERCE
@@ -789,26 +788,26 @@ function getModuleIcon(moduleTitle: string, category: string) {
     if (lowerTitle.includes('платеж') || lowerTitle.includes('оплат')) return <CreditCard className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('статус') || lowerTitle.includes('трекинг')) return <ClipboardCheck className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('доставк')) return <Warehouse className="w-8 h-8 text-telegram" />;
-    if (lowerTitle.includes('ar') || lowerTitle.includes('примерка')) return <ScanFace className="w-8 h-8 text-telegram" />; // Предполагаем, что ScanFace существует
+    if (lowerTitle.includes('ar') || lowerTitle.includes('примерка')) return <Camera className="w-8 h-8 text-telegram" />; // ИСПРАВЛЕНО: Заменено на Camera
     if (lowerTitle.includes('промокод') || lowerTitle.includes('скидк')) return <Ticket className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('рекомендаци') || lowerTitle.includes('кросс-продажи')) return <Eye className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('повтор заказа')) return <Repeat className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('групповые покупки')) return <Users2 className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('предзаказ')) return <History className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('wishlist')) return <Heart className="w-8 h-8 text-telegram" />;
-    if (lowerTitle.includes('сравнение')) return <GitCompareArrows className="w-8 h-8 text-telegram" />; // Предполагаем, что GitCompareArrows существует
+    if (lowerTitle.includes('сравнение')) return <Baseline className="w-8 h-8 text-telegram" />; // ИСПРАВЛЕНО: Заменено на Baseline
     if (lowerTitle.includes('интеграция')) return <Link className="w-8 h-8 text-telegram" />;
 
     // МАРКЕТИНГ
     if (lowerTitle.includes('персонализаци') || lowerTitle.includes('рекомендаци')) return <UserCheck className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('аналитик') || lowerTitle.includes('дашборд')) return <BarChart3 className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('push') || lowerTitle.includes('гео')) return <Bell className="w-8 h-8 text-telegram" />;
-    if (lowerTitle.includes('a/b')) return <Beaker className="w-8 h-8 text-telegram" />; // Предполагаем, что Beaker существует
+    if (lowerTitle.includes('a/b')) return <TestTube2 className="w-8 h-8 text-telegram" />; // ИСПРАВЛЕНО: Заменено на TestTube2
     if (lowerTitle.includes('воронки')) return <Filter className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('ретаргетинг')) return <Target className="w-8 h-8 text-telegram" />;
-    if (lowerTitle.includes('email') || lowerTitle.includes('sms')) return <Mail className="w-8 h-8 text-telegram" />; // Предполагаем, что Mail существует
+    if (lowerTitle.includes('email') || lowerTitle.includes('sms')) return <Mail className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('отзыв') || lowerTitle.includes('доказательства')) return <MessageSquare className="w-8 h-8 text-telegram" />;
-    if (lowerTitle.includes('тепловые карты')) return <MousePointer2 className="w-8 h-8 text-telegram" />; // Предполагаем, что MousePointer2 существует
+    if (lowerTitle.includes('тепловые карты')) return <MousePointerClick className="w-8 h-8 text-telegram" />; // ИСПРАВЛЕНО: Заменено на MousePointerClick
     if (lowerTitle.includes('сегментаци')) return <Users2 className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('utm')) return <Link className="w-8 h-8 text-telegram" />;
 
@@ -823,7 +822,7 @@ function getModuleIcon(moduleTitle: string, category: string) {
     if (lowerTitle.includes('челленджи')) return <Milestone className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('календарь активности')) return <Calendar className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('лидерборд')) return <BarChart3 className="w-8 h-8 text-telegram" />;
-    if (lowerTitle.includes('колесо фортуны')) return <CircleDashed className="w-8 h-8 text-telegram" />; // Предполагаем, что CircleDashed существует
+    if (lowerTitle.includes('колесо фортуны')) return <Aperture className="w-8 h-8 text-telegram" />; // ИСПРАВЛЕНО: Заменено на Aperture
 
     // ОБРАЗОВАНИЕ
     if (lowerTitle.includes('курс') || lowerTitle.includes('платформа')) return <BookOpen className="w-8 h-8 text-telegram" />;
@@ -837,7 +836,7 @@ function getModuleIcon(moduleTitle: string, category: string) {
     if (lowerTitle.includes('симуляции')) return <Bot className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('ментор')) return <UserCheck className="w-8 h-8 text-telegram" />;
     if (lowerTitle.includes('проекты')) return <Group className="w-8 h-8 text-telegram" />;
-    if (lowerTitle.includes('библиотека')) return <Library className="w-8 h-8 text-telegram" />; // Предполагаем, что Library существует
+    if (lowerTitle.includes('библиотека')) return <Library className="w-8 h-8 text-telegram" />;
 
     // B2B
     if (lowerTitle.includes('структура компании')) return <Building2 className="w-8 h-8 text-telegram" />;
@@ -849,7 +848,7 @@ function getModuleIcon(moduleTitle: string, category: string) {
     return getCategoryIcon(category);
 }
 
-function getCategoryIcon(category: string) {
+function getCategoryIcon(category: string): JSX.Element {
   const categoryIcons: Record<string, JSX.Element> = {
     "E-COMMERCE": <ShoppingCart className="w-8 h-8 text-telegram" />,
     "МАРКЕТИНГ": <BarChart3 className="w-8 h-8 text-telegram" />,
@@ -860,7 +859,6 @@ function getCategoryIcon(category: string) {
   return categoryIcons[category] || <Zap className="w-8 h-8 text-telegram" />;
 }
 
-// Получаем уникальные категории из общего списка
 const uniqueCategories = [...new Set(allModules.map(m => m.category))];
 
 export default function Modules() {
