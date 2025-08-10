@@ -44,6 +44,7 @@ import podcastImage from "@assets/generated_images/Podcast_platform_interface_9d
 import apiImage from "@assets/generated_images/API_integration_dashboard_093d07e8.png";
 import trackingImage from "@assets/generated_images/Order_tracking_interface_3f251983.png";
 import discountImage from "@assets/generated_images/Discount_system_interface_f78c73cf.png";
+import corporateImage from "@assets/generated_images/Corporate_portal_interface_513aeefc.png";
 import surveyImage from "@assets/generated_images/Survey_feedback_interface_3627f690.png";
 import gamificationImage from "@assets/generated_images/Gamification_achievement_system_98016851.png";
 import subscriptionImage from "@assets/generated_images/Subscription_management_interface_fa28e3e6.png";
@@ -150,6 +151,9 @@ const moduleImages: Record<string, string> = {
   "Синхронизация с внешними сервисами": apiImage,
   "Экспорт данных в популярные форматы": exportImage,
   
+  // B2B И КОРПОРАТИВНЫЕ СЕРВИСЫ
+  "Корпоративный портал 'в кармане'": corporateImage,
+  
   // More E-COMMERCE modules
   
   // More MARKETING modules  
@@ -226,7 +230,8 @@ const categoryImages: Record<string, string> = {
   "СЕРВИСЫ И БРОНИРОВАНИЕ": bookingImage,
   "ФИНТЕХ И ПЛАТЕЖИ": fintechImage,
   "КОНТЕНТ И МЕДИА": contentImage,
-  "ИНТЕГРАЦИИ И API": contentImage
+  "ИНТЕГРАЦИИ И API": contentImage,
+  "B2B И КОРПОРАТИВНЫЕ СЕРВИСЫ": corporateImage
 };
 
 const moduleFeatures: Record<string, any> = {
@@ -616,6 +621,19 @@ const moduleFeatures: Record<string, any> = {
     impact: "Stories увеличивают время в приложении на 50% и повышают вовлеченность на 65%, создавая привлекательный и знакомый пользователям формат контента в Telegram Mini App.",
     implementation: "3-4 дня",
     price: "$35/месяц"
+  },
+  "Корпоративный портал 'в кармане'": {
+    description: "Комплексное решение для внутренних коммуникаций и рабочих процессов, полностью интегрированное в Telegram:",
+    features: [
+      "**Структура компании и контакты**: Интерактивная схема организационной структуры с поиском сотрудников, их должностей и контактов прямо в Mini App",
+      "**База знаний компании**: Централизованное хранилище регламентов, инструкций и шаблонов документов с умным семантическим поиском",
+      "**Заказ справок и документов**: Автоматизированная подача заявок в бухгалтерию или HR-отдел (справка 2-НДФЛ, справка с места работы) с отслеживанием статуса через Telegram-бота",
+      "**Календарь корпоративных событий**: Общий календарь с возможностью подписки на уведомления о днях рождения коллег, корпоративах и важных встречах",
+      "**Онбординг новых сотрудников**: Автоматизированные приветственные цепочки и чек-листы задач для быстрой адаптации новичков"
+    ],
+    impact: "Решение сокращает время на поиск информации и решение рутинных кадровых вопросов на 60%, повышая вовлеченность и информированность сотрудников.",
+    implementation: "7-10 дней",
+    price: "$85/месяц"
   }
 };
 
