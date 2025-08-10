@@ -10,10 +10,11 @@ import {
   Target, Shield, Settings, Bell, Cloud, Database, Camera, Video, Headphones,
   CreditCard, Package, Warehouse, Bot, Link, BookOpen, UserCheck, Group, Milestone, 
   Trophy, Ticket, Puzzle, Repeat, History, Baseline, TestTube2, Mail, Users2,
-  MousePointerClick, Library, Aperture, Presentation, PenTool, ClipboardCheck, Briefcase, MessageSquare
+  MousePointerClick, Library, Aperture, Presentation, PenTool, ClipboardCheck, Briefcase, MessageSquare,
+  Globe, QrCode, Lock, HandCoins, MessageCircleQuestion, Share2, Component, LayoutDashboard
 } from "lucide-react";
 
-// Полный и корректный список ВСЕХ 58 модулей
+// Полный и корректный список ВСЕХ 100+ модулей
 const allModules = [
     // E-COMMERCE (15 Модулей)
     {
