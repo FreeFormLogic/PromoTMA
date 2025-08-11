@@ -45,12 +45,6 @@ function verifyJWT(req: any, res: any, next: any) {
 }
 
 function verifyTelegramAuth(authData: any): boolean {
-  // Check if this is a secure auth request
-  if (authData.fromBot && authData.hash && authData.hash.startsWith('secure_auth_')) {
-    // Verify username is authorized
-    return AUTHORIZED_USERS.includes(authData.username);
-  }
-  
   const { hash, ...data } = authData;
   const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
   
@@ -59,6 +53,7 @@ function verifyTelegramAuth(authData: any): boolean {
     return false;
   }
   
+  // Only accept real Telegram OAuth signatures
   // Create data-check-string
   const dataCheckArr = Object.keys(data)
     .sort()

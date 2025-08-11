@@ -112,100 +112,38 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
     setIsLoading(true);
     
     try {
-      // Try to use the widget first
+      // Check if widget is available
       const widgetContainer = document.getElementById('telegram-login-widget');
-      if (widgetContainer && widgetContainer.innerHTML.includes('telegram-widget')) {
+      const hasWidget = widgetContainer && widgetContainer.children.length > 0;
+      
+      if (hasWidget) {
         toast({
-          title: "Используйте виджет",
-          description: "Нажмите синюю кнопку 'Log in via Telegram' выше",
+          title: "Используйте Telegram Widget",
+          description: "Нажмите кнопку 'Log in via Telegram' выше для быстрой авторизации",
         });
         setIsLoading(false);
         return;
       }
 
-      // Fallback to bot
-      const botUsername = 'tmasalesbot';
-      const telegramUrl = `https://t.me/${botUsername}?start=auth_${Date.now()}`;
-      
-      window.open(telegramUrl, '_blank');
-      
+      // Show instruction for OAuth setup
       toast({
-        title: "Откройте бота",
-        description: "Нажмите /start в боте, затем вернитесь и обновите страницу",
+        title: "Требуется настройка OAuth",
+        description: "Для безопасной авторизации необходимо настроить Telegram Login Widget",
+        variant: "destructive",
       });
       
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 3000);
+      setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       toast({
         title: "Ошибка",
-        description: "Не удалось запустить авторизацию",
+        description: "Не удалось инициализировать авторизацию",
         variant: "destructive",
       });
     }
   };
 
-  const handleSecureAuth = async () => {
-    if (!username) return;
-    
-    // Remove @ if user typed it
-    const cleanUsername = username.replace('@', '');
-    
-    setIsLoading(true);
-    
-    try {
-      // Create secure auth data with verification
-      const authData = {
-        id: Date.now(),
-        username: cleanUsername,
-        first_name: cleanUsername.charAt(0).toUpperCase() + cleanUsername.slice(1),
-        auth_date: Math.floor(Date.now() / 1000),
-        hash: `secure_auth_${cleanUsername}_${Date.now()}`,
-        fromBot: true,
-        isAuthorized: true
-      };
 
-      const response = await fetch('/api/auth/telegram', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(authData)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('telegram_auth', JSON.stringify({
-          user: data.user,
-          timestamp: Date.now()
-        }));
-        
-        toast({
-          title: "Авторизация успешна",
-          description: `Добро пожаловать!`,
-        });
-        
-        onAuth(data.user);
-      } else {
-        toast({
-          title: "Доступ запрещен",
-          description: "У вас нет доступа к этому приложению",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Ошибка сети",
-        description: "Не удалось подключиться к серверу",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const checkAuthStatus = async () => {
     toast({
@@ -243,60 +181,28 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
               className="w-full flex justify-center"
             />
             
-            {/* Secure Username Input */}
-            <div className="space-y-3">
-              <Label htmlFor="username">Telegram username:</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="Введите ваш username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full"
-              />
-              
-              <Button 
-                onClick={handleSecureAuth}
-                disabled={isLoading || !username}
-                className="w-full bg-telegram hover:bg-telegram/90"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Проверка доступа...
-                  </>
-                ) : (
-                  <>
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Войти
-                  </>
-                )}
-              </Button>
-            </div>
-
-            {/* Fallback button */}
             <Button 
               onClick={startTelegramAuth}
               disabled={isLoading}
-              variant="outline"
-              className="w-full"
+              className="w-full bg-telegram hover:bg-telegram/90"
             >
               {isLoading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
-                  Авторизация...
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Подключение к Telegram...
                 </>
               ) : (
                 <>
                   <MessageSquare className="w-4 h-4 mr-2" />
-                  Войти через Telegram (требует настройки бота)
+                  Войти через Telegram
                 </>
               )}
             </Button>
           </div>
           
           <div className="mt-6 text-center text-sm text-gray-600">
-            <p>Введите ваш Telegram username для авторизации</p>
+            <p>Авторизация только через официальный Telegram OAuth</p>
+            <p className="mt-2 text-xs">Требуется настройка Login Widget для вашего бота</p>
           </div>
         </CardContent>
       </Card>
