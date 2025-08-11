@@ -823,55 +823,7 @@ export default function Partners() {
             </div>
             </div>
             
-            {/* Packages Section */}
-            <div>
-                <h3 className="font-semibold text-gray-900 mb-3 text-sm flex items-center">
-                  <Package className="w-4 h-4 mr-1 text-telegram" />
-                  Пакеты ускорения
-                </h3>
-                <div className="grid md:grid-cols-4 gap-3">
-                  {levelPackages.map((pkg, index) => (
-                    <div 
-                      key={index}
-                      onClick={() => setSelectedPackage(index)}
-                      className={`relative p-3 rounded-lg border-2 cursor-pointer transition-all duration-300 ${
-                        selectedPackage === index 
-                          ? 'border-telegram bg-telegram/5' 
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      {selectedPackage === index && (
-                        <div className="absolute -top-1 -right-1">
-                          <div className="w-4 h-4 bg-telegram rounded-full flex items-center justify-center">
-                            <Check className="w-3 h-3 text-white" />
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-telegram mb-1">
-                          {pkg.levels}
-                        </div>
-                        <div className="text-xs text-gray-600 mb-2">
-                          уровн{pkg.levels > 1 ? 'ей' : 'ь'}
-                        </div>
-                        
-                        <div className="text-xs text-gray-500 mb-2">
-                          {pkg.description}
-                        </div>
-                        
-                        <div className="text-center">
-                          {pkg.price > 0 ? (
-                            <div className="text-lg font-bold">${pkg.price}</div>
-                          ) : (
-                            <div className="text-sm font-bold text-green-600">Включено</div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+
             </CardContent>
           </Card>
         )}
