@@ -34,13 +34,30 @@ const partnerLevels = [
   { level: 5, commission: 3, color: "bg-blue-500", description: "5-й уровень", minClients: 20 }
 ];
 
-// Commission tiers based on deal size
-const getCommissionRate = (dealSize: number): number => {
-  if (dealSize >= 2000) return 50;
-  if (dealSize >= 1500) return 40;
-  if (dealSize >= 1000) return 35;
-  if (dealSize >= 500) return 30;
+// Base commission rates by deal size
+const getBaseCommissionRate = (dealSize: number): number => {
+  if (dealSize >= 2000) return 40;
+  if (dealSize >= 1500) return 35;
+  if (dealSize >= 1000) return 30;
+  if (dealSize >= 500) return 25;
   return 20; // $300 = 20%
+};
+
+// Order count multiplier (1.0 to 1.25 based on order count)
+const getOrderMultiplier = (orderCount: number): number => {
+  if (orderCount >= 50) return 1.25; // 25% bonus
+  if (orderCount >= 30) return 1.20; // 20% bonus
+  if (orderCount >= 20) return 1.15; // 15% bonus
+  if (orderCount >= 10) return 1.10; // 10% bonus
+  if (orderCount >= 5) return 1.05;  // 5% bonus
+  return 1.0; // No bonus
+};
+
+// Final commission rate with multiplier
+const getFinalCommissionRate = (dealSize: number, orderCount: number): number => {
+  const baseRate = getBaseCommissionRate(dealSize);
+  const multiplier = getOrderMultiplier(orderCount);
+  return Math.min(50, Math.round(baseRate * multiplier)); // Cap at 50%
 };
 
 export default function Partners() {
@@ -48,10 +65,13 @@ export default function Partners() {
   const [monthlySubscription, setMonthlySubscription] = useState([15]);
   const [totalClients, setTotalClients] = useState([5]);
   const [activeClients, setActiveClients] = useState([3]);
+  const [orderCount, setOrderCount] = useState([1]);
   const [copied, setCopied] = useState(false);
   const [expandedLevel, setExpandedLevel] = useState<number | null>(null);
 
-  const currentCommission = getCommissionRate(dealSize[0]);
+  const baseCommission = getBaseCommissionRate(dealSize[0]);
+  const orderMultiplier = getOrderMultiplier(orderCount[0]);
+  const currentCommission = getFinalCommissionRate(dealSize[0], orderCount[0]);
   const monthlyEarnings = activeClients[0] * (monthlySubscription[0] * 0.1);
   const oneTimeEarning = (dealSize[0] * currentCommission) / 100;
   const unlockedLevels = partnerLevels.filter(level => totalClients[0] >= level.minClients).length;
@@ -88,14 +108,14 @@ export default function Partners() {
             Партнерская программа
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
-            Зарабатывайте от 20% до 50% с каждого приведенного клиента (процент растет плавно кратно 5%) и 10% от всех абонентских платежей. 
+            Зарабатывайте от 20% до 50% с каждого приведенного клиента (базовый процент × мультипликатор количества заказов) и 10% от всех абонентских платежей. 
             Многоуровневая система вознаграждений с 5 уровнями глубины.
           </p>
           
           {/* Commission progression visual */}
           <div className="flex justify-center">
             <div className="bg-white rounded-xl p-4 shadow-lg border max-w-md">
-              <h3 className="text-center font-semibold text-gray-900 mb-3">Прогрессия комиссий</h3>
+              <h3 className="text-center font-semibold text-gray-900 mb-3">Базовые ставки × Мультипликатор</h3>
               <div className="flex justify-between items-center text-sm">
                 <div className="text-center">
                   <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-2">
@@ -106,28 +126,28 @@ export default function Partners() {
                 <div className="flex-1 h-0.5 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2"></div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-2">
-                    <span className="text-orange-700 font-bold">30%</span>
+                    <span className="text-orange-700 font-bold">25%</span>
                   </div>
                   <span className="text-gray-600">$500</span>
                 </div>
                 <div className="flex-1 h-0.5 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2"></div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mb-2">
-                    <span className="text-yellow-700 font-bold">35%</span>
+                    <span className="text-yellow-700 font-bold">30%</span>
                   </div>
                   <span className="text-gray-600">$1K</span>
                 </div>
                 <div className="flex-1 h-0.5 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2"></div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
-                    <span className="text-blue-700 font-bold">40%</span>
+                    <span className="text-blue-700 font-bold">35%</span>
                   </div>
                   <span className="text-gray-600">$1.5K</span>
                 </div>
                 <div className="flex-1 h-0.5 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2"></div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-2">
-                    <span className="text-green-700 font-bold">50%</span>
+                    <span className="text-green-700 font-bold">40%</span>
                   </div>
                   <span className="text-gray-600">$2K+</span>
                 </div>
@@ -172,10 +192,10 @@ export default function Partners() {
                   </div>
                   <div className="flex justify-between text-xs text-telegram font-medium mt-1">
                     <span>20%</span>
+                    <span>25%</span>
                     <span>30%</span>
                     <span>35%</span>
                     <span>40%</span>
-                    <span>50%</span>
                   </div>
                 </div>
 
@@ -242,9 +262,43 @@ export default function Partners() {
                     Платят абонентскую плату
                   </div>
                 </div>
+
+                {/* Order Count */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-medium text-gray-700">Количество заказов</label>
+                    <Badge variant="secondary" className="bg-indigo-100 text-indigo-800">
+                      {orderCount[0]}
+                    </Badge>
+                  </div>
+                  <Slider
+                    value={orderCount}
+                    onValueChange={setOrderCount}
+                    max={100}
+                    min={1}
+                    step={1}
+                    className="w-full"
+                  />
+                  <div className="text-xs text-gray-500">
+                    Мультипликатор: ×{orderMultiplier.toFixed(2)}
+                  </div>
+                </div>
               </div>
 
               <Separator />
+
+              {/* Commission Formula Display */}
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-200 mb-4">
+                <h4 className="font-semibold text-gray-900 mb-2 text-center">Формула расчета</h4>
+                <div className="text-center space-y-2">
+                  <div className="text-sm text-gray-700">
+                    {baseCommission}% × {orderMultiplier.toFixed(2)} = <span className="font-bold text-indigo-600">{currentCommission}%</span>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Базовая ставка × Мультипликатор заказов = Итоговая комиссия
+                  </div>
+                </div>
+              </div>
 
               {/* Earnings Display */}
               <div className="grid md:grid-cols-3 gap-3">
@@ -308,7 +362,7 @@ export default function Partners() {
 
               {/* Commission Scale */}
               <div className="space-y-2">
-                <h4 className="font-semibold text-gray-900 text-sm">Шкала комиссий:</h4>
+                <h4 className="font-semibold text-gray-900 text-sm">Базовые ставки:</h4>
                 <div className="space-y-1 text-xs">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">$300-499:</span>
@@ -316,19 +370,52 @@ export default function Partners() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">$500-999:</span>
-                    <Badge variant="secondary" className="bg-orange-100 text-orange-800">30%</Badge>
+                    <Badge variant="secondary" className="bg-orange-100 text-orange-800">25%</Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">$1000-1499:</span>
-                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">35%</Badge>
+                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">30%</Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">$1500-1999:</span>
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">40%</Badge>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">35%</Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">$2000+:</span>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">50%</Badge>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">40%</Badge>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Order Multipliers */}
+              <div className="space-y-2">
+                <h4 className="font-semibold text-gray-900 text-sm">Мультипликаторы:</h4>
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">1-4 заказа:</span>
+                    <Badge variant="secondary" className="bg-gray-100 text-gray-800">×1.0</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">5-9 заказов:</span>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">×1.05</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">10-19 заказов:</span>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">×1.10</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">20-29 заказов:</span>
+                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">×1.15</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">30-49 заказов:</span>
+                    <Badge variant="secondary" className="bg-orange-100 text-orange-800">×1.20</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">50+ заказов:</span>
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-800">×1.25</Badge>
                   </div>
                 </div>
               </div>
