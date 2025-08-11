@@ -33,7 +33,7 @@ const categoryColors: Record<string, string> = {
   "ПОЛЕЗНО": "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300 border-green-200 dark:border-green-800"
 };
 
-const categories = ["ВСЕ ОТРАСЛИ", "КРИТИЧЕСКИ ВАЖНО", "ОЧЕНЬ ПОЛЕЗНО", "ПОЛЕЗНО"];
+const categories = ["ВСЕ НИШИ", "КРИТИЧЕСКИ ВАЖНО", "ОЧЕНЬ ПОЛЕЗНО", "ПОЛЕЗНО"];
 
 // Компонент для форматирования текста с выделением жирным
 function formatText(text: string): React.ReactNode {
@@ -97,7 +97,7 @@ function IndustryCard({ industry }: { industry: Industry }) {
       </DialogTrigger>
       
       {/* Модальное окно с детальной информацией */}
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden" aria-describedby={`industry-description-${industry.id}`}>
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -109,14 +109,14 @@ function IndustryCard({ industry }: { industry: Industry }) {
           </div>
         </DialogHeader>
         
-        <ScrollArea className="max-h-[75vh] pr-4">
+        <ScrollArea className="max-h-[70vh] pr-6">
           <div className="space-y-8">
             {/* Иконка и описание */}
-            <div className="flex items-start gap-6">
+            <div className="flex items-start gap-6" id={`industry-description-${industry.id}`}>
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
                 <IconComponent className="w-10 h-10 text-white" />
               </div>
-              <div className="flex-1">
+              <div className="flex-1 pr-4">
                 <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-lg">
                   {industry.description}
                 </p>
@@ -148,8 +148,8 @@ function IndustryCard({ industry }: { industry: Industry }) {
               <div className="grid gap-3">
                 {painPoints.map((point, index) => (
                   <div key={index} className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="w-2 h-2 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                    <ArrowRight className="w-4 h-4 text-blue-500 mt-1 flex-shrink-0" />
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed pr-4">
                       {formatText(point)}
                     </p>
                   </div>
@@ -228,7 +228,7 @@ function IndustryCard({ industry }: { industry: Industry }) {
             )}
 
             {/* Кнопки действий */}
-            <div className="flex gap-4 pt-6">
+            <div className="flex gap-4 pt-4 pb-2">
               <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
                 Начать создание
               </Button>
@@ -279,7 +279,7 @@ export default function Industries() {
       industry.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       industry.importance.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCategory = selectedCategory === "ВСЕ ОТРАСЛИ" || industry.category === selectedCategory;
+    const matchesCategory = selectedCategory === "ВСЕ НИШИ" || industry.category === selectedCategory;
     return matchesSearch && matchesCategory;
   }) || [];
 
@@ -295,7 +295,7 @@ export default function Industries() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Ошибка загрузки отраслей</h1>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Ошибка загрузки ниш</h1>
           <p className="text-gray-600">Попробуйте обновить страницу</p>
         </div>
       </div>
@@ -309,27 +309,11 @@ export default function Industries() {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Отрасли и ниши бизнеса
+              Ниши бизнеса
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-              {totalIndustries} перспективных отраслей для запуска Telegram Mini Apps с подробным анализом эффективности и рекомендациями по модулям
+              {totalIndustries} перспективных ниш для запуска Telegram Mini Apps с подробным анализом эффективности и рекомендациями по модулям
             </p>
-          </div>
-
-          {/* Статистика по категориям */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-red-600 dark:text-red-400">{categoriesStats["КРИТИЧЕСКИ ВАЖНО"]}</div>
-              <div className="text-sm text-red-700 dark:text-red-300">Критически важно</div>
-            </div>
-            <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{categoriesStats["ОЧЕНЬ ПОЛЕЗНО"]}</div>
-              <div className="text-sm text-orange-700 dark:text-orange-300">Очень полезно</div>
-            </div>
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">{categoriesStats["ПОЛЕЗНО"]}</div>
-              <div className="text-sm text-green-700 dark:text-green-300">Полезно</div>
-            </div>
           </div>
 
           {/* Поиск и фильтры */}
@@ -337,7 +321,7 @@ export default function Industries() {
             <div className="relative flex-1 w-full lg:max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Поиск по названию отрасли..."
+                placeholder="Поиск по названию ниши..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
@@ -357,7 +341,7 @@ export default function Industries() {
                       : "hover:bg-gray-100 dark:hover:bg-gray-700"
                   }`}
                 >
-                  {category === "ВСЕ ОТРАСЛИ" ? `Все (${totalIndustries})` : category}
+                  {category === "ВСЕ НИШИ" ? `Все (${totalIndustries})` : category}
                 </Button>
               ))}
             </div>
@@ -379,7 +363,7 @@ export default function Industries() {
               <Search className="w-8 h-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              Отрасли не найдены
+              Ниши не найдены
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
               Попробуйте изменить критерии поиска или выбрать другую категорию
@@ -389,8 +373,8 @@ export default function Industries() {
           <>
             <div className="flex items-center justify-between mb-6">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Найдено {filteredIndustries.length} отраслей
-                {selectedCategory !== "ВСЕ ОТРАСЛИ" && ` в категории "${selectedCategory}"`}
+                Найдено {filteredIndustries.length} ниш
+                {selectedCategory !== "ВСЕ НИШИ" && ` в категории "${selectedCategory}"`}
               </p>
             </div>
             
