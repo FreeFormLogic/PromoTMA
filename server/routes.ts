@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 const telegramAuthSchema = z.object({
   id: z.number(),
@@ -13,7 +14,7 @@ const telegramAuthSchema = z.object({
   hash: z.string(),
 });
 
-const ALLOWED_ACCOUNTS = [
+const AUTHORIZED_USERS = [
   "balilegend",
   "dudewernon", 
   "krutikov201318",
@@ -22,6 +23,26 @@ const ALLOWED_ACCOUNTS = [
   "Protasbali",
   "Radost_no"
 ];
+
+// JWT secret for secure token management
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-for-development';
+
+// Middleware to verify JWT tokens
+function verifyJWT(req: any, res: any, next: any) {
+  const token = req.cookies?.telegram_auth_token || req.headers.authorization?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ message: "Токен авторизации не найден" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Недействительный токен" });
+  }
+}
 
 function verifyTelegramAuth(authData: any): boolean {
   // Check if this is a bot-verified user
@@ -70,7 +91,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if username is in allowed accounts
-      if (!authData.username || !authorizedUsers.includes(authData.username)) {
+      if (!authData.username || !AUTHORIZED_USERS.includes(authData.username)) {
         return res.status(403).json({ 
           message: "Доступ запрещен. Обратитесь к администратору для получения доступа." 
         });
@@ -87,12 +108,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Generate secure JWT token
+      const token = jwt.sign(
+        { 
+          userId: authData.id,
+          username: authData.username,
+          first_name: authData.first_name,
+          auth_date: authData.auth_date
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
       const user = await storage.authenticateTelegramUser(authData.username);
-      return res.json({ user, message: "Авторизация успешна" });
+      
+      // Set secure HTTP-only cookie
+      res.cookie('telegram_auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      });
+
+      return res.json({ user, token, message: "Авторизация успешна" });
     } catch (error) {
       console.error("Auth error:", error);
       return res.status(400).json({ message: "Неверные данные авторизации" });
     }
+  });
+
+  // Telegram Widget Authentication endpoint
+  app.post("/api/auth/telegram-widget", async (req, res) => {
+    try {
+      const authData = req.body;
+      
+      if (!verifyTelegramAuth(authData)) {
+        return res.status(401).json({ 
+          success: false,
+          message: "Недействительная подпись Telegram" 
+        });
+      }
+
+      const username = authData.username;
+      if (!username || !AUTHORIZED_USERS.includes(username)) {
+        return res.status(403).json({ 
+          success: false,
+          message: "Доступ запрещен" 
+        });
+      }
+
+      // Generate secure JWT token
+      const token = jwt.sign(
+        { 
+          userId: authData.id,
+          username: authData.username,
+          first_name: authData.first_name,
+          auth_date: authData.auth_date
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      const user = await storage.authenticateTelegramUser(authData.username);
+      
+      // Set secure HTTP-only cookie
+      res.cookie('telegram_auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      });
+
+      // Redirect back to app with success
+      return res.redirect('/?auth=success');
+    } catch (error) {
+      console.error("Widget auth error:", error);
+      return res.redirect('/?auth=error');
+    }
+  });
+
+  // Token verification endpoint
+  app.get("/api/auth/verify", verifyJWT, async (req, res) => {
+    try {
+      const user = await storage.authenticateTelegramUser((req as any).user.username);
+      return res.json({ success: true, user });
+    } catch (error) {
+      return res.status(500).json({ success: false, message: "Ошибка верификации" });
+    }
+  });
+
+  // Logout endpoint
+  app.post("/api/auth/logout", (req, res) => {
+    res.clearCookie('telegram_auth_token');
+    return res.json({ success: true, message: "Выход выполнен" });
   });
 
   // Modules routes
@@ -205,7 +313,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Check if user is in authorized list
-        const isAuthorized = authorizedUsers.includes(username);
+        const isAuthorized = AUTHORIZED_USERS.includes(username);
         
         if (isAuthorized) {
           // Store temporary authorization

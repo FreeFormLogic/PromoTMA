@@ -18,8 +18,18 @@ export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleLogout = () => {
-    // Clear all auth data
+  const handleLogout = async () => {
+    try {
+      // Call logout endpoint to clear secure cookies
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+    
+    // Clear local storage
     localStorage.removeItem('telegram_auth');
     
     // Force a complete page reload to reset all component states

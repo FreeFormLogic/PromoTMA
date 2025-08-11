@@ -39,10 +39,39 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
     const script = document.createElement('script');
     script.src = 'https://telegram.org/js/telegram-widget.js?22';
     script.async = true;
+    script.setAttribute('data-telegram-login', 'tmasalesbot');
+    script.setAttribute('data-size', 'large');
+    script.setAttribute('data-auth-url', window.location.origin + '/api/auth/telegram-widget');
+    script.setAttribute('data-request-access', 'write');
     document.body.appendChild(script);
 
+    // Create widget container
+    setTimeout(() => {
+      const container = document.getElementById('telegram-login-widget');
+      if (container && window.Telegram?.Login) {
+        // Try to create login widget programmatically
+        const widget = document.createElement('script');
+        widget.src = 'https://telegram.org/js/telegram-widget.js?22';
+        widget.setAttribute('data-telegram-login', 'tmasalesbot');
+        widget.setAttribute('data-size', 'large');
+        widget.setAttribute('data-onauth', 'onTelegramAuth(user)');
+        widget.setAttribute('data-request-access', 'write');
+        container.appendChild(widget);
+      }
+    }, 1000);
+
+    // Define global callback
+    (window as any).onTelegramAuth = (user: any) => {
+      handleTelegramAuth(user);
+    };
+
     return () => {
-      document.body.removeChild(script);
+      try {
+        document.body.removeChild(script);
+      } catch (e) {
+        // Script may already be removed
+      }
+      delete (window as any).onTelegramAuth;
     };
   }, []);
 
@@ -133,34 +162,35 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button 
-            onClick={startTelegramAuth}
-            disabled={isLoading}
-            className="w-full bg-telegram hover:bg-telegram/90"
-          >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Авторизация...
-              </>
-            ) : (
-              <>
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Открыть Telegram бота
-              </>
-            )}
-          </Button>
+          <div className="space-y-4">
+            {/* Telegram Login Widget */}
+            <div 
+              id="telegram-login-widget"
+              className="w-full flex justify-center"
+            />
+            
+            {/* Fallback button */}
+            <Button 
+              onClick={startTelegramAuth}
+              disabled={isLoading}
+              className="w-full bg-telegram hover:bg-telegram/90"
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Авторизация...
+                </>
+              ) : (
+                <>
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Войти через Telegram
+                </>
+              )}
+            </Button>
+          </div>
           
           <div className="mt-6 text-center text-sm text-gray-600">
-            <p>После авторизации в боте вернитесь и обновите страницу</p>
-            <div className="mt-3">
-              <button 
-                onClick={() => window.location.reload()} 
-                className="text-telegram hover:underline text-sm"
-              >
-                Обновить страницу
-              </button>
-            </div>
+            <p>Используйте кнопку выше для быстрой авторизации через Telegram</p>
           </div>
         </CardContent>
       </Card>

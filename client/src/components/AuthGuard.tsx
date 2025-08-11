@@ -11,71 +11,59 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const auth = localStorage.getItem('telegram_auth');
-      if (!auth) {
-        // Check if there's a telegram auth in global storage from bot
-        const checkBotAuth = async () => {
-          try {
-            // Check all possible authorized user IDs (simple demo approach)
-            const possibleUsers = [
-              { username: 'balilegend', id: 'user1' },
-              { username: 'dudewernon', id: 'user2' },
-              { username: 'krutikov201318', id: 'user3' },
-              { username: 'partners_IRE', id: 'user4' },
-              { username: 'fluuxerr', id: 'user5' },
-              { username: 'Protasbali', id: 'user6' },
-              { username: 'Radost_no', id: 'user7' }
-            ];
+      try {
+        // Check URL params for auth success
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('auth') === 'success') {
+          // Remove auth param from URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
 
-            for (const user of possibleUsers) {
-              const response = await fetch(`/api/telegram/auth-status/${user.id}`);
-              if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                  localStorage.setItem('telegram_auth', JSON.stringify({
-                    user: data.user,
-                    timestamp: Date.now()
-                  }));
-                  setUser(data.user);
-                  setIsAuthenticated(true);
-                  return;
-                }
-              }
+        // Verify JWT token with server
+        const response = await fetch('/api/auth/verify', {
+          credentials: 'include' // Include cookies
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.user) {
+            setUser(data.user);
+            setIsAuthenticated(true);
+            
+            // Store user info in localStorage for offline access
+            localStorage.setItem('telegram_auth', JSON.stringify({
+              user: data.user,
+              timestamp: Date.now()
+            }));
+            return;
+          }
+        }
+
+        // Fallback: check localStorage for existing auth
+        const auth = localStorage.getItem('telegram_auth');
+        if (auth) {
+          try {
+            const authData = JSON.parse(auth);
+            // Check if auth data is less than 24 hours old
+            const authAge = Date.now() - authData.timestamp;
+            const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+
+            if (authAge <= maxAge && authData.user && authData.user.isAuthorized) {
+              setUser(authData.user);
+              setIsAuthenticated(true);
+              return;
+            } else {
+              localStorage.removeItem('telegram_auth');
             }
           } catch (error) {
-            console.error('Bot auth check error:', error);
+            localStorage.removeItem('telegram_auth');
           }
-        };
+        }
 
-        await checkBotAuth();
         setIsAuthenticated(false);
         setUser(null);
-        return;
-      }
-
-      try {
-        const authData = JSON.parse(auth);
-        // Check if auth data is less than 24 hours old
-        const authAge = Date.now() - authData.timestamp;
-        const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-
-        if (authAge > maxAge) {
-          localStorage.removeItem('telegram_auth');
-          setIsAuthenticated(false);
-          setUser(null);
-          return;
-        }
-
-        if (authData.user && authData.user.isAuthorized) {
-          setUser(authData.user);
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-          setUser(null);
-        }
       } catch (error) {
         console.error('Auth check error:', error);
-        localStorage.removeItem('telegram_auth');
         setIsAuthenticated(false);
         setUser(null);
       }
