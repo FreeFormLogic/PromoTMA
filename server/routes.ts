@@ -192,6 +192,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Telegram Bot Webhook for real authentication
+  app.post("/api/telegram/webhook", async (req, res) => {
+    try {
+      const update = req.body;
+      
+      if (update.message && update.message.text === '/start') {
+        const user = update.message.from;
+        const username = user.username;
+        
+        if (!username) {
+          return res.json({ ok: true });
+        }
+        
+        // Check if user is in authorized list
+        const isAuthorized = AUTHORIZED_USERS.includes(username);
+        
+        if (isAuthorized) {
+          // Store temporary authorization
+          const authData = {
+            id: user.id,
+            username: username,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            timestamp: Date.now(),
+            isAuthorized: true
+          };
+          
+          // Store in memory (in production use database)
+          global.telegramAuth = global.telegramAuth || {};
+          global.telegramAuth[user.id] = authData;
+          
+          // Send confirmation to user
+          const botToken = process.env.TELEGRAM_BOT_TOKEN;
+          if (botToken) {
+            const sendMessageUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            await fetch(sendMessageUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: user.id,
+                text: `✅ Авторизация успешна!\n\nВы можете вернуться в веб-приложение и обновить страницу.\n\nВаш аккаунт: @${username}`
+              })
+            });
+          }
+        } else {
+          // Send rejection message
+          const botToken = process.env.TELEGRAM_BOT_TOKEN;
+          if (botToken) {
+            const sendMessageUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            await fetch(sendMessageUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: user.id,
+                text: `❌ Доступ запрещен\n\nВаш аккаунт @${username} не находится в списке авторизованных пользователей.\n\nОбратитесь к администратору для получения доступа.`
+              })
+            });
+          }
+        }
+      }
+      
+      return res.json({ ok: true });
+    } catch (error) {
+      console.error('Telegram webhook error:', error);
+      return res.json({ ok: true });
+    }
+  });
+
+  // Check authorization status
+  app.get("/api/telegram/auth-status/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const authData = global.telegramAuth?.[userId];
+      
+      if (authData && authData.isAuthorized) {
+        return res.json({ 
+          success: true, 
+          user: authData 
+        });
+      }
+      
+      return res.json({ 
+        success: false, 
+        message: "Авторизация не найдена" 
+      });
+    } catch (error) {
+      return res.status(500).json({ 
+        success: false, 
+        message: "Ошибка проверки авторизации" 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

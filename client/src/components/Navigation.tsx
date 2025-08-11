@@ -21,7 +21,6 @@ export function Navigation() {
   const handleLogout = () => {
     // Clear all auth data
     localStorage.removeItem('telegram_auth');
-    localStorage.removeItem('onboarding_completed');
     
     // Force a complete page reload to reset all component states
     window.location.href = window.location.origin;

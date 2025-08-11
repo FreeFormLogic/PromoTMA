@@ -32,7 +32,6 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
   // Clear any existing auth data when component mounts
   useEffect(() => {
     localStorage.removeItem('telegram_auth');
-    localStorage.removeItem('onboarding_completed');
   }, []);
 
   useEffect(() => {
@@ -88,59 +87,92 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
     }
   };
 
-  const handleUsernameAuth = async () => {
-    if (!username.trim()) {
-      toast({
-        title: "Ошибка",
-        description: "Введите ваш Telegram username",
-        variant: "destructive",
-      });
-      return;
-    }
+  const startTelegramAuth = () => {
+    const botUsername = "tmasalesbot";
+    const telegramUrl = `https://t.me/${botUsername}`;
+    
+    toast({
+      title: "Открытие Telegram",
+      description: "Откройте бот в Telegram для авторизации",
+    });
+    
+    window.open(telegramUrl, '_blank');
+    
+    // Start polling for auth status
+    setTimeout(() => {
+      checkAuthStatus();
+    }, 3000);
+  };
 
-    setIsLoading(true);
+  const checkAuthStatus = async () => {
     try {
-      const response = await fetch('/api/auth/telegram', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: Date.now(), // Temporary ID
-          first_name: username,
-          username: username.replace('@', ''),
-          auth_date: Math.floor(Date.now() / 1000),
-          hash: 'temp_hash_' + Date.now() // Temporary hash
-        })
+      // Generate a temporary user ID for polling (in real scenario, we'd get this from Telegram)
+      const pollId = 'poll_' + Date.now();
+      
+      toast({
+        title: "Ожидание авторизации",
+        description: "Нажмите /start в боте для авторизации",
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('telegram_auth', JSON.stringify({
-          user: data.user,
-          timestamp: Date.now()
-        }));
-        toast({
-          title: "Успешная авторизация",
-          description: `Добро пожаловать, @${username.replace('@', '')}!`,
-        });
-        onAuth(data.user);
-      } else {
-        toast({
-          title: "Ошибка авторизации",
-          description: data.message,
-          variant: "destructive",
-        });
-      }
+      // Poll for auth every 3 seconds for 2 minutes
+      let attempts = 0;
+      const maxAttempts = 40;
+      
+      const pollInterval = setInterval(async () => {
+        attempts++;
+        
+        try {
+          // Check if there's any new auth data in localStorage
+          // This is a simplified approach - in production, you'd poll the server
+          const authCheck = localStorage.getItem('telegram_auth_pending');
+          if (authCheck) {
+            const authData = JSON.parse(authCheck);
+            localStorage.removeItem('telegram_auth_pending');
+            
+            // Verify with server
+            const response = await fetch('/api/auth/telegram', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(authData)
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              localStorage.setItem('telegram_auth', JSON.stringify({
+                user: data.user,
+                timestamp: Date.now()
+              }));
+              
+              toast({
+                title: "Успешная авторизация",
+                description: `Добро пожаловать, @${data.user.username}!`,
+              });
+              
+              onAuth(data.user);
+              clearInterval(pollInterval);
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Auth polling error:', error);
+        }
+        
+        if (attempts >= maxAttempts) {
+          clearInterval(pollInterval);
+          toast({
+            title: "Время ожидания истекло",
+            description: "Попробуйте еще раз",
+            variant: "destructive",
+          });
+        }
+      }, 3000);
+      
     } catch (error) {
       toast({
-        title: "Ошибка сети",
-        description: "Не удалось подключиться к серверу",
+        title: "Ошибка",
+        description: "Не удалось запустить проверку авторизации",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -153,44 +185,38 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
           </div>
           <CardTitle className="text-2xl font-bold">Добро пожаловать</CardTitle>
           <CardDescription>
-            Авторизуйтесь через Telegram бот для доступа к каталогу Mini Apps
+            Войдите в Telegram и откройте бота для авторизации
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="username">Telegram Username</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="@ваш_username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleUsernameAuth()}
-              />
-            </div>
-            
-            <Button 
-              onClick={handleUsernameAuth}
-              disabled={isLoading}
-              className="w-full bg-telegram hover:bg-telegram/90"
-            >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Авторизация...
-                </>
-              ) : (
-                <>
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Войти
-                </>
-              )}
-            </Button>
-          </div>
+          <Button 
+            onClick={startTelegramAuth}
+            disabled={isLoading}
+            className="w-full bg-telegram hover:bg-telegram/90"
+          >
+            {isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Авторизация...
+              </>
+            ) : (
+              <>
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Открыть Telegram бота
+              </>
+            )}
+          </Button>
           
           <div className="mt-6 text-center text-sm text-gray-600">
-            <p>Введите ваш Telegram username для входа в систему</p>
+            <p>После авторизации в боте вернитесь и обновите страницу</p>
+            <div className="mt-3">
+              <button 
+                onClick={() => window.location.reload()} 
+                className="text-telegram hover:underline text-sm"
+              >
+                Обновить страницу
+              </button>
+            </div>
           </div>
         </CardContent>
       </Card>

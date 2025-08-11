@@ -26,7 +26,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
         if (authAge > maxAge) {
           localStorage.removeItem('telegram_auth');
-          localStorage.removeItem('onboarding_completed');
           setIsAuthenticated(false);
           setUser(null);
           return;
@@ -42,7 +41,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
       } catch (error) {
         console.error('Auth check error:', error);
         localStorage.removeItem('telegram_auth');
-        localStorage.removeItem('onboarding_completed');
         setIsAuthenticated(false);
         setUser(null);
       }
