@@ -13,6 +13,8 @@ import {
   Target,
   Crown,
   Trophy,
+  Award,
+  Package,
   Handshake,
   Calculator,
   Network,
