@@ -13,11 +13,13 @@ export const users = pgTable("users", {
 
 export const modules = pgTable("modules", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  number: integer("number").notNull(),
   name: text("name").notNull(),
   description: text("description").notNull(),
   category: text("category").notNull(),
   icon: text("icon").notNull(),
-  features: jsonb("features").notNull(),
+  keyFeatures: jsonb("key_features").notNull(),
+  benefits: text("benefits").notNull(),
   isPopular: boolean("is_popular").default(false),
 });
 

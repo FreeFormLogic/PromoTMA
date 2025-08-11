@@ -1,5 +1,6 @@
 import { type User, type InsertUser, type Module, type Industry, type USP, type Objection } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { allModulesData } from "./seedModules";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -64,50 +65,9 @@ export class MemStorage implements IStorage {
   }
 
   private initializeModules() {
-    const moduleCategories = [
-      {
-        category: "E-COMMERCE И ПРОДАЖИ",
-        modules: [
-          { name: "Витрина товаров с AI-описаниями", icon: "Store", features: ["AI-генерация описаний", "Каталог товаров", "Поиск и фильтры"] },
-          { name: "Карточка товара с 360° галереей", icon: "Image", features: ["360° просмотр", "Увеличение фото", "Множественные ракурсы"] },
-          { name: "Корзина и быстрое оформление в 2 клика", icon: "ShoppingCart", features: ["Быстрый заказ", "Сохранение корзины", "Одним кликом"] },
-          { name: "Автоматический прием платежей (Telegram Stars 0%)", icon: "CreditCard", features: ["Telegram Stars", "Криптоплатежи", "Автоматическая обработка"] },
-          { name: "Система статусов заказов с трекингом", icon: "Package", features: ["Отслеживание заказа", "SMS/Push уведомления", "История заказов"] }
-        ]
-      },
-      {
-        category: "МАРКЕТИНГ И АНАЛИТИКА",
-        modules: [
-          { name: "AI-персонализация контента", icon: "Brain", features: ["Персональные рекомендации", "Умная лента", "Поведенческий анализ"] },
-          { name: "Дашборд бизнес-аналитики в реальном времени", icon: "BarChart3", features: ["Реальные метрики", "Конверсии", "ROI анализ"] },
-          { name: "Гео-таргетированные push-уведомления", icon: "MapPin", features: ["Геолокация", "Персональные сообщения", "Автоматическая отправка"] },
-          { name: "A/B тестирование интерфейсов", icon: "TestTube", features: ["Сплит-тесты", "Статистика", "Оптимизация конверсий"] }
-        ]
-      },
-      {
-        category: "ВОВЛЕЧЕНИЕ И ЛОЯЛЬНОСТЬ",
-        modules: [
-          { name: "Система баллов и VIP-статусы", icon: "Crown", features: ["Программа лояльности", "VIP уровни", "Бонусные баллы"] },
-          { name: "Игровые достижения и коллекционные бейджи", icon: "Trophy", features: ["Достижения", "Коллекции", "Игровые механики"] },
-          { name: "Ежедневные задания и streak-система", icon: "Calendar", features: ["Ежедневные задачи", "Серии дней", "Мотивация"] },
-          { name: "Партнерская MLM программа", icon: "Users", features: ["Реферальная система", "Многоуровневость", "Комиссии"] }
-        ]
-      }
-    ];
-
-    moduleCategories.forEach(category => {
-      category.modules.forEach(moduleData => {
-        const module: Module = {
-          id: randomUUID(),
-          name: moduleData.name,
-          description: `Модуль ${moduleData.name} включает полный функционал для автоматизации и улучшения пользовательского опыта.`,
-          category: category.category,
-          icon: moduleData.icon,
-          features: moduleData.features,
-          isPopular: Math.random() > 0.7
-        };
-        this.modules.set(module.id, module);
-      });
+    // Загружаем все модули из файла seedModules.ts
+    allModulesData.forEach(module => {
+      this.modules.set(module.id, module);
     });
   }
 

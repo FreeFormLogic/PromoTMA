@@ -1,1229 +1,366 @@
-    import React, { useState, useEffect, useMemo } from "react";
-    import { 
-      Card, 
-      CardContent, 
-      CardDescription, 
-      CardFooter, 
-      CardHeader, 
-      CardTitle 
-    } from "@/components/ui/card";
-    import { Badge } from "@/components/ui/badge";
-    import { Button } from "@/components/ui/button";
-    import { Input } from "@/components/ui/input";
-    import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-    import {
-      Dialog,
-      DialogContent,
-      DialogDescription,
-      DialogHeader,
-      DialogTitle,
-      DialogFooter,
-    } from "@/components/ui/dialog";
-    import {
-      Select,
-      SelectContent,
-      SelectItem,
-      SelectTrigger,
-      SelectValue,
-    } from "@/components/ui/select";
-    import { ScrollArea } from "@/components/ui/scroll-area";
-    import {
-      Search,
-      Filter,
-      ShoppingCart,
-      BarChart3,
-      Gift,
-      GraduationCap,
-      Calendar,
-      DollarSign,
-      FileText,
-      Brain,
-      TrendingUp,
-      Award,
-      Gamepad2,
-      Globe,
-      Phone,
-      MessageSquare,
-      Lock,
-      FormInput,
-      Sparkles,
-      Rocket,
-      CheckCircle2,
-      Timer,
-      Layers,
-      Camera,
-      Video,
-      Eye,
-      Heart,
-      Database,
-      Settings,
-      Users,
-      CreditCard,
-      Package,
-      Warehouse,
-      Building2,
-      Target,
-      Headphones,
-      Mail,
-      Cloud,
-      Briefcase,
-      Star,
-      Shield,
-    } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  Search, Filter, ArrowRight, ShoppingCart, BarChart3, Gift,
+  GraduationCap, Calendar, DollarSign, Users, Star, Trophy,
+  CreditCard, Package, Bot, Globe, Settings, Building2,
+  Component, Store, Camera, Target, Heart, Crown, Award,
+  Gamepad2, BookOpen, Coins, TrendingUp, UserPlus, Aperture,
+  Truck, Repeat, TestTube2, Mail, Users2, MousePointerClick,
+  Link, Eye, Wifi, Zap
+} from "lucide-react";
+import type { Module } from "@shared/schema";
 
-    // Определение типов
-    interface Feature {
-      title: string;
-      description: string;
+// Маппинг иконок
+const iconMap: { [key: string]: any } = {
+  Store, Camera, ShoppingCart, CreditCard, Package, Truck, Aperture, Gift, 
+  Repeat, Users, Star, Heart, BarChart3, TestTube2, TrendingUp, Target, Mail,
+  Users2, MousePointerClick, Link, Crown, Award, Calendar, Gamepad2, Coins,
+  Trophy, Eye, GraduationCap, BookOpen, Bot, Globe, Settings, Building2,
+  Component, Search, Filter, ArrowRight, DollarSign, UserPlus, Wifi, Zap
+};
+
+// Список всех доступных категорий
+const categories = [
+  "ВСЕ МОДУЛИ",
+  "E-COMMERCE",
+  "МАРКЕТИНГ", 
+  "ВОВЛЕЧЕНИЕ",
+  "ОБРАЗОВАНИЕ",
+  "ФИНТЕХ",
+  "CRM",
+  "B2B",
+  "ИГРЫ",
+  "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"
+];
+
+// Цвета для категорий
+const categoryColors: { [key: string]: string } = {
+  "E-COMMERCE": "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300",
+  "МАРКЕТИНГ": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+  "ВОВЛЕЧЕНИЕ": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+  "ОБРАЗОВАНИЕ": "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
+  "ФИНТЕХ": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+  "CRM": "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300",
+  "B2B": "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300",
+  "ИГРЫ": "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
+  "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ": "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+};
+
+function parseKeyFeatures(keyFeatures: unknown): string[] {
+  if (Array.isArray(keyFeatures)) {
+    return keyFeatures;
+  }
+  if (typeof keyFeatures === 'string') {
+    try {
+      const parsed = JSON.parse(keyFeatures);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [keyFeatures];
     }
+  }
+  return [];
+}
 
-    interface Module {
-      id: number;
-      name: string;
-      description: string;
-      fullDescription?: string;
-      icon: React.ReactNode;
-      category: string;
-      subcategory?: string;
-      isPopular?: boolean;
-      features: Feature[];
-      benefits: string;
+function formatFeatureText(text: string): React.ReactNode {
+  // Разбиваем текст на части, выделяя жирным текст между **
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      const boldText = part.slice(2, -2);
+      return <strong key={index} className="font-semibold text-gray-900 dark:text-gray-100">{boldText}</strong>;
     }
+    return <span key={index}>{part}</span>;
+  });
+}
 
-    // Функция для получения иконок по имени
-    const getIcon = (name: string, className: string = "h-5 w-5"): React.ReactNode => {
-      const icons: Record<string, React.ReactNode> = {
-        ShoppingCart: <ShoppingCart className={className} />,
-        BarChart3: <BarChart3 className={className} />,
-        Gift: <Gift className={className} />,
-        GraduationCap: <GraduationCap className={className} />,
-        Calendar: <Calendar className={className} />,
-        DollarSign: <DollarSign className={className} />,
-        FileText: <FileText className={className} />,
-        Brain: <Brain className={className} />,
-        TrendingUp: <TrendingUp className={className} />,
-        Award: <Award className={className} />,
-        Gamepad2: <Gamepad2 className={className} />,
-        Globe: <Globe className={className} />,
-        Phone: <Phone className={className} />,
-        MessageSquare: <MessageSquare className={className} />,
-        Lock: <Lock className={className} />,
-        FormInput: <FormInput className={className} />,
-        Sparkles: <Sparkles className={className} />,
-        Rocket: <Rocket className={className} />,
-        CheckCircle2: <CheckCircle2 className={className} />,
-        Timer: <Timer className={className} />,
-        Layers: <Layers className={className} />,
-        Camera: <Camera className={className} />,
-        Star: <Star className={className} />,
-        Eye: <Eye className={className} />,
-        Heart: <Heart className={className} />,
-        Database: <Database className={className} />,
-        Settings: <Settings className={className} />,
-        Users: <Users className={className} />,
-        CreditCard: <CreditCard className={className} />,
-        Package: <Package className={className} />,
-        Warehouse: <Warehouse className={className} />,
-        Video: <Video className={className} />,
-        Building2: <Building2 className={className} />,
-        Shield: <Shield className={className} />,
-        Cloud: <Cloud className={className} />
-      };
-
-      return icons[name] || <Settings className={className} />;
-    };
-
-    // Данные модулей - E-COMMERCE
-    const ecommerceModules: Module[] = [
-      {
-        id: 1,
-        name: "Витрина товаров с AI-описаниями",
-        description: "Революционный каталог с нейросетевыми описаниями и 20+ умными фильтрами",
-        fullDescription: "Интеллектуальная система каталога с автоматической генерацией SEO-описаний через нейросети, визуальным поиском по фото с точностью 95% и персонализацией под каждого пользователя",
-        icon: getIcon("Brain"),
-        category: "E-COMMERCE",
-        isPopular: true,
-        features: [
-          { 
-            title: "Нейросетевые описания товаров", 
-            description: "Автоматическая генерация продающих текстов с сокращением времени наполнения каталога на 90%" 
-          },
-          { 
-            title: "Интеллектуальная фильтрация", 
-            description: "20+ типов фильтров с автоматической настройкой релевантности под категории товаров" 
-          },
-          { 
-            title: "Визуальный поиск по фото", 
-            description: "Загрузка фотографии товара для поиска аналогов с точностью до 95%" 
-          },
-          { 
-            title: "Динамическое ранжирование", 
-            description: "Автоматическое ранжирование на основе предпочтений пользователя и популярности" 
-          },
-          { 
-            title: "Персонализация витрины", 
-            description: "Адаптация отображаемого ассортимента под интересы каждого пользователя" 
-          }
-        ],
-        benefits: "Повышение конверсии на 40%, сокращение времени поиска на 60%"
-      },
-      {
-        id: 2,
-        name: "Карточка товара с 360° галереей",
-        description: "Интерактивная презентация с 3D-обзором, видео и AR-примеркой",
-        fullDescription: "Максимально вовлекающая карточка товара с возможностью кругового обзора, HD-зуммированием деталей и примеркой через камеру",
-        icon: getIcon("Camera"),
-        category: "E-COMMERCE",
-        isPopular: true,
-        features: [
-          { 
-            title: "3D-просмотр товаров", 
-            description: "Интерактивное вращение на 360° с плавным масштабированием" 
-          },
-          { 
-            title: "Видео-демонстрации", 
-            description: "Встроенный плеер для просмотра обзоров с автоадаптацией качества" 
-          },
-          { 
-            title: "HD-зуммирование", 
-            description: "Детальное рассмотрение материалов с 20-кратным увеличением" 
-          },
-          { 
-            title: "AR-примерка", 
-            description: "Визуализация товаров в реальном пространстве через камеру устройства" 
-          },
-          { 
-            title: "Интерактивные хотспоты", 
-            description: "Выделение и описание ключевых особенностей товара" 
-          }
-        ],
-        benefits: "Снижение возвратов на 35%, увеличение среднего чека на 25%"
-      },
-      {
-        id: 3,
-        name: "Корзина с сохранением сессии",
-        description: "Умная корзина с облачной синхронизацией и автовосстановлением",
-        fullDescription: "Интеллектуальная система управления корзиной с автосохранением, восстановлением брошенных покупок и персональными напоминаниями",
-        icon: getIcon("ShoppingCart"),
-        category: "E-COMMERCE",
-        isPopular: true,
-        features: [
-          { 
-            title: "Синхронизация с аккаунтом", 
-            description: "Мгновенное сохранение корзины при повторном открытии Mini App" 
-          },
-          { 
-            title: "Облачное хранение", 
-            description: "Сохранение содержимого корзины до 30 дней для пользователей" 
-          },
-          { 
-            title: "Восстановление сессий", 
-            description: "Автоматическое восстановление корзины после закрытия приложения" 
-          },
-          { 
-            title: "Интеллектуальные напоминания", 
-            description: "Персонализированные уведомления о незавершенных покупках" 
-          },
-          { 
-            title: "Аналитика поведения", 
-            description: "Выявление паттернов, приводящих к отказу от покупки" 
-          }
-        ],
-        benefits: "Восстановление 45% брошенных корзин, рост конверсии на 30%"
-      },
-      {
-        id: 4,
-        name: "Автоматический прием платежей",
-        description: "15+ способов оплаты с нулевой комиссией через Telegram Stars",
-        fullDescription: "Универсальная платежная экосистема с поддержкой всех популярных методов оплаты и встроенной защитой от мошенничества",
-        icon: getIcon("CreditCard"),
-        category: "E-COMMERCE",
-        features: [
-          { 
-            title: "Интеграция с Telegram Payments", 
-            description: "Быстрая оплата через встроенные в Telegram платежные методы" 
-          },
-          { 
-            title: "Мультиплатформенный прием", 
-            description: "15+ способов оплаты включая карты, электронные кошельки, СБП" 
-          },
-          { 
-            title: "Защита от мошенничества", 
-            description: "ML-алгоритмы для выявления подозрительных операций" 
-          },
-          { 
-            title: "Автоматические возвраты", 
-            description: "Мгновенная обработка возвратов и частичных возмещений" 
-          },
-          { 
-            title: "Умные платежные формы", 
-            description: "Адаптивный дизайн с минимизацией полей для быстрой оплаты" 
-          }
-        ],
-        benefits: "Увеличение конверсии оплат на 35%, снижение отказов на 40%"
-      },
-      {
-        id: 5,
-        name: "Система статусов заказов с трекингом",
-        description: "Детальное отслеживание заказа с GPS-координатами курьера",
-        fullDescription: "Прозрачная система мониторинга движения заказов от оформления до получения с предиктивной аналитикой времени доставки",
-        icon: getIcon("Package"),
-        category: "E-COMMERCE",
-        features: [
-          { 
-            title: "Детализированные статусы", 
-            description: "8-10 этапов обработки заказа с подробными уведомлениями" 
-          },
-          { 
-            title: "GPS-трекинг курьеров", 
-            description: "Отображение текущего местоположения с прогнозом прибытия" 
-          },
-          { 
-            title: "Предиктивная аналитика", 
-            description: "Расчет точного времени доставки с учетом загруженности дорог" 
-          },
-          { 
-            title: "Мгновенные уведомления", 
-            description: "Автоматические сообщения о смене статуса через Telegram" 
-          },
-          { 
-            title: "Логистическая интеграция", 
-            description: "Получение трек-номеров от транспортных компаний" 
-          }
-        ],
-        benefits: "Снижение обращений в поддержку на 60%, рост лояльности на 40%"
-      },
-      {
-        id: 6,
-        name: "Виртуальная примерка AR",
-        description: "AR-примерка мебели, одежды и аксессуаров через камеру",
-        fullDescription: "Инновационная AR-технология для визуализации товаров в реальном пространстве прямо в Telegram Mini App",
-        icon: getIcon("Sparkles"),
-        category: "E-COMMERCE",
-        isPopular: true,
-        features: [
-          { 
-            title: "Бесшовная AR-интеграция", 
-            description: "Работа без необходимости установки дополнительных приложений" 
-          },
-          { 
-            title: "Высокоточное распознавание", 
-            description: "Определение размеров тела и лица с точностью до 98%" 
-          },
-          { 
-            title: "Реалистичная визуализация", 
-            description: "Точная передача фактуры и цвета материалов в AR" 
-          },
-          { 
-            title: "Фотофиксация примерки", 
-            description: "Сохранение фото товара в интерьере или на себе" 
-          },
-          { 
-            title: "Мультитоварная примерка", 
-            description: "Одновременная визуализация нескольких товаров для комплектов" 
-          }
-        ],
-        benefits: "Снижение возвратов на 50%, рост конверсии на 45%"
-      }
-    ];
-
-    // Данные о модулях
-    const modulesData: Module[] = [
-      // E-COMMERCE
-      {
-        id: 1,
-        name: "Витрина товаров с AI-описаниями",
-        description: "Революционная витрина с 20+ фильтрами и визуальным поиском",
-        fullDescription: "Интеллектуальная система каталога с автоматической генерацией SEO-описаний через нейросети, визуальным поиском по фото с точностью 95% и персонализацией под каждого пользователя",
-        icon: getIcon("Brain"),
-        category: "E-COMMERCE",
-        isPopular: true,
-        features: [
-          { 
-            title: "Нейросетевые описания товаров", 
-            description: "Автоматическая генерация продающих текстов, сокращение времени наполнения каталога на 90%" 
-          },
-          { 
-            title: "20+ типов умных фильтров", 
-            description: "Адаптированы специально под компактный интерфейс Telegram" 
-          },
-          { 
-            title: "Визуальный поиск по фото", 
-            description: "Загрузка фотографии для быстрого поиска аналогов с точностью до 95%" 
-          },
-          { 
-            title: "Динамическое ранжирование", 
-            description: "Автоматическое ранжирование товаров на основе предпочтений пользователя" 
-          },
-          { 
-            title: "Персонализация витрины", 
-            description: "Адаптация отображаемого ассортимента под интересы пользователя" 
-          }
-        ],
-        benefits: "Повышение конверсии на 40%, сокращение времени поиска на 60%"
-      },
-      {
-        id: 2,
-        name: "Карточка товара с 360° галереей",
-        description: "Интерактивная презентация с 3D-просмотром и AR-примеркой",
-        fullDescription: "Максимально вовлекающая карточка товара с возможностью кругового обзора, HD-зуммированием деталей и примеркой через камеру",
-        icon: getIcon("Camera"),
-        category: "E-COMMERCE",
-        isPopular: true,
-        features: [
-          { 
-            title: "3D-просмотр товаров", 
-            description: "Интерактивное вращение на 360° с плавным масштабированием" 
-          },
-          { 
-            title: "Видео-демонстрации", 
-            description: "Встроенный плеер для просмотра обзоров без выхода из Telegram" 
-          },
-          { 
-            title: "HD-зуммирование", 
-            description: "Детальное рассмотрение материалов с 20-кратным увеличением" 
-          },
-          { 
-            title: "AR-примерка", 
-            description: "Визуализация товаров в реальном пространстве через камеру устройства" 
-          },
-          { 
-            title: "Интерактивные хотспоты", 
-            description: "Выделение и описание ключевых особенностей товара" 
-          }
-        ],
-        benefits: "Снижение возвратов на 35%, увеличение среднего чека на 25%"
-      },
-      {
-        id: 3,
-        name: "Корзина с сохранением между сессиями",
-        description: "Умная корзина с облачной синхронизацией и напоминаниями",
-        fullDescription: "Интеллектуальная система управления корзиной с автосохранением, восстановлением брошенных покупок и персональными напоминаниями",
-        icon: getIcon("ShoppingCart"),
-        category: "E-COMMERCE",
-        isPopular: true,
-        features: [
-          { 
-            title: "Синхронизация с аккаунтом Telegram", 
-            description: "Мгновенное сохранение корзины при повторном открытии Mini App" 
-          },
-          { 
-            title: "Облачное хранение данных", 
-            description: "Сохранение содержимого корзины до 30 дней" 
-          },
-          { 
-            title: "Восстановление прерванных сессий", 
-            description: "Автоматическое восстановление корзины после закрытия приложения" 
-          },
-          { 
-            title: "Интеллектуальные напоминания", 
-            description: "Персонализированные уведомления о незавершенных покупках" 
-          },
-          { 
-            title: "Аналитика поведения", 
-            description: "Выявление паттернов, приводящих к отказу от покупки" 
-          }
-        ],
-        benefits: "Восстановление 45% брошенных корзин, рост конверсии на 30%"
-      },
-      {
-        id: 4,
-        name: "Автоматический прием платежей",
-        description: "15+ способов оплаты включая Telegram Stars и криптовалюты",
-        fullDescription: "Универсальная платежная экосистема с поддержкой всех популярных методов оплаты и встроенной защитой от мошенничества",
-        icon: getIcon("CreditCard"),
-        category: "E-COMMERCE",
-        isPopular: true,
-        features: [
-          { 
-            title: "Интеграция с Telegram Payments", 
-            description: "Быстрая оплата через встроенные в Telegram платежные методы" 
-          },
-          { 
-            title: "Мультиплатформенный прием", 
-            description: "Поддержка карт, электронных кошельков, СБП и Telegram Stars" 
-          },
-          { 
-            title: "Защита от мошенничества", 
-            description: "ML-алгоритмы для выявления подозрительных операций" 
-          },
-          { 
-            title: "Автоматические возвраты", 
-            description: "Мгновенная обработка возвратов и частичных возмещений" 
-          },
-          { 
-            title: "Умные платежные формы", 
-            description: "Минимум полей для быстрой оплаты прямо в Telegram" 
-          }
-        ],
-        benefits: "Увеличение конверсии оплат на 35%, снижение отказов на 40%"
-      },
-      {
-        id: 5,
-        name: "Система статусов заказов с трекингом",
-        description: "Полная прозрачность от оформления до доставки",
-        fullDescription: "Детализированное отслеживание заказа с GPS-трекингом курьера и автоматическими уведомлениями",
-        icon: getIcon("Package"),
-        category: "E-COMMERCE",
-        features: [
-          { 
-            title: "Детализированный процесс", 
-            description: "8-10 этапов статусов заказа с подробными уведомлениями" 
-          },
-          { 
-            title: "GPS-трекинг курьера", 
-            description: "Отображение текущего местоположения курьера на карте" 
-          },
-          { 
-            title: "Предиктивная аналитика доставки", 
-            description: "Расчет точного времени доставки с учетом загруженности дорог" 
-          },
-          { 
-            title: "Мгновенные уведомления", 
-            description: "Автоматические сообщения о смене статуса через Telegram" 
-          },
-          { 
-            title: "Интеграция с логистическими сервисами", 
-            description: "Автоматическое получение трек-номеров от транспортных компаний" 
-          }
-        ],
-        benefits: "Снижение обращений в поддержку на 60%, рост лояльности на 40%"
-      },
-      {
-        id: 6,
-        name: "Управление доставкой",
-        description: "Единый интерфейс для всех служб доставки (СДЭК, Boxberry)",
-        fullDescription: "Комплексная автоматизация логистики с расчетом оптимального способа доставки и автоматической печатью документов",
-        icon: getIcon("Warehouse"),
-        category: "E-COMMERCE",
-        features: [
-          { 
-            title: "Единый интерфейс управления", 
-            description: "Централизованное управление отправками через разные службы доставки" 
-          },
-          { 
-            title: "Автоматический расчет стоимости", 
-            description: "Мгновенное определение оптимального способа доставки" 
-          },
-          { 
-            title: "Печать документов", 
-            description: "Автоматическое формирование этикеток и накладных" 
-          },
-          { 
-            title: "Трекинг отправлений", 
-            description: "Отслеживание статусов доставки с обновлением в Telegram" 
-          },
-          { 
-            title: "Интеграция с маркетплейсами", 
-            description: "Синхронизация заказов с Wildberries, Ozon, Яндекс.Маркет" 
-          }
-        ],
-        benefits: "Экономия времени на логистику 70%, снижение ошибок на 90%"
-      },
-      {
-        id: 7,
-        name: "Виртуальная примерка AR",
-        description: "Примерка товаров через камеру без установки приложений",
-        fullDescription: "Инновационная AR-технология для визуализации товаров в реальном пространстве прямо в Telegram Mini App",
-        icon: getIcon("Sparkles"),
-        category: "E-COMMERCE",
-        isPopular: true,
-        features: [
-          { 
-            title: "Бесшовная AR-интеграция", 
-            description: "Работа без необходимости установки дополнительных приложений" 
-          },
-          { 
-            title: "Высокоточное распознавание", 
-            description: "Определение размеров тела и лица с точностью до 98%" 
-          },
-          { 
-            title: "Реалистичная визуализация", 
-            description: "Точная передача фактуры и цвета материалов в AR" 
-          },
-          { 
-            title: "Фотофиксация примерки", 
-            description: "Сохранение фото товара в интерьере или на себе" 
-          },
-          { 
-            title: "Мультитоварная примерка", 
-            description: "Одновременная визуализация нескольких товаров для комплектов" 
-          }
-        ],
-        benefits: "Снижение возвратов на 50%, рост конверсии на 45%"
-      },
-      {
-        id: 8,
-        name: "Система промокодов и скидок",
-        description: "Гибкие механизмы ценообразования и акций",
-        fullDescription: "Мощный инструмент стимулирования продаж с многоуровневыми скидками и персональными предложениями",
-        icon: getIcon("Gift"),
-        category: "E-COMMERCE",
-        features: [
-          { 
-            title: "Многоуровневые скидки", 
-            description: "Создание сложных правил с комбинированием различных условий" 
-          },
-          { 
-            title: "Временные ограничения", 
-            description: "Настройка промокодов с точным периодом действия до минут" 
-          },
-          { 
-            title: "Персональные промокоды", 
-            description: "Генерация уникальных одноразовых кодов для конкретных пользователей" 
-          },
-          { 
-            title: "Автоматические скидки", 
-            description: "Применение скидок на основе состава корзины и поведения" 
-          },
-          { 
-            title: "Защита от злоупотреблений", 
-            description: "Система предотвращения мошенничества с промокодами" 
-          }
-        ],
-        benefits: "Рост среднего чека на 20%, увеличение повторных покупок на 35%"
-      },
-      {
-        id: 9,
-        name: "Кросс-продажи с умными рекомендациями",
-        description: "AI-рекомендации для увеличения среднего чека",
-        fullDescription: "Интеллектуальная система персонализированных предложений на основе машинного обучения",
-        icon: getIcon("TrendingUp"),
-        category: "E-COMMERCE",
-        features: [
-          { 
-            title: "ML-анализ покупок", 
-            description: "Анализ покупательских паттернов для выявления связей между товарами" 
-          },
-          { 
-            title: "Контекстные рекомендации", 
-            description: "Динамические предложения в зависимости от этапа покупки" 
-          },
-          { 
-            title: "Персонализированная выдача", 
-            description: "Рекомендации на основе предыдущих покупок и просмотров" 
-          },
-          { 
-            title: "Автоматические комплекты", 
-            description: "Создание готовых наборов товаров со специальной ценой" 
-          },
-          { 
-            title: "A/B тестирование стратегий", 
-            description: "Автоматический подбор оптимальных алгоритмов рекомендаций" 
-          }
-        ],
-        benefits: "Увеличение среднего чека на 30-40%, рост LTV на 25%"
-      },
-      {
-        id: 10,
-        name: "Быстрый повтор заказа в один клик",
-        description: "Мгновенное переоформление предыдущих покупок",
-        fullDescription: "Инструмент для максимального упрощения повторных покупок с сохранением всех данных",
-        icon: getIcon("Rocket"),
-        category: "E-COMMERCE",
-        features: [
-          { 
-            title: "Шаблоны заказов", 
-            description: "Сохранение истории заказов с возможностью быстрого повторения" 
-          },
-          { 
-            title: "Умные напоминания", 
-            description: "Автоматическое определение оптимального момента для напоминания" 
-          },
-          { 
-            title: "Предзаполненные формы", 
-            description: "Сохранение всех данных без повторного ввода" 
-          },
-          { 
-            title: "Отслеживание расходных материалов", 
-            description: "Интеллектуальное отслеживание периодичности заказов" 
-          },
-          { 
-            title: "Экспресс-доставка", 
-            description: "Приоритетная обработка повторных заказов" 
-          }
-        ],
-        benefits: "Рост повторных продаж на 60%, увеличение LTV на 40%"
-      },
-      {
-        id: 11,
-        name: "Групповые покупки со скидками",
-        description: "Социальные продажи с прогрессивными скидками",
-        fullDescription: "Механизм коллективных покупок с автоматическим снижением цены при росте участников",
-        icon: getIcon("Users"),
-        category: "E-COMMERCE",
-        features: [
-          { 
-            title: "Динамическое ценообразование", 
-            description: "Автоматическое снижение цены при достижении пороговых значений участников" 
-          },
-          { 
-            title: "Таймеры обратного отсчета", 
-            description: "Создание ощущения срочности с ограниченным временем" 
-          },
-          { 
-            title: "Интеграция с чатами Telegram", 
-            description: "Инструменты для приглашения друзей через чаты и каналы" 
-          },
-          { 
-            title: "Прозрачный прогресс", 
-            description: "Наглядное отображение текущего статуса группы" 
-          },
-          { 
-            title: "Автоматические уведомления", 
-            description: "Информирование участников о статусе покупки через бота" 
-          }
-        ],
-        benefits: "Вирусный рост продаж на 80%, увеличение охвата на 150%"
-      },
-      // МАРКЕТИНГ
-      {
-        id: 16,
-        name: "AI-персонализация и рекомендации",
-        description: "ML-система для создания уникального опыта для каждого клиента",
-        fullDescription: "Продвинутая система машинного обучения, анализирующая 50+ факторов поведения для точной персонализации контента и предложений",
-        icon: getIcon("Brain"),
-        category: "МАРКЕТИНГ",
-        isPopular: true,
-        features: [
-          { 
-            title: "Анализ 50+ факторов", 
-            description: "Комплексная обработка взаимодействия пользователя с Mini App" 
-          },
-          { 
-            title: "Динамическая персонализация", 
-            description: "Автоматическая адаптация контента под каждого пользователя" 
-          },
-          { 
-            title: "Предиктивные рекомендации", 
-            description: "Прогнозирование интереса к товарам с точностью до 85%" 
-          },
-          { 
-            title: "Микросегментация", 
-            description: "Распределение пользователей для таргетированных кампаний" 
-          },
-          { 
-            title: "Самообучающиеся алгоритмы", 
-            description: "Постоянное улучшение рекомендаций на основе обратной связи" 
-          }
-        ],
-        benefits: "Рост конверсии на 45%, увеличение среднего чека на 35%"
-      },
-      {
-        id: 17,
-        name: "Дашборд бизнес-аналитики",
-        description: "15+ готовых отчетов с real-time метриками и прогнозами",
-        fullDescription: "Комплексное решение для визуализации и анализа ключевых показателей вашего Telegram Mini App",
-        icon: getIcon("BarChart3"),
-        category: "МАРКЕТИНГ",
-        isPopular: true,
-        features: [
-          { 
-            title: "15+ готовых отчетов", 
-            description: "Настраиваемые отчеты по всем критическим бизнес-метрикам" 
-          },
-          { 
-            title: "Real-time мониторинг", 
-            description: "Отображение показателей с минимальной задержкой" 
-          },
-          { 
-            title: "Многоуровневые воронки", 
-            description: "Анализ пути пользователя с выявлением проблемных этапов" 
-          },
-          { 
-            title: "Когортный анализ", 
-            description: "Сегментация пользователей для оценки долгосрочной ценности" 
-          },
-          { 
-            title: "Предиктивная аналитика", 
-            description: "Прогнозирование показателей на основе исторических данных" 
-          }
-        ],
-        benefits: "Ускорение принятия решений на 60%, рост ROI на 40%"
-      },
-      {
-        id: 18,
-        name: "A/B тестирование интерфейсов",
-        description: "Многовариантное тестирование для оптимизации конверсии",
-        fullDescription: "Научный подход к оптимизации через экспериментальную проверку гипотез с автоматическим определением победителя",
-        icon: getIcon("Target"),
-        category: "МАРКЕТИНГ",
-        features: [
-          { 
-            title: "Многовариантное тестирование", 
-            description: "Сравнение до 10 версий элементов интерфейса одновременно" 
-          },
-          { 
-            title: "Статистическая достоверность", 
-            description: "Расчет размера выборки и определение победителя" 
-          },
-          { 
-            title: "Таргетированные эксперименты", 
-            description: "Тестирование на определенных сегментах аудитории" 
-          },
-          { 
-            title: "Визуальный редактор", 
-            description: "Создание вариаций без необходимости программирования" 
-          },
-          { 
-            title: "Комплексная аналитика", 
-            description: "Оценка влияния изменений на ключевые бизнес-показатели" 
-          }
-        ],
-        benefits: "Рост конверсии на 25-40% через оптимизацию"
-      }
-    ];
-
-    // Данные модулей - ВОВЛЕЧЕНИЕ
-    const engagementModules: Module[] = [
-      {
-        id: 29,
-        name: "Многоуровневые VIP-статусы",
-        description: "5-7 уровней лояльности с эксклюзивными привилегиями",
-        fullDescription: "Продвинутая система статусов для стимулирования долгосрочной лояльности клиентов в Telegram Mini App",
-        icon: getIcon("Award"),
-        category: "ВОВЛЕЧЕНИЕ",
-        isPopular: true,
-        features: [
-          { 
-            title: "Иерархия из 5-7 уровней", 
-            description: "Уровни с увеличивающимися привилегиями и возможностями" 
-          },
-          { 
-            title: "Прозрачные условия перехода", 
-            description: "Четкие метрики для повышения статуса пользователя" 
-          },
-          { 
-            title: "Персонализированные привилегии", 
-            description: "Уникальные бонусы для каждого уровня" 
-          },
-          { 
-            title: "Защита от понижения", 
-            description: "Механизм сохранения статуса при временной неактивности" 
-          },
-          { 
-            title: "Эксклюзивные возможности", 
-            description: "Доступ к специальным предложениям для VIP-пользователей" 
-          }
-        ],
-        benefits: "Рост LTV на 80%, увеличение retention на 65%"
-      },
-      {
-        id: 31,
-        name: "Ежедневные задания со streak-системой",
-        description: "Система формирования привычек через дейли-квесты",
-        fullDescription: "Механика создания устойчивых привычек использования Telegram Mini App через регулярные персонализированные задания",
-        icon: getIcon("Calendar"),
-        category: "ВОВЛЕЧЕНИЕ",
-        isPopular: true,
-        features: [
-          { 
-            title: "Персонализированные квесты", 
-            description: "Адаптивные задания под интересы пользователя" 
-          },
-          { 
-            title: "Система стриков", 
-            description: "Накопление серий с растущими наградами" 
-          },
-          { 
-            title: "Визуализация прогресса", 
-            description: "Интерактивный календарь с отметками успешных дней" 
-          },
-          { 
-            title: "Защита от пропусков", 
-            description: "Страховки от прерывания серии активности" 
-          },
-          { 
-            title: "Каскадные награды", 
-            description: "Специальные бонусы за достижение ключевых этапов" 
-          }
-        ],
-        benefits: "Рост DAU на 60%, увеличение retention D30 на 50%"
-      },
-      {
-        id: 35,
-        name: "Геймификация всех действий",
-        description: "Комплексная система игровых механик с наградами",
-        fullDescription: "Комплексная система игровых механик, трансформирующая весь пользовательский опыт в увлекательную игру",
-        icon: getIcon("Gamepad2"),
-        category: "ВОВЛЕЧЕНИЕ",
-        features: [
-          { 
-            title: "Система опыта и уровней", 
-            description: "Начисление XP за все типы взаимодействий с приложением" 
-          },
-          { 
-            title: "Дерево развития", 
-            description: "Нелинейная система прогрессии с выбором направлений" 
-          },
-          { 
-            title: "Внутренняя экономика", 
-            description: "Виртуальная валюта и коллекционные предметы" 
-          },
-          { 
-            title: "Квесты и миссии", 
-            description: "Разнообразные задания с уникальными наградами" 
-          },
-          { 
-            title: "Сезонные события", 
-            description: "Регулярные мероприятия с эксклюзивными активностями" 
-          }
-        ],
-        benefits: "Рост времени в приложении на 120%, retention +80%"
-      }
-    ];
-
-    // Данные модулей - ОБРАЗОВАНИЕ
-    const educationModules: Module[] = [
-      {
-        id: 41,
-        name: "Платформа курсов с видео и тестами",
-        description: "Комплексное решение для онлайн-обучения в Telegram",
-        fullDescription: "Полноценная LMS-система внутри Telegram с видео, интерактивными тестами и системой отслеживания прогресса",
-        icon: getIcon("GraduationCap"),
-        category: "ОБРАЗОВАНИЕ",
-        isPopular: true,
-        features: [
-          { 
-            title: "Адаптивный видеоплеер", 
-            description: "Оптимизированное воспроизведение с регулировкой качества" 
-          },
-          { 
-            title: "Интерактивные таймкоды", 
-            description: "Навигация по ключевым моментам видеоконтента" 
-          },
-          { 
-            title: "Многоязычные субтитры", 
-            description: "Автоматическая генерация и переключение языков" 
-          },
-          { 
-            title: "Встроенные тесты", 
-            description: "Тесты и задания, интегрированные непосредственно в видео" 
-          },
-          { 
-            title: "Синхронизация прогресса", 
-            description: "Сохранение позиции просмотра между устройствами" 
-          }
-        ],
-        benefits: "Завершаемость курсов 70%, рост вовлеченности на 85%"
-      },
-      {
-        id: 44,
-        name: "Система вебинаров и прямых эфиров",
-        description: "HD-трансляции с интерактивными инструментами",
-        fullDescription: "Профессиональная платформа для проведения онлайн-мероприятий и обучающих трансляций в Telegram",
-        icon: getIcon("Video"),
-        category: "ОБРАЗОВАНИЕ",
-        isPopular: true,
-        features: [
-          { 
-            title: "HD-трансляция", 
-            description: "Высококачественный стриминг с адаптивным битрейтом" 
-          },
-          { 
-            title: "Интерактивные инструменты", 
-            description: "Встроенные опросы, вопросы, реакции и чат" 
-          },
-          { 
-            title: "Демонстрация экрана", 
-            description: "Показ презентаций с поддержкой аннотаций" 
-          },
-          { 
-            title: "Автоматическая запись", 
-            description: "Сохранение трансляций для последующего просмотра" 
-          },
-          { 
-            title: "Оповещения в Telegram", 
-            description: "Уведомления о предстоящих трансляциях" 
-          }
-        ],
-        benefits: "Охват аудитории x5, конверсия в продажи 15%"
-      }
-    ];
-
-    // Данные модулей - ФИНТЕХ
-    const fintechModules: Module[] = [
-      {
-        id: 73,
-        name: "Прием Telegram Stars",
-        description: "0% комиссия на платежи внутри Telegram",
-        fullDescription: "Нативная интеграция с внутренней валютой Telegram для мгновенных платежей без комиссии",
-        icon: getIcon("Star"),
-        category: "ФИНТЕХ",
-        isPopular: true,
-        features: [
-          { 
-            title: "Нулевая комиссия", 
-            description: "Отсутствие дополнительных сборов за использование" 
-          },
-          { 
-            title: "Мгновенные транзакции", 
-            description: "Моментальное зачисление средств без задержек" 
-          },
-          { 
-            title: "Автоматическая конвертация", 
-            description: "Перевод Stars в фиатные валюты по актуальному курсу" 
-          },
-          { 
-            title: "Защищенные платежи", 
-            description: "Многоуровневая система безопасности с верификацией" 
-          },
-          { 
-            title: "Нативная интеграция", 
-            description: "Прямое подключение к экосистеме Telegram" 
-          }
-        ],
-        benefits: "Конверсия платежей +35%, экономия на комиссиях 5-10%"
-      },
-      {
-        id: 69,
-        name: "Платежи для России и СНГ",
-        description: "Интеграция со СБП, YooKassa и картами МИР",
-        fullDescription: "Оптимизированное решение для приема платежей от российской аудитории с минимальными комиссиями",
-        icon: getIcon("CreditCard"),
-        category: "ФИНТЕХ",
-        isPopular: true,
-        features: [
-          { 
-            title: "СБП интеграция", 
-            description: "Прием оплаты по QR-коду с минимальными комиссиями" 
-          },
-          { 
-            title: "Поддержка карт МИР", 
-            description: "Полная интеграция с национальной платежной системой" 
-          },
-          { 
-            title: "SberPay, Tinkoff Pay", 
-            description: "Подключение популярных pay-сервисов российских банков" 
-          },
-          { 
-            title: "ЮKassa и CloudPayments", 
-            description: "Интеграция с ведущими платежными агрегаторами" 
-          },
-          { 
-            title: "Автоматическая фискализация", 
-            description: "Соответствие 54-ФЗ с отправкой чеков" 
-          }
-        ],
-        benefits: "Успешность транзакций +40%, снижение комиссий на 1%"
-      }
-    ];
-
-
-
-    // Компонент карточки модуля
-    const ModuleCard: React.FC<{
-      module: Module;
-      onClick: (module: Module) => void;
-    }> = ({ module, onClick }) => {
-      return (
-        <Card 
-          className="h-full flex flex-col overflow-hidden cursor-pointer transition-all hover:shadow-md"
-          onClick={() => onClick(module)}
-        >
-          <CardHeader className="pb-2">
-            <div className="flex justify-between items-start mb-1">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                {module.icon}
+function ModuleCard({ module }: { module: Module }) {
+  const IconComponent = iconMap[module.icon] || Component;
+  const keyFeatures = parseKeyFeatures(module.keyFeatures);
+  
+  return (
+    <Card className="group h-full hover:shadow-lg transition-all duration-300 border-0 bg-white dark:bg-gray-800 shadow-md hover:shadow-xl hover:-translate-y-1">
+      <CardHeader className="pb-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <IconComponent className="w-6 h-6 text-white" />
               </div>
-              {module.isPopular && (
-                <Badge variant="secondary" className="ml-auto">
-                  Популярный
+              <div className="flex flex-col gap-1">
+                <Badge className={`text-xs font-medium px-2 py-1 ${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
+                  #{module.number} {module.category}
                 </Badge>
-              )}
-            </div>
-            <CardTitle className="text-lg mt-2">{module.name}</CardTitle>
-            <CardDescription className="text-sm mt-1">{module.description}</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-grow">
-            <p className="text-xs text-muted-foreground">{module.benefits}</p>
-          </CardContent>
-          <CardFooter>
-            <Button variant="outline" className="w-full" size="sm">
-              Подробнее
-            </Button>
-          </CardFooter>
-        </Card>
-      );
-    };
-
-    // Модальное окно с детальной информацией о модуле
-    const ModuleDetailModal: React.FC<{
-      module: Module | null;
-      isOpen: boolean;
-      onClose: () => void;
-    }> = ({ module, isOpen, onClose }) => {
-      if (!module) return null;
-
-      return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  {module.icon}
-                </div>
-                <div className="flex-grow">
-                  <DialogTitle className="text-xl flex items-center gap-2">
-                    {module.name}
-                    {module.isPopular && <Badge variant="secondary">Популярный</Badge>}
-                  </DialogTitle>
-                  <DialogDescription className="text-base mt-1">
-                    {module.category}
-                  </DialogDescription>
-                </div>
-              </div>
-              <p className="mt-4 text-base">
-                {module.fullDescription || module.description}
-              </p>
-            </DialogHeader>
-
-            <div className="mt-6 space-y-6">
-              <div>
-                <h3 className="text-lg font-medium mb-3">Ключевые возможности</h3>
-                <div className="space-y-3">
-                  {module.features.map((feature, index) => (
-                    <div key={index} className="border rounded-lg p-3">
-                      <div className="font-medium">{feature.title}</div>
-                      <div className="text-sm text-muted-foreground mt-1">{feature.description}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-secondary/20 p-4 rounded-lg">
-                <h3 className="font-medium mb-2">Основные преимущества:</h3>
-                <p>{module.benefits}</p>
+                {module.isPopular && (
+                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 text-xs px-2 py-1">
+                    <Star className="w-3 h-3 mr-1" />
+                    Популярный
+                  </Badge>
+                )}
               </div>
             </div>
-
-            <DialogFooter className="mt-6">
-              <Button variant="outline" onClick={onClose}>Закрыть</Button>
-              <Button>Добавить модуль</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      );
-    };
-
-    // Основной компонент страницы
-    export default function ModulesPage() {
-      const [activeCategory, setActiveCategory] = useState<string>("all");
-      const [searchQuery, setSearchQuery] = useState<string>("");
-      const [selectedModule, setSelectedModule] = useState<Module | null>(null);
-      const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-      const [showPopularOnly, setShowPopularOnly] = useState<boolean>(false);
-
-      // Получаем уникальные категории
-      const categories = useMemo(() => {
-        const uniqueCategories = Array.from(new Set(modulesData.map(module => module.category)));
-        return ["all", ...uniqueCategories];
-      }, []);
-
-      // Фильтрация модулей по категории, поисковому запросу и популярности
-      const filteredModules = useMemo(() => {
-        return modulesData.filter(module => {
-          const matchesCategory = activeCategory === "all" || module.category === activeCategory;
-          const matchesSearch = 
-            module.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-            module.description.toLowerCase().includes(searchQuery.toLowerCase());
-          const matchesPopular = showPopularOnly ? module.isPopular === true : true;
-
-          return matchesCategory && matchesSearch && matchesPopular;
-        });
-      }, [activeCategory, searchQuery, showPopularOnly]);
-
-      // Обработчики событий
-      const handleModuleClick = (module: Module) => {
-        setSelectedModule(module);
-        setIsModalOpen(true);
-      };
-
-      const handleCloseModal = () => {
-        setIsModalOpen(false);
-      };
-
-      const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-      };
-
-      const handleTogglePopular = () => {
-        setShowPopularOnly(!showPopularOnly);
-      };
-
-      return (
-        <div className="container mx-auto py-8 px-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <CardTitle className="text-lg font-bold leading-tight text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              {module.name}
+            </CardTitle>
+          </div>
+        </div>
+        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mt-2">
+          {module.description}
+        </p>
+      </CardHeader>
+      
+      <CardContent className="pt-0">
+        <div className="space-y-4">
+          {keyFeatures.length > 0 && (
             <div>
-              <h1 className="text-3xl font-bold">Модули для Telegram Mini App</h1>
-              <p className="text-muted-foreground mt-1 text-lg">
-                Выберите подходящие модули для вашего проекта
+              <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-blue-500" />
+                Ключевые возможности
+              </h4>
+              <div className="space-y-2">
+                {keyFeatures.slice(0, 3).map((feature, index) => {
+                  const [title, ...description] = feature.split(':');
+                  return (
+                    <div key={index} className="text-sm leading-relaxed">
+                      <div className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+                        <div className="text-gray-700 dark:text-gray-300">
+                          {description.length > 0 ? (
+                            <>
+                              <span className="font-medium text-gray-900 dark:text-gray-100">{formatFeatureText(title)}:</span>
+                              <span className="ml-1">{formatFeatureText(description.join(':'))}</span>
+                            </>
+                          ) : (
+                            formatFeatureText(feature)
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {keyFeatures.length > 3 && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                    +{keyFeatures.length - 3} дополнительных возможностей
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {module.benefits && (
+            <div className="pt-3 border-t border-gray-100 dark:border-gray-700">
+              <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-green-500" />
+                Результат
+              </h4>
+              <p className="text-sm text-green-700 dark:text-green-400 font-medium bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg">
+                {module.benefits}
               </p>
+            </div>
+          )}
+        </div>
+        
+        <Button 
+          className="w-full mt-6 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-md hover:shadow-lg transition-all duration-300"
+        >
+          Подробнее
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <Card className="h-full">
+      <CardHeader>
+        <div className="flex items-center gap-3 mb-3">
+          <Skeleton className="w-12 h-12 rounded-xl" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-3 w-16" />
+          </div>
+        </div>
+        <Skeleton className="h-6 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function Modules() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("ВСЕ МОДУЛИ");
+
+  // Загрузка модулей из API
+  const { data: modules, isLoading, error } = useQuery<Module[]>({
+    queryKey: ['/api/modules'],
+  });
+
+  const filteredModules = modules?.filter(module => {
+    const matchesSearch = module.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         module.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "ВСЕ МОДУЛИ" || module.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  }) || [];
+
+  const moduleStats = modules ? {
+    total: modules.length,
+    categories: [...new Set(modules.map(m => m.category))].length,
+    popular: modules.filter(m => m.isPopular).length
+  } : { total: 0, categories: 0, popular: 0 };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 flex items-center justify-center">
+        <Card className="p-8 text-center">
+          <h2 className="text-xl font-bold text-red-600 mb-2">Ошибка загрузки</h2>
+          <p className="text-gray-600 dark:text-gray-400">Не удалось загрузить модули. Попробуйте обновить страницу.</p>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Заголовок страницы */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            Каталог бизнес-модулей
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            Готовые решения для создания мощных Telegram Mini Apps. 
+            Выберите нужные модули и запустите свой бизнес за считанные дни.
+          </p>
+          
+          {/* Статистика */}
+          <div className="flex justify-center gap-8 mt-8">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                {isLoading ? "..." : moduleStats.total}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Модулей</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                {isLoading ? "..." : moduleStats.categories}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Категорий</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                {isLoading ? "..." : moduleStats.popular}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Популярных</div>
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-grow relative">
-              <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
+        {/* Поиск и фильтры */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Поиск */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
-                placeholder="Поиск модулей..."
-                className="pl-9"
-                value={searchQuery}
-                onChange={handleSearchChange}
+                placeholder="Поиск модулей по названию или описанию..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-11 h-12 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-lg"
               />
             </div>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant={showPopularOnly ? "default" : "outline"} 
-                onClick={handleTogglePopular}
-                className="flex items-center gap-2"
-              >
-                <Star className="h-4 w-4" />
-                Популярные
-              </Button>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                Фильтры
-              </Button>
+            
+            {/* Фильтр по категориям */}
+            <div className="flex gap-2 overflow-x-auto lg:overflow-visible">
+              {categories.map((category) => (
+                <Button
+                  key={category}
+                  variant={selectedCategory === category ? "default" : "outline"}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`whitespace-nowrap transition-all duration-300 ${
+                    selectedCategory === category
+                      ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md"
+                      : "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  {category}
+                </Button>
+              ))}
             </div>
           </div>
-
-          <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-            <TabsList className="mb-6 flex-wrap h-auto">
-              {categories.map((category) => (
-                <TabsTrigger key={category} value={category}>
-                  {category === "all" ? "Все модули" : category}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            <TabsContent value={activeCategory}>
-              {filteredModules.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredModules.map((module) => (
-                    <ModuleCard
-                      key={module.id}
-                      module={module}
-                      onClick={handleModuleClick}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <h3 className="text-lg font-medium">Модули не найдены</h3>
-                  <p className="text-muted-foreground mt-2">
-                    Попробуйте изменить поисковый запрос или выбрать другую категорию
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-
-          <ModuleDetailModal 
-            module={selectedModule}
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
-          />
+          
+          {/* Результаты поиска */}
+          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+            {isLoading ? (
+              "Загрузка модулей..."
+            ) : (
+              `Найдено ${filteredModules.length} из ${modules?.length || 0} модулей${searchTerm ? ` по запросу "${searchTerm}"` : ''}${selectedCategory !== "ВСЕ МОДУЛИ" ? ` в категории "${selectedCategory}"` : ''}`
+            )}
+          </div>
         </div>
-      );
-    }
+
+        {/* Сетка модулей */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {isLoading ? (
+            // Скелетоны загрузки
+            Array.from({ length: 12 }).map((_, index) => (
+              <LoadingSkeleton key={index} />
+            ))
+          ) : filteredModules.length > 0 ? (
+            // Реальные модули
+            filteredModules.map((module) => (
+              <ModuleCard key={module.id} module={module} />
+            ))
+          ) : (
+            // Пустое состояние
+            <div className="col-span-full text-center py-16">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                Модули не найдены
+              </h3>
+              <p className="text-gray-500 dark:text-gray-500">
+                Попробуйте изменить поисковый запрос или выбрать другую категорию
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Призыв к действию */}
+        <div className="mt-16 text-center">
+          <Card className="max-w-4xl mx-auto p-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0">
+            <h2 className="text-3xl font-bold mb-4">
+              Готовы создать свой Telegram Mini App?
+            </h2>
+            <p className="text-xl mb-6 opacity-90">
+              Выберите нужные модули и получите готовое решение за 24 часа
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Начать сейчас
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
