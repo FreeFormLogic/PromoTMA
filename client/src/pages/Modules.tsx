@@ -12,7 +12,7 @@ import {
   Trophy, Ticket, Puzzle, Repeat, History, Baseline, TestTube2, Mail, Users2,
   MousePointerClick, Library, Aperture, Presentation, PenTool, ClipboardCheck, Briefcase, MessageSquare,
   Globe, QrCode, Lock, HandCoins, MessageCircleQuestion, Share2, Component, LayoutDashboard, Car,
-  Utensils, BedDouble, Plane, Handshake, ShieldCheck, Code2, Webhook, FileOutput
+  Utensils, BedDouble, Plane, Handshake, ShieldCheck, Code2, Webhook, FileOutput, Wallet, Tv
 } from "lucide-react";
 
 // Полный и корректный список ВСЕХ 102 модулей
@@ -403,7 +403,6 @@ const allModules = [
     }
 ];
 
-TypeScript
 
 const additionalModules = [
     // ВОВЛЕЧЕНИЕ (12 Модулей)
@@ -1293,7 +1292,7 @@ function getCategoryIcon(category: string): JSX.Element {
   return categoryIcons[category] || <Zap className="w-8 h-8 text-telegram" />;
 }
 
-const uniqueCategories = [...new Set(allModulesFinal.map(m => m.category))];
+const uniqueCategories = Array.from(new Set(allModulesFinal.map(m => m.category)));
 
 export default function Modules() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
