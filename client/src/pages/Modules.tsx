@@ -402,7 +402,7 @@ const allModules = [
         ]
     }
 ];
-Часть 2 из 2
+
 TypeScript
 
 const additionalModules = [
