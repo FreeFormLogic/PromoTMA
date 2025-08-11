@@ -7,12 +7,12 @@ This is a full-stack web application for a Telegram Mini Apps directory and show
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2025)
-- ✅ COMPLETED: Fixed authorization system - all users can now access without restrictions
-- ✅ COMPLETED: Replaced problematic Telegram OAuth with stable one-click authentication
-- ✅ COMPLETED: Switched to free in-memory database storage (MemStorage) instead of PostgreSQL
-- ✅ COMPLETED: Created clean authentication interface without external dependencies
-- ✅ COMPLETED: Eliminated browser extension conflicts and signature verification errors
-- ✅ COMPLETED: System now works reliably at https://PromoTMA.replit.app
+- ✅ COMPLETED: Implemented real Telegram ID-based authorization with whitelist
+- ✅ COMPLETED: Added strict access control for specific Telegram IDs: 7418405560, 5173994544, 216463929, 6209116360, 893850026, 1577419391, 5201551014
+- ✅ COMPLETED: Removed fake @balilegend display from authorization system
+- ✅ COMPLETED: Fixed mobile navigation - moved hamburger menu to bottom-right floating button
+- ✅ COMPLETED: Mobile menu now opens from bottom of screen to avoid conflicts with battery/back button
+- ✅ COMPLETED: System blocks all unauthorized users completely, even if bot/app is already added
 
 # System Architecture
 

@@ -84,29 +84,8 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
       onAuth(userData);
       
     } else {
-      // Для тестирования вне Telegram - используем первый ID из списка
-      const testUser = {
-        id: ALLOWED_USER_IDS[0],
-        first_name: "Test User",
-        username: "testuser"
-      };
-      
-      const userData = {
-        id: testUser.id.toString(),
-        username: testUser.username,
-        telegramUsername: `@${testUser.username}`,
-        firstName: testUser.first_name,
-        lastName: "",
-        isAuthorized: true,
-      };
-
-      localStorage.setItem('telegram_auth', JSON.stringify({
-        user: userData,
-        timestamp: Date.now()
-      }));
-
-      console.log('Тестовый пользователь авторизован:', userData);
-      onAuth(userData);
+      setError("Приложение должно быть запущено через Telegram");
+      setIsChecking(false);
     }
   }, [onAuth]);
 

@@ -41,77 +41,18 @@ export function Navigation() {
   ];
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <nav className="flex items-center justify-between h-16">
-          <Link href="/">
-            <div className="flex items-center space-x-3 cursor-pointer">
-              <MessageSquare className="text-telegram text-2xl" />
-              <h1 className="text-xl font-semibold text-gray-900">Mini Apps Directory</h1>
-            </div>
-          </Link>
-          
-          <div className="hidden md:flex items-center space-x-6">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location === item.path;
-              const isPartnersItem = item.path === "/partners";
-              
-              if (isPartnersItem) {
-                return (
-                  <div 
-                    key={item.path}
-                    onClick={handlePartnersClick}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer text-gray-700 hover:text-telegram hover:bg-telegram/10`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="text-sm font-medium">{item.label}</span>
-                  </div>
-                );
-              }
-              
-              return (
-                <Link key={item.path} href={item.path}>
-                  <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer ${
-                    isActive 
-                      ? 'bg-telegram text-white' 
-                      : 'text-gray-700 hover:text-telegram hover:bg-telegram/10'
-                  }`}>
-                    <Icon className="w-4 h-4" />
-                    <span className="text-sm font-medium">{item.label}</span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleLogout}
-              className="hidden md:flex"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Выйти
-            </Button>
+    <>
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="container mx-auto px-4">
+          <nav className="flex items-center justify-between h-16">
+            <Link href="/">
+              <div className="flex items-center space-x-3 cursor-pointer">
+                <MessageSquare className="text-telegram text-2xl" />
+                <h1 className="text-xl font-semibold text-gray-900">Mini Apps Directory</h1>
+              </div>
+            </Link>
             
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="md:hidden relative z-50 bg-white border border-gray-300 shadow-sm"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              style={{ zIndex: 9999 }}
-            >
-              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
-          </div>
-        </nav>
-        
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 bg-white relative z-40" style={{ zIndex: 9998 }}>
-            <div className="px-4 py-4 space-y-2">
+            <div className="hidden md:flex items-center space-x-6">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location === item.path;
@@ -121,47 +62,112 @@ export function Navigation() {
                   return (
                     <div 
                       key={item.path}
-                      className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors cursor-pointer text-gray-700 hover:text-telegram hover:bg-telegram/10`}
-                      onClick={(e) => {
-                        handlePartnersClick(e);
-                        setIsMobileMenuOpen(false);
-                      }}
+                      className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer text-gray-700 hover:text-telegram hover:bg-telegram/10`}
                     >
-                      <Icon className="w-5 h-5" />
-                      <span className="font-medium">{item.label}</span>
+                      <Icon className="w-4 h-4" />
+                      <span className="text-sm font-medium">{item.label}</span>
                     </div>
                   );
                 }
                 
                 return (
                   <Link key={item.path} href={item.path}>
-                    <div 
-                      className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors cursor-pointer ${
-                        isActive 
-                          ? 'bg-telegram text-white' 
-                          : 'text-gray-700 hover:text-telegram hover:bg-telegram/10'
-                      }`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span className="font-medium">{item.label}</span>
+                    <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer ${
+                      isActive 
+                        ? 'bg-telegram text-white' 
+                        : 'text-gray-700 hover:text-telegram hover:bg-telegram/10'
+                    }`}>
+                      <Icon className="w-4 h-4" />
+                      <span className="text-sm font-medium">{item.label}</span>
                     </div>
                   </Link>
                 );
               })}
-              
+            </div>
+            
+            <div className="flex items-center space-x-4">
               <Button 
                 variant="outline" 
+                size="sm" 
                 onClick={handleLogout}
-                className="w-full justify-start mt-4"
+                className="hidden md:flex"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Выйти
               </Button>
             </div>
-          </div>
-        )}
+          </nav>
+        </div>
+      </header>
+
+      {/* Кнопка меню внизу экрана для мобильных */}
+      <div className="md:hidden fixed bottom-4 right-4 z-50">
+        <Button 
+          variant="default" 
+          size="lg"
+          className="bg-telegram hover:bg-telegram/90 text-white rounded-full w-14 h-14 shadow-lg"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </Button>
       </div>
-    </header>
+        
+      {/* Mobile Menu - снизу экрана */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 shadow-lg rounded-t-xl">
+          <div className="px-4 py-6 space-y-3">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location === item.path;
+              const isPartnersItem = item.path === "/partners";
+              
+              if (isPartnersItem) {
+                return (
+                  <div 
+                    key={item.path}
+                    className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors cursor-pointer text-gray-700 hover:text-telegram hover:bg-telegram/10`}
+                    onClick={(e) => {
+                      handlePartnersClick(e);
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span className="font-medium">{item.label}</span>
+                  </div>
+                );
+              }
+              
+              return (
+                <Link key={item.path} href={item.path}>
+                  <div 
+                    className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors cursor-pointer ${
+                      isActive 
+                        ? 'bg-telegram text-white' 
+                        : 'text-gray-700 hover:text-telegram hover:bg-telegram/10'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span className="font-medium">{item.label}</span>
+                  </div>
+                </Link>
+              );
+            })}
+            
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                handleLogout();
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full justify-start mt-4"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Выйти
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
