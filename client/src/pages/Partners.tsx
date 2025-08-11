@@ -29,7 +29,17 @@ import {
   Settings,
   HelpCircle,
   X,
-  User
+  User,
+  Flame,
+  Rocket,
+  Heart,
+  MessageCircle,
+  Download,
+  Play,
+  GamepadIcon as Gamepad,
+  Coins,
+  Timer,
+  Zap
 } from "lucide-react";
 
 // Generate mock partner data with Telegram-style usernames
@@ -115,7 +125,7 @@ const DetailedNetworkView = ({ levels, personalRecruits, currentUser }: {
           <div
             key={partner.id}
             onClick={() => setSelectedPartner(partner)}
-            className="bg-white border rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer"
+            className="bg-white border rounded-lg p-4 hover:shadow-lg transition-all duration-200 cursor-pointer hover:scale-105"
           >
             <div className="flex items-center space-x-3 mb-3">
               <div className="relative">
@@ -160,72 +170,149 @@ const DetailedNetworkView = ({ levels, personalRecruits, currentUser }: {
         </div>
       )}
 
-      {/* Partner Detail Modal */}
+      {/* Enhanced Partner Detail Modal */}
       {selectedPartner && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Профиль партнера</h3>
-              <button
-                onClick={() => setSelectedPartner(null)}
-                className="p-1 hover:bg-gray-100 rounded-full"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="flex items-center space-x-4 mb-6">
-              <div className="relative">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-white border-b p-6 flex items-center justify-between">
+              <div className="flex items-center space-x-4">
                 <img
                   src={selectedPartner.avatar}
                   alt={selectedPartner.name}
-                  className="w-16 h-16 rounded-full"
+                  className="w-16 h-16 rounded-full border-2 border-telegram"
                 />
-                {selectedPartner.isOnline && (
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full"></div>
-                )}
-              </div>
-              <div>
-                <h4 className="text-lg font-medium">{selectedPartner.name}</h4>
-                <p className="text-gray-500">{selectedPartner.username}</p>
-                <Badge className={`mt-1 ${selectedPartner.isOnline ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-                  {selectedPartner.isOnline ? 'Онлайн' : 'Не в сети'}
-                </Badge>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-xs text-gray-500 mb-1">Уровень</p>
-                  <p className="font-semibold">{selectedPartner.level}</p>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                    {selectedPartner.name}
+                    {selectedPartner.earnings > 1000 && <Crown className="w-5 h-5 ml-2 text-yellow-500" />}
+                  </h3>
+                  <p className="text-blue-600 font-medium">{selectedPartner.username}</p>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <Badge className="bg-telegram text-white text-xs">
+                      Уровень {selectedPartner.level}
+                    </Badge>
+                    {selectedPartner.isOnline && (
+                      <Badge className="bg-green-500 text-white text-xs animate-pulse">
+                        Онлайн
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-xs text-gray-500 mb-1">Комиссия</p>
-                  <p className="font-semibold">{selectedPartner.commission}%</p>
+              </div>
+              <button
+                onClick={() => setSelectedPartner(null)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Statistics Grid */}
+              <div className="grid md:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg">
+                  <DollarSign className="w-8 h-8 text-green-600 mb-2" />
+                  <div className="text-2xl font-bold text-green-600">${selectedPartner.earnings}</div>
+                  <div className="text-sm text-gray-600">Месячный доход</div>
+                </div>
+                
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg">
+                  <Users className="w-8 h-8 text-blue-600 mb-2" />
+                  <div className="text-2xl font-bold text-blue-600">{Math.floor(selectedPartner.earnings / 50)}</div>
+                  <div className="text-sm text-gray-600">Команда</div>
+                </div>
+                
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
+                  <Trophy className="w-8 h-8 text-purple-600 mb-2" />
+                  <div className="text-2xl font-bold text-purple-600">{selectedPartner.commission}%</div>
+                  <div className="text-sm text-gray-600">Комиссия</div>
+                </div>
+                
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-lg">
+                  <Star className="w-8 h-8 text-yellow-600 mb-2" />
+                  <div className="text-2xl font-bold text-yellow-600">{Math.floor(selectedPartner.earnings / 100)}</div>
+                  <div className="text-sm text-gray-600">Рейтинг</div>
                 </div>
               </div>
               
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-xs text-gray-500 mb-1">Месячный доход</p>
-                <p className="text-xl font-bold text-green-600">${selectedPartner.earnings}</p>
+              {/* Partner's Network Structure */}
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <h4 className="text-lg font-bold mb-4 flex items-center">
+                  <TreePine className="w-5 h-5 mr-2 text-telegram" />
+                  Структура партнера {selectedPartner.name}
+                </h4>
+                
+                {/* Mini Network Visualization */}
+                <div className="space-y-4">
+                  <div className="flex justify-center">
+                    <div className="bg-telegram text-white p-3 rounded-lg text-center">
+                      <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <User className="w-6 h-6" />
+                      </div>
+                      <div className="text-sm font-medium">{selectedPartner.name}</div>
+                      <div className="text-xs opacity-90">${selectedPartner.earnings}/мес</div>
+                    </div>
+                  </div>
+                  
+                  {/* Level 1 partners */}
+                  <div className="grid grid-cols-3 gap-2 max-w-md mx-auto">
+                    {Array.from({ length: 3 }, (_, i) => {
+                      const partnerName = generatePartnerName(1, i + 10);
+                      const earnings = Math.floor(Math.random() * 300) + 100;
+                      return (
+                        <div key={i} className="bg-white border p-2 rounded text-center">
+                          <img
+                            src={`https://ui-avatars.com/api/?name=${partnerName.replace(' ', '+')}&background=0088cc&color=fff&size=32`}
+                            alt={partnerName}
+                            className="w-8 h-8 rounded-full mx-auto mb-1"
+                          />
+                          <div className="text-xs font-medium">{partnerName.split(' ')[0]}</div>
+                          <div className="text-xs text-green-600">${earnings}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  <div className="text-center text-sm text-gray-500">
+                    И еще {Math.floor(selectedPartner.earnings / 50) - 3} партнеров в структуре
+                  </div>
+                </div>
               </div>
               
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-xs text-gray-500 mb-1">Дата присоединения</p>
-                <p className="font-medium">{selectedPartner.joinDate}</p>
+              {/* Achievements & Badges */}
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
+                <h4 className="text-lg font-bold mb-3 flex items-center">
+                  <Award className="w-5 h-5 mr-2 text-purple-600" />
+                  Достижения
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {selectedPartner.earnings > 500 && (
+                    <Badge className="bg-yellow-500 text-black">🥇 Топ-исполнитель</Badge>
+                  )}
+                  {selectedPartner.earnings > 1000 && (
+                    <Badge className="bg-purple-500 text-white">👑 Элитный партнер</Badge>
+                  )}
+                  {selectedPartner.isOnline && (
+                    <Badge className="bg-green-500 text-white">⚡ Активный</Badge>
+                  )}
+                  <Badge className="bg-blue-500 text-white">📈 Растущий</Badge>
+                  <Badge className="bg-orange-500 text-white">🎯 Целеустремленный</Badge>
+                </div>
               </div>
-            </div>
-
-            <div className="mt-6 flex space-x-3">
-              <Button className="flex-1 bg-telegram hover:bg-telegram/90">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Перейти в Telegram
-              </Button>
-              <Button variant="outline" className="flex-1">
-                <Users className="w-4 h-4 mr-2" />
-                Структура
-              </Button>
+              
+              {/* Contact & Actions */}
+              <div className="flex space-x-3">
+                <Button className="flex-1 bg-telegram hover:bg-telegram-dark">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Написать в Telegram
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  <Users className="w-4 h-4 mr-2" />
+                  Посмотреть команду
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -336,30 +423,16 @@ const getBaseCommissionRate = (dealSize: number, tariff: typeof builderTariffs[n
   return Math.min(50, baseRate); // Cap at 50%
 };
 
-// Order count multiplier (1.0 to 1.25 based on order count)
-const getOrderMultiplier = (orderCount: number): number => {
-  if (orderCount >= 50) return 1.25; // 25% bonus
-  if (orderCount >= 30) return 1.20; // 20% bonus
-  if (orderCount >= 20) return 1.15; // 15% bonus
-  if (orderCount >= 10) return 1.10; // 10% bonus
-  if (orderCount >= 5) return 1.05;  // 5% bonus
-  return 1.0; // No bonus
-};
-
-// Final commission rate with multiplier
-const getFinalCommissionRate = (dealSize: number, orderCount: number, tariff: typeof builderTariffs[number]): number => {
-  const baseRate = getBaseCommissionRate(dealSize, tariff);
-  const multiplier = getOrderMultiplier(orderCount);
-  return Math.min(50, Math.round(baseRate * multiplier)); // Cap at 50%
+// Simplified commission calculation for personal sales
+const getFinalCommissionRate = (dealSize: number, tariff: typeof builderTariffs[number]): number => {
+  return getBaseCommissionRate(dealSize, tariff);
 };
 
 export default function Partners() {
   const [dealSize, setDealSize] = useState([1600]);
   const [monthlySubscription, setMonthlySubscription] = useState([49]);
   const [totalClients, setTotalClients] = useState([5]);
-  const [activeClients, setActiveClients] = useState([3]);
-  const [orderCount, setOrderCount] = useState([1]);
-  const [personalRecruits, setPersonalRecruits] = useState([3]);
+  const [personalRecruits, setPersonalRecruits] = useState([3]); // For network calculations
   const [selectedPackage, setSelectedPackage] = useState(0);
   const [selectedTariff, setSelectedTariff] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -372,17 +445,12 @@ export default function Partners() {
   const currentTariff = builderTariffs[selectedTariff];
   const currentPackage = levelPackages[selectedPackage];
   const baseCommission = getBaseCommissionRate(dealSize[0], currentTariff);
-  const orderMultiplier = getOrderMultiplier(orderCount[0]);
-  const currentCommission = Math.min(50, Math.round(baseCommission * orderMultiplier));
-  const monthlyEarnings = activeClients[0] * (monthlySubscription[0] * 0.1);
+  const currentCommission = Math.min(50, Math.round(baseCommission));
+  const monthlyEarnings = totalClients[0] * monthlySubscription[0];
   const oneTimeEarning = (dealSize[0] * currentCommission) / 100;
   
-  // Calculate network earnings from personal recruits
-  const networkEarnings = showMlmFeatures ? partnerLevels.slice(0, currentPackage.levels).reduce((total, level, index) => {
-    const partnersAtLevel = Math.max(0, Math.floor(personalRecruits[0] * Math.pow(0.6, index)));
-    const earningsAtLevel = partnersAtLevel * dealSize[0] * (level.commission / 100);
-    return total + earningsAtLevel;
-  }, 0) : 0;
+  // Network earnings calculation moved to network structure section
+  const networkEarnings = 0;
   
   // Additional network bonus from tariff
   const networkBonus = showMlmFeatures ? networkEarnings * (currentTariff.networkBonus / 100) : 0;
@@ -487,7 +555,7 @@ export default function Partners() {
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
                     dealSize[0] >= 300 && dealSize[0] < 500 ? 'bg-red-200 ring-2 ring-red-400 scale-110' : 'bg-red-100'
                   }`}>
-                    <span className="text-red-700 font-bold">{Math.round(20 * orderMultiplier)}%</span>
+                    <span className="text-red-700 font-bold">20%</span>
                   </div>
                   <span className="text-gray-600">$300</span>
                 </div>
@@ -496,7 +564,7 @@ export default function Partners() {
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
                     dealSize[0] >= 500 && dealSize[0] < 1000 ? 'bg-orange-200 ring-2 ring-orange-400 scale-110' : 'bg-orange-100'
                   }`}>
-                    <span className="text-orange-700 font-bold">{Math.round(25 * orderMultiplier)}%</span>
+                    <span className="text-orange-700 font-bold">25%</span>
                   </div>
                   <span className="text-gray-600">$500</span>
                 </div>
@@ -505,7 +573,7 @@ export default function Partners() {
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
                     dealSize[0] >= 1000 && dealSize[0] < 1500 ? 'bg-yellow-200 ring-2 ring-yellow-400 scale-110' : 'bg-yellow-100'
                   }`}>
-                    <span className="text-yellow-700 font-bold">{Math.round(30 * orderMultiplier)}%</span>
+                    <span className="text-yellow-700 font-bold">30%</span>
                   </div>
                   <span className="text-gray-600">$1K</span>
                 </div>
@@ -514,7 +582,7 @@ export default function Partners() {
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
                     dealSize[0] >= 1500 && dealSize[0] < 2000 ? 'bg-blue-200 ring-2 ring-blue-400 scale-110' : 'bg-blue-100'
                   }`}>
-                    <span className="text-blue-700 font-bold">{Math.round(35 * orderMultiplier)}%</span>
+                    <span className="text-blue-700 font-bold">35%</span>
                   </div>
                   <span className="text-gray-600">$1.5K</span>
                 </div>
@@ -523,7 +591,7 @@ export default function Partners() {
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
                     dealSize[0] >= 2000 ? 'bg-green-200 ring-2 ring-green-400 scale-110' : 'bg-green-100'
                   }`}>
-                    <span className="text-green-700 font-bold">{Math.round(40 * orderMultiplier)}%</span>
+                    <span className="text-green-700 font-bold">40%</span>
                   </div>
                   <span className="text-gray-600">$2K+</span>
                 </div>
@@ -550,10 +618,10 @@ export default function Partners() {
               <div className="mt-4 p-3 bg-gray-50 rounded-lg text-center">
                 <div className="text-sm text-gray-600 mb-1">Текущая ставка</div>
                 <div className="text-xl font-bold text-telegram">
-                  {baseCommission}% × {orderMultiplier.toFixed(2)} = {currentCommission}%
+                  {baseCommission}% = {currentCommission}%
                 </div>
                 <div className="text-xs text-gray-500">
-                  Влияние количества ({orderCount[0]} заказ{orderCount[0] > 1 ? 'ов' : ''}) и качества (${dealSize[0]})
+                  Комиссия с размера сделки ${dealSize[0]}
                 </div>
               </div>
             </div>
@@ -783,7 +851,7 @@ export default function Partners() {
                   <Slider
                     value={dealSize}
                     onValueChange={setDealSize}
-                    max={3000}
+                    max={2000}
                     min={300}
                     step={100}
                     className="w-full"
@@ -793,7 +861,7 @@ export default function Partners() {
                     <span>$500</span>
                     <span>$1000</span>
                     <span>$1500</span>
-                    <span>$2000+</span>
+                    <span>$2000</span>
                   </div>
                   <div className="flex justify-between text-xs text-telegram font-medium mt-1">
                     <span>20%</span>
@@ -902,47 +970,7 @@ export default function Partners() {
                   </div>
                 </div>
 
-                {/* Active Clients */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <label className="text-sm font-medium text-gray-700">Активных клиентов</label>
-                    <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                      {activeClients[0]}
-                    </Badge>
-                  </div>
-                  <Slider
-                    value={activeClients}
-                    onValueChange={setActiveClients}
-                    max={totalClients[0]}
-                    min={0}
-                    step={1}
-                    className="w-full"
-                  />
-                  <div className="text-xs text-gray-500">
-                    Платят абонентскую плату
-                  </div>
-                </div>
 
-                {/* Order Count */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <label className="text-sm font-medium text-gray-700">Количество заказов</label>
-                    <Badge variant="secondary" className="bg-indigo-100 text-indigo-800">
-                      {orderCount[0]}
-                    </Badge>
-                  </div>
-                  <Slider
-                    value={orderCount}
-                    onValueChange={setOrderCount}
-                    max={100}
-                    min={1}
-                    step={1}
-                    className="w-full"
-                  />
-                  <div className="text-xs text-gray-500">
-                    Мультипликатор: ×{orderMultiplier.toFixed(2)}
-                  </div>
-                </div>
 
                 {showMlmFeatures && (
                   <div className="space-y-2">
@@ -969,15 +997,15 @@ export default function Partners() {
 
               <Separator />
 
-              {/* Commission Formula Display */}
+              {/* Commission Display */}
               <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-200 mb-4">
-                <h4 className="font-semibold text-gray-900 mb-2 text-center">Формула расчета</h4>
+                <h4 className="font-semibold text-gray-900 mb-2 text-center">Ваша комиссия</h4>
                 <div className="text-center space-y-2">
                   <div className="text-sm text-gray-700">
-                    {baseCommission}% × {orderMultiplier.toFixed(2)} = <span className="font-bold text-indigo-600">{currentCommission}%</span>
+                    <span className="font-bold text-indigo-600">{currentCommission}%</span> с каждой сделки
                   </div>
                   <div className="text-xs text-gray-500">
-                    Базовая ставка × Мультипликатор заказов = Итоговая комиссия
+                    Базовая ставка зависит от размера сделки
                   </div>
                 </div>
               </div>
@@ -994,9 +1022,9 @@ export default function Partners() {
                       <div className="text-xs text-green-600">${oneTimeEarning.toFixed(0)} за сделку</div>
                     </div>
                     <div>
-                      <div className="text-sm text-green-700">Месячный доход</div>
-                      <div className="text-xl font-bold text-green-600">${(oneTimeEarning * totalClients[0]).toFixed(0)}</div>
-                      <div className="text-xs text-green-600">{totalClients[0]} клиентов × ${dealSize[0]}</div>
+                      <div className="text-sm text-green-700">Абонентская плата</div>
+                      <div className="text-xl font-bold text-green-600">${monthlyEarnings.toFixed(0)}/мес</div>
+                      <div className="text-xs text-green-600">{totalClients[0]} клиентов × ${monthlySubscription[0]}</div>
                     </div>
                   </div>
                 </div>
@@ -1450,6 +1478,125 @@ export default function Partners() {
           </CardContent>
         </Card>
         )}
+
+        {/* Viral Promotion Mechanics */}
+        <Card className="bg-gradient-to-r from-purple-500 to-pink-500 text-white mb-8">
+          <CardContent className="py-8">
+            <div className="text-center max-w-4xl mx-auto">
+              <div className="flex justify-center items-center space-x-2 mb-4">
+                <Flame className="w-8 h-8 animate-pulse" />
+                <h2 className="text-3xl font-bold">
+                  Вирусная механика продвижения
+                </h2>
+                <Flame className="w-8 h-8 animate-pulse" />
+              </div>
+              <p className="text-xl opacity-90 mb-8">
+                Геймифицированная система привлечения клиентов в стиле популярных Telegram-приложений
+              </p>
+              
+              {/* Gaming-style features */}
+              <div className="grid md:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+                  <Coins className="w-8 h-8 mx-auto mb-2 text-yellow-300" />
+                  <h3 className="font-semibold mb-2">Система наград</h3>
+                  <p className="text-sm opacity-90">
+                    Зарабатывайте токены за каждого приглашенного друга
+                  </p>
+                  <div className="mt-2 text-yellow-300 font-bold">+50 токенов</div>
+                </div>
+                
+                <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+                  <Timer className="w-8 h-8 mx-auto mb-2 text-blue-300" />
+                  <h3 className="font-semibold mb-2">Ежедневные бонусы</h3>
+                  <p className="text-sm opacity-90">
+                    Получайте дополнительные награды за активность
+                  </p>
+                  <div className="mt-2 text-blue-300 font-bold">+25 токенов/день</div>
+                </div>
+                
+                <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+                  <Rocket className="w-8 h-8 mx-auto mb-2 text-green-300" />
+                  <h3 className="font-semibold mb-2">Стрики активности</h3>
+                  <p className="text-sm opacity-90">
+                    Мультипликатор за непрерывную активность
+                  </p>
+                  <div className="mt-2 text-green-300 font-bold">×2.5 бонус</div>
+                </div>
+                
+                <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+                  <Trophy className="w-8 h-8 mx-auto mb-2 text-orange-300" />
+                  <h3 className="font-semibold mb-2">Турниры</h3>
+                  <p className="text-sm opacity-90">
+                    Соревнуйтесь с другими партнерами за призы
+                  </p>
+                  <div className="mt-2 text-orange-300 font-bold">$1000 приз</div>
+                </div>
+              </div>
+              
+              {/* Social sharing features */}
+              <div className="bg-white/10 p-6 rounded-lg backdrop-blur-sm mb-8">
+                <h3 className="text-xl font-bold mb-4 flex items-center justify-center">
+                  <Share2 className="w-5 h-5 mr-2" />
+                  Вирусные механики распространения
+                </h3>
+                
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <MessageCircle className="w-6 h-6 mx-auto mb-2 text-telegram" />
+                    <h4 className="font-medium mb-1">Telegram Stories</h4>
+                    <p className="text-xs opacity-90">Автоматические истории о ваших достижениях</p>
+                  </div>
+                  
+                  <div className="text-center">
+                    <Heart className="w-6 h-6 mx-auto mb-2 text-pink-300" />
+                    <h4 className="font-medium mb-1">Челленджи</h4>
+                    <p className="text-xs opacity-90">Создавайте вызовы для друзей и получайте бонусы</p>
+                  </div>
+                  
+                  <div className="text-center">
+                    <Gamepad className="w-6 h-6 mx-auto mb-2 text-purple-300" />
+                    <h4 className="font-medium mb-1">Мини-игры</h4>
+                    <p className="text-xs opacity-90">Развлекайте аудиторию интерактивным контентом</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Achievement system */}
+              <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 p-4 rounded-lg mb-6">
+                <h3 className="text-lg font-bold mb-3 flex items-center justify-center">
+                  <Star className="w-5 h-5 mr-2 text-yellow-300" />
+                  Система достижений
+                </h3>
+                
+                <div className="flex justify-center space-x-4 flex-wrap">
+                  <Badge className="bg-yellow-500 text-black font-bold px-3 py-1">
+                    🥇 Первый миллион
+                  </Badge>
+                  <Badge className="bg-purple-500 text-white font-bold px-3 py-1">
+                    👑 Партнер года
+                  </Badge>
+                  <Badge className="bg-blue-500 text-white font-bold px-3 py-1">
+                    🚀 Суперзвезда
+                  </Badge>
+                  <Badge className="bg-green-500 text-white font-bold px-3 py-1">
+                    💎 Элитный наставник
+                  </Badge>
+                </div>
+              </div>
+              
+              <div className="flex justify-center space-x-4">
+                <Button className="bg-white text-purple-600 hover:bg-gray-100 font-semibold px-6">
+                  <Play className="w-4 h-4 mr-2" />
+                  Начать игру
+                </Button>
+                <Button variant="outline" className="border-white text-white hover:bg-white/10">
+                  <Download className="w-4 h-4 mr-2" />
+                  Скачать материалы
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* How to Start */}
         <Card className="bg-gradient-to-r from-telegram to-telegram-dark text-white">
