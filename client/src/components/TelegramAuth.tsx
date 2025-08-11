@@ -29,6 +29,12 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
   const [username, setUsername] = useState("");
   const { toast } = useToast();
 
+  // Clear any existing auth data when component mounts
+  useEffect(() => {
+    localStorage.removeItem('telegram_auth');
+    localStorage.removeItem('onboarding_completed');
+  }, []);
+
   useEffect(() => {
     // Load Telegram Login Widget script
     const script = document.createElement('script');

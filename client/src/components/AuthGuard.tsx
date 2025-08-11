@@ -14,6 +14,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
       const auth = localStorage.getItem('telegram_auth');
       if (!auth) {
         setIsAuthenticated(false);
+        setUser(null);
         return;
       }
 
@@ -25,7 +26,9 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
         if (authAge > maxAge) {
           localStorage.removeItem('telegram_auth');
+          localStorage.removeItem('onboarding_completed');
           setIsAuthenticated(false);
+          setUser(null);
           return;
         }
 
@@ -34,14 +37,28 @@ export function AuthGuard({ children }: AuthGuardProps) {
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
+          setUser(null);
         }
       } catch (error) {
+        console.error('Auth check error:', error);
         localStorage.removeItem('telegram_auth');
+        localStorage.removeItem('onboarding_completed');
         setIsAuthenticated(false);
+        setUser(null);
       }
     };
 
     checkAuth();
+    
+    // Also listen for storage changes (in case user logs out in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'telegram_auth') {
+        checkAuth();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const handleAuth = (authenticatedUser: any) => {
