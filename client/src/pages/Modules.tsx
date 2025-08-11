@@ -244,9 +244,36 @@ export default function Modules() {
   });
 
   const filteredModules = modules?.filter(module => {
-    const matchesSearch = (module.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                         (module.description?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+    if (!searchTerm.trim()) {
+      const matchesCategory = selectedCategory === "ВСЕ МОДУЛИ" || module.category === selectedCategory;
+      return matchesCategory;
+    }
+
+    const searchLower = searchTerm.toLowerCase();
+    
+    // Поиск в названии и описании
+    const matchesNameOrDescription = 
+      (module.name?.toLowerCase() || '').includes(searchLower) ||
+      (module.description?.toLowerCase() || '').includes(searchLower);
+    
+    // Поиск в бизнес-преимуществах
+    const matchesBenefits = (module.benefits?.toLowerCase() || '').includes(searchLower);
+    
+    // Поиск в ключевых возможностях
+    let matchesFeatures = false;
+    try {
+      const keyFeatures = parseKeyFeatures(module.keyFeatures);
+      matchesFeatures = keyFeatures.some(feature => 
+        typeof feature === 'string' && feature.toLowerCase().includes(searchLower)
+      );
+    } catch {
+      // Если не удается распарсить, ищем в исходной строке
+      matchesFeatures = (module.keyFeatures?.toLowerCase() || '').includes(searchLower);
+    }
+    
+    const matchesSearch = matchesNameOrDescription || matchesBenefits || matchesFeatures;
     const matchesCategory = selectedCategory === "ВСЕ МОДУЛИ" || module.category === selectedCategory;
+    
     return matchesSearch && matchesCategory;
   }) || [];
 
@@ -284,7 +311,7 @@ export default function Modules() {
             <div className="relative flex-1 w-full lg:max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Поиск модулей..."
+                placeholder="Поиск по названию, описанию, возможностям..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
