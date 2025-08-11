@@ -17,7 +17,7 @@ export default function Login() {
 
   const loginMutation = useMutation({
     mutationFn: async (username: string) => {
-      const response = await apiRequest("POST", "/api/auth/telegram", { username });
+      const response = await apiRequest("POST", "/api/auth/simple", { username });
       return response.json();
     },
     onSuccess: (data) => {
@@ -68,41 +68,44 @@ export default function Login() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          <Button
-            onClick={() => {
-              // Имитируем вход через Telegram без проверки ограниченного списка пользователей
-              const simulatedUser = {
-                id: Date.now(),
-                first_name: "User",
-                username: `user_${Date.now()}`,
-                auth_date: Math.floor(Date.now() / 1000),
-                hash: "simulated_hash"
-              };
-              
-              localStorage.setItem('telegram_auth', JSON.stringify({
-                user: {
-                  id: simulatedUser.id.toString(),
-                  username: simulatedUser.username,
-                  telegramUsername: `@${simulatedUser.username}`,
-                  isAuthorized: true
-                },
-                timestamp: Date.now()
-              }));
-              
-              toast({
-                title: "Вход выполнен",
-                description: "Добро пожаловать в справочник!",
-              });
-              
-              setLocation("/");
-            }}
-            className="w-full bg-telegram hover:bg-telegram-dark"
-          >
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Войти через Telegram
-          </Button>
+          <div className="text-center space-y-4">
+            <p className="text-sm text-gray-600">
+              Быстрый вход для демонстрации:
+            </p>
+            <Button
+              onClick={() => {
+                const username = `demo_user_${Date.now()}`;
+                loginMutation.mutate(username);
+              }}
+              className="w-full bg-telegram hover:bg-telegram-dark"
+              disabled={loginMutation.isPending}
+            >
+              {loginMutation.isPending ? (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Вход...</span>
+                </div>
+              ) : (
+                <>
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Демо вход
+                </>
+              )}
+            </Button>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-muted-foreground">
+                  или введите свой username
+                </span>
+              </div>
+            </div>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4 hidden">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Имя пользователя Telegram</Label>
               <Input
