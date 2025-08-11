@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react";
 import { TelegramAuth } from "./TelegramAuth";
 
+// Список разрешенных Telegram ID (дублируем из TelegramAuth для проверки)
+const ALLOWED_USER_IDS = [
+  "7418405560",
+  "5173994544", 
+  "216463929",
+  "6209116360",
+  "893850026",
+  "1577419391",
+  "5201551014"
+];
+
 interface AuthGuardProps {
   children: React.ReactNode;
 }
@@ -37,9 +48,26 @@ export function AuthGuard({ children }: AuthGuardProps) {
         }
 
         if (authData.user && authData.user.isAuthorized) {
-          console.log('Пользователь авторизован:', authData.user);
-          setUser(authData.user);
-          setIsAuthenticated(true);
+          // Дополнительная проверка whitelist
+          const userId = authData.user.id;
+          const isInWhitelist = ALLOWED_USER_IDS.includes(userId);
+          
+          // Проверяем режим preview для разработки
+          const urlParams = new URLSearchParams(window.location.search);
+          const isPreview = urlParams.get('preview') === 'true';
+          const isDevelopment = window.location.hostname.includes('replit') || 
+                               window.location.hostname === 'localhost' ||
+                               import.meta.env.DEV;
+          
+          if (isInWhitelist || (isDevelopment && isPreview)) {
+            console.log('Пользователь авторизован:', authData.user);
+            setUser(authData.user);
+            setIsAuthenticated(true);
+          } else {
+            console.log(`Пользователь ${userId} не в whitelist`);
+            localStorage.removeItem('telegram_auth');
+            setIsAuthenticated(false);
+          }
         } else {
           console.log('Пользователь не авторизован');
           setIsAuthenticated(false);

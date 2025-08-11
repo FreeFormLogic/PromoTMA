@@ -48,25 +48,35 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
                          window.location.hostname.includes('127.0.0.1') ||
                          import.meta.env.DEV;
 
-    // В среде разработки создаем тестового пользователя
-    if (isDevelopment) {
-      const testUser = {
-        id: ALLOWED_USER_IDS[0].toString(),
-        username: 'dev_user',
-        telegramUsername: '@dev_user',
-        firstName: 'Dev',
-        lastName: 'User',
-        isAuthorized: true,
-      };
+    // Проверяем, запущено ли приложение в Telegram ИЛИ в режиме разработки
+    if (isDevelopment && (!window.Telegram || !window.Telegram.WebApp)) {
+      // В режиме разработки без Telegram создаем тестового пользователя ТОЛЬКО для preview
+      const urlParams = new URLSearchParams(window.location.search);
+      const isPreview = urlParams.get('preview') === 'true';
+      
+      if (isPreview) {
+        const testUser = {
+          id: ALLOWED_USER_IDS[0].toString(),
+          username: 'dev_user',
+          telegramUsername: '@dev_user',
+          firstName: 'Dev',
+          lastName: 'User',
+          isAuthorized: true,
+        };
 
-      localStorage.setItem('telegram_auth', JSON.stringify({
-        user: testUser,
-        timestamp: Date.now()
-      }));
+        localStorage.setItem('telegram_auth', JSON.stringify({
+          user: testUser,
+          timestamp: Date.now()
+        }));
 
-      console.log('Режим разработки - пользователь авторизован:', testUser);
-      onAuth(testUser);
-      return;
+        console.log('Режим разработки (preview) - пользователь авторизован:', testUser);
+        onAuth(testUser);
+        return;
+      } else {
+        setError("Приложение должно быть запущено через Telegram");
+        setIsChecking(false);
+        return;
+      }
     }
 
     // Проверяем, запущено ли приложение в Telegram
