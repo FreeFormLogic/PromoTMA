@@ -17,7 +17,8 @@ import {
   Truck, Repeat, TestTube2, Mail, Users2, MousePointerClick,
   Link, Eye, Wifi, Zap, Clock, Puzzle, Sword, CheckSquare,
   FileText, MessageSquare, UserCheck, Edit, Video, Headphones,
-  Briefcase, Database, Webhook, Car, Wallet, Shield, X
+  Briefcase, Database, Webhook, Car, Wallet, Shield, X, Bell,
+  CalendarCheck, Smartphone
 } from "lucide-react";
 import type { Module } from "@shared/schema";
 
@@ -29,7 +30,8 @@ const iconMap: { [key: string]: any } = {
   Trophy, Eye, GraduationCap, BookOpen, Bot, Globe, Settings, Building2,
   Component, Search, Filter, ArrowRight, DollarSign, UserPlus, Wifi, Zap,
   Clock, Puzzle, Sword, CheckSquare, FileText, MessageSquare, UserCheck,
-  Edit, Video, Headphones, Briefcase, Database, Webhook, Car, Wallet, Shield
+  Edit, Video, Headphones, Briefcase, Database, Webhook, Car, Wallet, Shield,
+  Bell, CalendarCheck, Smartphone
 };
 
 // Список всех доступных категорий
