@@ -108,40 +108,7 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
     }
   };
 
-  const startTelegramAuth = async () => {
-    setIsLoading(true);
-    
-    try {
-      // Check if widget is available
-      const widgetContainer = document.getElementById('telegram-login-widget');
-      const hasWidget = widgetContainer && widgetContainer.children.length > 0;
-      
-      if (hasWidget) {
-        toast({
-          title: "Используйте Telegram Widget",
-          description: "Нажмите кнопку 'Log in via Telegram' выше для быстрой авторизации",
-        });
-        setIsLoading(false);
-        return;
-      }
 
-      // Show OAuth setup instruction
-      toast({
-        title: "Настройте Telegram OAuth",
-        description: "Требуется настройка Login Widget в @BotFather для работы авторизации",
-        variant: "default",
-      });
-      
-      setIsLoading(false);
-    } catch (error) {
-      setIsLoading(false);
-      toast({
-        title: "Ошибка",
-        description: "Не удалось инициализировать авторизацию",
-        variant: "destructive",
-      });
-    }
-  };
 
   const checkAuthStatus = async () => {
     toast({
@@ -179,28 +146,11 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
               className="w-full flex justify-center"
             />
             
-            <Button 
-              onClick={startTelegramAuth}
-              disabled={isLoading}
-              className="w-full bg-telegram hover:bg-telegram/90"
-            >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Подключение к Telegram...
-                </>
-              ) : (
-                <>
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Войти через Telegram
-                </>
-              )}
-            </Button>
+
           </div>
           
           <div className="mt-6 text-center text-sm text-gray-600">
-            <p>Авторизация только через официальный Telegram OAuth</p>
-            <p className="mt-2 text-xs">Требуется настройка Login Widget для вашего бота</p>
+            <p>Нажмите кнопку выше для авторизации</p>
           </div>
         </CardContent>
       </Card>
