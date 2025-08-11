@@ -54,16 +54,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Auth Header */}
-      <div className="bg-telegram text-white py-2 px-4 text-sm">
-        <div className="container mx-auto flex items-center justify-between">
-          <span className="flex items-center space-x-2">
-            <Shield className="w-4 h-4" />
-            <span>Авторизован: @balilegend</span>
-          </span>
-          <span className="text-xs">Telegram Mini Apps Directory</span>
-        </div>
-      </div>
+      {/* Убрали строку авторизации */}
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Hero Section */}
         <section className="mb-12">
@@ -300,7 +291,7 @@ export default function Home() {
               <div className="space-y-2 text-gray-400 text-sm">
                 <div className="flex items-center">
                   <MessageSquare className="w-4 h-4 mr-2" />
-                  @balilegend
+                  Telegram Mini Apps
                 </div>
                 <div className="flex items-center">
                   <Mail className="w-4 h-4 mr-2" />
@@ -323,7 +314,7 @@ export default function Home() {
           <Separator className="my-8 bg-gray-800" />
           
           <div className="text-center text-gray-400 text-sm">
-            © 2025 Telegram Mini Apps. Разработка и консультации: @balilegend
+            © 2025 Telegram Mini Apps Directory
           </div>
         </div>
       </footer>

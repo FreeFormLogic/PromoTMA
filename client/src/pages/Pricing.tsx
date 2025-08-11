@@ -223,7 +223,7 @@ export default function Pricing() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <Button className="bg-success hover:bg-success/90 text-white px-8 py-3 font-semibold">
               <MessageSquare className="w-4 h-4 mr-2" />
-              Обсудить проект с @balilegend
+              Обсудить проект
             </Button>
             <div className="text-blue-100 text-sm">
               Консультация бесплатна • Прототип за 1 день

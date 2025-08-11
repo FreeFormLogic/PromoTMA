@@ -18,10 +18,7 @@ export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleLogout = () => {
-    localStorage.removeItem('telegram_auth');
-    window.location.reload();
-  };
+  // Убрали функцию logout - нет авторизации
 
   const handlePartnersClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -47,7 +44,7 @@ export function Navigation() {
           <nav className="flex items-center justify-between h-16">
             <Link href="/">
               <div className="flex items-center space-x-3 cursor-pointer">
-                <MessageSquare className="text-telegram text-2xl" />
+                <MessageSquare className="text-green-500 text-2xl" />
                 <h1 className="text-xl font-semibold text-gray-900">Mini Apps Directory</h1>
               </div>
             </Link>
@@ -86,15 +83,7 @@ export function Navigation() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleLogout}
-                className="hidden md:flex"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Выйти
-              </Button>
+              {/* Убрали кнопку "Выйти" - нет авторизации */}
             </div>
           </nav>
         </div>
@@ -105,7 +94,7 @@ export function Navigation() {
         <Button 
           variant="default" 
           size="lg"
-          className="bg-telegram hover:bg-telegram/90 text-white rounded-full w-14 h-14 shadow-lg"
+          className="bg-green-500 hover:bg-green-600 text-white rounded-full w-14 h-14 shadow-lg"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -154,17 +143,7 @@ export function Navigation() {
               );
             })}
             
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                handleLogout();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full justify-start mt-4"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Выйти
-            </Button>
+            {/* Убрали кнопку "Выйти" из мобильного меню */}
           </div>
         </div>
       )}
