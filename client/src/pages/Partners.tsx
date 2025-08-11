@@ -378,28 +378,28 @@ const levelPackages = [
     name: "Базовый", 
     levels: 3, 
     price: 0, 
-    savings: 0,
+    maxEarnings: 1500,
     description: "Доступ к 3 уровням партнерской сети"
   },
   { 
     name: "Расширенный", 
     levels: 5, 
     price: 299, 
-    savings: 500,
+    maxEarnings: 5000,
     description: "Доступ к 5 уровням + бонусы"
   },
   { 
     name: "Премиум", 
     levels: 6, 
     price: 999, 
-    savings: 2000,
+    maxEarnings: 15000,
     description: "Доступ к 6 уровням + VIP поддержка"
   },
   { 
     name: "Ультра", 
     levels: 7, 
     price: 2999, 
-    savings: 5000,
+    maxEarnings: 50000,
     description: "Полный доступ + эксклюзивные возможности"
   }
 ];
@@ -437,7 +437,7 @@ export default function Partners() {
   const [selectedTariff, setSelectedTariff] = useState(0);
   const [copied, setCopied] = useState(false);
   const [expandedLevel, setExpandedLevel] = useState<number | null>(null);
-  const [showMlmFeatures, setShowMlmFeatures] = useState(true);
+  const [showMlmFeatures, setShowMlmFeatures] = useState(false);
   const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null);
   const [showHelpFor, setShowHelpFor] = useState<string | null>(null);
   const [showDetailedNetwork, setShowDetailedNetwork] = useState(false);
@@ -771,10 +771,10 @@ export default function Partners() {
                     </div>
                   )}
                   
-                  {pkg.savings > 0 && (
+                  {pkg.maxEarnings > 1500 && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-red-500 text-white text-xs">
-                        Экономия ${pkg.savings}
+                      <Badge className="bg-green-500 text-white text-xs">
+                        До ${pkg.maxEarnings}/мес
                       </Badge>
                     </div>
                   )}
@@ -1479,104 +1479,104 @@ export default function Partners() {
         </Card>
         )}
 
-        {/* Viral Promotion Mechanics */}
+        {/* Viral Partner Promotion System */}
         <Card className="bg-gradient-to-r from-purple-500 to-pink-500 text-white mb-8">
           <CardContent className="py-8">
             <div className="text-center max-w-4xl mx-auto">
               <div className="flex justify-center items-center space-x-2 mb-4">
                 <Flame className="w-8 h-8 animate-pulse" />
                 <h2 className="text-3xl font-bold">
-                  Вирусная механика продвижения
+                  Вирусная партнерская система
                 </h2>
                 <Flame className="w-8 h-8 animate-pulse" />
               </div>
               <p className="text-xl opacity-90 mb-8">
-                Геймифицированная система привлечения клиентов в стиле популярных Telegram-приложений
+                Мощные инструменты для привлечения партнеров и роста доходов в экосистеме Telegram Mini Apps
               </p>
               
-              {/* Gaming-style features */}
+              {/* Partner referral features */}
               <div className="grid md:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
-                  <Coins className="w-8 h-8 mx-auto mb-2 text-yellow-300" />
-                  <h3 className="font-semibold mb-2">Система наград</h3>
+                  <DollarSign className="w-8 h-8 mx-auto mb-2 text-yellow-300" />
+                  <h3 className="font-semibold mb-2">Бонус за реферала</h3>
                   <p className="text-sm opacity-90">
-                    Зарабатывайте токены за каждого приглашенного друга
+                    Мгновенная выплата за каждого привлеченного партнера
                   </p>
-                  <div className="mt-2 text-yellow-300 font-bold">+50 токенов</div>
+                  <div className="mt-2 text-yellow-300 font-bold">+$50 бонус</div>
                 </div>
                 
                 <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
                   <Timer className="w-8 h-8 mx-auto mb-2 text-blue-300" />
-                  <h3 className="font-semibold mb-2">Ежедневные бонусы</h3>
+                  <h3 className="font-semibold mb-2">Ежедневные выплаты</h3>
                   <p className="text-sm opacity-90">
-                    Получайте дополнительные награды за активность
+                    Получайте пассивный доход от активности вашей команды
                   </p>
-                  <div className="mt-2 text-blue-300 font-bold">+25 токенов/день</div>
+                  <div className="mt-2 text-blue-300 font-bold">+$25/день</div>
                 </div>
                 
                 <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
                   <Rocket className="w-8 h-8 mx-auto mb-2 text-green-300" />
-                  <h3 className="font-semibold mb-2">Стрики активности</h3>
+                  <h3 className="font-semibold mb-2">Мультипликатор команды</h3>
                   <p className="text-sm opacity-90">
-                    Мультипликатор за непрерывную активность
+                    Увеличение комиссии за рост партнерской структуры
                   </p>
-                  <div className="mt-2 text-green-300 font-bold">×2.5 бонус</div>
+                  <div className="mt-2 text-green-300 font-bold">×2.5 комиссия</div>
                 </div>
                 
                 <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
                   <Trophy className="w-8 h-8 mx-auto mb-2 text-orange-300" />
-                  <h3 className="font-semibold mb-2">Турниры</h3>
+                  <h3 className="font-semibold mb-2">Партнерские турниры</h3>
                   <p className="text-sm opacity-90">
-                    Соревнуйтесь с другими партнерами за призы
+                    Соревнуйтесь за лидерство и получайте крупные призы
                   </p>
                   <div className="mt-2 text-orange-300 font-bold">$1000 приз</div>
                 </div>
               </div>
               
-              {/* Social sharing features */}
+              {/* Telegram-specific sharing features */}
               <div className="bg-white/10 p-6 rounded-lg backdrop-blur-sm mb-8">
                 <h3 className="text-xl font-bold mb-4 flex items-center justify-center">
                   <Share2 className="w-5 h-5 mr-2" />
-                  Вирусные механики распространения
+                  Инструменты продвижения в Telegram
                 </h3>
                 
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="text-center">
                     <MessageCircle className="w-6 h-6 mx-auto mb-2 text-telegram" />
                     <h4 className="font-medium mb-1">Telegram Stories</h4>
-                    <p className="text-xs opacity-90">Автоматические истории о ваших достижениях</p>
+                    <p className="text-xs opacity-90">Автопосты о ваших успехах и доходах</p>
                   </div>
                   
                   <div className="text-center">
-                    <Heart className="w-6 h-6 mx-auto mb-2 text-pink-300" />
-                    <h4 className="font-medium mb-1">Челленджи</h4>
-                    <p className="text-xs opacity-90">Создавайте вызовы для друзей и получайте бонусы</p>
+                    <Users className="w-6 h-6 mx-auto mb-2 text-pink-300" />
+                    <h4 className="font-medium mb-1">Реферальные челленджи</h4>
+                    <p className="text-xs opacity-90">Мотивируйте команду участвовать в вызовах</p>
                   </div>
                   
                   <div className="text-center">
-                    <Gamepad className="w-6 h-6 mx-auto mb-2 text-purple-300" />
-                    <h4 className="font-medium mb-1">Мини-игры</h4>
-                    <p className="text-xs opacity-90">Развлекайте аудиторию интерактивным контентом</p>
+                    <Zap className="w-6 h-6 mx-auto mb-2 text-purple-300" />
+                    <h4 className="font-medium mb-1">Mini App интеграция</h4>
+                    <p className="text-xs opacity-90">Встроенные инструменты прямо в приложениях</p>
                   </div>
                 </div>
               </div>
               
-              {/* Achievement system */}
+              {/* Partner achievement system */}
               <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 p-4 rounded-lg mb-6">
                 <h3 className="text-lg font-bold mb-3 flex items-center justify-center">
                   <Star className="w-5 h-5 mr-2 text-yellow-300" />
-                  Система достижений
+                  Партнерские достижения
                 </h3>
                 
                 <div className="flex justify-center space-x-4 flex-wrap">
                   <Badge className="bg-yellow-500 text-black font-bold px-3 py-1">
-                    🥇 Первый миллион
+                    🥇 Первые $10k
                   </Badge>
                   <Badge className="bg-purple-500 text-white font-bold px-3 py-1">
-                    👑 Партнер года
+                    👑 Топ-партнер месяца
                   </Badge>
                   <Badge className="bg-blue-500 text-white font-bold px-3 py-1">
-                    🚀 Суперзвезда
+                    🚀 Команда 100+ партнеров
                   </Badge>
                   <Badge className="bg-green-500 text-white font-bold px-3 py-1">
                     💎 Элитный наставник
@@ -1586,12 +1586,12 @@ export default function Partners() {
               
               <div className="flex justify-center space-x-4">
                 <Button className="bg-white text-purple-600 hover:bg-gray-100 font-semibold px-6">
-                  <Play className="w-4 h-4 mr-2" />
-                  Начать игру
+                  <Users className="w-4 h-4 mr-2" />
+                  Начать привлекать партнеров
                 </Button>
                 <Button variant="outline" className="border-white text-white hover:bg-white/10">
                   <Download className="w-4 h-4 mr-2" />
-                  Скачать материалы
+                  Скачать промо-материалы
                 </Button>
               </div>
             </div>
