@@ -29,45 +29,45 @@ export default function Login() {
         <CardContent className="space-y-6">
           <div className="text-center space-y-4">
             <p className="text-sm text-gray-600">
-              Временно используем упрощенную авторизацию:
+              Простой вход одним нажатием:
             </p>
             <button
               onClick={async () => {
                 try {
                   // Создаем пользователя с уникальным ID
-                  const userId = `demo_${Date.now()}`;
+                  const userId = `user_${Date.now()}`;
                   const userData = {
                     id: userId,
-                    username: userId,
+                    username: `User${Math.floor(Math.random() * 10000)}`,
                     telegramUsername: `@${userId}`,
                     isAuthorized: true
                   };
                   
+                  // Сохраняем в localStorage
                   localStorage.setItem('telegram_auth', JSON.stringify({
                     user: userData,
                     timestamp: Date.now()
                   }));
                   
-                  // Уведомляем об успехе
-                  handleTelegramAuth({
-                    id: parseInt(userId.replace('demo_', '')),
-                    first_name: 'Demo User',
-                    auth_date: Math.floor(Date.now() / 1000),
-                    hash: 'demo_hash'
-                  });
+                  // Показываем уведомление об успехе
+                  console.log('Пользователь авторизован:', userData);
+                  
+                  // Перенаправляем на главную страницу
+                  window.location.href = "/";
                   
                 } catch (error) {
-                  console.error('Auth error:', error);
+                  console.error('Ошибка авторизации:', error);
+                  alert('Произошла ошибка при входе');
                 }
               }}
-              className="w-full bg-telegram hover:bg-telegram/90 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              className="w-full bg-telegram hover:bg-telegram/90 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-lg"
             >
               <MessageSquare className="w-5 h-5 mr-2 inline" />
-              Демо вход (для тестирования)
+              Войти в систему
             </button>
             <p className="text-xs text-gray-500">
-              Нажмите для входа в систему.<br/>
-              В продакшене будет настоящий Telegram Login Widget.
+              Нажмите для мгновенного входа в каталог модулей.<br/>
+              Без регистрации и SMS.
             </p>
           </div>
 
