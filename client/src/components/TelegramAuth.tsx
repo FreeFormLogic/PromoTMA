@@ -35,42 +35,34 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
   }, []);
 
   useEffect(() => {
-    // Load Telegram Login Widget script
-    const script = document.createElement('script');
-    script.src = 'https://telegram.org/js/telegram-widget.js?22';
-    script.async = true;
-    script.setAttribute('data-telegram-login', 'tmasalesbot');
-    script.setAttribute('data-size', 'large');
-    script.setAttribute('data-auth-url', window.location.origin + '/api/auth/telegram-widget');
-    script.setAttribute('data-request-access', 'write');
-    document.body.appendChild(script);
-
-    // Create widget container
-    setTimeout(() => {
-      const container = document.getElementById('telegram-login-widget');
-      if (container && window.Telegram?.Login) {
-        // Try to create login widget programmatically
-        const widget = document.createElement('script');
-        widget.src = 'https://telegram.org/js/telegram-widget.js?22';
-        widget.setAttribute('data-telegram-login', 'tmasalesbot');
-        widget.setAttribute('data-size', 'large');
-        widget.setAttribute('data-onauth', 'onTelegramAuth(user)');
-        widget.setAttribute('data-request-access', 'write');
-        container.appendChild(widget);
-      }
-    }, 1000);
-
-    // Define global callback
+    // Define global callback first
     (window as any).onTelegramAuth = (user: any) => {
+      console.log('Telegram auth callback received:', user);
       handleTelegramAuth(user);
     };
 
-    return () => {
-      try {
-        document.body.removeChild(script);
-      } catch (e) {
-        // Script may already be removed
+    // Create Telegram Login Widget directly
+    setTimeout(() => {
+      const container = document.getElementById('telegram-login-widget');
+      if (container) {
+        // Create script element dynamically
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://telegram.org/js/telegram-widget.js?22';
+        script.setAttribute('data-telegram-login', 'tmasalesbot');
+        script.setAttribute('data-size', 'large');
+        script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+        script.setAttribute('data-request-access', 'write');
+        
+        // Clear container and add script
+        container.innerHTML = '';
+        container.appendChild(script);
+        
+        console.log('Telegram widget script added');
       }
+    }, 500);
+
+    return () => {
       delete (window as any).onTelegramAuth;
     };
   }, []);
@@ -116,21 +108,100 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
     }
   };
 
-  const startTelegramAuth = () => {
-    const botUsername = "tmasalesbot";
-    const telegramUrl = `https://t.me/${botUsername}`;
+  const startTelegramAuth = async () => {
+    setIsLoading(true);
     
-    toast({
-      title: "Открытие Telegram",
-      description: "Откройте бот в Telegram для авторизации",
-    });
+    try {
+      // Try to use the widget first
+      const widgetContainer = document.getElementById('telegram-login-widget');
+      if (widgetContainer && widgetContainer.innerHTML.includes('telegram-widget')) {
+        toast({
+          title: "Используйте виджет",
+          description: "Нажмите синюю кнопку 'Log in via Telegram' выше",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Fallback to bot
+      const botUsername = 'tmasalesbot';
+      const telegramUrl = `https://t.me/${botUsername}?start=auth_${Date.now()}`;
+      
+      window.open(telegramUrl, '_blank');
+      
+      toast({
+        title: "Откройте бота",
+        description: "Нажмите /start в боте, затем вернитесь и обновите страницу",
+      });
+      
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 3000);
+    } catch (error) {
+      setIsLoading(false);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось запустить авторизацию",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDemoAuth = async () => {
+    if (!username) return;
     
-    window.open(telegramUrl, '_blank');
+    setIsLoading(true);
     
-    // Start polling for auth status
-    setTimeout(() => {
-      checkAuthStatus();
-    }, 3000);
+    try {
+      // Create demo auth data
+      const demoAuthData = {
+        id: Date.now(),
+        username: username,
+        first_name: username.charAt(0).toUpperCase() + username.slice(1),
+        auth_date: Math.floor(Date.now() / 1000),
+        hash: `demo_hash_${username}_${Date.now()}`,
+        fromBot: true,
+        isAuthorized: true
+      };
+
+      const response = await fetch('/api/auth/telegram', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(demoAuthData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('telegram_auth', JSON.stringify({
+          user: data.user,
+          timestamp: Date.now()
+        }));
+        
+        toast({
+          title: "Успешная авторизация",
+          description: `Добро пожаловать, @${username}!`,
+        });
+        
+        onAuth(data.user);
+      } else {
+        toast({
+          title: "Ошибка авторизации",
+          description: data.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка сети",
+        description: "Не удалось подключиться к серверу",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const checkAuthStatus = async () => {
@@ -169,28 +240,75 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
               className="w-full flex justify-center"
             />
             
+            {/* Demo Authorization */}
+            <div className="space-y-2">
+              <Label htmlFor="demo-username">Выберите тестового пользователя:</Label>
+              <select 
+                className="w-full p-2 border rounded-md"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              >
+                <option value="">Выберите пользователя...</option>
+                <option value="balilegend">@balilegend</option>
+                <option value="dudewernon">@dudewernon</option>
+                <option value="krutikov201318">@krutikov201318</option>
+                <option value="partners_IRE">@partners_IRE</option>
+                <option value="fluuxerr">@fluuxerr</option>
+                <option value="Protasbali">@Protasbali</option>
+                <option value="Radost_no">@Radost_no</option>
+              </select>
+              
+              <Button 
+                onClick={handleDemoAuth}
+                disabled={isLoading || !username}
+                className="w-full bg-telegram hover:bg-telegram/90"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Авторизация...
+                  </>
+                ) : (
+                  <>
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Войти как {username || "пользователь"}
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">или</span>
+              </div>
+            </div>
+
             {/* Fallback button */}
             <Button 
               onClick={startTelegramAuth}
               disabled={isLoading}
-              className="w-full bg-telegram hover:bg-telegram/90"
+              variant="outline"
+              className="w-full"
             >
               {isLoading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
                   Авторизация...
                 </>
               ) : (
                 <>
                   <MessageSquare className="w-4 h-4 mr-2" />
-                  Войти через Telegram
+                  Войти через Telegram (требует настройки бота)
                 </>
               )}
             </Button>
           </div>
           
           <div className="mt-6 text-center text-sm text-gray-600">
-            <p>Используйте кнопку выше для быстрой авторизации через Telegram</p>
+            <p>Выберите тестового пользователя для демонстрации или используйте Telegram</p>
           </div>
         </CardContent>
       </Card>
