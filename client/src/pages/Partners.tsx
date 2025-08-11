@@ -87,10 +87,53 @@ export default function Partners() {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Партнерская программа
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Зарабатывайте до 50% с каждого приведенного клиента и 10% от всех абонентских платежей. 
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
+            Зарабатывайте от 20% до 50% с каждого приведенного клиента (процент растет плавно кратно 5%) и 10% от всех абонентских платежей. 
             Многоуровневая система вознаграждений с 5 уровнями глубины.
           </p>
+          
+          {/* Commission progression visual */}
+          <div className="flex justify-center">
+            <div className="bg-white rounded-xl p-4 shadow-lg border max-w-md">
+              <h3 className="text-center font-semibold text-gray-900 mb-3">Прогрессия комиссий</h3>
+              <div className="flex justify-between items-center text-sm">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-red-700 font-bold">20%</span>
+                  </div>
+                  <span className="text-gray-600">$300</span>
+                </div>
+                <div className="flex-1 h-0.5 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2"></div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-orange-700 font-bold">30%</span>
+                  </div>
+                  <span className="text-gray-600">$500</span>
+                </div>
+                <div className="flex-1 h-0.5 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2"></div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-yellow-700 font-bold">35%</span>
+                  </div>
+                  <span className="text-gray-600">$1K</span>
+                </div>
+                <div className="flex-1 h-0.5 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2"></div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-blue-700 font-bold">40%</span>
+                  </div>
+                  <span className="text-gray-600">$1.5K</span>
+                </div>
+                <div className="flex-1 h-0.5 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2"></div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-2">
+                    <span className="text-green-700 font-bold">50%</span>
+                  </div>
+                  <span className="text-gray-600">$2K+</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6 mb-8">
@@ -121,8 +164,18 @@ export default function Partners() {
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>$300 (20%)</span>
-                    <span>$2000+ (50%)</span>
+                    <span>$300</span>
+                    <span>$500</span>
+                    <span>$1000</span>
+                    <span>$1500</span>
+                    <span>$2000+</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-telegram font-medium mt-1">
+                    <span>20%</span>
+                    <span>30%</span>
+                    <span>35%</span>
+                    <span>40%</span>
+                    <span>50%</span>
                   </div>
                 </div>
 
@@ -196,7 +249,7 @@ export default function Partners() {
               {/* Earnings Display */}
               <div className="grid md:grid-cols-3 gap-3">
                 <div className="bg-green-50 p-3 rounded-lg border border-green-200 text-center">
-                  <div className="text-sm text-green-700 mb-1">Комиссия</div>
+                  <div className="text-sm text-green-700 mb-1">Комиссия за ${dealSize[0]}</div>
                   <div className="text-2xl font-bold text-green-600">{currentCommission}%</div>
                   <div className="text-xs text-green-600">${oneTimeEarning.toFixed(0)} за сделку</div>
                 </div>
@@ -253,16 +306,37 @@ export default function Partners() {
 
               <Separator />
 
+              {/* Commission Scale */}
+              <div className="space-y-2">
+                <h4 className="font-semibold text-gray-900 text-sm">Шкала комиссий:</h4>
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">$300-499:</span>
+                    <Badge variant="secondary" className="bg-red-100 text-red-800">20%</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">$500-999:</span>
+                    <Badge variant="secondary" className="bg-orange-100 text-orange-800">30%</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">$1000-1499:</span>
+                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">35%</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">$1500-1999:</span>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">40%</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">$2000+:</span>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">50%</Badge>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
               {/* Key Benefits */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2 text-sm">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-700">$300 = 20% комиссия</span>
-                </div>
-                <div className="flex items-center space-x-2 text-sm">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <span className="text-gray-700">$2000+ = 50% комиссия</span>
-                </div>
+              <div className="space-y-2">
                 <div className="flex items-center space-x-2 text-sm">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span className="text-gray-700">10% от подписок навсегда</span>
