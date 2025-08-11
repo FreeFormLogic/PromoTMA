@@ -674,6 +674,17 @@ export default function Partners() {
             </div>
           )}
           
+          {/* ===========================================
+               ЛИЧНЫЕ ПРОДАЖИ И ДОХОДЫ 
+              =========================================== */}
+          <div className="text-center mb-12 bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl border border-green-200 mx-4">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center justify-center">
+              <Calculator className="w-7 h-7 mr-3 text-green-600" />
+              Личные продажи и доходы
+            </h2>
+            <p className="text-lg text-gray-600">Ваши персональные комиссии от прямых продаж клиентам</p>
+          </div>
+          
           {/* Interactive Commission Progression */}
           <div className="flex justify-center">
             <div className="bg-white rounded-xl p-6 shadow-lg border max-w-2xl w-full">
@@ -758,8 +769,20 @@ export default function Partners() {
           </div>
         </div>
 
+        {/* ===========================================
+             СЕТЕВЫЕ ФУНКЦИИ И ПАРТНЕРСКАЯ СТРУКТУРА 
+            =========================================== */}
         {showMlmFeatures && (
-          <Card className="bg-white shadow-lg mb-8">
+          <div className="mb-16">
+            <div className="text-center mb-8 bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200 mx-4">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center justify-center">
+                <Users className="w-7 h-7 mr-3 text-purple-600" />
+                Сетевые функции и партнерская структура
+              </h2>
+              <p className="text-lg text-gray-600">Многоуровневый доход от вашей партнерской команды</p>
+            </div>
+
+        <Card className="bg-white shadow-lg mb-8">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center space-x-2 text-lg">
               <Award className="w-5 h-5 text-telegram" />
@@ -826,7 +849,6 @@ export default function Partners() {
 
             </CardContent>
           </Card>
-        )}
 
         <div className={`grid ${showMlmFeatures ? 'lg:grid-cols-2' : 'lg:grid-cols-1'} gap-6 mb-8`}>
           {/* Personal Sales Calculator */}
@@ -1966,6 +1988,8 @@ export default function Partners() {
             </div>
           </CardContent>
         </Card>
+        </div>
+        )}
       </div>
     </div>
   );
