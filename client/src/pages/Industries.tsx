@@ -8,22 +8,37 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Search, ArrowRight, Star, Users, Building2, Target, TrendingUp } from "lucide-react";
+import { 
+  Search, ArrowRight, Star, Users, Building2, Target, TrendingUp,
+  ShoppingCart, Utensils, Smartphone, GraduationCap, Brain,
+  Truck, Package, Briefcase, Scissors, Stethoscope,
+  Home, Car, Plane, Gamepad2, Music,
+  Dumbbell, Camera, Baby, DollarSign, Wrench
+} from "lucide-react";
 import { Industry } from "@shared/schema";
 
 // Маппинг иконок
 const iconMap: Record<string, any> = {
-  "🍕": Building2,
-  "🛍️": Building2,
-  "📱": Users,
-  "🎓": Building2,
-  "🧠": Target,
-  "🛵": Building2,
-  "🚚": Building2,
-  "💼": Users,
-  "💇‍♀️": Building2,
-  "🏥": Building2,
-  "📦": Building2,
+  "🍕": Utensils,
+  "🛍️": ShoppingCart,
+  "📱": Smartphone,
+  "🎓": GraduationCap,
+  "🧠": Brain,
+  "🛵": Car,
+  "🚚": Truck,
+  "💼": Briefcase,
+  "💇‍♀️": Scissors,
+  "🏥": Stethoscope,
+  "📦": Package,
+  "🏠": Home,
+  "✈️": Plane,
+  "🎮": Gamepad2,
+  "🎵": Music,
+  "💪": Dumbbell,
+  "📷": Camera,
+  "👶": Baby,
+  "💰": DollarSign,
+  "🔧": Wrench,
 };
 
 // Цвета для категорий важности

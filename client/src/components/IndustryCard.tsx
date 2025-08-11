@@ -11,7 +11,22 @@ import {
   Home,
   Car,
   ArrowRight,
-  TrendingUp
+  TrendingUp,
+  ShoppingCart,
+  Utensils,
+  Smartphone,
+  Brain,
+  Truck,
+  Package,
+  Briefcase,
+  Plane,
+  Gamepad2,
+  Music,
+  Dumbbell,
+  Camera,
+  Baby,
+  DollarSign,
+  Wrench
 } from "lucide-react";
 import { type Industry } from "@shared/schema";
 
@@ -32,14 +47,30 @@ interface IndustryCardProps {
 }
 
 const iconMap: Record<string, any> = {
+  "🍕": Utensils,
+  "🛍️": ShoppingCart,
+  "📱": Smartphone,
+  "🎓": GraduationCap,
+  "🧠": Brain,
+  "🛵": Car,
+  "🚚": Truck,
+  "💼": Briefcase,
+  "💇‍♀️": Scissors,
+  "🏥": Stethoscope,
+  "📦": Package,
+  "🏠": Home,
+  "✈️": Plane,
+  "🎮": Gamepad2,
+  "🎵": Music,
+  "💪": Dumbbell,
+  "📷": Camera,
+  "👶": Baby,
+  "💰": DollarSign,
+  "🔧": Wrench,
+  // Fallback для старых записей
   Store,
   UtensilsCrossed,
-  GraduationCap,
   Building2,
-  Stethoscope,
-  Scissors,
-  Home,
-  Car,
 };
 
 const industryImages: Record<string, string> = {
