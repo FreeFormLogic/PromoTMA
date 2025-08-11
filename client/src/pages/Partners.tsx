@@ -20,34 +20,60 @@ import {
   ChevronDown,
   ChevronRight,
   Copy,
-  Check
+  Check,
+  Share2,
+  ExternalLink,
+  TreePine
 } from "lucide-react";
 
-const mlmLevels = [
-  { level: 1, commission: 50, color: "bg-yellow-500", description: "Прямые рефералы" },
-  { level: 2, commission: 25, color: "bg-orange-500", description: "2-й уровень" },
-  { level: 3, commission: 15, color: "bg-red-500", description: "3-й уровень" },
-  { level: 4, commission: 7, color: "bg-purple-500", description: "4-й уровень" },
-  { level: 5, commission: 3, color: "bg-blue-500", description: "5-й уровень" }
+const partnerLevels = [
+  { level: 1, commission: 15, color: "bg-yellow-500", description: "Прямые партнеры", minClients: 1 },
+  { level: 2, commission: 10, color: "bg-orange-500", description: "2-й уровень", minClients: 3 },
+  { level: 3, commission: 7, color: "bg-red-500", description: "3-й уровень", minClients: 5 },
+  { level: 4, commission: 5, color: "bg-purple-500", description: "4-й уровень", minClients: 10 },
+  { level: 5, commission: 3, color: "bg-blue-500", description: "5-й уровень", minClients: 20 }
 ];
 
-const monthlySubscriptionPrice = 15; // $15 per month
+// Commission tiers based on deal size
+const getCommissionRate = (dealSize: number): number => {
+  if (dealSize >= 2000) return 50;
+  if (dealSize >= 1500) return 40;
+  if (dealSize >= 1000) return 35;
+  if (dealSize >= 500) return 30;
+  return 20; // $300 = 20%
+};
 
 export default function Partners() {
-  const [newClientCommission, setNewClientCommission] = useState([35]);
-  const [isFirstClient, setIsFirstClient] = useState(false);
-  const [monthlyReferrals, setMonthlyReferrals] = useState([1]);
+  const [dealSize, setDealSize] = useState([300]);
+  const [monthlySubscription, setMonthlySubscription] = useState([15]);
+  const [totalClients, setTotalClients] = useState([5]);
+  const [activeClients, setActiveClients] = useState([3]);
   const [copied, setCopied] = useState(false);
   const [expandedLevel, setExpandedLevel] = useState<number | null>(null);
 
-  const currentCommission = isFirstClient ? 50 : newClientCommission[0];
-  const monthlyEarnings = monthlyReferrals[0] * (monthlySubscriptionPrice * 0.1);
-  const oneTimeEarning = (300 * currentCommission) / 100;
+  const currentCommission = getCommissionRate(dealSize[0]);
+  const monthlyEarnings = activeClients[0] * (monthlySubscription[0] * 0.1);
+  const oneTimeEarning = (dealSize[0] * currentCommission) / 100;
+  const unlockedLevels = partnerLevels.filter(level => totalClients[0] >= level.minClients).length;
 
+  const referralLink = "https://telegram-miniapps.directory/ref/balilegend123";
+  
   const copyReferralLink = () => {
-    navigator.clipboard.writeText("https://telegram-miniapps.directory/ref/YOUR_ID");
+    navigator.clipboard.writeText(referralLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareReferralLink = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Telegram Mini Apps Directory - Партнерская программа',
+        text: 'Присоединяйтесь к партнерской программе и зарабатывайте до 50% с каждого клиента!',
+        url: referralLink
+      });
+    } else {
+      copyReferralLink();
+    }
   };
 
   return (
@@ -67,204 +93,201 @@ export default function Partners() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid lg:grid-cols-3 gap-6 mb-8">
           {/* Calculator Section */}
-          <Card className="bg-white shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Calculator className="w-6 h-6 text-telegram" />
+          <Card className="lg:col-span-2 bg-white shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center space-x-2 text-lg">
+                <Calculator className="w-5 h-5 text-telegram" />
                 <span>Калькулятор доходов</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* First Client Toggle */}
-              <div className="flex items-center justify-between p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <div>
-                  <h3 className="font-semibold text-gray-900">Первый клиент</h3>
-                  <p className="text-sm text-gray-600">Гарантированные 50%</p>
-                </div>
-                <Button
-                  variant={isFirstClient ? "default" : "outline"}
-                  onClick={() => setIsFirstClient(!isFirstClient)}
-                  className={isFirstClient ? "bg-telegram hover:bg-telegram-dark" : ""}
-                >
-                  {isFirstClient ? "Активно" : "Активировать"}
-                </Button>
-              </div>
-
-              {/* Commission Slider */}
-              {!isFirstClient && (
-                <div className="space-y-3">
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Deal Size Slider */}
+                <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <label className="text-sm font-medium text-gray-700">
-                      Комиссия за нового клиента
-                    </label>
-                    <Badge variant="secondary" className="bg-telegram/10 text-telegram">
-                      {newClientCommission[0]}%
+                    <label className="text-sm font-medium text-gray-700">Размер сделки</label>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      ${dealSize[0]}
                     </Badge>
                   </div>
                   <Slider
-                    value={newClientCommission}
-                    onValueChange={setNewClientCommission}
+                    value={dealSize}
+                    onValueChange={setDealSize}
+                    max={3000}
+                    min={300}
+                    step={100}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>$300 (20%)</span>
+                    <span>$2000+ (50%)</span>
+                  </div>
+                </div>
+
+                {/* Monthly Subscription */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-medium text-gray-700">Месячная плата</label>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                      ${monthlySubscription[0]}
+                    </Badge>
+                  </div>
+                  <Slider
+                    value={monthlySubscription}
+                    onValueChange={setMonthlySubscription}
                     max={50}
-                    min={20}
+                    min={5}
                     step={5}
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>20%</span>
-                    <span>35%</span>
-                    <span>50%</span>
+                    <span>$5</span>
+                    <span>$50</span>
                   </div>
                 </div>
-              )}
 
-              {/* Monthly Referrals */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm font-medium text-gray-700">
-                    Рефералов в месяц
-                  </label>
-                  <Badge variant="secondary">
-                    {monthlyReferrals[0]} клиент{monthlyReferrals[0] > 1 ? 'ов' : ''}
-                  </Badge>
+                {/* Total Clients */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-medium text-gray-700">Всего клиентов</label>
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                      {totalClients[0]}
+                    </Badge>
+                  </div>
+                  <Slider
+                    value={totalClients}
+                    onValueChange={setTotalClients}
+                    max={100}
+                    min={1}
+                    step={1}
+                    className="w-full"
+                  />
+                  <div className="text-xs text-gray-500">
+                    Открыто уровней: {unlockedLevels}/5
+                  </div>
                 </div>
-                <Slider
-                  value={monthlyReferrals}
-                  onValueChange={setMonthlyReferrals}
-                  max={50}
-                  min={1}
-                  step={1}
-                  className="w-full"
-                />
+
+                {/* Active Clients */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-medium text-gray-700">Активных клиентов</label>
+                    <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                      {activeClients[0]}
+                    </Badge>
+                  </div>
+                  <Slider
+                    value={activeClients}
+                    onValueChange={setActiveClients}
+                    max={totalClients[0]}
+                    min={0}
+                    step={1}
+                    className="w-full"
+                  />
+                  <div className="text-xs text-gray-500">
+                    Платят абонентскую плату
+                  </div>
+                </div>
               </div>
 
               <Separator />
 
               {/* Earnings Display */}
-              <div className="space-y-4">
-                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-green-700">Разовая выплата</span>
-                    <span className="text-2xl font-bold text-green-600">
-                      ${oneTimeEarning.toFixed(0)}
-                    </span>
-                  </div>
-                  <p className="text-xs text-green-600">
-                    {currentCommission}% от $300 за каждого клиента
-                  </p>
+              <div className="grid md:grid-cols-3 gap-3">
+                <div className="bg-green-50 p-3 rounded-lg border border-green-200 text-center">
+                  <div className="text-sm text-green-700 mb-1">Комиссия</div>
+                  <div className="text-2xl font-bold text-green-600">{currentCommission}%</div>
+                  <div className="text-xs text-green-600">${oneTimeEarning.toFixed(0)} за сделку</div>
                 </div>
 
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-blue-700">Ежемесячный доход</span>
-                    <span className="text-2xl font-bold text-blue-600">
-                      ${monthlyEarnings.toFixed(0)}
-                    </span>
-                  </div>
-                  <p className="text-xs text-blue-600">
-                    10% от абонентских плат ({monthlyReferrals[0]} × $1.5)
-                  </p>
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 text-center">
+                  <div className="text-sm text-blue-700 mb-1">В месяц</div>
+                  <div className="text-2xl font-bold text-blue-600">${monthlyEarnings.toFixed(0)}</div>
+                  <div className="text-xs text-blue-600">10% от подписок</div>
                 </div>
 
-                <div className="bg-telegram/5 p-4 rounded-lg border border-telegram/20">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-telegram">Годовой доход</span>
-                    <span className="text-3xl font-bold text-telegram">
-                      ${(oneTimeEarning + monthlyEarnings * 12).toFixed(0)}
-                    </span>
-                  </div>
+                <div className="bg-telegram/5 p-3 rounded-lg border border-telegram/20 text-center">
+                  <div className="text-sm text-telegram mb-1">В год</div>
+                  <div className="text-2xl font-bold text-telegram">${(oneTimeEarning + monthlyEarnings * 12).toFixed(0)}</div>
+                  <div className="text-xs text-telegram">Общий доход</div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Program Benefits */}
+          {/* Referral Link & Benefits */}
           <Card className="bg-white shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Gift className="w-6 h-6 text-telegram" />
-                <span>Преимущества программы</span>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center space-x-2 text-lg">
+                <Share2 className="w-5 h-5 text-telegram" />
+                <span>Реферальная ссылка</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Star className="w-4 h-4 text-yellow-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Первый клиент — 50%</h3>
-                    <p className="text-sm text-gray-600">
-                      Гарантированная максимальная комиссия за первого приведенного клиента
-                    </p>
-                  </div>
+              {/* Referral Link */}
+              <div className="space-y-3">
+                <div className="p-3 bg-gray-50 rounded-lg border text-sm text-gray-600 break-all">
+                  {referralLink}
                 </div>
-
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <TrendingUp className="w-4 h-4 text-green-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Растущие проценты</h3>
-                    <p className="text-sm text-gray-600">
-                      От 20% до 50% в зависимости от количества приведенных клиентов
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Percent className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Пассивный доход</h3>
-                    <p className="text-sm text-gray-600">
-                      10% от всех абонентских платежей ваших рефералов навсегда
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Network className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">MLM-структура</h3>
-                    <p className="text-sm text-gray-600">
-                      5 уровней партнерской сети с дополнительными бонусами
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Target className="w-4 h-4 text-red-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Мгновенные выплаты</h3>
-                    <p className="text-sm text-gray-600">
-                      Автоматические выплаты в течение 24 часов после оплаты клиентом
-                    </p>
-                  </div>
+                <div className="flex space-x-2">
+                  <Button
+                    size="sm"
+                    onClick={copyReferralLink}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    {copied ? <Check className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
+                    {copied ? "Скопировано" : "Копировать"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={shareReferralLink}
+                    className="flex-1 bg-telegram hover:bg-telegram-dark"
+                  >
+                    <Share2 className="w-4 h-4 mr-1" />
+                    Поделиться
+                  </Button>
                 </div>
               </div>
 
               <Separator />
 
-              {/* Referral Link */}
+              {/* Key Benefits */}
               <div className="space-y-3">
-                <h3 className="font-semibold text-gray-900">Ваша реферальная ссылка</h3>
-                <div className="flex items-center space-x-2">
-                  <div className="flex-1 p-3 bg-gray-50 rounded-lg border text-sm text-gray-600 truncate">
-                    https://telegram-miniapps.directory/ref/YOUR_ID
-                  </div>
-                  <Button
-                    size="sm"
-                    onClick={copyReferralLink}
-                    className="bg-telegram hover:bg-telegram-dark"
-                  >
-                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                <div className="flex items-center space-x-2 text-sm">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-gray-700">$300 = 20% комиссия</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <span className="text-gray-700">$2000+ = 50% комиссия</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-gray-700">10% от подписок навсегда</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <span className="text-gray-700">5 уровней структуры</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <span className="text-gray-700">Выплаты в течение 24ч</span>
+                </div>
+              </div>
+
+              {/* Quick Start */}
+              <div className="bg-telegram/5 p-3 rounded-lg border border-telegram/20">
+                <div className="text-center">
+                  <Target className="w-8 h-8 text-telegram mx-auto mb-2" />
+                  <h3 className="font-semibold text-gray-900 mb-1">Быстрый старт</h3>
+                  <p className="text-xs text-gray-600 mb-3">
+                    Поделитесь ссылкой и получите первую комиссию
+                  </p>
+                  <Button size="sm" className="w-full bg-telegram hover:bg-telegram-dark">
+                    <ExternalLink className="w-3 h-3 mr-1" />
+                    Начать зарабатывать
                   </Button>
                 </div>
               </div>
@@ -272,104 +295,162 @@ export default function Partners() {
           </Card>
         </div>
 
-        {/* MLM Structure */}
-        <Card className="bg-white shadow-lg mb-12">
+        {/* Partner Structure Tree */}
+        <Card className="bg-white shadow-lg mb-8">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Network className="w-6 h-6 text-telegram" />
-              <span>MLM-структура партнерской сети</span>
+              <TreePine className="w-6 h-6 text-telegram" />
+              <span>Структура партнерской сети</span>
             </CardTitle>
             <p className="text-gray-600">
-              Многоуровневая система вознаграждений с комиссиями до 5 уровня глубины
+              Многоуровневая система с бонусами до 5 уровня глубины
             </p>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {mlmLevels.map((level, index) => (
-                <div key={level.level} className="border rounded-lg overflow-hidden">
-                  <div 
-                    className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
-                    onClick={() => setExpandedLevel(expandedLevel === level.level ? null : level.level)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className={`w-12 h-12 ${level.color} rounded-full flex items-center justify-center text-white font-bold`}>
-                          {level.level}
+            {/* Tree Structure Visualization */}
+            <div className="mb-6 overflow-x-auto">
+              <div className="min-w-full">
+                {/* Level indicators */}
+                <div className="flex items-center justify-center space-x-8 mb-4">
+                  {partnerLevels.slice(0, unlockedLevels).map((level, index) => (
+                    <div key={level.level} className="text-center">
+                      <div className={`w-3 h-3 ${level.color} rounded-full mx-auto mb-1`}></div>
+                      <div className="text-xs text-gray-500">Ур. {level.level}</div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Tree visualization */}
+                <div className="relative">
+                  <div className="flex items-center justify-center">
+                    <div className="w-12 h-12 bg-telegram rounded-full flex items-center justify-center text-white font-bold relative">
+                      ВЫ
+                      {unlockedLevels > 1 && (
+                        <div className="absolute -right-4 top-1/2 w-8 h-0.5 bg-gray-300"></div>
+                      )}
+                    </div>
+                    
+                    {/* Level 1 */}
+                    {unlockedLevels > 0 && (
+                      <div className="flex flex-col items-center ml-8">
+                        <div className="grid grid-cols-2 gap-2">
+                          {[...Array(Math.min(totalClients[0], 4))].map((_, i) => (
+                            <div key={i} className={`w-8 h-8 ${partnerLevels[0].color} rounded-full flex items-center justify-center text-white text-xs font-bold relative`}>
+                              {i + 1}
+                              {unlockedLevels > 1 && i < 2 && (
+                                <div className="absolute -right-3 top-1/2 w-6 h-0.5 bg-gray-300"></div>
+                              )}
+                            </div>
+                          ))}
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">
-                            Уровень {level.level}
-                          </h3>
-                          <p className="text-sm text-gray-600">{level.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <Badge className="bg-green-100 text-green-800">
-                          {level.commission}% комиссия
-                        </Badge>
-                        {expandedLevel === level.level ? (
-                          <ChevronDown className="w-5 h-5 text-gray-400" />
-                        ) : (
-                          <ChevronRight className="w-5 h-5 text-gray-400" />
+                        
+                        {/* Level 2 and beyond */}
+                        {unlockedLevels > 1 && (
+                          <div className="flex space-x-4 mt-4">
+                            {[...Array(Math.min(unlockedLevels - 1, 3))].map((_, levelIndex) => (
+                              <div key={levelIndex} className="flex flex-col items-center">
+                                <div className="grid grid-cols-1 gap-1">
+                                  {[...Array(Math.min(2, Math.max(0, totalClients[0] - (levelIndex + 1) * 2)))].map((_, i) => (
+                                    <div key={i} className={`w-6 h-6 ${partnerLevels[levelIndex + 1].color} rounded-full flex items-center justify-center text-white text-xs`}>
+                                      •
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         )}
                       </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Level Details */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {partnerLevels.slice(0, unlockedLevels).map((level, index) => (
+                <div key={level.level} className={`p-4 rounded-lg border-2 ${
+                  totalClients[0] >= level.minClients ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'
+                }`}>
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className={`w-10 h-10 ${level.color} rounded-full flex items-center justify-center text-white font-bold`}>
+                      {level.level}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Уровень {level.level}</h3>
+                      <p className="text-xs text-gray-600">{level.description}</p>
                     </div>
                   </div>
                   
-                  {expandedLevel === level.level && (
-                    <div className="px-4 pb-4 bg-gray-50">
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">Как это работает</h4>
-                          <p className="text-sm text-gray-600">
-                            {level.level === 1 && "Вы получаете комиссию с каждого клиента, которого привели лично. Максимальный процент с прямых продаж."}
-                            {level.level === 2 && "Комиссия с клиентов, приведенных вашими прямыми рефералами. Создавайте команду активных партнеров."}
-                            {level.level === 3 && "Доход с третьего уровня вашей партнерской сети. Развивайте глубокие структуры для стабильного дохода."}
-                            {level.level === 4 && "Четвертый уровень MLM-структуры. Пассивный доход от расширения вашей сети."}
-                            {level.level === 5 && "Максимальная глубина партнерской программы. Дополнительный доход от больших структур."}
-                          </p>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">Пример расчета</h4>
-                          <div className="space-y-1 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Клиент оплачивает:</span>
-                              <span className="font-medium">$300</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Ваша комиссия ({level.commission}%):</span>
-                              <span className="font-medium text-green-600">
-                                ${(300 * level.commission / 100).toFixed(0)}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Ежемесячно (10%):</span>
-                              <span className="font-medium text-blue-600">$1.5</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Комиссия:</span>
+                      <Badge className="bg-green-100 text-green-800 text-xs">
+                        {level.commission}%
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Мин. клиентов:</span>
+                      <span className="font-medium">{level.minClients}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Пример дохода:</span>
+                      <span className="font-medium text-green-600">
+                        ${(dealSize[0] * level.commission / 100).toFixed(0)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {totalClients[0] < level.minClients && (
+                    <div className="mt-3 p-2 bg-yellow-50 rounded border border-yellow-200">
+                      <p className="text-xs text-yellow-700">
+                        Нужно еще {level.minClients - totalClients[0]} клиент{level.minClients - totalClients[0] > 1 ? 'ов' : ''} для разблокировки
+                      </p>
                     </div>
                   )}
                 </div>
               ))}
+              
+              {/* Locked levels */}
+              {partnerLevels.slice(unlockedLevels).map((level, index) => (
+                <div key={level.level} className="p-4 rounded-lg border-2 border-gray-200 bg-gray-50 opacity-60">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-white font-bold">
+                      🔒
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-500">Уровень {level.level}</h3>
+                      <p className="text-xs text-gray-500">Заблокирован</p>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center p-2 bg-gray-100 rounded">
+                    <p className="text-xs text-gray-500">
+                      Нужно {level.minClients} клиентов
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            <div className="mt-8 p-6 bg-gradient-to-r from-telegram/5 to-telegram-dark/5 rounded-lg border border-telegram/20">
-              <div className="text-center">
-                <Crown className="w-12 h-12 text-telegram mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Потенциальный месячный доход
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  При активной сети из 100 партнеров на всех уровнях
-                </p>
-                <div className="text-4xl font-bold text-telegram mb-2">
-                  $2,450
+            {/* Summary */}
+            <div className="mt-6 p-4 bg-gradient-to-r from-telegram/5 to-telegram-dark/5 rounded-lg border border-telegram/20">
+              <div className="grid md:grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-telegram">{unlockedLevels}</div>
+                  <div className="text-sm text-gray-600">Открыто уровней</div>
                 </div>
-                <p className="text-sm text-gray-500">
-                  Включает разовые комиссии и ежемесячные выплаты
-                </p>
+                <div>
+                  <div className="text-2xl font-bold text-green-600">
+                    ${((unlockedLevels * dealSize[0] * 0.1) + monthlyEarnings).toFixed(0)}
+                  </div>
+                  <div className="text-sm text-gray-600">Потенциал в месяц</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-purple-600">{totalClients[0]}</div>
+                  <div className="text-sm text-gray-600">Всего в структуре</div>
+                </div>
               </div>
             </div>
           </CardContent>
