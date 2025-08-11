@@ -25,8 +25,214 @@ import {
   Check,
   Share2,
   ExternalLink,
-  TreePine
+  TreePine,
+  Settings,
+  HelpCircle,
+  X,
+  User
 } from "lucide-react";
+
+// Generate mock partner data with Telegram-style usernames
+const generatePartnerName = (level: number, index: number): string => {
+  const firstNames = ['Alex', 'Maria', 'Ivan', 'Anna', 'Pavel', 'Kate', 'Dmitry', 'Lisa', 'Max', 'Sofia'];
+  const lastNames = ['Kozlov', 'Petrov', 'Ivanov', 'Sidorov', 'Fedorov', 'Morozov', 'Volkov', 'Alexeev'];
+  const first = firstNames[index % firstNames.length];
+  const last = lastNames[(index + level) % lastNames.length];
+  return `${first} ${last}`;
+};
+
+const generateTelegramUsername = (name: string): string => {
+  const cleanName = name.toLowerCase().replace(/\s+/g, '');
+  const numbers = Math.floor(Math.random() * 999) + 1;
+  return `@${cleanName}${numbers}`;
+};
+
+// Detailed Network View Component
+const DetailedNetworkView = ({ levels, personalRecruits, currentUser }: {
+  levels: any[];
+  personalRecruits: number;
+  currentUser: string;
+}) => {
+  const [selectedLevel, setSelectedLevel] = useState(1);
+  const [selectedPartner, setSelectedPartner] = useState<any>(null);
+
+  const partnersAtLevel = Math.max(0, Math.floor(personalRecruits * Math.pow(0.6, selectedLevel - 1)));
+  
+  const partners = Array.from({ length: Math.min(partnersAtLevel, 20) }, (_, index) => {
+    const name = generatePartnerName(selectedLevel, index);
+    return {
+      id: `${selectedLevel}-${index}`,
+      name,
+      username: generateTelegramUsername(name),
+      level: selectedLevel,
+      commission: levels[selectedLevel - 1]?.commission || 0,
+      earnings: Math.floor(Math.random() * 500) + 100,
+      joinDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toLocaleDateString('ru-RU'),
+      isOnline: Math.random() > 0.3,
+      avatar: `https://ui-avatars.com/api/?name=${name.replace(' ', '+')}&background=0088cc&color=fff&size=64`
+    };
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Level Navigation */}
+      <div className="flex flex-wrap gap-2 p-4 bg-gray-50 rounded-lg">
+        {levels.map((level, index) => {
+          const count = Math.max(0, Math.floor(personalRecruits * Math.pow(0.6, index)));
+          return (
+            <button
+              key={level.level}
+              onClick={() => setSelectedLevel(level.level)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                selectedLevel === level.level
+                  ? 'bg-telegram text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              Уровень {level.level}
+              <span className="ml-2 px-2 py-1 bg-white/20 rounded text-xs">
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Current Level Info */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          Уровень {selectedLevel} - Комиссия {levels[selectedLevel - 1]?.commission}%
+        </h3>
+        <p className="text-gray-600">
+          Партнеров на уровне: {partnersAtLevel} • 
+          Потенциальный доход: ${(partnersAtLevel * 100).toFixed(0)}/мес
+        </p>
+      </div>
+
+      {/* Partners Grid */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {partners.map((partner) => (
+          <div
+            key={partner.id}
+            onClick={() => setSelectedPartner(partner)}
+            className="bg-white border rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer"
+          >
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="relative">
+                <img
+                  src={partner.avatar}
+                  alt={partner.name}
+                  className="w-12 h-12 rounded-full"
+                />
+                {partner.isOnline && (
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {partner.name}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {partner.username}
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-500">Доход:</span>
+                <span className="font-medium text-green-600">${partner.earnings}/мес</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-500">Присоединился:</span>
+                <span className="text-gray-700">{partner.joinDate}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {partnersAtLevel === 0 && (
+        <div className="text-center py-8 text-gray-500">
+          <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+          <p>На этом уровне пока нет партнеров</p>
+          <p className="text-sm">Привлекайте больше людей для открытия новых уровней</p>
+        </div>
+      )}
+
+      {/* Partner Detail Modal */}
+      {selectedPartner && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Профиль партнера</h3>
+              <button
+                onClick={() => setSelectedPartner(null)}
+                className="p-1 hover:bg-gray-100 rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex items-center space-x-4 mb-6">
+              <div className="relative">
+                <img
+                  src={selectedPartner.avatar}
+                  alt={selectedPartner.name}
+                  className="w-16 h-16 rounded-full"
+                />
+                {selectedPartner.isOnline && (
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full"></div>
+                )}
+              </div>
+              <div>
+                <h4 className="text-lg font-medium">{selectedPartner.name}</h4>
+                <p className="text-gray-500">{selectedPartner.username}</p>
+                <Badge className={`mt-1 ${selectedPartner.isOnline ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                  {selectedPartner.isOnline ? 'Онлайн' : 'Не в сети'}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-xs text-gray-500 mb-1">Уровень</p>
+                  <p className="font-semibold">{selectedPartner.level}</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-xs text-gray-500 mb-1">Комиссия</p>
+                  <p className="font-semibold">{selectedPartner.commission}%</p>
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-xs text-gray-500 mb-1">Месячный доход</p>
+                <p className="text-xl font-bold text-green-600">${selectedPartner.earnings}</p>
+              </div>
+              
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-xs text-gray-500 mb-1">Дата присоединения</p>
+                <p className="font-medium">{selectedPartner.joinDate}</p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex space-x-3">
+              <Button className="flex-1 bg-telegram hover:bg-telegram/90">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Перейти в Telegram
+              </Button>
+              <Button variant="outline" className="flex-1">
+                <Users className="w-4 h-4 mr-2" />
+                Структура
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Optimized commission structure (50% of revenue allocated to partners)
 const partnerLevels = [
@@ -148,16 +354,20 @@ const getFinalCommissionRate = (dealSize: number, orderCount: number, tariff: ty
 };
 
 export default function Partners() {
-  const [dealSize, setDealSize] = useState([300]);
-  const [monthlySubscription, setMonthlySubscription] = useState([15]);
+  const [dealSize, setDealSize] = useState([1600]);
+  const [monthlySubscription, setMonthlySubscription] = useState([49]);
   const [totalClients, setTotalClients] = useState([5]);
   const [activeClients, setActiveClients] = useState([3]);
   const [orderCount, setOrderCount] = useState([1]);
-  const [networkSize, setNetworkSize] = useState([10]);
+  const [personalRecruits, setPersonalRecruits] = useState([3]);
   const [selectedPackage, setSelectedPackage] = useState(0);
   const [selectedTariff, setSelectedTariff] = useState(0);
   const [copied, setCopied] = useState(false);
   const [expandedLevel, setExpandedLevel] = useState<number | null>(null);
+  const [showMlmFeatures, setShowMlmFeatures] = useState(true);
+  const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null);
+  const [showHelpFor, setShowHelpFor] = useState<string | null>(null);
+  const [showDetailedNetwork, setShowDetailedNetwork] = useState(false);
 
   const currentTariff = builderTariffs[selectedTariff];
   const currentPackage = levelPackages[selectedPackage];
@@ -167,15 +377,15 @@ export default function Partners() {
   const monthlyEarnings = activeClients[0] * (monthlySubscription[0] * 0.1);
   const oneTimeEarning = (dealSize[0] * currentCommission) / 100;
   
-  // Calculate network earnings
-  const networkEarnings = partnerLevels.slice(0, currentPackage.levels).reduce((total, level, index) => {
-    const partnersAtLevel = Math.max(0, Math.floor(networkSize[0] * Math.pow(0.5, index)));
+  // Calculate network earnings from personal recruits
+  const networkEarnings = showMlmFeatures ? partnerLevels.slice(0, currentPackage.levels).reduce((total, level, index) => {
+    const partnersAtLevel = Math.max(0, Math.floor(personalRecruits[0] * Math.pow(0.6, index)));
     const earningsAtLevel = partnersAtLevel * dealSize[0] * (level.commission / 100);
     return total + earningsAtLevel;
-  }, 0);
+  }, 0) : 0;
   
   // Additional network bonus from tariff
-  const networkBonus = networkEarnings * (currentTariff.networkBonus / 100);
+  const networkBonus = showMlmFeatures ? networkEarnings * (currentTariff.networkBonus / 100) : 0;
   
   // Calculate quality score and available levels
   const qualityScore = calculateQualityScore(totalClients[0], dealSize[0]);
@@ -223,6 +433,48 @@ export default function Partners() {
             Получайте до 50% от личных продаж и до 22% от структуры партнеров. 
             Мы выделяем 50% выручки на партнерские вознаграждения!
           </p>
+          
+          {/* MLM Toggle */}
+          <div className="flex justify-center mb-6">
+            <div className="flex items-center space-x-3 bg-white p-4 rounded-lg shadow-sm border">
+              <Settings className="w-5 h-5 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Показать сетевые функции</span>
+              <button
+                onClick={() => setShowMlmFeatures(!showMlmFeatures)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  showMlmFeatures ? 'bg-telegram' : 'bg-gray-200'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    showMlmFeatures ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+              <button
+                onClick={() => setShowHelpFor(showHelpFor === 'mlm-toggle' ? null : 'mlm-toggle')}
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <HelpCircle className="w-4 h-4 text-gray-400" />
+              </button>
+            </div>
+          </div>
+          
+          {showHelpFor === 'mlm-toggle' && (
+            <div className="max-w-lg mx-auto mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+              <button
+                onClick={() => setShowHelpFor(null)}
+                className="float-right p-1 hover:bg-blue-100 rounded-full"
+              >
+                <X className="w-3 h-3" />
+              </button>
+              <p><strong>Режимы работы:</strong></p>
+              <ul className="list-disc list-inside mt-1 space-y-1">
+                <li><strong>Только личные продажи:</strong> Классическая партнерская программа без MLM</li>
+                <li><strong>С сетевыми функциями:</strong> Многоуровневый маркетинг с доходом от структуры</li>
+              </ul>
+            </div>
+          )}
           
           {/* Interactive Commission Progression */}
           <div className="flex justify-center">
@@ -308,13 +560,35 @@ export default function Partners() {
           </div>
         </div>
 
-        {/* Tariff Selection */}
-        <Card className="bg-white shadow-lg mb-8">
+        {showMlmFeatures && (
+          <Card className="bg-white shadow-lg mb-8">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Award className="w-6 h-6 text-telegram" />
               <span>Выберите ваш тариф</span>
+              <button
+                onClick={() => setShowHelpFor(showHelpFor === 'tariff' ? null : 'tariff')}
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <HelpCircle className="w-4 h-4 text-gray-400" />
+              </button>
             </CardTitle>
+            {showHelpFor === 'tariff' && (
+              <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                <button
+                  onClick={() => setShowHelpFor(null)}
+                  className="float-right p-1 hover:bg-blue-100 rounded-full"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+                <p><strong>Тарифы партнерской программы:</strong></p>
+                <ul className="list-disc list-inside mt-1 space-y-1">
+                  <li><strong>Партнер (25%):</strong> Базовый тариф для начинающих</li>
+                  <li><strong>Про (35%):</strong> Увеличенная комиссия + бонус от сети</li>
+                  <li><strong>Премиум (50%):</strong> Максимальная комиссия + все бонусы</li>
+                </ul>
+              </div>
+            )}
             <p className="text-gray-600">
               Инвестируйте в развитие сети и получайте повышенные комиссии
             </p>
@@ -374,14 +648,37 @@ export default function Partners() {
             </div>
           </CardContent>
         </Card>
+        )}
 
-        {/* Level Packages */}
-        <Card className="bg-white shadow-lg mb-8">
+        {showMlmFeatures && (
+          <Card className="bg-white shadow-lg mb-8">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Package className="w-6 h-6 text-telegram" />
               <span>Пакеты уровней</span>
+              <button
+                onClick={() => setShowHelpFor(showHelpFor === 'levels' ? null : 'levels')}
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <HelpCircle className="w-4 h-4 text-gray-400" />
+              </button>
             </CardTitle>
+            {showHelpFor === 'levels' && (
+              <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                <button
+                  onClick={() => setShowHelpFor(null)}
+                  className="float-right p-1 hover:bg-blue-100 rounded-full"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+                <p><strong>Пакеты расширения уровней:</strong></p>
+                <ul className="list-disc list-inside mt-1 space-y-1">
+                  <li><strong>Стартовый:</strong> 3 уровня вознаграждений</li>
+                  <li><strong>Стандарт:</strong> 5 уровней для развития сети</li>
+                  <li><strong>Премиум:</strong> 7 уровней максимальной глубины</li>
+                </ul>
+              </div>
+            )}
             <p className="text-gray-600">
               Разблокируйте больше уровней для увеличения пассивного дохода
             </p>
@@ -439,6 +736,7 @@ export default function Partners() {
             </div>
           </CardContent>
         </Card>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-6 mb-8">
           {/* Calculator Section */}
@@ -446,8 +744,31 @@ export default function Partners() {
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center space-x-2 text-lg">
                 <Calculator className="w-5 h-5 text-telegram" />
-                <span>Калькулятор доходов</span>
+                <span>Калькулятор доходов от личных продаж</span>
+                <button
+                  onClick={() => setShowHelpFor(showHelpFor === 'calculator' ? null : 'calculator')}
+                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <HelpCircle className="w-4 h-4 text-gray-400" />
+                </button>
               </CardTitle>
+              {showHelpFor === 'calculator' && (
+                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                  <button
+                    onClick={() => setShowHelpFor(null)}
+                    className="float-right p-1 hover:bg-blue-100 rounded-full"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                  <p><strong>Как работает калькулятор:</strong></p>
+                  <ul className="list-disc list-inside mt-1 space-y-1">
+                    <li>Комиссия зависит от размера сделки и вашего тарифа</li>
+                    <li>Мультипликатор растет с количеством успешных заказов</li>
+                    <li>Абонентская плата - это ежемесячные платежи клиентов</li>
+                    <li>С каждой подписки вы получаете 10%</li>
+                  </ul>
+                </div>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
@@ -486,15 +807,40 @@ export default function Partners() {
                 {/* Monthly Subscription */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <label className="text-sm font-medium text-gray-700">Месячная плата</label>
+                    <div className="flex items-center space-x-2">
+                      <label className="text-sm font-medium text-gray-700">Абонентская плата</label>
+                      <button
+                        onClick={() => setShowHelpFor(showHelpFor === 'monthly-fee' ? null : 'monthly-fee')}
+                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                      >
+                        <HelpCircle className="w-4 h-4 text-gray-400" />
+                      </button>
+                    </div>
                     <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                       ${monthlySubscription[0]}
                     </Badge>
                   </div>
+                  {showHelpFor === 'monthly-fee' && (
+                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                      <button
+                        onClick={() => setShowHelpFor(null)}
+                        className="float-right p-1 hover:bg-blue-100 rounded-full"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      <p><strong>Абонентская плата клиента:</strong></p>
+                      <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Ежемесячный платеж клиента за подписку</li>
+                        <li>Максимум $300 в месяц</li>
+                        <li>Вы получаете 10% с каждого платежа</li>
+                        <li>Стабильный пассивный доход</li>
+                      </ul>
+                    </div>
+                  )}
                   <Slider
                     value={monthlySubscription}
                     onValueChange={setMonthlySubscription}
-                    max={50}
+                    max={300}
                     min={5}
                     step={5}
                     className="w-full"
@@ -502,17 +848,47 @@ export default function Partners() {
                   <div className="flex justify-between text-xs text-gray-500">
                     <span>$5</span>
                     <span>$50</span>
+                    <span>$150</span>
+                    <span>$300</span>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Доход: ${monthlyEarnings.toFixed(0)}/мес (10% от подписок)
                   </div>
                 </div>
 
                 {/* Total Clients */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <label className="text-sm font-medium text-gray-700">Всего клиентов</label>
+                    <div className="flex items-center space-x-2">
+                      <label className="text-sm font-medium text-gray-700">Всего клиентов</label>
+                      <button
+                        onClick={() => setShowHelpFor(showHelpFor === 'total-clients' ? null : 'total-clients')}
+                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                      >
+                        <HelpCircle className="w-4 h-4 text-gray-400" />
+                      </button>
+                    </div>
                     <Badge variant="secondary" className="bg-purple-100 text-purple-800">
                       {totalClients[0]}
                     </Badge>
                   </div>
+                  {showHelpFor === 'total-clients' && (
+                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                      <button
+                        onClick={() => setShowHelpFor(null)}
+                        className="float-right p-1 hover:bg-blue-100 rounded-full"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      <p><strong>Количество клиентов:</strong></p>
+                      <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Общее число привлеченных клиентов</li>
+                        <li>Влияет на разблокировку уровней</li>
+                        <li>Каждые 5 клиентов открывают новый уровень</li>
+                        <li>Больше клиентов = выше общий доход</li>
+                      </ul>
+                    </div>
+                  )}
                   <Slider
                     value={totalClients}
                     onValueChange={setTotalClients}
@@ -568,26 +944,27 @@ export default function Partners() {
                   </div>
                 </div>
 
-                {/* Network Size */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <label className="text-sm font-medium text-gray-700">Размер сети</label>
-                    <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                      {networkSize[0]}
-                    </Badge>
+                {showMlmFeatures && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-sm font-medium text-gray-700">Лично привлеченные</label>
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                        {personalRecruits[0]}
+                      </Badge>
+                    </div>
+                    <Slider
+                      value={personalRecruits}
+                      onValueChange={setPersonalRecruits}
+                      max={50}
+                      min={0}
+                      step={1}
+                      className="w-full"
+                    />
+                    <div className="text-xs text-gray-500">
+                      Партнеров, привлеченных лично вами
+                    </div>
                   </div>
-                  <Slider
-                    value={networkSize}
-                    onValueChange={setNetworkSize}
-                    max={500}
-                    min={0}
-                    step={10}
-                    className="w-full"
-                  />
-                  <div className="text-xs text-gray-500">
-                    Партнеров в структуре
-                  </div>
-                </div>
+                )}
               </div>
 
               <Separator />
@@ -624,12 +1001,13 @@ export default function Partners() {
                   </div>
                 </div>
 
-                {/* Network Earnings */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                {showMlmFeatures && (
+                  /* Network Earnings */
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
                   <h4 className="font-semibold text-blue-900 mb-2">🌐 Доход от сети</h4>
                   <div className="space-y-2">
                     {partnerLevels.slice(0, currentPackage.levels).map((level, index) => {
-                      const partnersAtLevel = Math.max(0, Math.floor(networkSize[0] * Math.pow(0.5, index)));
+                      const partnersAtLevel = Math.max(0, Math.floor(personalRecruits[0] * Math.pow(0.6, index)));
                       const earningsAtLevel = partnersAtLevel * dealSize[0] * (level.commission / 100);
                       
                       return (
@@ -656,6 +1034,7 @@ export default function Partners() {
                     )}
                   </div>
                 </div>
+                )}
 
                 {/* Total Earnings */}
                 <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-lg border border-purple-200">
@@ -805,20 +1184,27 @@ export default function Partners() {
           </Card>
         </div>
 
-        {/* Interactive Partner Structure Tree */}
-        <Card className="bg-white shadow-lg mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <TreePine className="w-6 h-6 text-telegram" />
-              <span>Интерактивная структура партнерской сети</span>
-            </CardTitle>
+        {showMlmFeatures && (
+          <Card className="bg-white shadow-lg mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <TreePine className="w-6 h-6 text-telegram" />
+                <span>Интерактивная структура партнерской сети</span>
+                <button
+                  onClick={() => setShowDetailedNetwork(!showDetailedNetwork)}
+                  className="ml-auto px-3 py-1 bg-telegram text-white text-sm rounded-lg hover:bg-telegram/90 transition-colors"
+                >
+                  {showDetailedNetwork ? 'Схема' : 'Детали'}
+                </button>
+              </CardTitle>
             <p className="text-gray-600">
-              Многоуровневая система с расширением до {currentPackage.levels} уровн{currentPackage.levels > 1 ? 'ей' : 'я'} глубины
+              {showDetailedNetwork ? 'Детальный просмотр партнеров с профилями' : `Многоуровневая система с расширением до ${currentPackage.levels} уровн${currentPackage.levels > 1 ? 'ей' : 'я'} глубины`}
             </p>
           </CardHeader>
           <CardContent>
-            {/* Modern Tree Visualization */}
-            <div className="mb-8">
+            {!showDetailedNetwork ? (
+              <>
+              <div className="mb-8">
               {/* Central hub with you */}
               <div className="flex justify-center mb-8">
                 <div className="relative">
@@ -925,7 +1311,6 @@ export default function Partners() {
               </div>
             </div>
 
-            {/* Interactive Level Cards */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {partnerLevels.slice(0, currentPackage.levels).map((level, index) => {
                 const isUnlocked = index < unlockedLevels;
@@ -1054,8 +1439,17 @@ export default function Partners() {
                 </div>
               </div>
             </div>
+            </>
+            ) : (
+              <DetailedNetworkView 
+                levels={partnerLevels.slice(0, currentPackage.levels)}
+                personalRecruits={personalRecruits[0]}
+                currentUser="Вы"
+              />
+            )}
           </CardContent>
         </Card>
+        )}
 
         {/* How to Start */}
         <Card className="bg-gradient-to-r from-telegram to-telegram-dark text-white">
