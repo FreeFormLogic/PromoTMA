@@ -24,10 +24,9 @@ const ALLOWED_ACCOUNTS = [
 ];
 
 function verifyTelegramAuth(authData: any): boolean {
-  // Temporary solution: skip hash verification for demo
-  // In production, you would verify the hash properly
-  if (authData.hash && authData.hash.startsWith('temp_hash_')) {
-    return true; // Allow temporary hashes for demo
+  // Check if this is a bot-verified user
+  if (authData.fromBot && authData.isAuthorized) {
+    return true;
   }
   
   const { hash, ...data } = authData;
@@ -71,7 +70,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if username is in allowed accounts
-      if (!authData.username || !ALLOWED_ACCOUNTS.includes(authData.username)) {
+      if (!authData.username || !authorizedUsers.includes(authData.username)) {
         return res.status(403).json({ 
           message: "Доступ запрещен. Обратитесь к администратору для получения доступа." 
         });
@@ -206,7 +205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Check if user is in authorized list
-        const isAuthorized = AUTHORIZED_USERS.includes(username);
+        const isAuthorized = authorizedUsers.includes(username);
         
         if (isAuthorized) {
           // Store temporary authorization
@@ -220,8 +219,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
           
           // Store in memory (in production use database)
-          global.telegramAuth = global.telegramAuth || {};
-          global.telegramAuth[user.id] = authData;
+          (global as any).telegramAuth = (global as any).telegramAuth || {};
+          (global as any).telegramAuth[user.id] = authData;
           
           // Send confirmation to user
           const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -264,7 +263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/telegram/auth-status/:userId", async (req, res) => {
     try {
       const { userId } = req.params;
-      const authData = global.telegramAuth?.[userId];
+      const authData = (global as any).telegramAuth?.[userId];
       
       if (authData && authData.isAuthorized) {
         return res.json({ 

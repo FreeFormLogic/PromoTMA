@@ -105,75 +105,19 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
   };
 
   const checkAuthStatus = async () => {
-    try {
-      // Generate a temporary user ID for polling (in real scenario, we'd get this from Telegram)
-      const pollId = 'poll_' + Date.now();
-      
-      toast({
-        title: "Ожидание авторизации",
-        description: "Нажмите /start в боте для авторизации",
-      });
+    toast({
+      title: "Ожидание авторизации",
+      description: "Нажмите /start в боте для авторизации",
+    });
 
-      // Poll for auth every 3 seconds for 2 minutes
-      let attempts = 0;
-      const maxAttempts = 40;
-      
-      const pollInterval = setInterval(async () => {
-        attempts++;
-        
-        try {
-          // Check if there's any new auth data in localStorage
-          // This is a simplified approach - in production, you'd poll the server
-          const authCheck = localStorage.getItem('telegram_auth_pending');
-          if (authCheck) {
-            const authData = JSON.parse(authCheck);
-            localStorage.removeItem('telegram_auth_pending');
-            
-            // Verify with server
-            const response = await fetch('/api/auth/telegram', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(authData)
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              localStorage.setItem('telegram_auth', JSON.stringify({
-                user: data.user,
-                timestamp: Date.now()
-              }));
-              
-              toast({
-                title: "Успешная авторизация",
-                description: `Добро пожаловать, @${data.user.username}!`,
-              });
-              
-              onAuth(data.user);
-              clearInterval(pollInterval);
-              return;
-            }
-          }
-        } catch (error) {
-          console.error('Auth polling error:', error);
-        }
-        
-        if (attempts >= maxAttempts) {
-          clearInterval(pollInterval);
-          toast({
-            title: "Время ожидания истекло",
-            description: "Попробуйте еще раз",
-            variant: "destructive",
-          });
-        }
-      }, 3000);
-      
-    } catch (error) {
+    // Show message about manual refresh
+    setTimeout(() => {
       toast({
-        title: "Ошибка",
-        description: "Не удалось запустить проверку авторизации",
-        variant: "destructive",
+        title: "Важно",
+        description: "После нажатия /start в боте обновите эту страницу",
+        variant: "default",
       });
-    }
+    }, 5000);
   };
 
   return (

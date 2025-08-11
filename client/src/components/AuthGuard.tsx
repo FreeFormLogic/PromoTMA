@@ -10,9 +10,44 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const auth = localStorage.getItem('telegram_auth');
       if (!auth) {
+        // Check if there's a telegram auth in global storage from bot
+        const checkBotAuth = async () => {
+          try {
+            // Check all possible authorized user IDs (simple demo approach)
+            const possibleUsers = [
+              { username: 'balilegend', id: 'user1' },
+              { username: 'dudewernon', id: 'user2' },
+              { username: 'krutikov201318', id: 'user3' },
+              { username: 'partners_IRE', id: 'user4' },
+              { username: 'fluuxerr', id: 'user5' },
+              { username: 'Protasbali', id: 'user6' },
+              { username: 'Radost_no', id: 'user7' }
+            ];
+
+            for (const user of possibleUsers) {
+              const response = await fetch(`/api/telegram/auth-status/${user.id}`);
+              if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                  localStorage.setItem('telegram_auth', JSON.stringify({
+                    user: data.user,
+                    timestamp: Date.now()
+                  }));
+                  setUser(data.user);
+                  setIsAuthenticated(true);
+                  return;
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Bot auth check error:', error);
+          }
+        };
+
+        await checkBotAuth();
         setIsAuthenticated(false);
         setUser(null);
         return;
