@@ -13,15 +13,7 @@ const telegramAuthSchema = z.object({
   hash: z.string(),
 });
 
-const ALLOWED_ACCOUNTS = [
-  "balilegend",
-  "dudewernon", 
-  "krutikov201318",
-  "partners_IRE",
-  "fluuxerr",
-  "Protasbali",
-  "Radost_no"
-];
+
 
 function verifyTelegramAuth(authData: any): boolean {
   const { hash, ...data } = authData;
@@ -64,12 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check if username is in allowed accounts
-      if (!authData.username || !ALLOWED_ACCOUNTS.includes(authData.username)) {
-        return res.status(403).json({ 
-          message: "Доступ запрещен. Обратитесь к администратору для получения доступа." 
-        });
-      }
+
       
       // Check auth date (should be within 24 hours)
       const authDate = new Date(authData.auth_date * 1000);
@@ -82,7 +69,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const user = await storage.authenticateTelegramUser(authData.username);
+      // Find or create user
+      let user = await storage.authenticateTelegramUser(authData.username || `user_${authData.id}`);
+      
+      if (!user) {
+        // Create new user if not exists
+        user = await storage.createUser({
+          username: authData.username || `user_${authData.id}`,
+          password: 'telegram_auth',
+          telegramUsername: authData.username ? `@${authData.username}` : `@user_${authData.id}`,
+          isAuthorized: true
+        });
+      }
+      
       return res.json({ user, message: "Авторизация успешна" });
     } catch (error) {
       console.error("Auth error:", error);

@@ -142,11 +142,10 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
           </Button>
           
           <div className="mt-6 text-center text-sm text-gray-600">
-            <p>Доступ разрешен только авторизованным пользователям:</p>
-            <div className="mt-2 text-xs text-gray-500 space-y-1">
-              <div>@balilegend, @dudewernon, @krutikov201318</div>
-              <div>@partners_IRE, @fluuxerr, @Protasbali, @Radost_no</div>
-            </div>
+            <p>Войдите через Telegram для доступа к справочнику</p>
+            <p className="text-xs text-gray-500 mt-2">
+              60+ модулей • 30+ ниш • 25+ УТП
+            </p>
           </div>
         </CardContent>
       </Card>

@@ -55,6 +55,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
   telegramUsername: true,
+  isAuthorized: true,
 });
 
 export const insertModuleSchema = createInsertSchema(modules).omit({

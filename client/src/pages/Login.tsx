@@ -68,14 +68,41 @@ export default function Login() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          <Alert className="border-orange-200 bg-orange-50">
-            <AlertCircle className="h-4 w-4 text-orange-600" />
-            <AlertDescription className="text-orange-800">
-              Доступ имеют только авторизованные пользователи: @balilegend и @Protasbali
-            </AlertDescription>
-          </Alert>
+          <Button
+            onClick={() => {
+              // Имитируем вход через Telegram без проверки ограниченного списка пользователей
+              const simulatedUser = {
+                id: Date.now(),
+                first_name: "User",
+                username: `user_${Date.now()}`,
+                auth_date: Math.floor(Date.now() / 1000),
+                hash: "simulated_hash"
+              };
+              
+              localStorage.setItem('telegram_auth', JSON.stringify({
+                user: {
+                  id: simulatedUser.id.toString(),
+                  username: simulatedUser.username,
+                  telegramUsername: `@${simulatedUser.username}`,
+                  isAuthorized: true
+                },
+                timestamp: Date.now()
+              }));
+              
+              toast({
+                title: "Вход выполнен",
+                description: "Добро пожаловать в справочник!",
+              });
+              
+              setLocation("/");
+            }}
+            className="w-full bg-telegram hover:bg-telegram-dark"
+          >
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Войти через Telegram
+          </Button>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 hidden">
             <div className="space-y-2">
               <Label htmlFor="username">Имя пользователя Telegram</Label>
               <Input
