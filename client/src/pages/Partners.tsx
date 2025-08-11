@@ -26,14 +26,87 @@ import {
   TreePine
 } from "lucide-react";
 
+// Optimized commission structure (50% of revenue allocated to partners)
 const partnerLevels = [
-  { level: 1, commission: 15, color: "bg-yellow-500", description: "Прямые партнеры", minClients: 1, minQuality: 300 },
-  { level: 2, commission: 10, color: "bg-orange-500", description: "2-й уровень", minClients: 3, minQuality: 500 },
-  { level: 3, commission: 7, color: "bg-red-500", description: "3-й уровень", minClients: 5, minQuality: 800 },
-  { level: 4, commission: 5, color: "bg-purple-500", description: "4-й уровень", minClients: 10, minQuality: 1200 },
-  { level: 5, commission: 3, color: "bg-blue-500", description: "5-й уровень", minClients: 20, minQuality: 2000 },
-  { level: 6, commission: 2, color: "bg-indigo-500", description: "6-й уровень (пакет)", minClients: 50, minQuality: 5000, isPremium: true },
-  { level: 7, commission: 1, color: "bg-gray-500", description: "7-й уровень (пакет)", minClients: 100, minQuality: 10000, isPremium: true }
+  { level: 1, commission: 10, color: "bg-yellow-500", description: "Прямые партнеры", minClients: 1, minQuality: 300 },
+  { level: 2, commission: 5, color: "bg-orange-500", description: "2-й уровень", minClients: 3, minQuality: 1000 },
+  { level: 3, commission: 3, color: "bg-red-500", description: "3-й уровень", minClients: 5, minQuality: 2500 },
+  { level: 4, commission: 2, color: "bg-purple-500", description: "4-й уровень", minClients: 10, minQuality: 5000 },
+  { level: 5, commission: 1, color: "bg-blue-500", description: "5-й уровень", minClients: 20, minQuality: 10000 },
+  { level: 6, commission: 0.5, color: "bg-indigo-500", description: "6-й уровень (премиум)", minClients: 50, minQuality: 25000, isPremium: true },
+  { level: 7, commission: 0.5, color: "bg-gray-500", description: "7-й уровень (ультра)", minClients: 100, minQuality: 50000, isPremium: true }
+];
+
+// Network builder tariffs
+const builderTariffs = [
+  { 
+    name: "Партнер", 
+    personalBonus: 25, 
+    networkBonus: 0,
+    levelAccess: 3,
+    price: 0,
+    color: "from-blue-500 to-blue-600",
+    requirements: "Привлечь 1+ клиента"
+  },
+  { 
+    name: "Менеджер", 
+    personalBonus: 30, 
+    networkBonus: 2,
+    levelAccess: 5,
+    price: 500,
+    color: "from-purple-500 to-purple-600",
+    requirements: "5+ личных клиентов"
+  },
+  { 
+    name: "Директор", 
+    personalBonus: 35, 
+    networkBonus: 3,
+    levelAccess: 7,
+    price: 2000,
+    color: "from-amber-500 to-amber-600",
+    requirements: "20+ личных клиентов, 100+ в структуре"
+  },
+  { 
+    name: "Президент", 
+    personalBonus: 40, 
+    networkBonus: 5,
+    levelAccess: 7,
+    price: 5000,
+    color: "from-rose-500 to-rose-600",
+    requirements: "50+ личных клиентов, 500+ в структуре"
+  }
+];
+
+// Level packages for purchase
+const levelPackages = [
+  { 
+    name: "Базовый", 
+    levels: 3, 
+    price: 0, 
+    savings: 0,
+    description: "Доступ к 3 уровням партнерской сети"
+  },
+  { 
+    name: "Расширенный", 
+    levels: 5, 
+    price: 299, 
+    savings: 500,
+    description: "Доступ к 5 уровням + бонусы"
+  },
+  { 
+    name: "Премиум", 
+    levels: 6, 
+    price: 999, 
+    savings: 2000,
+    description: "Доступ к 6 уровням + VIP поддержка"
+  },
+  { 
+    name: "Ультра", 
+    levels: 7, 
+    price: 2999, 
+    savings: 5000,
+    description: "Полный доступ + эксклюзивные возможности"
+  }
 ];
 
 // Calculate total quality score based on clients and their deal sizes
@@ -41,13 +114,18 @@ const calculateQualityScore = (totalClients: number, avgDealSize: number): numbe
   return totalClients * avgDealSize;
 };
 
-// Base commission rates by deal size
-const getBaseCommissionRate = (dealSize: number): number => {
-  if (dealSize >= 2000) return 40;
-  if (dealSize >= 1500) return 35;
-  if (dealSize >= 1000) return 30;
-  if (dealSize >= 500) return 25;
-  return 20; // $300 = 20%
+// Base commission rates by deal size (personal sales)
+const getBaseCommissionRate = (dealSize: number, tariff: typeof builderTariffs[number]): number => {
+  // Base rate adjusted by tariff
+  let baseRate = tariff.personalBonus;
+  
+  // Deal size bonuses
+  if (dealSize >= 2000) baseRate += 10;
+  else if (dealSize >= 1500) baseRate += 7;
+  else if (dealSize >= 1000) baseRate += 5;
+  else if (dealSize >= 500) baseRate += 2;
+  
+  return Math.min(50, baseRate); // Cap at 50%
 };
 
 // Order count multiplier (1.0 to 1.25 based on order count)
@@ -61,8 +139,8 @@ const getOrderMultiplier = (orderCount: number): number => {
 };
 
 // Final commission rate with multiplier
-const getFinalCommissionRate = (dealSize: number, orderCount: number): number => {
-  const baseRate = getBaseCommissionRate(dealSize);
+const getFinalCommissionRate = (dealSize: number, orderCount: number, tariff: typeof builderTariffs[number]): number => {
+  const baseRate = getBaseCommissionRate(dealSize, tariff);
   const multiplier = getOrderMultiplier(orderCount);
   return Math.min(50, Math.round(baseRate * multiplier)); // Cap at 50%
 };
@@ -73,27 +151,39 @@ export default function Partners() {
   const [totalClients, setTotalClients] = useState([5]);
   const [activeClients, setActiveClients] = useState([3]);
   const [orderCount, setOrderCount] = useState([1]);
-  const [premiumPackage, setPremiumPackage] = useState(0); // 0 = basic (5 levels), 1 = premium (6 levels), 2 = ultimate (7 levels)
+  const [networkSize, setNetworkSize] = useState([10]);
+  const [selectedPackage, setSelectedPackage] = useState(0);
+  const [selectedTariff, setSelectedTariff] = useState(0);
   const [copied, setCopied] = useState(false);
   const [expandedLevel, setExpandedLevel] = useState<number | null>(null);
 
-  const baseCommission = getBaseCommissionRate(dealSize[0]);
+  const currentTariff = builderTariffs[selectedTariff];
+  const currentPackage = levelPackages[selectedPackage];
+  const baseCommission = getBaseCommissionRate(dealSize[0], currentTariff);
   const orderMultiplier = getOrderMultiplier(orderCount[0]);
-  const currentCommission = getFinalCommissionRate(dealSize[0], orderCount[0]);
+  const currentCommission = Math.min(50, Math.round(baseCommission * orderMultiplier));
   const monthlyEarnings = activeClients[0] * (monthlySubscription[0] * 0.1);
   const oneTimeEarning = (dealSize[0] * currentCommission) / 100;
   
+  // Calculate network earnings
+  const networkEarnings = partnerLevels.slice(0, currentPackage.levels).reduce((total, level, index) => {
+    const partnersAtLevel = Math.max(0, Math.floor(networkSize[0] * Math.pow(0.5, index)));
+    const earningsAtLevel = partnersAtLevel * dealSize[0] * (level.commission / 100);
+    return total + earningsAtLevel;
+  }, 0);
+  
+  // Additional network bonus from tariff
+  const networkBonus = networkEarnings * (currentTariff.networkBonus / 100);
+  
   // Calculate quality score and available levels
   const qualityScore = calculateQualityScore(totalClients[0], dealSize[0]);
-  const maxBasicLevels = 5;
-  const maxLevelsWithPackage = maxBasicLevels + premiumPackage;
   const unlockedLevels = Math.min(
     partnerLevels.filter(level => 
       totalClients[0] >= level.minClients && 
       qualityScore >= level.minQuality &&
-      level.level <= maxLevelsWithPackage
+      level.level <= currentPackage.levels
     ).length,
-    maxLevelsWithPackage
+    currentPackage.levels
   );
 
   const referralLink = "https://telegram-miniapps.directory/ref/balilegend123";
@@ -128,8 +218,8 @@ export default function Partners() {
             Партнерская программа
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
-            Зарабатывайте от 20% до 50% с каждого приведенного клиента (базовый процент × мультипликатор количества заказов) и 10% от всех абонентских платежей. 
-            Многоуровневая система вознаграждений с 5 уровнями глубины.
+            Получайте до 50% от личных продаж и до 22% от структуры партнеров. 
+            Мы выделяем 50% выручки на партнерские вознаграждения!
           </p>
           
           {/* Interactive Commission Progression */}
@@ -215,6 +305,138 @@ export default function Partners() {
             </div>
           </div>
         </div>
+
+        {/* Tariff Selection */}
+        <Card className="bg-white shadow-lg mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Award className="w-6 h-6 text-telegram" />
+              <span>Выберите ваш тариф</span>
+            </CardTitle>
+            <p className="text-gray-600">
+              Инвестируйте в развитие сети и получайте повышенные комиссии
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {builderTariffs.map((tariff, index) => (
+                <div 
+                  key={index}
+                  onClick={() => setSelectedTariff(index)}
+                  className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg ${
+                    selectedTariff === index 
+                      ? 'border-telegram bg-telegram/5 scale-105' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  {selectedTariff === index && (
+                    <div className="absolute -top-2 -right-2">
+                      <div className="w-6 h-6 bg-telegram rounded-full flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className={`h-2 rounded-full bg-gradient-to-r ${tariff.color} mb-3`}></div>
+                  
+                  <h3 className="font-bold text-lg mb-2">{tariff.name}</h3>
+                  
+                  <div className="space-y-2 mb-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Личные:</span>
+                      <Badge className="bg-green-100 text-green-800">{tariff.personalBonus}%</Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Сеть:</span>
+                      <Badge className="bg-blue-100 text-blue-800">+{tariff.networkBonus}%</Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Уровни:</span>
+                      <span className="font-medium">{tariff.levelAccess}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    {tariff.price > 0 ? (
+                      <div className="text-2xl font-bold text-telegram">${tariff.price}</div>
+                    ) : (
+                      <div className="text-lg font-bold text-green-600">Бесплатно</div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-2 text-xs text-gray-500 text-center">
+                    {tariff.requirements}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Level Packages */}
+        <Card className="bg-white shadow-lg mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Package className="w-6 h-6 text-telegram" />
+              <span>Пакеты уровней</span>
+            </CardTitle>
+            <p className="text-gray-600">
+              Разблокируйте больше уровней для увеличения пассивного дохода
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {levelPackages.map((pkg, index) => (
+                <div 
+                  key={index}
+                  onClick={() => setSelectedPackage(index)}
+                  className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg ${
+                    selectedPackage === index 
+                      ? 'border-telegram bg-telegram/5 scale-105' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  {selectedPackage === index && (
+                    <div className="absolute -top-2 -right-2">
+                      <div className="w-6 h-6 bg-telegram rounded-full flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                  )}
+                  
+                  {pkg.savings > 0 && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-red-500 text-white text-xs">
+                        Экономия ${pkg.savings}
+                      </Badge>
+                    </div>
+                  )}
+                  
+                  <h3 className="font-bold text-lg mb-2 mt-2">{pkg.name}</h3>
+                  
+                  <div className="text-3xl font-bold text-telegram text-center mb-2">
+                    {pkg.levels}
+                  </div>
+                  <div className="text-sm text-gray-600 text-center mb-3">
+                    уровн{pkg.levels > 1 ? 'ей' : 'ь'}
+                  </div>
+                  
+                  <div className="text-xs text-gray-500 mb-3">
+                    {pkg.description}
+                  </div>
+                  
+                  <div className="text-center">
+                    {pkg.price > 0 ? (
+                      <div className="text-2xl font-bold">${pkg.price}</div>
+                    ) : (
+                      <div className="text-lg font-bold text-green-600">Включено</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid lg:grid-cols-3 gap-6 mb-8">
           {/* Calculator Section */}
@@ -344,42 +566,24 @@ export default function Partners() {
                   </div>
                 </div>
 
-                {/* Premium Package Selector */}
+                {/* Network Size */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <label className="text-sm font-medium text-gray-700">Пакет уровней</label>
+                    <label className="text-sm font-medium text-gray-700">Размер сети</label>
                     <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                      {maxLevelsWithPackage} уровн{maxLevelsWithPackage > 1 ? 'ей' : 'ь'}
+                      {networkSize[0]}
                     </Badge>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Button
-                      size="sm"
-                      variant={premiumPackage === 0 ? "default" : "outline"}
-                      onClick={() => setPremiumPackage(0)}
-                      className={premiumPackage === 0 ? "bg-telegram" : ""}
-                    >
-                      Базовый (5)
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={premiumPackage === 1 ? "default" : "outline"}
-                      onClick={() => setPremiumPackage(1)}
-                      className={premiumPackage === 1 ? "bg-purple-600" : ""}
-                    >
-                      Премиум (6)
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={premiumPackage === 2 ? "default" : "outline"}
-                      onClick={() => setPremiumPackage(2)}
-                      className={premiumPackage === 2 ? "bg-gradient-to-r from-purple-600 to-pink-600" : ""}
-                    >
-                      Ультра (7)
-                    </Button>
-                  </div>
+                  <Slider
+                    value={networkSize}
+                    onValueChange={setNetworkSize}
+                    max={500}
+                    min={0}
+                    step={10}
+                    className="w-full"
+                  />
                   <div className="text-xs text-gray-500">
-                    Качество: {qualityScore.toLocaleString()} (клиенты × средний чек)
+                    Партнеров в структуре
                   </div>
                 </div>
               </div>
@@ -399,24 +603,74 @@ export default function Partners() {
                 </div>
               </div>
 
-              {/* Earnings Display */}
-              <div className="grid md:grid-cols-3 gap-3">
-                <div className="bg-green-50 p-3 rounded-lg border border-green-200 text-center">
-                  <div className="text-sm text-green-700 mb-1">Комиссия за ${dealSize[0]}</div>
-                  <div className="text-2xl font-bold text-green-600">{currentCommission}%</div>
-                  <div className="text-xs text-green-600">${oneTimeEarning.toFixed(0)} за сделку</div>
+              {/* Comprehensive Earnings Display */}
+              <div className="space-y-4">
+                {/* Personal Sales */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
+                  <h4 className="font-semibold text-green-900 mb-2">💰 Личные продажи</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-sm text-green-700">Комиссия ({currentTariff.name})</div>
+                      <div className="text-xl font-bold text-green-600">{currentCommission}%</div>
+                      <div className="text-xs text-green-600">${oneTimeEarning.toFixed(0)} за сделку</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-green-700">Месячный доход</div>
+                      <div className="text-xl font-bold text-green-600">${(oneTimeEarning * totalClients[0]).toFixed(0)}</div>
+                      <div className="text-xs text-green-600">{totalClients[0]} клиентов × ${dealSize[0]}</div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 text-center">
-                  <div className="text-sm text-blue-700 mb-1">В месяц</div>
-                  <div className="text-2xl font-bold text-blue-600">${monthlyEarnings.toFixed(0)}</div>
-                  <div className="text-xs text-blue-600">10% от подписок</div>
+                {/* Network Earnings */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-900 mb-2">🌐 Доход от сети</h4>
+                  <div className="space-y-2">
+                    {partnerLevels.slice(0, currentPackage.levels).map((level, index) => {
+                      const partnersAtLevel = Math.max(0, Math.floor(networkSize[0] * Math.pow(0.5, index)));
+                      const earningsAtLevel = partnersAtLevel * dealSize[0] * (level.commission / 100);
+                      
+                      return (
+                        <div key={level.level} className="flex justify-between items-center text-sm">
+                          <span className="text-blue-700">
+                            Уровень {level.level} ({partnersAtLevel} партнеров)
+                          </span>
+                          <Badge className="bg-blue-100 text-blue-800">
+                            ${earningsAtLevel.toFixed(0)} ({level.commission}%)
+                          </Badge>
+                        </div>
+                      );
+                    })}
+                    <div className="border-t pt-2 flex justify-between items-center">
+                      <span className="font-semibold text-blue-900">Всего от сети:</span>
+                      <span className="text-xl font-bold text-blue-600">
+                        ${(networkEarnings + networkBonus).toFixed(0)}
+                      </span>
+                    </div>
+                    {networkBonus > 0 && (
+                      <div className="text-xs text-blue-600">
+                        Включая бонус {currentTariff.networkBonus}%: +${networkBonus.toFixed(0)}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="bg-telegram/5 p-3 rounded-lg border border-telegram/20 text-center">
-                  <div className="text-sm text-telegram mb-1">В год</div>
-                  <div className="text-2xl font-bold text-telegram">${(oneTimeEarning + monthlyEarnings * 12).toFixed(0)}</div>
-                  <div className="text-xs text-telegram">Общий доход</div>
+                {/* Total Earnings */}
+                <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-lg border border-purple-200">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h4 className="font-semibold text-purple-900">🎯 Общий потенциал</h4>
+                      <div className="text-sm text-purple-700 mt-1">Месячный доход</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-3xl font-bold text-purple-600">
+                        ${(oneTimeEarning * totalClients[0] + networkEarnings + networkBonus + monthlyEarnings).toFixed(0)}
+                      </div>
+                      <div className="text-sm text-purple-700">
+                        в год: ${((oneTimeEarning * totalClients[0] + networkEarnings + networkBonus + monthlyEarnings) * 12).toFixed(0)}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -459,29 +713,23 @@ export default function Partners() {
 
               <Separator />
 
-              {/* Commission Scale */}
+              {/* Current Tariff Benefits */}
               <div className="space-y-2">
-                <h4 className="font-semibold text-gray-900 text-sm">Базовые ставки:</h4>
-                <div className="space-y-1 text-xs">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">$300-499:</span>
-                    <Badge variant="secondary" className="bg-red-100 text-red-800">20%</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">$500-999:</span>
-                    <Badge variant="secondary" className="bg-orange-100 text-orange-800">25%</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">$1000-1499:</span>
-                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">30%</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">$1500-1999:</span>
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">35%</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">$2000+:</span>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">40%</Badge>
+                <h4 className="font-semibold text-gray-900 text-sm">Ваш тариф: {currentTariff.name}</h4>
+                <div className="p-3 bg-gradient-to-r from-telegram/5 to-telegram/10 rounded-lg border border-telegram/20">
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700">Личные продажи:</span>
+                      <Badge className="bg-green-100 text-green-800">{currentTariff.personalBonus}%+</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700">Бонус от сети:</span>
+                      <Badge className="bg-blue-100 text-blue-800">+{currentTariff.networkBonus}%</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700">Доступ к уровням:</span>
+                      <Badge className="bg-purple-100 text-purple-800">{currentTariff.levelAccess}</Badge>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -563,7 +811,7 @@ export default function Partners() {
               <span>Интерактивная структура партнерской сети</span>
             </CardTitle>
             <p className="text-gray-600">
-              Многоуровневая система с расширением до {maxLevelsWithPackage} уровн{maxLevelsWithPackage > 1 ? 'ей' : 'я'} глубины
+              Многоуровневая система с расширением до {currentPackage.levels} уровн{currentPackage.levels > 1 ? 'ей' : 'я'} глубины
             </p>
           </CardHeader>
           <CardContent>
@@ -658,16 +906,16 @@ export default function Partners() {
               <div className="mt-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-gray-700">Прогресс открытия уровней</span>
-                  <span className="text-sm text-gray-500">{unlockedLevels}/{maxLevelsWithPackage}</span>
+                  <span className="text-sm text-gray-500">{unlockedLevels}/{currentPackage.levels}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
                     className="bg-gradient-to-r from-telegram to-telegram-dark h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${(unlockedLevels / maxLevelsWithPackage) * 100}%` }}
+                    style={{ width: `${(unlockedLevels / currentPackage.levels) * 100}%` }}
                   ></div>
                 </div>
                 <div className="text-xs text-gray-500 mt-2">
-                  Следующий уровень: {unlockedLevels < maxLevelsWithPackage ? 
+                  Следующий уровень: {unlockedLevels < currentPackage.levels ? 
                     `${partnerLevels[unlockedLevels]?.minClients} клиентов, качество ${partnerLevels[unlockedLevels]?.minQuality?.toLocaleString()}` : 
                     'Все уровни открыты!'
                   }
@@ -677,12 +925,12 @@ export default function Partners() {
 
             {/* Interactive Level Cards */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {partnerLevels.slice(0, maxLevelsWithPackage).map((level, index) => {
+              {partnerLevels.slice(0, currentPackage.levels).map((level, index) => {
                 const isUnlocked = index < unlockedLevels;
                 const isQualityMet = qualityScore >= level.minQuality;
                 const isClientsMet = totalClients[0] >= level.minClients;
                 const isPremiumLevel = level.isPremium;
-                const isPackageAvailable = level.level <= maxLevelsWithPackage;
+                const isPackageAvailable = level.level <= currentPackage.levels;
                 
                 return (
                   <div key={level.level} className={`relative p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${
