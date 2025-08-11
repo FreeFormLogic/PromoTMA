@@ -1,6 +1,7 @@
 import { type User, type InsertUser, type Module, type Industry, type USP, type Objection } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { allModulesData } from "./seedModules";
+import { allIndustriesData } from "./seedIndustries";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -72,39 +73,8 @@ export class MemStorage implements IStorage {
   }
 
   private initializeIndustries() {
-    const industriesData = [
-      {
-        name: "Розничная торговля и e-commerce",
-        description: "Полноценный интернет-магазин в Telegram",
-        icon: "Store",
-        solutions: ["Каталог товаров", "Корзина и оплата", "Система скидок", "Управление заказами"],
-        painPoints: ["Высокие комиссии маркетплейсов", "Сложность привлечения клиентов", "Дорогая разработка сайта"]
-      },
-      {
-        name: "Рестораны и доставка еды",
-        description: "Прием заказов и доставка через Telegram",
-        icon: "UtensilsCrossed",
-        solutions: ["Меню с фото", "Онлайн заказы", "Система доставки", "Программа лояльности"],
-        painPoints: ["Высокие комиссии агрегаторов", "Сложность управления заказами", "Отсутствие прямой связи с клиентами"]
-      },
-      {
-        name: "Образование и онлайн-курсы",
-        description: "Платформа обучения внутри Telegram",
-        icon: "GraduationCap",
-        solutions: ["Видеоуроки", "Тесты и задания", "Сертификаты", "Прогресс обучения"],
-        painPoints: ["Дорогие LMS платформы", "Низкая вовлеченность студентов", "Сложность создания курсов"]
-      }
-    ];
-
-    industriesData.forEach(industryData => {
-      const industry: Industry = {
-        id: randomUUID(),
-        name: industryData.name,
-        description: industryData.description,
-        icon: industryData.icon,
-        solutions: industryData.solutions,
-        painPoints: industryData.painPoints
-      };
+    // Загружаем все отрасли из файла seedIndustries.ts
+    allIndustriesData.forEach(industry => {
       this.industries.set(industry.id, industry);
     });
   }

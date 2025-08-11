@@ -27,9 +27,13 @@ export const industries = pgTable("industries", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   description: text("description").notNull(),
+  importance: text("importance").notNull(), // Почему критически важен
+  category: text("category").notNull(), // КРИТИЧЕСКИ ВАЖНО, ОЧЕНЬ ПОЛЕЗНО, ПОЛЕЗНО
   icon: text("icon").notNull(),
-  solutions: jsonb("solutions").notNull(),
-  painPoints: jsonb("pain_points").notNull(),
+  painPoints: jsonb("pain_points").notNull(), // Болевые точки и решения
+  requiredModules: jsonb("required_modules").notNull(), // Обязательные модули
+  recommendedModules: jsonb("recommended_modules").notNull(), // Рекомендуемые модули
+  keyMetrics: jsonb("key_metrics").notNull(), // Ключевые метрики
 });
 
 export const usps = pgTable("usps", {
@@ -73,5 +77,6 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Module = typeof modules.$inferSelect;
 export type Industry = typeof industries.$inferSelect;
+export type InsertIndustry = z.infer<typeof insertIndustrySchema>;
 export type USP = typeof usps.$inferSelect;
 export type Objection = typeof objections.$inferSelect;
