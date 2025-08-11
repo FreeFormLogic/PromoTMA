@@ -27,12 +27,19 @@ import {
 } from "lucide-react";
 
 const partnerLevels = [
-  { level: 1, commission: 15, color: "bg-yellow-500", description: "Прямые партнеры", minClients: 1 },
-  { level: 2, commission: 10, color: "bg-orange-500", description: "2-й уровень", minClients: 3 },
-  { level: 3, commission: 7, color: "bg-red-500", description: "3-й уровень", minClients: 5 },
-  { level: 4, commission: 5, color: "bg-purple-500", description: "4-й уровень", minClients: 10 },
-  { level: 5, commission: 3, color: "bg-blue-500", description: "5-й уровень", minClients: 20 }
+  { level: 1, commission: 15, color: "bg-yellow-500", description: "Прямые партнеры", minClients: 1, minQuality: 300 },
+  { level: 2, commission: 10, color: "bg-orange-500", description: "2-й уровень", minClients: 3, minQuality: 500 },
+  { level: 3, commission: 7, color: "bg-red-500", description: "3-й уровень", minClients: 5, minQuality: 800 },
+  { level: 4, commission: 5, color: "bg-purple-500", description: "4-й уровень", minClients: 10, minQuality: 1200 },
+  { level: 5, commission: 3, color: "bg-blue-500", description: "5-й уровень", minClients: 20, minQuality: 2000 },
+  { level: 6, commission: 2, color: "bg-indigo-500", description: "6-й уровень (пакет)", minClients: 50, minQuality: 5000, isPremium: true },
+  { level: 7, commission: 1, color: "bg-gray-500", description: "7-й уровень (пакет)", minClients: 100, minQuality: 10000, isPremium: true }
 ];
+
+// Calculate total quality score based on clients and their deal sizes
+const calculateQualityScore = (totalClients: number, avgDealSize: number): number => {
+  return totalClients * avgDealSize;
+};
 
 // Base commission rates by deal size
 const getBaseCommissionRate = (dealSize: number): number => {
@@ -66,6 +73,7 @@ export default function Partners() {
   const [totalClients, setTotalClients] = useState([5]);
   const [activeClients, setActiveClients] = useState([3]);
   const [orderCount, setOrderCount] = useState([1]);
+  const [premiumPackage, setPremiumPackage] = useState(0); // 0 = basic (5 levels), 1 = premium (6 levels), 2 = ultimate (7 levels)
   const [copied, setCopied] = useState(false);
   const [expandedLevel, setExpandedLevel] = useState<number | null>(null);
 
@@ -74,7 +82,19 @@ export default function Partners() {
   const currentCommission = getFinalCommissionRate(dealSize[0], orderCount[0]);
   const monthlyEarnings = activeClients[0] * (monthlySubscription[0] * 0.1);
   const oneTimeEarning = (dealSize[0] * currentCommission) / 100;
-  const unlockedLevels = partnerLevels.filter(level => totalClients[0] >= level.minClients).length;
+  
+  // Calculate quality score and available levels
+  const qualityScore = calculateQualityScore(totalClients[0], dealSize[0]);
+  const maxBasicLevels = 5;
+  const maxLevelsWithPackage = maxBasicLevels + premiumPackage;
+  const unlockedLevels = Math.min(
+    partnerLevels.filter(level => 
+      totalClients[0] >= level.minClients && 
+      qualityScore >= level.minQuality &&
+      level.level <= maxLevelsWithPackage
+    ).length,
+    maxLevelsWithPackage
+  );
 
   const referralLink = "https://telegram-miniapps.directory/ref/balilegend123";
   
@@ -112,44 +132,84 @@ export default function Partners() {
             Многоуровневая система вознаграждений с 5 уровнями глубины.
           </p>
           
-          {/* Commission progression visual */}
+          {/* Interactive Commission Progression */}
           <div className="flex justify-center">
-            <div className="bg-white rounded-xl p-4 shadow-lg border max-w-md">
-              <h3 className="text-center font-semibold text-gray-900 mb-3">Базовые ставки × Мультипликатор</h3>
-              <div className="flex justify-between items-center text-sm">
+            <div className="bg-white rounded-xl p-6 shadow-lg border max-w-2xl w-full">
+              <h3 className="text-center font-semibold text-gray-900 mb-4">Интерактивная шкала комиссий</h3>
+              
+              {/* Dynamic circles showing current values */}
+              <div className="flex justify-between items-center text-sm mb-6">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-2">
-                    <span className="text-red-700 font-bold">20%</span>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
+                    dealSize[0] >= 300 && dealSize[0] < 500 ? 'bg-red-200 ring-2 ring-red-400 scale-110' : 'bg-red-100'
+                  }`}>
+                    <span className="text-red-700 font-bold">{Math.round(20 * orderMultiplier)}%</span>
                   </div>
                   <span className="text-gray-600">$300</span>
                 </div>
-                <div className="flex-1 h-0.5 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2"></div>
+                <div className="flex-1 h-1 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2 rounded-full"></div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-2">
-                    <span className="text-orange-700 font-bold">25%</span>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
+                    dealSize[0] >= 500 && dealSize[0] < 1000 ? 'bg-orange-200 ring-2 ring-orange-400 scale-110' : 'bg-orange-100'
+                  }`}>
+                    <span className="text-orange-700 font-bold">{Math.round(25 * orderMultiplier)}%</span>
                   </div>
                   <span className="text-gray-600">$500</span>
                 </div>
-                <div className="flex-1 h-0.5 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2"></div>
+                <div className="flex-1 h-1 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2 rounded-full"></div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mb-2">
-                    <span className="text-yellow-700 font-bold">30%</span>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
+                    dealSize[0] >= 1000 && dealSize[0] < 1500 ? 'bg-yellow-200 ring-2 ring-yellow-400 scale-110' : 'bg-yellow-100'
+                  }`}>
+                    <span className="text-yellow-700 font-bold">{Math.round(30 * orderMultiplier)}%</span>
                   </div>
                   <span className="text-gray-600">$1K</span>
                 </div>
-                <div className="flex-1 h-0.5 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2"></div>
+                <div className="flex-1 h-1 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2 rounded-full"></div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
-                    <span className="text-blue-700 font-bold">35%</span>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
+                    dealSize[0] >= 1500 && dealSize[0] < 2000 ? 'bg-blue-200 ring-2 ring-blue-400 scale-110' : 'bg-blue-100'
+                  }`}>
+                    <span className="text-blue-700 font-bold">{Math.round(35 * orderMultiplier)}%</span>
                   </div>
                   <span className="text-gray-600">$1.5K</span>
                 </div>
-                <div className="flex-1 h-0.5 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2"></div>
+                <div className="flex-1 h-1 bg-gradient-to-r from-red-300 via-orange-300 via-yellow-300 via-blue-300 to-green-300 mx-2 rounded-full"></div>
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-2">
-                    <span className="text-green-700 font-bold">40%</span>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
+                    dealSize[0] >= 2000 ? 'bg-green-200 ring-2 ring-green-400 scale-110' : 'bg-green-100'
+                  }`}>
+                    <span className="text-green-700 font-bold">{Math.round(40 * orderMultiplier)}%</span>
                   </div>
                   <span className="text-gray-600">$2K+</span>
+                </div>
+              </div>
+
+              {/* Maximum 50% achievement circle */}
+              <div className="text-center">
+                <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3 transition-all duration-500 ${
+                  currentCommission >= 50 ? 'bg-gradient-to-r from-purple-400 to-pink-400 ring-4 ring-purple-300 shadow-lg animate-pulse' : 'bg-gray-100'
+                }`}>
+                  <span className={`font-bold text-lg ${currentCommission >= 50 ? 'text-white' : 'text-gray-400'}`}>50%</span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  Максимальная комиссия
+                </div>
+                {currentCommission >= 50 && (
+                  <div className="text-xs text-purple-600 font-medium mt-1">
+                    🎉 Достигнута максимальная ставка!
+                  </div>
+                )}
+              </div>
+
+              {/* Current selection indicator */}
+              <div className="mt-4 p-3 bg-gray-50 rounded-lg text-center">
+                <div className="text-sm text-gray-600 mb-1">Текущая ставка</div>
+                <div className="text-xl font-bold text-telegram">
+                  {baseCommission}% × {orderMultiplier.toFixed(2)} = {currentCommission}%
+                </div>
+                <div className="text-xs text-gray-500">
+                  Влияние количества ({orderCount[0]} заказ{orderCount[0] > 1 ? 'ов' : ''}) и качества (${dealSize[0]})
                 </div>
               </div>
             </div>
@@ -281,6 +341,45 @@ export default function Partners() {
                   />
                   <div className="text-xs text-gray-500">
                     Мультипликатор: ×{orderMultiplier.toFixed(2)}
+                  </div>
+                </div>
+
+                {/* Premium Package Selector */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-medium text-gray-700">Пакет уровней</label>
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                      {maxLevelsWithPackage} уровн{maxLevelsWithPackage > 1 ? 'ей' : 'ь'}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button
+                      size="sm"
+                      variant={premiumPackage === 0 ? "default" : "outline"}
+                      onClick={() => setPremiumPackage(0)}
+                      className={premiumPackage === 0 ? "bg-telegram" : ""}
+                    >
+                      Базовый (5)
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={premiumPackage === 1 ? "default" : "outline"}
+                      onClick={() => setPremiumPackage(1)}
+                      className={premiumPackage === 1 ? "bg-purple-600" : ""}
+                    >
+                      Премиум (6)
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={premiumPackage === 2 ? "default" : "outline"}
+                      onClick={() => setPremiumPackage(2)}
+                      className={premiumPackage === 2 ? "bg-gradient-to-r from-purple-600 to-pink-600" : ""}
+                    >
+                      Ультра (7)
+                    </Button>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Качество: {qualityScore.toLocaleString()} (клиенты × средний чек)
                   </div>
                 </div>
               </div>
@@ -456,143 +555,234 @@ export default function Partners() {
           </Card>
         </div>
 
-        {/* Partner Structure Tree */}
+        {/* Interactive Partner Structure Tree */}
         <Card className="bg-white shadow-lg mb-8">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <TreePine className="w-6 h-6 text-telegram" />
-              <span>Структура партнерской сети</span>
+              <span>Интерактивная структура партнерской сети</span>
             </CardTitle>
             <p className="text-gray-600">
-              Многоуровневая система с бонусами до 5 уровня глубины
+              Многоуровневая система с расширением до {maxLevelsWithPackage} уровн{maxLevelsWithPackage > 1 ? 'ей' : 'я'} глубины
             </p>
           </CardHeader>
           <CardContent>
-            {/* Tree Structure Visualization */}
-            <div className="mb-6 overflow-x-auto">
-              <div className="min-w-full">
-                {/* Level indicators */}
-                <div className="flex items-center justify-center space-x-8 mb-4">
-                  {partnerLevels.slice(0, unlockedLevels).map((level, index) => (
-                    <div key={level.level} className="text-center">
-                      <div className={`w-3 h-3 ${level.color} rounded-full mx-auto mb-1`}></div>
-                      <div className="text-xs text-gray-500">Ур. {level.level}</div>
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Tree visualization */}
+            {/* Modern Tree Visualization */}
+            <div className="mb-8">
+              {/* Central hub with you */}
+              <div className="flex justify-center mb-8">
                 <div className="relative">
-                  <div className="flex items-center justify-center">
-                    <div className="w-12 h-12 bg-telegram rounded-full flex items-center justify-center text-white font-bold relative">
-                      ВЫ
-                      {unlockedLevels > 1 && (
-                        <div className="absolute -right-4 top-1/2 w-8 h-0.5 bg-gray-300"></div>
-                      )}
+                  <div className="w-16 h-16 bg-gradient-to-r from-telegram to-telegram-dark rounded-full flex items-center justify-center text-white font-bold shadow-lg ring-4 ring-telegram/20">
+                    ВЫ
+                  </div>
+                  
+                  {/* Animated connection lines */}
+                  {unlockedLevels > 0 && (
+                    <div className="absolute top-1/2 left-full">
+                      <div className="w-8 h-0.5 bg-gradient-to-r from-telegram to-transparent animate-pulse"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Dynamic level visualization */}
+              <div className="space-y-6">
+                {[...Array(Math.min(unlockedLevels, 3))].map((_, levelIndex) => (
+                  <div key={levelIndex} className="flex items-center justify-center space-x-4">
+                    <div className="text-xs text-gray-500 w-16 text-right">
+                      Уровень {levelIndex + 1}
                     </div>
                     
-                    {/* Level 1 */}
-                    {unlockedLevels > 0 && (
-                      <div className="flex flex-col items-center ml-8">
-                        <div className="grid grid-cols-2 gap-2">
-                          {[...Array(Math.min(totalClients[0], 4))].map((_, i) => (
-                            <div key={i} className={`w-8 h-8 ${partnerLevels[0].color} rounded-full flex items-center justify-center text-white text-xs font-bold relative`}>
-                              {i + 1}
-                              {unlockedLevels > 1 && i < 2 && (
-                                <div className="absolute -right-3 top-1/2 w-6 h-0.5 bg-gray-300"></div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
+                    {/* Partners at this level */}
+                    <div className="flex space-x-2">
+                      {[...Array(Math.min(6, Math.max(1, totalClients[0] - levelIndex * 2)))].map((_, partnerIndex) => {
+                        const level = partnerLevels[levelIndex];
+                        if (!level) return null;
                         
-                        {/* Level 2 and beyond */}
-                        {unlockedLevels > 1 && (
-                          <div className="flex space-x-4 mt-4">
-                            {[...Array(Math.min(unlockedLevels - 1, 3))].map((_, levelIndex) => (
-                              <div key={levelIndex} className="flex flex-col items-center">
-                                <div className="grid grid-cols-1 gap-1">
-                                  {[...Array(Math.min(2, Math.max(0, totalClients[0] - (levelIndex + 1) * 2)))].map((_, i) => (
-                                    <div key={i} className={`w-6 h-6 ${partnerLevels[levelIndex + 1].color} rounded-full flex items-center justify-center text-white text-xs`}>
-                                      •
-                                    </div>
-                                  ))}
-                                </div>
+                        return (
+                          <div key={partnerIndex} className="relative group">
+                            <div className={`w-10 h-10 ${level.color} rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md transition-all duration-300 hover:scale-110 cursor-pointer`}>
+                              {partnerIndex + 1}
+                            </div>
+                            
+                            {/* Tooltip on hover */}
+                            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                              {level.commission}% комиссия
+                            </div>
+                            
+                            {/* Connection to next level */}
+                            {levelIndex < unlockedLevels - 1 && partnerIndex < 3 && (
+                              <div className="absolute top-full left-1/2 transform -translate-x-1/2">
+                                <div className="w-0.5 h-6 bg-gray-300"></div>
                               </div>
-                            ))}
+                            )}
                           </div>
-                        )}
-                      </div>
-                    )}
+                        );
+                      })}
+                    </div>
+                    
+                    {/* Level stats */}
+                    <div className="text-xs text-gray-500 w-20">
+                      {partnerLevels[levelIndex]?.commission}% бонус
+                    </div>
                   </div>
+                ))}
+                
+                {/* Premium levels indicator */}
+                {unlockedLevels > 5 && (
+                  <div className="border-t pt-4 mt-4">
+                    <div className="text-center">
+                      <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full border border-purple-200">
+                        <Crown className="w-4 h-4 text-purple-600" />
+                        <span className="text-sm font-medium text-purple-800">
+                          Премиум уровни {unlockedLevels > 5 ? `6-${unlockedLevels}` : ''}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-center mt-4 space-x-2">
+                      {partnerLevels.slice(5, unlockedLevels).map((level, index) => (
+                        <div key={level.level} className="text-center">
+                          <div className={`w-8 h-8 ${level.color} rounded-full flex items-center justify-center text-white text-xs font-bold opacity-80`}>
+                            {level.level}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">{level.commission}%</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Progress indicator */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-gray-700">Прогресс открытия уровней</span>
+                  <span className="text-sm text-gray-500">{unlockedLevels}/{maxLevelsWithPackage}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-telegram to-telegram-dark h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${(unlockedLevels / maxLevelsWithPackage) * 100}%` }}
+                  ></div>
+                </div>
+                <div className="text-xs text-gray-500 mt-2">
+                  Следующий уровень: {unlockedLevels < maxLevelsWithPackage ? 
+                    `${partnerLevels[unlockedLevels]?.minClients} клиентов, качество ${partnerLevels[unlockedLevels]?.minQuality?.toLocaleString()}` : 
+                    'Все уровни открыты!'
+                  }
                 </div>
               </div>
             </div>
 
-            {/* Level Details */}
+            {/* Interactive Level Cards */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {partnerLevels.slice(0, unlockedLevels).map((level, index) => (
-                <div key={level.level} className={`p-4 rounded-lg border-2 ${
-                  totalClients[0] >= level.minClients ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'
-                }`}>
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className={`w-10 h-10 ${level.color} rounded-full flex items-center justify-center text-white font-bold`}>
-                      {level.level}
+              {partnerLevels.slice(0, maxLevelsWithPackage).map((level, index) => {
+                const isUnlocked = index < unlockedLevels;
+                const isQualityMet = qualityScore >= level.minQuality;
+                const isClientsMet = totalClients[0] >= level.minClients;
+                const isPremiumLevel = level.isPremium;
+                const isPackageAvailable = level.level <= maxLevelsWithPackage;
+                
+                return (
+                  <div key={level.level} className={`relative p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${
+                    isUnlocked 
+                      ? isPremiumLevel 
+                        ? 'border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50' 
+                        : 'border-green-200 bg-green-50' 
+                      : 'border-gray-200 bg-gray-50 opacity-70'
+                  }`}>
+                    {/* Premium badge */}
+                    {isPremiumLevel && (
+                      <div className="absolute -top-2 -right-2">
+                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                          <Crown className="w-3 h-3 mr-1" />
+                          Премиум
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className={`w-12 h-12 ${isUnlocked ? level.color : 'bg-gray-400'} rounded-full flex items-center justify-center text-white font-bold transition-all duration-300 ${
+                        isUnlocked ? 'shadow-md' : ''
+                      }`}>
+                        {isUnlocked ? level.level : '🔒'}
+                      </div>
+                      <div>
+                        <h3 className={`font-semibold ${isUnlocked ? 'text-gray-900' : 'text-gray-500'}`}>
+                          Уровень {level.level}
+                        </h3>
+                        <p className={`text-xs ${isUnlocked ? 'text-gray-600' : 'text-gray-400'}`}>
+                          {level.description}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">Уровень {level.level}</h3>
-                      <p className="text-xs text-gray-600">{level.description}</p>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Комиссия:</span>
+                        <Badge className={`text-xs ${isUnlocked ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                          {level.commission}%
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Мин. клиентов:</span>
+                        <span className={`font-medium ${isClientsMet ? 'text-green-600' : 'text-red-500'}`}>
+                          {level.minClients}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Мин. качество:</span>
+                        <span className={`font-medium text-xs ${isQualityMet ? 'text-green-600' : 'text-red-500'}`}>
+                          {level.minQuality?.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Пример дохода:</span>
+                        <span className={`font-medium ${isUnlocked ? 'text-green-600' : 'text-gray-400'}`}>
+                          ${(dealSize[0] * level.commission / 100).toFixed(0)}
+                        </span>
+                      </div>
                     </div>
+                    
+                    {/* Progress indicators */}
+                    {!isUnlocked && (
+                      <div className="mt-3 space-y-2">
+                        {!isPackageAvailable && (
+                          <div className="p-2 bg-purple-50 rounded border border-purple-200">
+                            <p className="text-xs text-purple-700">
+                              📦 Требуется {isPremiumLevel ? (level.level === 6 ? 'Премиум' : 'Ультра') : 'больший'} пакет
+                            </p>
+                          </div>
+                        )}
+                        {!isClientsMet && isPackageAvailable && (
+                          <div className="p-2 bg-yellow-50 rounded border border-yellow-200">
+                            <p className="text-xs text-yellow-700">
+                              👥 Нужно еще {level.minClients - totalClients[0]} клиент{level.minClients - totalClients[0] > 1 ? 'ов' : ''}
+                            </p>
+                          </div>
+                        )}
+                        {!isQualityMet && isPackageAvailable && (
+                          <div className="p-2 bg-blue-50 rounded border border-blue-200">
+                            <p className="text-xs text-blue-700">
+                              ⭐ Нужно качество: {(level.minQuality - qualityScore).toLocaleString()}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Success indicator */}
+                    {isUnlocked && (
+                      <div className="mt-3 p-2 bg-green-50 rounded border border-green-200">
+                        <p className="text-xs text-green-700 flex items-center">
+                          ✅ Уровень активен
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Комиссия:</span>
-                      <Badge className="bg-green-100 text-green-800 text-xs">
-                        {level.commission}%
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Мин. клиентов:</span>
-                      <span className="font-medium">{level.minClients}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Пример дохода:</span>
-                      <span className="font-medium text-green-600">
-                        ${(dealSize[0] * level.commission / 100).toFixed(0)}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {totalClients[0] < level.minClients && (
-                    <div className="mt-3 p-2 bg-yellow-50 rounded border border-yellow-200">
-                      <p className="text-xs text-yellow-700">
-                        Нужно еще {level.minClients - totalClients[0]} клиент{level.minClients - totalClients[0] > 1 ? 'ов' : ''} для разблокировки
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ))}
-              
-              {/* Locked levels */}
-              {partnerLevels.slice(unlockedLevels).map((level, index) => (
-                <div key={level.level} className="p-4 rounded-lg border-2 border-gray-200 bg-gray-50 opacity-60">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-white font-bold">
-                      🔒
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-500">Уровень {level.level}</h3>
-                      <p className="text-xs text-gray-500">Заблокирован</p>
-                    </div>
-                  </div>
-                  
-                  <div className="text-center p-2 bg-gray-100 rounded">
-                    <p className="text-xs text-gray-500">
-                      Нужно {level.minClients} клиентов
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Summary */}
