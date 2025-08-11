@@ -112,10 +112,10 @@ function IndustryCard({ industry }: { industry: Industry }) {
           <div className="space-y-6">
             {/* Иконка и описание */}
             <div className="flex items-start gap-6" id={`industry-description-${industry.id}`}>
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
                 <IconComponent className="w-10 h-10 text-white" />
               </div>
-              <div className="flex-1 pr-4">
+              <div className="flex-1 min-w-0">
                 <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-lg">
                   {industry.description}
                 </p>
@@ -142,7 +142,7 @@ function IndustryCard({ industry }: { industry: Industry }) {
                 {painPoints.map((point, index) => (
                   <div key={index} className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <ArrowRight className="w-4 h-4 text-blue-500 mt-1 flex-shrink-0" />
-                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed pr-4">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed flex-1 min-w-0">
                       {formatText(point)}
                     </p>
                   </div>
@@ -310,33 +310,35 @@ export default function Industries() {
           </div>
 
           {/* Поиск и фильтры */}
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-center max-w-4xl mx-auto">
-            <div className="relative flex-1 w-full lg:max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Поиск по названию ниши..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
-              />
-            </div>
-            
-            <div className="flex flex-wrap gap-2 justify-center">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category)}
-                  className={`text-xs whitespace-nowrap ${
-                    selectedCategory === category
-                      ? "bg-blue-600 hover:bg-blue-700 text-white"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  {category === "ВСЕ НИШИ" ? `Все (${totalIndustries})` : category}
-                </Button>
-              ))}
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-xl border border-blue-200 dark:border-blue-700 p-6 max-w-5xl mx-auto">
+            <div className="flex flex-col lg:flex-row gap-4 items-center justify-center">
+              <div className="relative flex-1 w-full lg:max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500 w-4 h-4" />
+                <Input
+                  placeholder="Поиск по названию ниши..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-white dark:bg-blue-800 border-blue-300 dark:border-blue-600 placeholder:text-blue-500 dark:placeholder:text-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              
+              <div className="flex flex-wrap gap-2 justify-center">
+                {categories.map((category) => (
+                  <Button
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory(category)}
+                    className={`text-xs whitespace-nowrap ${
+                      selectedCategory === category
+                        ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                        : "bg-white dark:bg-blue-700 text-blue-700 dark:text-blue-200 hover:bg-blue-50 dark:hover:bg-blue-600 border-blue-200 dark:border-blue-600"
+                    }`}
+                  >
+                    {category === "ВСЕ НИШИ" ? `Все (${totalIndustries})` : category}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
