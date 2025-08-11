@@ -44,7 +44,12 @@ export class MemStorage implements IStorage {
     // Initialize authorized users
     const authorizedUsers = [
       { username: 'balilegend', telegramUsername: '@balilegend' },
-      { username: 'Protasbali', telegramUsername: '@Protasbali' }
+      { username: 'dudewernon', telegramUsername: '@dudewernon' },
+      { username: 'krutikov201318', telegramUsername: '@krutikov201318' },
+      { username: 'partners_IRE', telegramUsername: '@partners_IRE' },
+      { username: 'fluuxerr', telegramUsername: '@fluuxerr' },
+      { username: 'Protasbali', telegramUsername: '@Protasbali' },
+      { username: 'Radost_no', telegramUsername: '@Radost_no' }
     ];
 
     authorizedUsers.forEach(userData => {

@@ -1,44 +1,59 @@
-import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
+import { TelegramAuth } from "./TelegramAuth";
 
 interface AuthGuardProps {
   children: React.ReactNode;
 }
 
 export function AuthGuard({ children }: AuthGuardProps) {
-  const [, setLocation] = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Check if user is already authenticated
-    const storedAuth = localStorage.getItem('telegram_auth');
-    if (storedAuth) {
+    const checkAuth = () => {
+      const auth = localStorage.getItem('telegram_auth');
+      if (!auth) {
+        setIsAuthenticated(false);
+        return;
+      }
+
       try {
-        const authData = JSON.parse(storedAuth);
-        if (authData && authData.user && authData.user.isAuthorized) {
+        const authData = JSON.parse(auth);
+        // Check if auth data is less than 24 hours old
+        const authAge = Date.now() - authData.timestamp;
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+
+        if (authAge > maxAge) {
+          localStorage.removeItem('telegram_auth');
+          setIsAuthenticated(false);
+          return;
+        }
+
+        if (authData.user && authData.user.isAuthorized) {
+          setUser(authData.user);
           setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
         }
       } catch (error) {
         localStorage.removeItem('telegram_auth');
+        setIsAuthenticated(false);
       }
-    }
-    setIsLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      setLocation('/login');
-    }
-  }, [isLoading, isAuthenticated, setLocation]);
+  const handleAuth = (authenticatedUser: any) => {
+    setUser(authenticatedUser);
+    setIsAuthenticated(true);
+  };
 
-  if (isLoading) {
+  if (isAuthenticated === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-telegram mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Проверка авторизации...</p>
         </div>
       </div>
@@ -46,7 +61,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   if (!isAuthenticated) {
-    return null;
+    return <TelegramAuth onAuth={handleAuth} />;
   }
 
   return <>{children}</>;

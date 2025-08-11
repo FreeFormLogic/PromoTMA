@@ -11,13 +11,11 @@ import Industries from "@/pages/Industries";
 import Pricing from "@/pages/Pricing";
 import Process from "@/pages/Process";
 import Partners from "@/pages/Partners";
-import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/login" component={Login} />
       <Route path="/" component={() => (
         <AuthGuard>
           <Navigation />

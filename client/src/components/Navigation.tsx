@@ -11,14 +11,25 @@ import {
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export function Navigation() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { toast } = useToast();
 
   const handleLogout = () => {
     localStorage.removeItem('telegram_auth');
     window.location.reload();
+  };
+
+  const handlePartnersClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    toast({
+      title: "Раздел в разработке",
+      description: "Раздел 'Партнерам' еще находится в разработке. Скоро будет доступен!",
+      variant: "default",
+    });
   };
 
   const navItems = [
@@ -44,6 +55,20 @@ export function Navigation() {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location === item.path;
+              const isPartnersItem = item.path === "/partners";
+              
+              if (isPartnersItem) {
+                return (
+                  <div 
+                    key={item.path}
+                    onClick={handlePartnersClick}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer text-gray-700 hover:text-telegram hover:bg-telegram/10`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </div>
+                );
+              }
               
               return (
                 <Link key={item.path} href={item.path}>
@@ -89,6 +114,23 @@ export function Navigation() {
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location === item.path;
+                const isPartnersItem = item.path === "/partners";
+                
+                if (isPartnersItem) {
+                  return (
+                    <div 
+                      key={item.path}
+                      className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors cursor-pointer text-gray-700 hover:text-telegram hover:bg-telegram/10`}
+                      onClick={(e) => {
+                        handlePartnersClick(e);
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="font-medium">{item.label}</span>
+                    </div>
+                  );
+                }
                 
                 return (
                   <Link key={item.path} href={item.path}>
