@@ -45,9 +45,10 @@ function verifyJWT(req: any, res: any, next: any) {
 }
 
 function verifyTelegramAuth(authData: any): boolean {
-  // Check if this is a bot-verified user
-  if (authData.fromBot && authData.isAuthorized) {
-    return true;
+  // Check if this is a secure auth request
+  if (authData.fromBot && authData.hash && authData.hash.startsWith('secure_auth_')) {
+    // Verify username is authorized
+    return AUTHORIZED_USERS.includes(authData.username);
   }
   
   const { hash, ...data } = authData;

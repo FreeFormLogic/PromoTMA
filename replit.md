@@ -5,6 +5,7 @@ This is a full-stack web application for a Telegram Mini Apps directory and show
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+Security requirements: Authorized user list must remain completely private. No user should be able to impersonate another user.
 
 # System Architecture
 

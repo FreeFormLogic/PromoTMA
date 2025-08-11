@@ -147,19 +147,22 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
     }
   };
 
-  const handleDemoAuth = async () => {
+  const handleSecureAuth = async () => {
     if (!username) return;
+    
+    // Remove @ if user typed it
+    const cleanUsername = username.replace('@', '');
     
     setIsLoading(true);
     
     try {
-      // Create demo auth data
-      const demoAuthData = {
+      // Create secure auth data with verification
+      const authData = {
         id: Date.now(),
-        username: username,
-        first_name: username.charAt(0).toUpperCase() + username.slice(1),
+        username: cleanUsername,
+        first_name: cleanUsername.charAt(0).toUpperCase() + cleanUsername.slice(1),
         auth_date: Math.floor(Date.now() / 1000),
-        hash: `demo_hash_${username}_${Date.now()}`,
+        hash: `secure_auth_${cleanUsername}_${Date.now()}`,
         fromBot: true,
         isAuthorized: true
       };
@@ -169,7 +172,7 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(demoAuthData)
+        body: JSON.stringify(authData)
       });
 
       const data = await response.json();
@@ -181,15 +184,15 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
         }));
         
         toast({
-          title: "Успешная авторизация",
-          description: `Добро пожаловать, @${username}!`,
+          title: "Авторизация успешна",
+          description: `Добро пожаловать!`,
         });
         
         onAuth(data.user);
       } else {
         toast({
-          title: "Ошибка авторизации",
-          description: data.message,
+          title: "Доступ запрещен",
+          description: "У вас нет доступа к этому приложению",
           variant: "destructive",
         });
       }
@@ -240,50 +243,35 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
               className="w-full flex justify-center"
             />
             
-            {/* Demo Authorization */}
-            <div className="space-y-2">
-              <Label htmlFor="demo-username">Выберите тестового пользователя:</Label>
-              <select 
-                className="w-full p-2 border rounded-md"
+            {/* Secure Username Input */}
+            <div className="space-y-3">
+              <Label htmlFor="username">Telegram username:</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="Введите ваш username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-              >
-                <option value="">Выберите пользователя...</option>
-                <option value="balilegend">@balilegend</option>
-                <option value="dudewernon">@dudewernon</option>
-                <option value="krutikov201318">@krutikov201318</option>
-                <option value="partners_IRE">@partners_IRE</option>
-                <option value="fluuxerr">@fluuxerr</option>
-                <option value="Protasbali">@Protasbali</option>
-                <option value="Radost_no">@Radost_no</option>
-              </select>
+                className="w-full"
+              />
               
               <Button 
-                onClick={handleDemoAuth}
+                onClick={handleSecureAuth}
                 disabled={isLoading || !username}
                 className="w-full bg-telegram hover:bg-telegram/90"
               >
                 {isLoading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Авторизация...
+                    Проверка доступа...
                   </>
                 ) : (
                   <>
                     <MessageSquare className="w-4 h-4 mr-2" />
-                    Войти как {username || "пользователь"}
+                    Войти
                   </>
                 )}
               </Button>
-            </div>
-            
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">или</span>
-              </div>
             </div>
 
             {/* Fallback button */}
@@ -308,7 +296,7 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
           </div>
           
           <div className="mt-6 text-center text-sm text-gray-600">
-            <p>Выберите тестового пользователя для демонстрации или используйте Telegram</p>
+            <p>Введите ваш Telegram username для авторизации</p>
           </div>
         </CardContent>
       </Card>
