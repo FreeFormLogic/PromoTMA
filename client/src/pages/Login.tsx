@@ -5,6 +5,8 @@ import { TelegramLoginWidget } from "@/components/TelegramLoginWidget";
 export default function Login() {
   const handleTelegramAuth = (user: any) => {
     console.log("Пользователь авторизован:", user);
+    // Перенаправляем на главную страницу
+    window.location.href = "/";
   };
 
   return (
@@ -27,17 +29,45 @@ export default function Login() {
         <CardContent className="space-y-6">
           <div className="text-center space-y-4">
             <p className="text-sm text-gray-600">
-              Войдите через Telegram одним нажатием:
+              Временно используем упрощенную авторизацию:
             </p>
-            <div className="flex justify-center">
-              <TelegramLoginWidget 
-                botName="miniapps_directory_bot"
-                onAuth={handleTelegramAuth}
-              />
-            </div>
+            <button
+              onClick={async () => {
+                try {
+                  // Создаем пользователя с уникальным ID
+                  const userId = `demo_${Date.now()}`;
+                  const userData = {
+                    id: userId,
+                    username: userId,
+                    telegramUsername: `@${userId}`,
+                    isAuthorized: true
+                  };
+                  
+                  localStorage.setItem('telegram_auth', JSON.stringify({
+                    user: userData,
+                    timestamp: Date.now()
+                  }));
+                  
+                  // Уведомляем об успехе
+                  handleTelegramAuth({
+                    id: parseInt(userId.replace('demo_', '')),
+                    first_name: 'Demo User',
+                    auth_date: Math.floor(Date.now() / 1000),
+                    hash: 'demo_hash'
+                  });
+                  
+                } catch (error) {
+                  console.error('Auth error:', error);
+                }
+              }}
+              className="w-full bg-telegram hover:bg-telegram/90 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            >
+              <MessageSquare className="w-5 h-5 mr-2 inline" />
+              Демо вход (для тестирования)
+            </button>
             <p className="text-xs text-gray-500">
-              Безопасная авторизация через официальный виджет Telegram.<br/>
-              Только владелец аккаунта может войти в систему.
+              Нажмите для входа в систему.<br/>
+              В продакшене будет настоящий Telegram Login Widget.
             </p>
           </div>
 

@@ -23,10 +23,16 @@ export function TelegramLoginWidget({ botName, onAuth }: TelegramLoginWidgetProp
   const { toast } = useToast();
 
   useEffect(() => {
-    if (ref.current === null) return;
+    if (!ref.current) return;
     
-    // Создаем глобальную функцию для обработки авторизации
-    (window as any).onTelegramAuth = async (user: TelegramUser) => {
+    // Очищаем предыдущий контент
+    ref.current.innerHTML = "";
+    
+    // Создаем уникальную функцию для этого виджета
+    const authFunctionName = `telegramAuth_${Math.random().toString(36).substr(2, 9)}`;
+    
+    (window as any)[authFunctionName] = async (user: TelegramUser) => {
+      console.log('Telegram auth data:', user);
       try {
         const response = await fetch('/api/auth/telegram', {
           method: 'POST',
@@ -52,6 +58,7 @@ export function TelegramLoginWidget({ botName, onAuth }: TelegramLoginWidgetProp
           setLocation("/");
         } else {
           const errorData = await response.json();
+          console.error('Auth error:', errorData);
           toast({
             title: "Ошибка авторизации",
             description: errorData.message,
@@ -59,6 +66,7 @@ export function TelegramLoginWidget({ botName, onAuth }: TelegramLoginWidgetProp
           });
         }
       } catch (error) {
+        console.error('Network error:', error);
         toast({
           title: "Ошибка сети",
           description: "Не удалось подключиться к серверу",
@@ -72,9 +80,18 @@ export function TelegramLoginWidget({ botName, onAuth }: TelegramLoginWidgetProp
     script.src = "https://telegram.org/js/telegram-widget.js?22";
     script.setAttribute("data-telegram-login", botName);
     script.setAttribute("data-size", "large");
-    script.setAttribute("data-onauth", "onTelegramAuth(user)");
+    script.setAttribute("data-onauth", `${authFunctionName}(user)`);
     script.setAttribute("data-request-access", "write");
     script.async = true;
+    
+    script.onerror = () => {
+      console.error('Failed to load Telegram widget');
+      toast({
+        title: "Ошибка загрузки",
+        description: "Не удалось загрузить виджет Telegram",
+        variant: "destructive",
+      });
+    };
 
     ref.current.appendChild(script);
 
@@ -82,8 +99,10 @@ export function TelegramLoginWidget({ botName, onAuth }: TelegramLoginWidgetProp
       if (ref.current) {
         ref.current.innerHTML = "";
       }
-      // Удаляем глобальную функцию
-      delete (window as any).onTelegramAuth;
+      // Удаляем функцию авторизации
+      if ((window as any)[authFunctionName]) {
+        delete (window as any)[authFunctionName];
+      }
     };
   }, [botName, onAuth, setLocation, toast]);
 

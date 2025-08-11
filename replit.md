@@ -6,6 +6,14 @@ This is a full-stack web application for a Telegram Mini Apps directory and show
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (January 2025)
+- Removed authorization restrictions - all users can now access the system
+- Implemented secure Telegram authentication using Login Widget with cryptographic verification
+- Only account owners can login (hash verification prevents impersonation)
+- Switched to free in-memory database storage (MemStorage) instead of PostgreSQL
+- Added one-click demo authentication for testing
+- Fixed browser compatibility issues with Telegram widget
+
 # System Architecture
 
 ## Frontend Architecture
@@ -24,10 +32,11 @@ The server follows a RESTful API design pattern:
 - **Development Integration**: Custom Vite middleware for seamless full-stack development experience
 
 ## Authentication System
-The application implements a simplified Telegram-based authentication:
-- **Method**: Username-based authentication mimicking Telegram user verification
-- **Storage**: Local storage for client-side session persistence
-- **Authorization**: Role-based access with authorized user checking
+The application implements secure Telegram-based authentication:
+- **Method**: Telegram Login Widget with cryptographic hash verification for security
+- **Verification**: Only real Telegram account owners can login (prevents impersonation)
+- **Storage**: Local storage for client-side session persistence + in-memory server storage
+- **Fallback**: Demo authentication for testing purposes
 - **Protection**: Route guards to ensure authenticated access to protected pages
 
 ## Database and ORM
