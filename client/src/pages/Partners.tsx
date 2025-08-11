@@ -442,6 +442,7 @@ export default function Partners() {
   const [avgDealSize, setAvgDealSize] = useState([800]);
   const [totalDeals, setTotalDeals] = useState([30]);
   const [openLevels, setOpenLevels] = useState([3]);
+  const [packageSales, setPackageSales] = useState([8]);
 
   // Partner data with realistic profiles
   const [selectedPartner, setSelectedPartner] = useState<any>(null);
@@ -758,71 +759,52 @@ export default function Partners() {
 
         {showMlmFeatures && (
           <Card className="bg-white shadow-lg mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Award className="w-6 h-6 text-telegram" />
-              <span>Выберите ваш тариф</span>
-              <button
-                onClick={() => setShowHelpFor(showHelpFor === 'tariff' ? null : 'tariff')}
-                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <HelpCircle className="w-4 h-4 text-gray-400" />
-              </button>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <Award className="w-5 h-5 text-telegram" />
+              <span>Тарифы и пакеты ускорения</span>
             </CardTitle>
-            {showHelpFor === 'tariff' && (
-              <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                <button
-                  onClick={() => setShowHelpFor(null)}
-                  className="float-right p-1 hover:bg-blue-100 rounded-full"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-                <p><strong>Тарифы партнерской программы:</strong></p>
-                <ul className="list-disc list-inside mt-1 space-y-1">
-                  <li><strong>Партнер (25%):</strong> Базовый тариф для начинающих</li>
-                  <li><strong>Про (35%):</strong> Увеличенная комиссия + бонус от сети</li>
-                  <li><strong>Премиум (50%):</strong> Максимальная комиссия + все бонусы</li>
-                </ul>
-              </div>
-            )}
-            <p className="text-gray-600">
-              Инвестируйте в развитие сети и получайте повышенные комиссии
+            <p className="text-gray-600 text-sm">
+              Выберите тариф для увеличения комиссий, затем пакет для ускоренного открытия уровней
             </p>
           </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <CardContent className="space-y-5">
+            {/* Tariffs Section */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-3 text-sm">Тарифы</h3>
+              <div className="grid md:grid-cols-4 gap-3">
               {builderTariffs.map((tariff, index) => (
                 <div 
                   key={index}
                   onClick={() => setSelectedTariff(index)}
-                  className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg ${
+                  className={`relative p-3 rounded-lg border-2 cursor-pointer transition-all duration-300 ${
                     selectedTariff === index 
-                      ? 'border-telegram bg-telegram/5 scale-105' 
+                      ? 'border-telegram bg-telegram/5' 
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
                   {selectedTariff === index && (
-                    <div className="absolute -top-2 -right-2">
-                      <div className="w-6 h-6 bg-telegram rounded-full flex items-center justify-center">
-                        <Check className="w-4 h-4 text-white" />
+                    <div className="absolute -top-1 -right-1">
+                      <div className="w-4 h-4 bg-telegram rounded-full flex items-center justify-center">
+                        <Check className="w-3 h-3 text-white" />
                       </div>
                     </div>
                   )}
                   
-                  <div className={`h-2 rounded-full bg-gradient-to-r ${tariff.color} mb-3`}></div>
+                  <div className={`h-1 rounded-full bg-gradient-to-r ${tariff.color} mb-2`}></div>
                   
-                  <h3 className="font-bold text-lg mb-2">{tariff.name}</h3>
+                  <h4 className="font-bold text-sm mb-2">{tariff.name}</h4>
                   
-                  <div className="space-y-2 mb-3">
-                    <div className="flex justify-between text-sm">
+                  <div className="space-y-1 mb-2 text-xs">
+                    <div className="flex justify-between">
                       <span className="text-gray-600">Личные:</span>
-                      <Badge className="bg-green-100 text-green-800">{tariff.personalBonus}%</Badge>
+                      <span className="font-semibold text-green-600">{tariff.personalBonus}%</span>
                     </div>
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between">
                       <span className="text-gray-600">Сеть:</span>
-                      <Badge className="bg-blue-100 text-blue-800">+{tariff.networkBonus}%</Badge>
+                      <span className="font-semibold text-blue-600">+{tariff.networkBonus}%</span>
                     </div>
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between">
                       <span className="text-gray-600">Уровни:</span>
                       <span className="font-medium">{tariff.levelAccess}</span>
                     </div>
@@ -830,108 +812,67 @@ export default function Partners() {
                   
                   <div className="text-center">
                     {tariff.price > 0 ? (
-                      <div className="text-2xl font-bold text-telegram">${tariff.price}</div>
+                      <div className="text-lg font-bold text-telegram">${tariff.price}</div>
                     ) : (
-                      <div className="text-lg font-bold text-green-600">Бесплатно</div>
+                      <div className="text-sm font-bold text-green-600">Бесплатно</div>
                     )}
-                  </div>
-                  
-                  <div className="mt-2 text-xs text-gray-500 text-center">
-                    {tariff.requirements}
                   </div>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-        )}
-
-        {showMlmFeatures && (
-          <Card className="bg-white shadow-lg mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Package className="w-6 h-6 text-telegram" />
-              <span>Пакеты уровней</span>
-              <button
-                onClick={() => setShowHelpFor(showHelpFor === 'levels' ? null : 'levels')}
-                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <HelpCircle className="w-4 h-4 text-gray-400" />
-              </button>
-            </CardTitle>
-            {showHelpFor === 'levels' && (
-              <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                <button
-                  onClick={() => setShowHelpFor(null)}
-                  className="float-right p-1 hover:bg-blue-100 rounded-full"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-                <p><strong>Пакеты расширения уровней:</strong></p>
-                <ul className="list-disc list-inside mt-1 space-y-1">
-                  <li><strong>Стартовый:</strong> 3 уровня вознаграждений</li>
-                  <li><strong>Стандарт:</strong> 5 уровней для развития сети</li>
-                  <li><strong>Премиум:</strong> 7 уровней максимальной глубины</li>
-                </ul>
-              </div>
-            )}
-            <p className="text-gray-600">
-              Разблокируйте больше уровней для увеличения пассивного дохода
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {levelPackages.map((pkg, index) => (
-                <div 
-                  key={index}
-                  onClick={() => setSelectedPackage(index)}
-                  className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg ${
-                    selectedPackage === index 
-                      ? 'border-telegram bg-telegram/5 scale-105' 
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  {selectedPackage === index && (
-                    <div className="absolute -top-2 -right-2">
-                      <div className="w-6 h-6 bg-telegram rounded-full flex items-center justify-center">
-                        <Check className="w-4 h-4 text-white" />
+            </div>
+            
+            {/* Packages Section */}
+            <div>
+                <h3 className="font-semibold text-gray-900 mb-3 text-sm flex items-center">
+                  <Package className="w-4 h-4 mr-1 text-telegram" />
+                  Пакеты ускорения
+                </h3>
+                <div className="grid md:grid-cols-4 gap-3">
+                  {levelPackages.map((pkg, index) => (
+                    <div 
+                      key={index}
+                      onClick={() => setSelectedPackage(index)}
+                      className={`relative p-3 rounded-lg border-2 cursor-pointer transition-all duration-300 ${
+                        selectedPackage === index 
+                          ? 'border-telegram bg-telegram/5' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      {selectedPackage === index && (
+                        <div className="absolute -top-1 -right-1">
+                          <div className="w-4 h-4 bg-telegram rounded-full flex items-center justify-center">
+                            <Check className="w-3 h-3 text-white" />
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-telegram mb-1">
+                          {pkg.levels}
+                        </div>
+                        <div className="text-xs text-gray-600 mb-2">
+                          уровн{pkg.levels > 1 ? 'ей' : 'ь'}
+                        </div>
+                        
+                        <div className="text-xs text-gray-500 mb-2">
+                          {pkg.description}
+                        </div>
+                        
+                        <div className="text-center">
+                          {pkg.price > 0 ? (
+                            <div className="text-lg font-bold">${pkg.price}</div>
+                          ) : (
+                            <div className="text-sm font-bold text-green-600">Включено</div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  )}
-                  
-                  {pkg.maxEarnings > 1500 && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-green-500 text-white text-xs">
-                        До ${pkg.maxEarnings}/мес
-                      </Badge>
-                    </div>
-                  )}
-                  
-                  <h3 className="font-bold text-lg mb-2 mt-2">{pkg.name}</h3>
-                  
-                  <div className="text-3xl font-bold text-telegram text-center mb-2">
-                    {pkg.levels}
-                  </div>
-                  <div className="text-sm text-gray-600 text-center mb-3">
-                    уровн{pkg.levels > 1 ? 'ей' : 'ь'}
-                  </div>
-                  
-                  <div className="text-xs text-gray-500 mb-3">
-                    {pkg.description}
-                  </div>
-                  
-                  <div className="text-center">
-                    {pkg.price > 0 ? (
-                      <div className="text-2xl font-bold">${pkg.price}</div>
-                    ) : (
-                      <div className="text-lg font-bold text-green-600">Включено</div>
-                    )}
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         <div className={`grid ${showMlmFeatures ? 'lg:grid-cols-2' : 'lg:grid-cols-1'} gap-6 mb-8`}>
@@ -1346,23 +1287,54 @@ export default function Partners() {
                       <span>100</span>
                     </div>
                   </div>
+
+                  {/* Package Sales */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-sm font-medium text-purple-700">Продажи пакетов</label>
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                        {packageSales[0]}
+                      </Badge>
+                    </div>
+                    <Slider
+                      value={packageSales}
+                      onValueChange={setPackageSales}
+                      max={20}
+                      min={0}
+                      step={1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-purple-500">
+                      <span>0</span>
+                      <span>5</span>
+                      <span>10</span>
+                      <span>15</span>
+                      <span>20</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Network Results */}
                 <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-lg border border-purple-200">
                   <h3 className="font-semibold text-purple-800 mb-3">Доходы от сети</h3>
-                  <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
-                      <div className="text-2xl font-bold text-purple-600">
+                      <div className="text-xl font-bold text-purple-600">
                         ${Math.floor(networkTurnover[0] * 0.1).toLocaleString()}
                       </div>
-                      <div className="text-sm text-purple-600">Комиссии с 1 уровня</div>
+                      <div className="text-xs text-purple-600">Комиссии с 1 уровня</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-purple-600">
-                        ${Math.floor(networkTurnover[0] * 0.18).toLocaleString()}
+                      <div className="text-xl font-bold text-purple-600">
+                        ${Math.floor(packageSales[0] * 500 * 0.4).toLocaleString()}
                       </div>
-                      <div className="text-sm text-purple-600">Общий сетевой доход</div>
+                      <div className="text-xs text-purple-600">От продажи пакетов</div>
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold text-purple-600">
+                        ${Math.floor(networkTurnover[0] * 0.18 + packageSales[0] * 500 * 0.4).toLocaleString()}
+                      </div>
+                      <div className="text-xs text-purple-600">Общий доход</div>
                     </div>
                   </div>
                   
@@ -1374,6 +1346,10 @@ export default function Partners() {
                     <div className="flex justify-between text-sm text-purple-700">
                       <span>Эффективность сети:</span>
                       <span className="font-semibold">{Math.floor((totalDeals[0] / networkPartners[0]) * 100)}%</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-purple-700">
+                      <span>Комиссия с пакетов:</span>
+                      <span className="font-semibold">40%</span>
                     </div>
                   </div>
                 </div>
@@ -1595,9 +1571,9 @@ export default function Partners() {
                         );
                       })}
                       
-                      {/* Show remaining slots if needed */}
-                      {(partnerData[`level${levelIndex + 1}` as keyof typeof partnerData] || []).length === 0 && (
-                        <div className="relative group">
+                      {/* Fill remaining slots with placeholders if not enough partners */}
+                      {Array.from({length: Math.max(0, 3 - (partnerData[`level${levelIndex + 1}` as keyof typeof partnerData] || []).length)}, (_, i) => (
+                        <div key={`empty-${i}`} className="relative group">
                           <div className="w-12 h-12 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center text-gray-400 text-xs">
                             +
                           </div>
@@ -1605,7 +1581,7 @@ export default function Partners() {
                             Свободное место
                           </div>
                         </div>
-                      )}
+                      ))}
                     </div>
                     
                     {/* Level stats */}
