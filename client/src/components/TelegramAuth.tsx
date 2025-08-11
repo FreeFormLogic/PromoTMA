@@ -42,6 +42,33 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
+    // Проверяем среду разработки
+    const isDevelopment = window.location.hostname === 'localhost' || 
+                         window.location.hostname.includes('replit') ||
+                         window.location.hostname.includes('127.0.0.1') ||
+                         import.meta.env.DEV;
+
+    // В среде разработки создаем тестового пользователя
+    if (isDevelopment) {
+      const testUser = {
+        id: ALLOWED_USER_IDS[0].toString(),
+        username: 'dev_user',
+        telegramUsername: '@dev_user',
+        firstName: 'Dev',
+        lastName: 'User',
+        isAuthorized: true,
+      };
+
+      localStorage.setItem('telegram_auth', JSON.stringify({
+        user: testUser,
+        timestamp: Date.now()
+      }));
+
+      console.log('Режим разработки - пользователь авторизован:', testUser);
+      onAuth(testUser);
+      return;
+    }
+
     // Проверяем, запущено ли приложение в Telegram
     if (window.Telegram && window.Telegram.WebApp) {
       const tg = window.Telegram.WebApp;
