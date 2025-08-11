@@ -10,6 +10,7 @@ import Modules from "@/pages/Modules";
 import Industries from "@/pages/Industries";
 import Pricing from "@/pages/Pricing";
 import Process from "@/pages/Process";
+import Partners from "@/pages/Partners";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 
@@ -45,6 +46,12 @@ function Router() {
         <AuthGuard>
           <Navigation />
           <Process />
+        </AuthGuard>
+      )} />
+      <Route path="/partners" component={() => (
+        <AuthGuard>
+          <Navigation />
+          <Partners />
         </AuthGuard>
       )} />
       <Route component={NotFound} />

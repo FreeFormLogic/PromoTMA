@@ -5,6 +5,7 @@ import {
   Puzzle, 
   Building2, 
   Rocket,
+  Handshake,
   LogOut,
   Menu,
   X
@@ -25,6 +26,7 @@ export function Navigation() {
     { path: "/modules", label: "Модули", icon: Puzzle },
     { path: "/industries", label: "Отрасли", icon: Building2 },
     { path: "/process", label: "Разработка", icon: Rocket },
+    { path: "/partners", label: "Партнерам", icon: Handshake },
   ];
 
   return (
