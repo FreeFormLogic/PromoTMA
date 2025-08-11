@@ -1,100 +1,155 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquare } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { MessageSquare, ShieldAlert } from "lucide-react";
+
+// Типы для Telegram WebApp
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp: {
+        ready: () => void;
+        initDataUnsafe: {
+          user?: {
+            id: number;
+            first_name: string;
+            last_name?: string;
+            username?: string;
+            language_code?: string;
+          };
+        };
+      };
+    };
+  }
+}
 
 interface TelegramAuthProps {
   onAuth: (user: any) => void;
 }
 
-export function TelegramAuth({ onAuth }: TelegramAuthProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+// Список разрешенных Telegram ID
+const ALLOWED_USER_IDS = [
+  7418405560,
+  5173994544, 
+  216463929,
+  6209116360,
+  893850026,
+  1577419391,
+  5201551014
+];
 
-  const handleAuth = async () => {
-    setIsLoading(true);
-    try {
-      // Создаем пользователя с уникальным ID
-      const userId = `user_${Date.now()}`;
-      const user = {
-        id: userId,
-        username: `User${Math.floor(Math.random() * 10000)}`,
-        telegramUsername: `@${userId}`,
+export function TelegramAuth({ onAuth }: TelegramAuthProps) {
+  const [error, setError] = useState<string>("");
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    // Проверяем, запущено ли приложение в Telegram
+    if (window.Telegram && window.Telegram.WebApp) {
+      const tg = window.Telegram.WebApp;
+      tg.ready();
+
+      const currentUser = tg.initDataUnsafe.user;
+      
+      console.log('Telegram user data:', currentUser);
+      
+      if (!currentUser) {
+        setError("Не удалось получить данные пользователя из Telegram");
+        setIsChecking(false);
+        return;
+      }
+
+      // Проверяем, есть ли ID пользователя в списке разрешенных
+      if (!ALLOWED_USER_IDS.includes(currentUser.id)) {
+        setError(`Доступ запрещен. Ваш ID: ${currentUser.id}`);
+        setIsChecking(false);
+        return;
+      }
+
+      // Пользователь авторизован
+      const userData = {
+        id: currentUser.id.toString(),
+        username: currentUser.username || `user_${currentUser.id}`,
+        telegramUsername: currentUser.username ? `@${currentUser.username}` : null,
+        firstName: currentUser.first_name,
+        lastName: currentUser.last_name,
         isAuthorized: true,
       };
 
-      // Сохраняем в localStorage
-      const authData = {
-        user: user,
-        timestamp: Date.now(),
+      // Сохраняем данные
+      localStorage.setItem('telegram_auth', JSON.stringify({
+        user: userData,
+        timestamp: Date.now()
+      }));
+
+      console.log('Пользователь авторизован:', userData);
+      onAuth(userData);
+      
+    } else {
+      // Для тестирования вне Telegram - используем первый ID из списка
+      const testUser = {
+        id: ALLOWED_USER_IDS[0],
+        first_name: "Test User",
+        username: "testuser"
+      };
+      
+      const userData = {
+        id: testUser.id.toString(),
+        username: testUser.username,
+        telegramUsername: `@${testUser.username}`,
+        firstName: testUser.first_name,
+        lastName: "",
+        isAuthorized: true,
       };
 
-      localStorage.setItem('telegram_auth', JSON.stringify(authData));
-      console.log('Сохранили данные авторизации:', authData);
+      localStorage.setItem('telegram_auth', JSON.stringify({
+        user: userData,
+        timestamp: Date.now()
+      }));
 
-      toast({
-        title: "Успешная авторизация",
-        description: "Добро пожаловать в каталог модулей!",
-      });
-
-      onAuth(user);
-    } catch (error) {
-      console.error('Ошибка авторизации:', error);
-      toast({
-        title: "Ошибка",
-        description: "Не удалось выполнить авторизацию",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      console.log('Тестовый пользователь авторизован:', userData);
+      onAuth(userData);
     }
-  };
+  }, [onAuth]);
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-telegram/5 to-telegram/10 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-telegram mx-auto"></div>
+              <p className="text-gray-600">Проверка доступа...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-telegram/5 to-telegram/10 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md border-red-200">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-telegram rounded-full flex items-center justify-center">
-            <MessageSquare className="w-8 h-8 text-white" />
+          <div className="mx-auto w-16 h-16 bg-red-500 rounded-full flex items-center justify-center">
+            <ShieldAlert className="w-8 h-8 text-white" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold text-gray-900">
-              PromoTMA Directory
+            <CardTitle className="text-2xl font-bold text-red-800">
+              Доступ запрещен
             </CardTitle>
-            <CardDescription className="text-gray-600 mt-2">
-              Каталог Telegram Mini Apps модулей
+            <CardDescription className="text-red-600 mt-2">
+              Приложение доступно только авторизованным пользователям
             </CardDescription>
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6">
-          <div className="text-center space-y-4">
-            <p className="text-sm text-gray-600">
-              Простой вход одним нажатием:
-            </p>
-            <Button
-              onClick={handleAuth}
-              disabled={isLoading}
-              className="w-full bg-telegram hover:bg-telegram/90 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-lg"
-              size="lg"
-            >
-              <MessageSquare className="w-5 h-5 mr-2" />
-              {isLoading ? "Вход..." : "Войти в систему"}
-            </Button>
-            <p className="text-xs text-gray-500">
-              Нажмите для мгновенного входа в каталог модулей.<br/>
-              Без регистрации и SMS.
-            </p>
+        <CardContent className="text-center space-y-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-sm text-red-700">{error}</p>
           </div>
-
-          <div className="text-center space-y-2 pt-4 border-t">
-            <p className="text-sm text-gray-600 font-medium">
-              📱 60+ модулей • 🏢 30+ ниш • ⭐ 25+ УТП
-            </p>
-            <p className="text-xs text-gray-500">
-              Полный каталог готовых решений для вашего бизнеса
-            </p>
+          
+          <div className="text-xs text-gray-500">
+            <p>Если вы считаете, что это ошибка,</p>
+            <p>обратитесь к администратору</p>
           </div>
         </CardContent>
       </Card>

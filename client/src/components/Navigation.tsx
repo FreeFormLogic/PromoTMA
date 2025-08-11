@@ -99,8 +99,9 @@ export function Navigation() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="md:hidden"
+              className="md:hidden relative z-50 bg-white border border-gray-300 shadow-sm"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              style={{ zIndex: 9999 }}
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
@@ -109,7 +110,7 @@ export function Navigation() {
         
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 bg-white">
+          <div className="md:hidden border-t border-gray-200 bg-white relative z-40" style={{ zIndex: 9998 }}>
             <div className="px-4 py-4 space-y-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
