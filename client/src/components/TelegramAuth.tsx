@@ -142,11 +142,7 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
           </Button>
           
           <div className="mt-6 text-center text-sm text-gray-600">
-            <p>Доступ разрешен только авторизованным пользователям:</p>
-            <div className="mt-2 text-xs text-gray-500 space-y-1">
-              <div>@balilegend, @dudewernon, @krutikov201318</div>
-              <div>@partners_IRE, @fluuxerr, @Protasbali, @Radost_no</div>
-            </div>
+            <p>Доступ ограничен. Обратитесь к администратору для получения доступа.</p>
           </div>
         </CardContent>
       </Card>
