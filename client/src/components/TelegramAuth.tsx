@@ -125,11 +125,11 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
         return;
       }
 
-      // Show instruction for OAuth setup
+      // Show OAuth setup instruction
       toast({
-        title: "Требуется настройка OAuth",
-        description: "Для безопасной авторизации необходимо настроить Telegram Login Widget",
-        variant: "destructive",
+        title: "Настройте Telegram OAuth",
+        description: "Требуется настройка Login Widget в @BotFather для работы авторизации",
+        variant: "default",
       });
       
       setIsLoading(false);
@@ -142,8 +142,6 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
       });
     }
   };
-
-
 
   const checkAuthStatus = async () => {
     toast({
@@ -170,7 +168,7 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
           </div>
           <CardTitle className="text-2xl font-bold">Добро пожаловать</CardTitle>
           <CardDescription>
-            Войдите в Telegram и откройте бота для авторизации
+            Авторизация через официальный Telegram OAuth
           </CardDescription>
         </CardHeader>
         <CardContent>
