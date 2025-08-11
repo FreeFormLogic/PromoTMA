@@ -96,27 +96,24 @@ function IndustryCard({ industry }: { industry: Industry }) {
       
       {/* Модальное окно с детальной информацией */}
       <DialogContent 
-        className="max-w-6xl max-h-[95vh] overflow-hidden p-8" 
+        className="max-w-5xl max-h-[90vh] overflow-hidden p-0" 
         aria-describedby={`industry-description-${industry.id}`}
       >
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {industry.name}
-            </DialogTitle>
-
-          </div>
+        <DialogHeader className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            {industry.name}
+          </DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="max-h-[80vh] pr-6">
-          <div className="space-y-6">
+        <ScrollArea className="max-h-[75vh]">
+          <div className="p-6 space-y-6">
             {/* Иконка и описание */}
-            <div className="flex items-start gap-6" id={`industry-description-${industry.id}`}>
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
-                <IconComponent className="w-10 h-10 text-white" />
+            <div className="flex items-start gap-4" id={`industry-description-${industry.id}`}>
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                <IconComponent className="w-8 h-8 text-white" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-lg">
+              <div className="flex-1">
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-base">
                   {industry.description}
                 </p>
               </div>
