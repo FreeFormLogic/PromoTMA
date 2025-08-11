@@ -10,76 +10,38 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
+      const auth = localStorage.getItem('telegram_auth');
+      if (!auth) {
+        setIsAuthenticated(false);
+        return;
+      }
+
       try {
-        // Check URL params for auth success
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('auth') === 'success') {
-          // Remove auth param from URL
-          window.history.replaceState({}, document.title, window.location.pathname);
+        const authData = JSON.parse(auth);
+        // Check if auth data is less than 24 hours old
+        const authAge = Date.now() - authData.timestamp;
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+
+        if (authAge > maxAge) {
+          localStorage.removeItem('telegram_auth');
+          setIsAuthenticated(false);
+          return;
         }
 
-        // Verify JWT token with server
-        const response = await fetch('/api/auth/verify', {
-          credentials: 'include' // Include cookies
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.user) {
-            setUser(data.user);
-            setIsAuthenticated(true);
-            
-            // Store user info in localStorage for offline access
-            localStorage.setItem('telegram_auth', JSON.stringify({
-              user: data.user,
-              timestamp: Date.now()
-            }));
-            return;
-          }
+        if (authData.user && authData.user.isAuthorized) {
+          setUser(authData.user);
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
         }
-
-        // Fallback: check localStorage for existing auth
-        const auth = localStorage.getItem('telegram_auth');
-        if (auth) {
-          try {
-            const authData = JSON.parse(auth);
-            // Check if auth data is less than 24 hours old
-            const authAge = Date.now() - authData.timestamp;
-            const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-
-            if (authAge <= maxAge && authData.user && authData.user.isAuthorized) {
-              setUser(authData.user);
-              setIsAuthenticated(true);
-              return;
-            } else {
-              localStorage.removeItem('telegram_auth');
-            }
-          } catch (error) {
-            localStorage.removeItem('telegram_auth');
-          }
-        }
-
-        setIsAuthenticated(false);
-        setUser(null);
       } catch (error) {
-        console.error('Auth check error:', error);
+        localStorage.removeItem('telegram_auth');
         setIsAuthenticated(false);
-        setUser(null);
       }
     };
 
     checkAuth();
-    
-    // Also listen for storage changes (in case user logs out in another tab)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'telegram_auth') {
-        checkAuth();
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const handleAuth = (authenticatedUser: any) => {

@@ -13,58 +13,43 @@ import Process from "@/pages/Process";
 import Partners from "@/pages/Partners";
 import NotFound from "@/pages/not-found";
 
-function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <Navigation />
-      {children}
-    </>
-  );
-}
-
 function Router() {
   return (
     <Switch>
       <Route path="/" component={() => (
         <AuthGuard>
-          <AuthenticatedLayout>
-            <Home />
-          </AuthenticatedLayout>
+          <Navigation />
+          <Home />
         </AuthGuard>
       )} />
       <Route path="/modules" component={() => (
         <AuthGuard>
-          <AuthenticatedLayout>
-            <Modules />
-          </AuthenticatedLayout>
+          <Navigation />
+          <Modules />
         </AuthGuard>
       )} />
       <Route path="/industries" component={() => (
         <AuthGuard>
-          <AuthenticatedLayout>
-            <Industries />
-          </AuthenticatedLayout>
+          <Navigation />
+          <Industries />
         </AuthGuard>
       )} />
       <Route path="/pricing" component={() => (
         <AuthGuard>
-          <AuthenticatedLayout>
-            <Pricing />
-          </AuthenticatedLayout>
+          <Navigation />
+          <Pricing />
         </AuthGuard>
       )} />
       <Route path="/process" component={() => (
         <AuthGuard>
-          <AuthenticatedLayout>
-            <Process />
-          </AuthenticatedLayout>
+          <Navigation />
+          <Process />
         </AuthGuard>
       )} />
       <Route path="/partners" component={() => (
         <AuthGuard>
-          <AuthenticatedLayout>
-            <Partners />
-          </AuthenticatedLayout>
+          <Navigation />
+          <Partners />
         </AuthGuard>
       )} />
       <Route component={NotFound} />

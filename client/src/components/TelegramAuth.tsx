@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,44 +24,17 @@ interface TelegramAuthProps {
 
 export function TelegramAuth({ onAuth }: TelegramAuthProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [username, setUsername] = useState("");
   const { toast } = useToast();
 
-  // Clear any existing auth data when component mounts
   useEffect(() => {
-    localStorage.removeItem('telegram_auth');
-  }, []);
-
-  useEffect(() => {
-    // Define global callback first
-    (window as any).onTelegramAuth = (user: any) => {
-      console.log('Telegram auth callback received:', user);
-      handleTelegramAuth(user);
-    };
-
-    // Create Telegram Login Widget directly
-    setTimeout(() => {
-      const container = document.getElementById('telegram-login-widget');
-      if (container) {
-        // Create script element dynamically
-        const script = document.createElement('script');
-        script.async = true;
-        script.src = 'https://telegram.org/js/telegram-widget.js?22';
-        script.setAttribute('data-telegram-login', 'tmasalesbot');
-        script.setAttribute('data-size', 'large');
-        script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-        script.setAttribute('data-request-access', 'write');
-        
-        // Clear container and add script
-        container.innerHTML = '';
-        container.appendChild(script);
-        
-        console.log('Telegram widget script added');
-      }
-    }, 500);
+    // Load Telegram Login Widget script
+    const script = document.createElement('script');
+    script.src = 'https://telegram.org/js/telegram-widget.js?22';
+    script.async = true;
+    document.body.appendChild(script);
 
     return () => {
-      delete (window as any).onTelegramAuth;
+      document.body.removeChild(script);
     };
   }, []);
 
@@ -108,22 +79,35 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
     }
   };
 
-
-
-  const checkAuthStatus = async () => {
-    toast({
-      title: "Ожидание авторизации",
-      description: "Нажмите /start в боте для авторизации",
-    });
-
-    // Show message about manual refresh
-    setTimeout(() => {
-      toast({
-        title: "Важно",
-        description: "После нажатия /start в боте обновите эту страницу",
-        variant: "default",
-      });
-    }, 5000);
+  const startTelegramAuth = () => {
+    if (window.Telegram?.Login) {
+      window.Telegram.Login.auth(
+        {
+          bot_id: "8403061743", // Bot ID from the token
+          request_access: "write",
+          embed: 1
+        },
+        handleTelegramAuth
+      );
+    } else {
+      // Fallback: open Telegram login in new window
+      const botId = "8403061743";
+      const url = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}&request_access=write`;
+      const popup = window.open(url, 'telegram-auth', 'width=600,height=600');
+      
+      // Listen for message from popup
+      const messageHandler = (event: MessageEvent) => {
+        if (event.origin !== 'https://oauth.telegram.org') return;
+        
+        if (event.data && event.data.user) {
+          handleTelegramAuth(event.data.user);
+          popup?.close();
+          window.removeEventListener('message', messageHandler);
+        }
+      };
+      
+      window.addEventListener('message', messageHandler);
+    }
   };
 
   return (
@@ -135,22 +119,34 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
           </div>
           <CardTitle className="text-2xl font-bold">Добро пожаловать</CardTitle>
           <CardDescription>
-            Авторизация через официальный Telegram OAuth
+            Войдите через Telegram для доступа к каталогу Mini Apps
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {/* Telegram Login Widget */}
-            <div 
-              id="telegram-login-widget"
-              className="w-full flex justify-center"
-            />
-            
-
-          </div>
+          <Button 
+            onClick={startTelegramAuth}
+            disabled={isLoading}
+            className="w-full bg-telegram hover:bg-telegram/90"
+          >
+            {isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Авторизация...
+              </>
+            ) : (
+              <>
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Войти через Telegram
+              </>
+            )}
+          </Button>
           
           <div className="mt-6 text-center text-sm text-gray-600">
-            <p>Нажмите кнопку выше для авторизации</p>
+            <p>Доступ разрешен только авторизованным пользователям:</p>
+            <div className="mt-2 text-xs text-gray-500 space-y-1">
+              <div>@balilegend, @dudewernon, @krutikov201318</div>
+              <div>@partners_IRE, @fluuxerr, @Protasbali, @Radost_no</div>
+            </div>
           </div>
         </CardContent>
       </Card>

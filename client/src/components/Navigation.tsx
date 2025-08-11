@@ -18,22 +18,9 @@ export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleLogout = async () => {
-    try {
-      // Call logout endpoint to clear secure cookies
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-    
-    // Clear local storage
+  const handleLogout = () => {
     localStorage.removeItem('telegram_auth');
-    
-    // Force a complete page reload to reset all component states
-    window.location.href = window.location.origin;
+    window.location.reload();
   };
 
   const handlePartnersClick = (e: React.MouseEvent) => {
@@ -85,9 +72,7 @@ export function Navigation() {
               
               return (
                 <Link key={item.path} href={item.path}>
-                  <div 
-                    data-tutorial-target={item.path}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer ${
+                  <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer ${
                     isActive 
                       ? 'bg-telegram text-white' 
                       : 'text-gray-700 hover:text-telegram hover:bg-telegram/10'
