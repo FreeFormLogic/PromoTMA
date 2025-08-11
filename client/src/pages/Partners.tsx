@@ -39,7 +39,9 @@ import {
   GamepadIcon as Gamepad,
   Coins,
   Timer,
-  Zap
+  Zap,
+  Calendar,
+  Clock
 } from "lucide-react";
 
 // Generate mock partner data with Telegram-style usernames
@@ -433,6 +435,132 @@ export default function Partners() {
   const [monthlySubscription, setMonthlySubscription] = useState([49]);
   const [totalClients, setTotalClients] = useState([5]);
   const [personalRecruits, setPersonalRecruits] = useState([3]); // For network calculations
+  
+  // Network characteristics
+  const [networkPartners, setNetworkPartners] = useState([15]);
+  const [networkTurnover, setNetworkTurnover] = useState([25000]);
+  const [avgDealSize, setAvgDealSize] = useState([800]);
+  const [totalDeals, setTotalDeals] = useState([30]);
+  const [openLevels, setOpenLevels] = useState([3]);
+
+  // Partner data with realistic profiles
+  const [selectedPartner, setSelectedPartner] = useState<any>(null);
+  const partnerData = {
+    level1: [
+      {
+        id: 1,
+        name: 'Александра Иванова',
+        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b9a1f4ba?w=150&h=150&fit=crop&crop=face',
+        role: 'Менеджер по развитию',
+        joinDate: '2024-01-15',
+        personalSales: 12000,
+        teamSales: 45000,
+        commission: 3200,
+        recruits: 5,
+        level: 1,
+        status: 'active',
+        city: 'Москва',
+        phone: '+7 (XXX) XXX-XX-XX',
+        telegram: '@alex_ivanova',
+        achievements: ['Лидер месяца', 'Топ-рекрутер'],
+        lastActivity: '2 часа назад'
+      },
+      {
+        id: 2,
+        name: 'Дмитрий Петров',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+        role: 'Региональный партнер',
+        joinDate: '2023-11-20',
+        personalSales: 18500,
+        teamSales: 67000,
+        commission: 4800,
+        recruits: 8,
+        level: 1,
+        status: 'active',
+        city: 'СПб',
+        phone: '+7 (XXX) XXX-XX-XX',
+        telegram: '@dmitry_p',
+        achievements: ['Миллионер', 'Наставник'],
+        lastActivity: '1 день назад'
+      },
+      {
+        id: 3,
+        name: 'Елена Сидорова',
+        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+        role: 'Специалист по продажам',
+        joinDate: '2024-02-08',
+        personalSales: 9800,
+        teamSales: 28000,
+        commission: 2150,
+        recruits: 3,
+        level: 1,
+        status: 'active',
+        city: 'Екатеринбург',
+        phone: '+7 (XXX) XXX-XX-XX',
+        telegram: '@elena_side',
+        achievements: ['Быстрый старт'],
+        lastActivity: '4 часа назад'
+      }
+    ],
+    level2: [
+      {
+        id: 4,
+        name: 'Михаил Козлов',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+        role: 'Консультант',
+        joinDate: '2024-03-12',
+        personalSales: 5600,
+        teamSales: 15000,
+        commission: 980,
+        recruits: 2,
+        level: 2,
+        status: 'active',
+        city: 'Казань',
+        phone: '+7 (XXX) XXX-XX-XX',
+        telegram: '@mikh_kozlov',
+        achievements: ['Новичок месяца'],
+        lastActivity: '1 день назад'
+      },
+      {
+        id: 5,
+        name: 'Анна Федорова',
+        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
+        role: 'Junior партнер',
+        joinDate: '2024-03-25',
+        personalSales: 7200,
+        teamSales: 18500,
+        commission: 1290,
+        recruits: 1,
+        level: 2,
+        status: 'active',
+        city: 'Новосибирск',
+        phone: '+7 (XXX) XXX-XX-XX',
+        telegram: '@anna_fedorova',
+        achievements: ['Активный участник'],
+        lastActivity: '6 часов назад'
+      }
+    ],
+    level3: [
+      {
+        id: 6,
+        name: 'Игорь Волков',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+        role: 'Стартап-консультант',
+        joinDate: '2024-04-02',
+        personalSales: 3100,
+        teamSales: 8900,
+        commission: 580,
+        recruits: 0,
+        level: 3,
+        status: 'learning',
+        city: 'Краснодар',
+        phone: '+7 (XXX) XXX-XX-XX',
+        telegram: '@igor_volkov',
+        achievements: ['Перспективный'],
+        lastActivity: '2 дня назад'
+      }
+    ]
+  };
   const [selectedPackage, setSelectedPackage] = useState(0);
   const [selectedTariff, setSelectedTariff] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -806,9 +934,9 @@ export default function Partners() {
         </Card>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-6 mb-8">
-          {/* Calculator Section */}
-          <Card className="lg:col-span-2 bg-white shadow-lg">
+        <div className={`grid ${showMlmFeatures ? 'lg:grid-cols-2' : 'lg:grid-cols-1'} gap-6 mb-8`}>
+          {/* Personal Sales Calculator */}
+          <Card className="bg-white shadow-lg">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center space-x-2 text-lg">
                 <Calculator className="w-5 h-5 text-telegram" />
@@ -1085,6 +1213,174 @@ export default function Partners() {
             </CardContent>
           </Card>
 
+          {/* Network Calculator - Only visible when MLM features are enabled */}
+          {showMlmFeatures && (
+            <Card className="bg-gradient-to-br from-purple-50 to-pink-50 shadow-lg border border-purple-200">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center space-x-2 text-lg">
+                  <Network className="w-5 h-5 text-purple-600" />
+                  <span>Калькулятор сетевых доходов</span>
+                  <button
+                    onClick={() => setShowHelpFor(showHelpFor === 'network' ? null : 'network')}
+                    className="p-1 hover:bg-purple-100 rounded-full transition-colors"
+                  >
+                    <HelpCircle className="w-4 h-4 text-purple-400" />
+                  </button>
+                </CardTitle>
+                {showHelpFor === 'network' && (
+                  <div className="mt-2 p-3 bg-purple-100 border border-purple-300 rounded-lg text-sm text-purple-800">
+                    <button
+                      onClick={() => setShowHelpFor(null)}
+                      className="float-right p-1 hover:bg-purple-200 rounded-full"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                    <p><strong>Как работает сетевой калькулятор:</strong></p>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                      <li>Доход от сети зависит от активности ваших партнеров</li>
+                      <li>Комиссия распределяется по уровням (10%, 5%, 3%, 2%, 1%)</li>
+                      <li>Больше открытых уровней = больше пассивный доход</li>
+                      <li>Качество партнеров важнее количества</li>
+                    </ul>
+                  </div>
+                )}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  {/* Network Partners */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-sm font-medium text-purple-700">Партнеров в сети</label>
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                        {networkPartners[0]}
+                      </Badge>
+                    </div>
+                    <Slider
+                      value={networkPartners}
+                      onValueChange={setNetworkPartners}
+                      max={100}
+                      min={1}
+                      step={1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-purple-500">
+                      <span>1</span>
+                      <span>25</span>
+                      <span>50</span>
+                      <span>75</span>
+                      <span>100</span>
+                    </div>
+                  </div>
+
+                  {/* Network Turnover */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-sm font-medium text-purple-700">Оборот сети</label>
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                        ${networkTurnover[0].toLocaleString()}
+                      </Badge>
+                    </div>
+                    <Slider
+                      value={networkTurnover}
+                      onValueChange={setNetworkTurnover}
+                      max={100000}
+                      min={5000}
+                      step={2500}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-purple-500">
+                      <span>$5k</span>
+                      <span>$25k</span>
+                      <span>$50k</span>
+                      <span>$75k</span>
+                      <span>$100k</span>
+                    </div>
+                  </div>
+
+                  {/* Average Deal Size */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-sm font-medium text-purple-700">Средний чек</label>
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                        ${avgDealSize[0]}
+                      </Badge>
+                    </div>
+                    <Slider
+                      value={avgDealSize}
+                      onValueChange={setAvgDealSize}
+                      max={2000}
+                      min={300}
+                      step={50}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-purple-500">
+                      <span>$300</span>
+                      <span>$650</span>
+                      <span>$1000</span>
+                      <span>$1500</span>
+                      <span>$2000</span>
+                    </div>
+                  </div>
+
+                  {/* Total Deals */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-sm font-medium text-purple-700">Сделок в месяц</label>
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                        {totalDeals[0]}
+                      </Badge>
+                    </div>
+                    <Slider
+                      value={totalDeals}
+                      onValueChange={setTotalDeals}
+                      max={100}
+                      min={5}
+                      step={5}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-purple-500">
+                      <span>5</span>
+                      <span>25</span>
+                      <span>50</span>
+                      <span>75</span>
+                      <span>100</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Network Results */}
+                <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-lg border border-purple-200">
+                  <h3 className="font-semibold text-purple-800 mb-3">Доходы от сети</h3>
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                      <div className="text-2xl font-bold text-purple-600">
+                        ${Math.floor(networkTurnover[0] * 0.1).toLocaleString()}
+                      </div>
+                      <div className="text-sm text-purple-600">Комиссии с 1 уровня</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-purple-600">
+                        ${Math.floor(networkTurnover[0] * 0.18).toLocaleString()}
+                      </div>
+                      <div className="text-sm text-purple-600">Общий сетевой доход</div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t border-purple-200">
+                    <div className="flex justify-between text-sm text-purple-700">
+                      <span>Открытых уровней:</span>
+                      <span className="font-semibold">{openLevels[0]}/7</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-purple-700">
+                      <span>Эффективность сети:</span>
+                      <span className="font-semibold">{Math.floor((totalDeals[0] / networkPartners[0]) * 100)}%</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Referral Link & Benefits */}
           <Card className="bg-white shadow-lg">
             <CardHeader className="pb-4">
@@ -1259,19 +1555,34 @@ export default function Partners() {
                     
                     {/* Partners at this level */}
                     <div className="flex space-x-2">
-                      {[...Array(Math.min(6, Math.max(1, totalClients[0] - levelIndex * 2)))].map((_, partnerIndex) => {
+                      {(partnerData[`level${levelIndex + 1}` as keyof typeof partnerData] || []).map((partner, partnerIndex) => {
                         const level = partnerLevels[levelIndex];
-                        if (!level) return null;
+                        if (!level || partnerIndex >= 6) return null;
                         
                         return (
-                          <div key={partnerIndex} className="relative group">
-                            <div className={`w-10 h-10 ${level.color} rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md transition-all duration-300 hover:scale-110 cursor-pointer`}>
-                              {partnerIndex + 1}
-                            </div>
+                          <div key={partner.id} className="relative group">
+                            <button 
+                              onClick={() => setSelectedPartner(partner)}
+                              className="relative w-12 h-12 rounded-full overflow-hidden shadow-md transition-all duration-300 hover:scale-110 cursor-pointer border-2 border-white hover:border-telegram"
+                            >
+                              <img 
+                                src={partner.avatar} 
+                                alt={partner.name}
+                                className="w-full h-full object-cover"
+                              />
+                              {/* Status indicator */}
+                              <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                                partner.status === 'active' ? 'bg-green-400' : 
+                                partner.status === 'learning' ? 'bg-yellow-400' : 'bg-gray-400'
+                              }`}></div>
+                            </button>
                             
-                            {/* Tooltip on hover */}
-                            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                              {level.commission}% комиссия
+                            {/* Partner info tooltip */}
+                            <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                              <div className="text-center">
+                                <div className="font-semibold">{partner.name.split(' ')[0]}</div>
+                                <div>${partner.commission.toLocaleString()}/мес</div>
+                              </div>
                             </div>
                             
                             {/* Connection to next level */}
@@ -1283,6 +1594,18 @@ export default function Partners() {
                           </div>
                         );
                       })}
+                      
+                      {/* Show remaining slots if needed */}
+                      {(partnerData[`level${levelIndex + 1}` as keyof typeof partnerData] || []).length === 0 && (
+                        <div className="relative group">
+                          <div className="w-12 h-12 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center text-gray-400 text-xs">
+                            +
+                          </div>
+                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                            Свободное место
+                          </div>
+                        </div>
+                      )}
                     </div>
                     
                     {/* Level stats */}
@@ -1477,6 +1800,167 @@ export default function Partners() {
             )}
           </CardContent>
         </Card>
+        )}
+
+        {/* Partner Profile Modal */}
+        {selectedPartner && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                {/* Header */}
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="relative">
+                      <img 
+                        src={selectedPartner.avatar}
+                        alt={selectedPartner.name}
+                        className="w-16 h-16 rounded-full object-cover"
+                      />
+                      <div className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${
+                        selectedPartner.status === 'active' ? 'bg-green-400' : 
+                        selectedPartner.status === 'learning' ? 'bg-yellow-400' : 'bg-gray-400'
+                      }`}></div>
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">{selectedPartner.name}</h2>
+                      <p className="text-gray-600">{selectedPartner.role}</p>
+                      <p className="text-sm text-gray-500">{selectedPartner.city}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedPartner(null)}
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="text-center p-3 bg-green-50 rounded-lg">
+                    <div className="text-lg font-bold text-green-600">
+                      ${selectedPartner.personalSales.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-green-700">Личные продажи</div>
+                  </div>
+                  <div className="text-center p-3 bg-blue-50 rounded-lg">
+                    <div className="text-lg font-bold text-blue-600">
+                      ${selectedPartner.teamSales.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-blue-700">Команда</div>
+                  </div>
+                  <div className="text-center p-3 bg-purple-50 rounded-lg">
+                    <div className="text-lg font-bold text-purple-600">
+                      ${selectedPartner.commission.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-purple-700">Комиссия</div>
+                  </div>
+                  <div className="text-center p-3 bg-orange-50 rounded-lg">
+                    <div className="text-lg font-bold text-orange-600">{selectedPartner.recruits}</div>
+                    <div className="text-xs text-orange-700">Рефералов</div>
+                  </div>
+                </div>
+
+                {/* Achievements */}
+                <div className="mb-6">
+                  <h3 className="font-semibold text-gray-900 mb-2">Достижения</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedPartner.achievements.map((achievement: string, index: number) => (
+                      <Badge key={index} className="bg-telegram/10 text-telegram border-telegram/20">
+                        🏆 {achievement}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Contact Info */}
+                <div className="mb-6">
+                  <h3 className="font-semibold text-gray-900 mb-2">Контакты</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <User className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-600">Telegram: {selectedPartner.telegram}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-600">
+                        Присоединился: {new Date(selectedPartner.joinDate).toLocaleDateString('ru-RU')}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Clock className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-600">Последняя активность: {selectedPartner.lastActivity}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Partner's Network Structure */}
+                <div className="mb-6">
+                  <h3 className="font-semibold text-gray-900 mb-3">Структура партнера</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex justify-center mb-4">
+                      <div className="relative">
+                        <img 
+                          src={selectedPartner.avatar}
+                          alt={selectedPartner.name}
+                          className="w-10 h-10 rounded-full object-cover border-2 border-telegram"
+                        />
+                      </div>
+                    </div>
+                    
+                    {selectedPartner.recruits > 0 ? (
+                      <div className="space-y-3">
+                        <div className="text-center">
+                          <div className="text-sm text-gray-600">Прямые рефералы</div>
+                          <div className="flex justify-center space-x-2 mt-2">
+                            {[...Array(Math.min(selectedPartner.recruits, 5))].map((_, i) => (
+                              <div key={i} className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs text-gray-600">
+                                {i + 1}
+                              </div>
+                            ))}
+                            {selectedPartner.recruits > 5 && (
+                              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs text-gray-500">
+                                +{selectedPartner.recruits - 5}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 text-center text-xs">
+                          <div>
+                            <div className="font-semibold text-gray-700">Глубина сети</div>
+                            <div className="text-gray-600">{selectedPartner.level + 1} уровня</div>
+                          </div>
+                          <div>
+                            <div className="font-semibold text-gray-700">Активность</div>
+                            <div className="text-gray-600">
+                              {selectedPartner.status === 'active' ? '85%' : '60%'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center text-gray-500 text-sm">
+                        Пока нет рефералов
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex space-x-3">
+                  <Button className="flex-1 bg-telegram hover:bg-telegram-dark">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Связаться
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <Users className="w-4 h-4 mr-2" />
+                    Посмотреть команду
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* How to Start */}
