@@ -1009,14 +1009,7 @@
       }
     ];
 
-    // Объединение всех модулей
-    const modulesData: Module[] = [
-      ...ecommerceModules,
-      ...marketingModules,
-      ...engagementModules,
-      ...educationModules,
-      ...fintechModules
-    ];
+
 
     // Компонент карточки модуля
     const ModuleCard: React.FC<{
@@ -1169,313 +1162,67 @@
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-4 mb-6"> </Button>
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-grow relative">
               <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
-              <Input eCategory}>tailsModal 
-                placeholder="Поиск модулей..." uto">selectedModule}
-                className="pl-9"lue="all">Все модули</TabsTrigger>
-                value={searchQuery}      {categories.filter(c => c !== 'all').map(category => (
-                onChange={handleSearchChange}            <TabsTrigger key={category} value={category}>
+              <Input
+                placeholder="Поиск модулей..."
+                className="pl-9"
+                value={searchQuery}
+                onChange={handleSearchChange}
               />
             </div>
             <div className="flex items-center gap-2">
               <Button 
                 variant={showPopularOnly ? "default" : "outline"} 
-                onClick={handleTogglePopular}t-2">
-                className="flex items-center gap-2"ap-6">
-              >filteredModules.map((module) => (
+                onClick={handleTogglePopular}
+                className="flex items-center gap-2"
+              >
                 <Star className="h-4 w-4" />
                 Популярные
               </Button>
               <Button variant="outline" className="flex items-center gap-2">
                 <Filter className="h-4 w-4" />
-                Фильтры))}
-              </Button>          </div>
+                Фильтры
+              </Button>
             </div>
-          </div>y-12">
+          </div>
 
-          <Tabs value={activeCategory} onValueChange={setActiveCategory}> className="text-muted-foreground">
-            <TabsList className="mb-6 flex-wrap h-auto">вый запрос или выбрать другую категорию
+          <Tabs value={activeCategory} onValueChange={setActiveCategory}>
+            <TabsList className="mb-6 flex-wrap h-auto">
               {categories.map((category) => (
                 <TabsTrigger key={category} value={category}>
                   {category === "all" ? "Все модули" : category}
-                </TabsTrigger>bsContent>
+                </TabsTrigger>
               ))}
             </TabsList>
 
-            <TabsContent value={activeCategory}>electedModule}
-              {filteredModules.length > 0 ? (sModalOpen}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">ose={closeModal}
-                  {filteredModules.map((module) => (      />
+            <TabsContent value={activeCategory}>
+              {filteredModules.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredModules.map((module) => (
                     <ModuleCard
                       key={module.id}
                       module={module}
                       onClick={handleModuleClick}
                     />
-                  ))}me="text-lg">Модули не найдены</p>
-                </div>="text-muted-foreground">
-              ) : (   Попробуйте изменить поисковый запрос или выбрать другую категорию
+                  ))}
+                </div>
+              ) : (
                 <div className="text-center py-12">
-                  <h3 className="text-lg font-medium">Модули не найдены</h3>            </div>
+                  <h3 className="text-lg font-medium">Модули не найдены</h3>
                   <p className="text-muted-foreground mt-2">
-                    Попробуйте изменить параметры поиска или фильтры
+                    Попробуйте изменить поисковый запрос или выбрать другую категорию
                   </p>
                 </div>
               )}
             </TabsContent>
           </Tabs>
-          {closeModal}
+
           <ModuleDetailModal 
             module={selectedModule}
             isOpen={isModalOpen}
             onClose={handleCloseModal}
-          />
-        </div>
-      );
-    }
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-
-          <ModuleDetailModal 
-            module={selectedModule}
-            isOpen={isModalOpen}
-            onClose={closeModal}
-          />
-        </div>
-      );
-    }
-              {filteredModules.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-lg">Модули не найдены</p>
-                  <p className="text-muted-foreground">
-                    Попробуйте изменить поисковый запрос или выбрать другую категорию
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-
-          <ModuleDetailModal 
-            module={selectedModule}
-            isOpen={isModalOpen}
-            onClose={closeModal}
-          />
-        </div>
-      );
-    }
-            title: "Оптимальный тайминг", 
-            description: "Автоматический подбор времени для максимальной конверсии" 
-          },k: (module: Module) => void;
-          { module, onClick }) => {
-            title: "Ограничение частоты", 
-            description: "Защита от чрезмерного давления на пользователя" 
-          }lassName="overflow-hidden cursor-pointer transition-all hover:shadow-md"
-        ],onClick={() => onClick(module)}
-        benefits: "Возврат 30% пользователей, ROI кампаний 400%"
-      }   <CardContent className="p-6 flex flex-col h-full">
-    ];      <div className="flex justify-between items-start mb-3">
-              <div className="p-2 bg-primary/10 rounded-lg">">
-                {module.icon}
-              </div>>
-              {module.isPopular && (
-                <Badge variant="secondary" className="ml-auto">
-                  Популярный
-                </Badge>
-              )}
-            </div>кно с детальной информацией о модуле
-            <CardTitle className="text-lg mt-2">{module.name}</CardTitle>
-            <CardDescription className="text-sm">{module.description}</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-grow">) => void;
-            <p className="text-xs text-muted-foreground">{module.benefits}</p>
-          </CardContent>rn null;
-          <CardFooter className="pt-0">
-            <Button variant="outline" size="sm" className="w-full">
-              Подробнее open={open} onOpenChange={onClose}>
-            </Button>  <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          </CardFooter>      <DialogHeader>
-        </Card>          <div className="flex items-center gap-2 mb-2">
-      );ded-lg">
-    };
-
-    // Детальное модальное окно для модуляlogTitle className="text-xl">{module.name}</DialogTitle>
-    const ModuleDetailModal: React.FC<{Popular && (
-      module: Module | null;ry">Популярный</Badge>
-      isOpen: boolean;
-      onClose: () => void;          </div>
-    }> = ({ module, isOpen, onClose }) => {<DialogDescription className="text-base pt-2">
-      if (!module) return null;
-
-      return (>
-        <Dialog open={isOpen} onOpenChange={onClose}>
-          <DialogContent className="max-w-3xl overflow-y-auto max-h-[90vh]">
-            <DialogHeader>nt-semibold text-lg mb-3">Ключевые возможности</h3>
-              <div className="flex items-center gap-3">ssName="space-y-3">
-                <div className="p-3 rounded-lg bg-primary/10">
-                  {module.icon}ssName="border rounded-lg p-3">
-                </div>}</div>
-                <div>  <div className="text-sm text-muted-foreground">{feature.description}</div>
-                  <DialogTitle className="text-xl">{module.name}</DialogTitle>div>
-                  <DialogDescription className="text-md">
-                    {module.description}
-                  </DialogDescription>
-                </div>e="mt-6 bg-secondary/30 p-4 rounded-lg">
-                {module.isPopular && (    <h3 className="font-semibold">Основные преимущества:</h3>
-                  <Badge variant="secondary" className="ml-auto">">{module.benefits}</p>
-                    Популярный
-                  </Badge>
-                )}
-              </div>
-            </DialogHeader>
-
-            <div className="my-4">
-              <p className="text-sm text-muted-foreground mb-4">понент страницы модулей
-                {module.fullDescription || module.description}unction ModulesPage() {
-              </p>ctiveCategory, setActiveCategory] = useState("all");
-
-              <h3 className="text-lg font-semibold mb-3">Ключевые возможности</h3>(null);
-              <div className="space-y-3">e);
-                {module.features.map((feature, index) => (
-                  <div key={index} className="border rounded-lg p-3"> модулей
-                    <h4 className="font-medium">{feature.title}</h4>seMemo(() => {
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>s = ['all', ...Array.from(new Set(modulesData.map(m => m.category)))];
-                  </div>return cats;
-                ))}}, []);
-              </div>
-     поисковому запросу
-              <div className="mt-6 p-4 bg-primary/5 rounded-lg"> {
-                <h3 className="font-semibold mb-2">Основные преимущества:</h3>
-                <p>{module.benefits}</p>' || module.category === activeCategory;
-              </div>oLowerCase()) || 
-            </div>e().includes(searchQuery.toLowerCase());
-          return matchesCategory && matchesSearch;
-            <DialogFooter>
-              <Button variant="outline" onClick={onClose}>
-                Закрыть
-              </Button>duleClick = (module: Module) => {
-              <Button>Добавить модуль</Button>lectedModule(module);
-            </DialogFooter>    setIsModalOpen(true);
-          </DialogContent>
-        </Dialog>
-      );
-    };
-
-    // Основной компонент страницы модулей
-    export default function ModulesPage() {
-      const [activeCategory, setActiveCategory] = useState("all");v className="container mx-auto py-8">
-      const [searchQuery, setSearchQuery] = useState("");etween items-center mb-8">
-      const [selectedModule, setSelectedModule] = useState<Module | null>(null);        <div>
-      const [isModalOpen, setIsModalOpen] = useState(false);ли для Telegram Mini App</h1>
-    uted-foreground mt-1">
-      // Категории модулейодящие модули для вашего проекта из каталога
-      const categories = useMemo(() => {      </p>
-        const cats = ['all', ...Array.from(new Set(modulesData.map(m => m.category)))];        </div>
-        return cats;
-      }, []);
-      <div className="mb-6 flex gap-4 flex-col sm:flex-row">
-      // Фильтрация модулей по категории и поисковому запросу        <div className="relative flex-1">
-      const filteredModules = useMemo(() => {<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        return modulesData.filter(module => {
-          const matchesCategory = activeCategory === 'all' || module.category === activeCategory;
-          const matchesSearch = module.name.toLowerCase().includes(searchQuery.toLowerCase()) || lassName="pl-8"
-                               module.description.toLowerCase().includes(searchQuery.toLowerCase());
-          return matchesCategory && matchesSearch;.value)}
-        });
-      }, [activeCategory, searchQuery]);
-    n variant="outline" className="flex items-center gap-2">
-      const handleModuleClick = (module: Module) => {ilter className="h-4 w-4" />
-        setSelectedModule(module);          Фильтры
-        setIsModalOpen(true);
-      };
-
-      const closeModal = () => {ultValue="all" value={activeCategory} onValueChange={setActiveCategory}>
-        setIsModalOpen(false);p h-auto">
-      };="all">Все модули</TabsTrigger>
-    => c !== 'all').map(category => (
-      return (
-        <div className="container mx-auto py-8">  {category}
-          <div className="flex justify-between items-center mb-8">TabsTrigger>
-            <div>
-              <h1 className="text-3xl font-bold">Модули для Telegram Mini App</h1>
-              <p className="text-muted-foreground mt-1">
-                Выберите подходящие модули для вашего проекта из каталогаent value={activeCategory} className="mt-2">
-              </p>iv className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            </div>            {filteredModules.map((module) => (
-          </div>
-
-          <div className="mb-6 flex gap-4 flex-col sm:flex-row">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Поиск модулей..."
-                className="pl-8"lteredModules.length === 0 && (
-                value={searchQuery}assName="text-center py-12">
-                onChange={(e) => setSearchQuery(e.target.value)}              <p className="text-lg">Модули не найдены</p>
-              />
-            </div>ю
-            <Button variant="outline" className="flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              Фильтры
-            </Button>
-          </div>
-
-          <Tabs defaultValue="all" value={activeCategory} onValueChange={setActiveCategory}>tailsModal 
-            <TabsList className="mb-8 flex-wrap h-auto">selectedModule}
-              <TabsTrigger value="all">Все модули</TabsTrigger>
-              {categories.filter(c => c !== 'all').map(category => (
-                <TabsTrigger key={category} value={category}>
-                  {category}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            <TabsContent value={activeCategory} className="mt-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredModules.map((module) => (
-                  <ModuleCard 
-                    key={module.id} 
-                    module={module}
-                    onClick={handleModuleClick}
-                  />
-                ))}
-              </div>
-              {filteredModules.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-lg">Модули не найдены</p>
-                  <p className="text-muted-foreground">
-                    Попробуйте изменить поисковый запрос или выбрать другую категорию
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-
-          <ModuleDetailModal 
-            module={selectedModule}
-            isOpen={isModalOpen}
-            onClose={closeModal}
-          />
-        </div>
-      );
-    }
-              {filteredModules.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-lg">Модули не найдены</p>
-                  <p className="text-muted-foreground">
-                    Попробуйте изменить поисковый запрос или выбрать другую категорию
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-
-          <ModuleDetailModal 
-            module={selectedModule}
-            isOpen={isModalOpen}
-            onClose={closeModal}
           />
         </div>
       );
