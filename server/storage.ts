@@ -6,7 +6,9 @@ import { allIndustriesData } from "./seedIndustries";
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByTelegramId(telegramId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  linkTelegramId(userId: string, telegramId: string): Promise<void>;
   authenticateTelegramUser(username: string): Promise<User | undefined>;
   
   getAllModules(): Promise<Module[]>;
@@ -25,6 +27,7 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
+  private telegramIdToUserId: Map<string, string>; // Map telegram ID to user ID
   private modules: Map<string, Module>;
   private industries: Map<string, Industry>;
   private usps: Map<string, USP>;
@@ -32,6 +35,7 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.users = new Map();
+    this.telegramIdToUserId = new Map();
     this.modules = new Map();
     this.industries = new Map();
     this.usps = new Map();
@@ -149,11 +153,23 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       id, 
-      isAuthorized: false,
+      isAuthorized: insertUser.isAuthorized ?? false,
       telegramUsername: insertUser.telegramUsername ?? null 
     };
     this.users.set(id, user);
     return user;
+  }
+
+  async getUserByTelegramId(telegramId: string): Promise<User | undefined> {
+    const userId = this.telegramIdToUserId.get(telegramId);
+    if (userId) {
+      return this.users.get(userId);
+    }
+    return undefined;
+  }
+
+  async linkTelegramId(userId: string, telegramId: string): Promise<void> {
+    this.telegramIdToUserId.set(telegramId, userId);
   }
 
   async authenticateTelegramUser(username: string): Promise<User | undefined> {

@@ -75,23 +75,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Keep telegram auth for future use
+  // Telegram Login Widget authentication - secure with hash verification
   app.post("/api/auth/telegram", async (req, res) => {
     try {
       const authData = telegramAuthSchema.parse(req.body);
       
-      // Skip verification for now - accept any telegram data
-      // Find or create user
-      let user = await storage.authenticateTelegramUser(authData.username || `user_${authData.id}`);
+      // Verify Telegram authentication data hash for security
+      if (!verifyTelegramAuth(authData)) {
+        return res.status(401).json({ 
+          message: "Неверная подпись Telegram. Попробуйте войти заново." 
+        });
+      }
+      
+      // Check auth date (should be within 24 hours)
+      const authDate = new Date(authData.auth_date * 1000);
+      const now = new Date();
+      const hoursDiff = (now.getTime() - authDate.getTime()) / (1000 * 60 * 60);
+      
+      if (hoursDiff > 24) {
+        return res.status(401).json({ 
+          message: "Данные авторизации устарели. Попробуйте войти заново." 
+        });
+      }
+
+      // Find or create user based on Telegram ID (more secure than username)
+      let user = await storage.getUserByTelegramId(authData.id.toString());
       
       if (!user) {
-        // Create new user if not exists
+        // Create new user with Telegram data
         user = await storage.createUser({
           username: authData.username || `user_${authData.id}`,
           password: 'telegram_auth',
           telegramUsername: authData.username ? `@${authData.username}` : `@user_${authData.id}`,
           isAuthorized: true
         });
+        
+        // Store telegram ID for future authentication
+        await storage.linkTelegramId(user.id, authData.id.toString());
       }
       
       return res.json({ user, message: "Авторизация успешна" });
