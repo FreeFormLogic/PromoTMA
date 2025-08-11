@@ -25,7 +25,7 @@ const tutorialSteps: TutorialStep[] = [
     id: 2,
     title: "Каталог модулей",
     description: "Здесь собраны готовые компоненты для вашего приложения. Каждый модуль - это отдельная функция, которую можно интегрировать.",
-    selector: '[href="/modules"]',
+    selector: '[data-tutorial-target="/modules"]',
     icon: <Package className="w-6 h-6" />,
     position: "bottom"
   },
@@ -33,7 +33,7 @@ const tutorialSteps: TutorialStep[] = [
     id: 3,
     title: "Бизнес-ниши",
     description: "29 специализированных решений для разных видов бизнеса. От ресторанов до психологов - найдите свою нишу.",
-    selector: '[href="/industries"]',
+    selector: '[data-tutorial-target="/industries"]',
     icon: <Briefcase className="w-6 h-6" />,
     position: "bottom"
   },
@@ -41,7 +41,7 @@ const tutorialSteps: TutorialStep[] = [
     id: 4,
     title: "Прозрачные цены",
     description: "Четкие тарифы без скрытых платежей. Выберите подходящий план для вашего проекта.",
-    selector: '[href="/pricing"]',
+    selector: '[data-tutorial-target="/pricing"]',
     icon: <CreditCard className="w-6 h-6" />,
     position: "bottom"
   },
@@ -49,7 +49,7 @@ const tutorialSteps: TutorialStep[] = [
     id: 5,
     title: "Процесс разработки",
     description: "Понятная схема работы от идеи до запуска. Знайте, что вас ждет на каждом этапе.",
-    selector: '[href="/process"]',
+    selector: '[data-tutorial-target="/process"]',
     icon: <Rocket className="w-6 h-6" />,
     position: "bottom"
   },
@@ -57,7 +57,7 @@ const tutorialSteps: TutorialStep[] = [
     id: 6,
     title: "Партнерская программа",
     description: "Специальные условия для партнеров. Этот раздел находится в разработке.",
-    selector: '[href="/partners"]',
+    selector: '[data-tutorial-target="/partners"]',
     icon: <Users className="w-6 h-6" />,
     position: "bottom"
   },

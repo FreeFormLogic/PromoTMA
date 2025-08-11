@@ -72,7 +72,9 @@ export function Navigation() {
               
               return (
                 <Link key={item.path} href={item.path}>
-                  <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer ${
+                  <div 
+                    data-tutorial-target={item.path}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer ${
                     isActive 
                       ? 'bg-telegram text-white' 
                       : 'text-gray-700 hover:text-telegram hover:bg-telegram/10'
