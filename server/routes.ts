@@ -67,7 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if username is in allowed accounts
       if (!authData.username || !ALLOWED_ACCOUNTS.includes(authData.username)) {
         return res.status(403).json({ 
-          message: "Доступ запрещен. Обратитесь к @balilegend для получения доступа." 
+          message: "Доступ запрещен. Обратитесь к администратору для получения доступа." 
         });
       }
       
