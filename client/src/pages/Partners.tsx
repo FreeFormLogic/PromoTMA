@@ -443,6 +443,7 @@ export default function Partners() {
   const [totalDeals, setTotalDeals] = useState([30]);
   const [openLevels, setOpenLevels] = useState([3]);
   const [packageSales, setPackageSales] = useState([8]);
+  const [avgPackagePrice, setAvgPackagePrice] = useState([500]);
 
   // Partner data with realistic profiles
   const [selectedPartner, setSelectedPartner] = useState<any>(null);
@@ -1312,6 +1313,31 @@ export default function Partners() {
                       <span>20</span>
                     </div>
                   </div>
+
+                  {/* Average Package Price */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-sm font-medium text-purple-700">Средний чек пакета</label>
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                        ${avgPackagePrice[0]}
+                      </Badge>
+                    </div>
+                    <Slider
+                      value={avgPackagePrice}
+                      onValueChange={setAvgPackagePrice}
+                      max={5000}
+                      min={100}
+                      step={50}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-purple-500">
+                      <span>$100</span>
+                      <span>$1K</span>
+                      <span>$2.5K</span>
+                      <span>$4K</span>
+                      <span>$5K</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Network Results */}
@@ -1326,13 +1352,13 @@ export default function Partners() {
                     </div>
                     <div>
                       <div className="text-xl font-bold text-purple-600">
-                        ${Math.floor(packageSales[0] * 500 * 0.4).toLocaleString()}
+                        ${Math.floor(packageSales[0] * avgPackagePrice[0] * 0.4).toLocaleString()}
                       </div>
                       <div className="text-xs text-purple-600">От продажи пакетов</div>
                     </div>
                     <div>
                       <div className="text-xl font-bold text-purple-600">
-                        ${Math.floor(networkTurnover[0] * 0.18 + packageSales[0] * 500 * 0.4).toLocaleString()}
+                        ${Math.floor(networkTurnover[0] * 0.18 + packageSales[0] * avgPackagePrice[0] * 0.4).toLocaleString()}
                       </div>
                       <div className="text-xs text-purple-600">Общий доход</div>
                     </div>
