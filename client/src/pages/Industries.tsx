@@ -28,8 +28,8 @@ const iconMap: Record<string, any> = {
 
 // Цвета для категорий важности
 const categoryColors: Record<string, string> = {
-  "КРИТИЧЕСКИ ВАЖНО": "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300 border-red-200 dark:border-red-800",
-  "ОЧЕНЬ ПОЛЕЗНО": "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300 border-orange-200 dark:border-orange-800",
+  "КРИТИЧЕСКИ ВАЖНО": "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+  "ОЧЕНЬ ПОЛЕЗНО": "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300 border-purple-200 dark:border-purple-800",
   "ПОЛЕЗНО": "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300 border-green-200 dark:border-green-800"
 };
 
@@ -73,9 +73,7 @@ function IndustryCard({ industry }: { industry: Industry }) {
                 <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 line-clamp-2 leading-tight mb-2">
                   {industry.name}
                 </h3>
-                <Badge className={`text-xs ${categoryColors[industry.category] || categoryColors["ПОЛЕЗНО"]}`}>
-                  {industry.category}
-                </Badge>
+
               </div>
             </div>
             
@@ -88,7 +86,7 @@ function IndustryCard({ industry }: { industry: Industry }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
                 <TrendingUp className="w-4 h-4" />
-                <span className="font-medium">ROI 200-500%</span>
+                <span className="font-medium">Подробнее</span>
               </div>
               <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
             </div>
@@ -97,19 +95,21 @@ function IndustryCard({ industry }: { industry: Industry }) {
       </DialogTrigger>
       
       {/* Модальное окно с детальной информацией */}
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden" aria-describedby={`industry-description-${industry.id}`}>
+      <DialogContent 
+        className="max-w-6xl max-h-[95vh] overflow-hidden p-8" 
+        aria-describedby={`industry-description-${industry.id}`}
+        description={`Подробная информация о нише ${industry.name}`}
+      >
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               {industry.name}
             </DialogTitle>
-            <Badge className={`${categoryColors[industry.category] || categoryColors["ПОЛЕЗНО"]}`}>
-              {industry.category}
-            </Badge>
+
           </div>
         </DialogHeader>
         
-        <ScrollArea className="max-h-[70vh] pr-6">
+        <ScrollArea className="max-h-[75vh] pr-6">
           <div className="space-y-8">
             {/* Иконка и описание */}
             <div className="flex items-start gap-6" id={`industry-description-${industry.id}`}>
@@ -228,11 +228,11 @@ function IndustryCard({ industry }: { industry: Industry }) {
             )}
 
             {/* Кнопки действий */}
-            <div className="flex gap-4 pt-4 pb-2">
-              <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
-                Начать создание
+            <div className="flex flex-col sm:flex-row gap-3 pt-6 pb-2">
+              <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-12">
+                Получить прототип
               </Button>
-              <Button variant="outline" className="flex-1">
+              <Button variant="outline" className="flex-1 h-12">
                 Получить консультацию
               </Button>
             </div>
@@ -267,7 +267,7 @@ function IndustryCardSkeleton() {
 
 export default function Industries() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("ВСЕ ОТРАСЛИ");
+  const [selectedCategory, setSelectedCategory] = useState("ВСЕ НИШИ");
 
   const { data: industries, isLoading, error } = useQuery<Industry[]>({
     queryKey: ['/api/industries'],
@@ -308,11 +308,11 @@ export default function Industries() {
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Ниши бизнеса
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-4">
+              Бизнес-ниши для Telegram Mini Apps
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-              {totalIndustries} перспективных ниш для запуска Telegram Mini Apps с подробным анализом эффективности и рекомендациями по модулям
+              Проверенные решения для {totalIndustries} перспективных ниш с готовыми модулями и рекомендациями по внедрению
             </p>
           </div>
 
