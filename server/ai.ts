@@ -102,8 +102,8 @@ Module categories available:
 - ПАРСИНГ TELEGRAM (216-220): Social listening, competitive intelligence
 - WEB3 & DEFI (221-225): NFT, DeFi, blockchain, crypto wallets
 - ЛОКАЛЬНЫЕ СЕРВИСЫ (226-230): Geolocation, local delivery, offline business
-- ТРЕНДОВЫЕ ИГРЫ (231-235): Tap-to-earn, P2E gaming, social trading
-- НОВЫЕ МОДУЛИ (236-255): Pre-orders, product comparison, analytics, queue management, virtual consultations, AI trainers, parsing tools
+- ИГРЫ (231-235): Tap-to-earn, P2E gaming, social trading
+- ДОПОЛНИТЕЛЬНЫЕ МОДУЛИ (236-260): Pre-orders, product comparison, analytics, queue management, virtual consultations, AI trainers, parsing tools, education library, unified communications
 
 Always speak Russian and be extremely specific about how each module solves their exact business challenges.`;
 

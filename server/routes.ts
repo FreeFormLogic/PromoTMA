@@ -4,7 +4,6 @@ import { storage } from "./storage";
 import { z } from "zod";
 import crypto from "crypto";
 import { analyzeBusinessContext, generateAIResponse, calculateModuleRelevance } from "./ai";
-import { analyzeBusinessContext, generateAIResponse, calculateModuleRelevance } from "./ai";
 
 const telegramAuthSchema = z.object({
   id: z.number(),

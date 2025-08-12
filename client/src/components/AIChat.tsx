@@ -68,13 +68,7 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
       setAnalysis(analysisData);
       onAnalysisUpdate(analysisData);
       
-      // Get relevant modules
-      const modulesResponse = await apiRequest('POST', '/api/ai/modules/relevant', { 
-        analysis: analysisData 
-      });
-      const modulesData = await modulesResponse.json();
-      
-      onModulesUpdate(modulesData);
+      // Skip getting modules here since we'll get them from the AI chat response
     } catch (error) {
       console.error('Error analyzing business:', error);
     }
