@@ -243,6 +243,15 @@ export function IndustryModal({ industry, isOpen, onClose }: IndustryModalProps)
     roi: "Окупаемость за 4-6 недель",
     painKillers: []
   };
+  
+  // Debug logging
+  console.log('IndustryModal DEBUG:', {
+    industryName: industry.name,
+    metricsFound: !!industryMetrics[industry.name],
+    painKillersExists: !!metrics.painKillers,
+    painKillersLength: metrics.painKillers ? metrics.painKillers.length : 0,
+    painKillers: metrics.painKillers
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -340,7 +349,7 @@ export function IndustryModal({ industry, isOpen, onClose }: IndustryModalProps)
             {/* Interactive Pain Points Section */}
             <ModulePainPoints 
               moduleName={industry.name} 
-              painPoints={metrics.painKillers.length > 0 ? metrics.painKillers.map((item: any) => ({
+              painPoints={metrics.painKillers && metrics.painKillers.length > 0 ? metrics.painKillers.map((item: any) => ({
                 problem: item.pain,
                 solution: item.solution,
                 impact: "Значительное улучшение показателей бизнеса"
