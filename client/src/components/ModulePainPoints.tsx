@@ -159,6 +159,59 @@ const modulePainPointsData: Record<string, PainPoint[]> = {
       solution: "Структурированная обработка с трекингом решения",
       impact: "Время решения жалоб сокращается на 60%"
     }
+  ],
+  // Универсальные болевые точки для ресторанной отрасли
+  "Ресторанная отрасль": [
+    {
+      problem: "Высокие комиссии агрегаторов (25-35%) съедают всю прибыль",
+      solution: "Собственный канал продаж без комиссий посредников",
+      impact: "Экономия на комиссиях до 30% от оборота"
+    },
+    {
+      problem: "Отсутствие данных о клиентах - нет базы для маркетинга",
+      solution: "Полная информация о клиентах и их предпочтениях",
+      impact: "Повторные заказы увеличиваются на 150%"
+    },
+    {
+      problem: "Зависимость от внешних платформ и их правил",
+      solution: "Независимый канал коммуникации и продаж",
+      impact: "Стабильность бизнеса повышается на 200%"
+    }
+  ],
+  // Дополнительные варианты названий для ресторанов
+  "Управление доставкой": [
+    {
+      problem: "Курьеры часто опаздывают, клиенты недовольны",
+      solution: "GPS-трекинг с точным временем прибытия",
+      impact: "Удовлетворенность доставкой растет на 80%"
+    },
+    {
+      problem: "Нет контроля над процессом доставки",
+      solution: "Полная прозрачность маршрута и статуса заказа",
+      impact: "Жалобы на доставку снижаются на 60%"
+    },
+    {
+      problem: "Сложно координировать работу нескольких курьеров",
+      solution: "Централизованная система управления доставками",
+      impact: "Эффективность логистики увеличивается на 40%"
+    }
+  ],
+  "Каталог блюд": [
+    {
+      problem: "Невкусные фото блюд снижают аппетит покупателей",
+      solution: "Профессиональные фото и детальные описания блюд",
+      impact: "Конверсия каталога увеличивается на 45%"
+    },
+    {
+      problem: "Клиенты не могут найти нужное блюдо в большом меню",
+      solution: "Умные фильтры по составу, калориям и предпочтениям",
+      impact: "Время выбора блюда сокращается на 50%"
+    },
+    {
+      problem: "Нет информации об аллергенах и составе",
+      solution: "Подробная информация о составе и пищевой ценности",
+      impact: "Доверие клиентов повышается на 70%"
+    }
   ]
 };
 
@@ -166,18 +219,54 @@ export function ModulePainPoints({ moduleName, painPoints: externalPainPoints }:
   const [selectedPoint, setSelectedPoint] = useState<number | null>(null);
   const [showSolution, setShowSolution] = useState(false);
 
-  const painPoints = externalPainPoints || modulePainPointsData[moduleName] || [
-    {
-      problem: "Текущие процессы неэффективны и требуют много ручной работы",
-      solution: "Автоматизация основных операций с умными алгоритмами",
-      impact: "Эффективность увеличивается на 70%"
-    },
-    {
-      problem: "Сложно отслеживать результаты и анализировать данные",
-      solution: "Встроенная аналитика с наглядными отчетами",
-      impact: "Время на анализ сокращается на 80%"
+  // Попробуем найти болевые точки по точному названию или по ключевым словам
+  let painPoints = externalPainPoints || modulePainPointsData[moduleName];
+  
+  // Если не найдено точное соответствие, ищем по ключевым словам
+  if (!painPoints) {
+    const lowerModuleName = moduleName.toLowerCase();
+    if (lowerModuleName.includes('доставк') || lowerModuleName.includes('курьер')) {
+      painPoints = modulePainPointsData["Управление доставкой"];
+    } else if (lowerModuleName.includes('блюд') || lowerModuleName.includes('меню') || lowerModuleName.includes('каталог')) {
+      painPoints = modulePainPointsData["Каталог блюд"];
+    } else if (lowerModuleName.includes('ресторан') || lowerModuleName.includes('кафе') || lowerModuleName.includes('еда')) {
+      painPoints = modulePainPointsData["Ресторанная отрасль"];
+    } else if (lowerModuleName.includes('корзин')) {
+      painPoints = modulePainPointsData["Корзина с сохранением сессии"];
+    } else if (lowerModuleName.includes('товар') || lowerModuleName.includes('витрин')) {
+      painPoints = modulePainPointsData["Витрина товаров с AI-описаниями"];
+    } else if (lowerModuleName.includes('лояльн') || lowerModuleName.includes('балл')) {
+      painPoints = modulePainPointsData["Программа лояльности с баллами"];
+    } else if (lowerModuleName.includes('уведомл') || lowerModuleName.includes('рассылк')) {
+      painPoints = modulePainPointsData["Push-уведомления и рассылки"];
+    } else if (lowerModuleName.includes('бот') || lowerModuleName.includes('поддержк')) {
+      painPoints = modulePainPointsData["Чат-бот поддержки"];
+    } else if (lowerModuleName.includes('запис') || lowerModuleName.includes('услуг')) {
+      painPoints = modulePainPointsData["Каталог услуг с онлайн-записью"];
+    } else if (lowerModuleName.includes('задач') || lowerModuleName.includes('проект')) {
+      painPoints = modulePainPointsData["Менеджер задач и проектов"];
+    } else if (lowerModuleName.includes('отзыв') || lowerModuleName.includes('модерац')) {
+      painPoints = modulePainPointsData["Система отзывов с модерацией"];
     }
-  ];
+  }
+  
+  // Если всё ещё не найдено, используем дефолтные
+  if (!painPoints) {
+    painPoints = [
+      {
+        problem: "Текущие процессы неэффективны и требуют много ручной работы",
+        solution: "Автоматизация основных операций с умными алгоритмами",
+        impact: "Эффективность увеличивается на 70%"
+      },
+      {
+        problem: "Сложно отслеживать результаты и анализировать данные",
+        solution: "Встроенная аналитика с наглядными отчетами",
+        impact: "Время на анализ сокращается на 80%"
+      }
+    ];
+  }
+
+  console.log('ModulePainPoints render:', { moduleName, painPointsLength: painPoints.length, foundData: !!modulePainPointsData[moduleName] });
 
   const handlePointClick = (index: number) => {
     if (selectedPoint === index) {
