@@ -36,7 +36,6 @@ export function Navigation() {
     { path: "/industries", label: "Отрасли", icon: Building2 },
     { path: "/process", label: "Разработка", icon: Rocket },
     { path: "/partners", label: "Партнерам", icon: Handshake },
-    { path: "/admin", label: "Админ", icon: Settings },
   ];
 
   return (

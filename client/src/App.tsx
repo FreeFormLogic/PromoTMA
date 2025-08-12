@@ -54,10 +54,7 @@ function Router() {
         </AuthGuard>
       )} />
       <Route path="/admin" component={() => (
-        <AuthGuard>
-          <Navigation />
-          <AdminPanel />
-        </AuthGuard>
+        <AdminPanel />
       )} />
       <Route component={NotFound} />
     </Switch>

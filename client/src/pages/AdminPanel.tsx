@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,25 @@ export default function AdminPanel() {
   const { toast } = useToast();
   const [newUserId, setNewUserId] = useState("");
   const [bulkUserIds, setBulkUserIds] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  
+  // Простая проверка админ-доступа
+  const handleAdminLogin = () => {
+    if (adminPassword === "PromoTMA2025") {
+      setIsAuthenticated(true);
+      toast({
+        title: "Доступ разрешен",
+        description: "Добро пожаловать в админ-панель",
+      });
+    } else {
+      toast({
+        title: "Неверный пароль",
+        description: "Доступ запрещен",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Получение списка разрешенных пользователей
   const { data: whitelist = [], isLoading } = useQuery({
@@ -165,22 +184,66 @@ export default function AdminPanel() {
     return displayName;
   };
 
+  // Если не авторизован, показываем форму входа
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mx-auto mb-4">
+              <Shield className="w-8 h-8 text-white" />
+            </div>
+            <CardTitle className="text-2xl">Админ-панель</CardTitle>
+            <CardDescription>
+              Введите пароль для доступа к управлению вайт-листом
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Input
+              type="password"
+              placeholder="Пароль администратора"
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
+            />
+            <Button 
+              onClick={handleAdminLogin}
+              className="w-full"
+              disabled={!adminPassword.trim()}
+            >
+              Войти в админ-панель
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Заголовок */}
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <Settings className="w-6 h-6 text-white" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <Settings className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                Панель администратора
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Управление доступом к Telegram Mini App
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              Панель администратора
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Управление доступом к Telegram Mini App
-            </p>
-          </div>
+          <Button 
+            variant="outline"
+            onClick={() => setIsAuthenticated(false)}
+            size="sm"
+          >
+            Выйти
+          </Button>
         </div>
 
         {/* Статистика */}
