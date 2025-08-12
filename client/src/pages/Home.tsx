@@ -29,7 +29,7 @@ import {
 import { Link } from "wouter";
 import { type Module, type Industry, type USP } from "@shared/schema";
 import { PainPointsSection } from "@/components/PainPointsSection";
-import { AIChat } from "@/components/AIChat";
+import AIChat from "@/components/AIChat";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface BusinessAnalysis {
@@ -187,30 +187,31 @@ export default function Home() {
 
 
 
-        {/* AI Chat Section - Compact */}
+
+
+        {/* Full-screen AI Chat */}
         {!chatMinimized && (
-          <section className="mb-8">
-            <div className="text-center mb-6">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Bot className="w-6 h-6 text-primary" />
-                <Sparkles className="w-5 h-5 text-yellow-500" />
-              </div>
-
-            </div>
-
-            <div className="max-w-xl mx-auto">
-              <div className="h-96">
-                <AIChat 
-                  onAnalysisUpdate={setBusinessAnalysis}
-                  onModulesUpdate={setAiRecommendedModules}
-                  isMinimized={chatMinimized}
-                  onToggleMinimize={() => setChatMinimized(!chatMinimized)}
-                  currentlyDisplayedModules={aiRecommendedModules}
-                />
-              </div>
-            </div>
-          </section>
+          <div className="fixed inset-0 z-50 bg-white">
+            <AIChat 
+              onAnalysisUpdate={setBusinessAnalysis}
+              onModulesUpdate={setAiRecommendedModules}
+              isMinimized={false}
+              onToggleMinimize={() => setChatMinimized(true)}
+              currentlyDisplayedModules={aiRecommendedModules}
+              isFullScreen={true}
+            />
+          </div>
         )}
+
+        {/* Show chat button */}
+        <div className="fixed bottom-6 right-6 z-50">
+          <Button
+            onClick={() => setChatMinimized(!chatMinimized)}
+            className="w-16 h-16 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg"
+          >
+            <Bot className="w-8 h-8 text-white" />
+          </Button>
+        </div>
 
         {/* Floating Chat Button */}
         {chatMinimized && (

@@ -8,6 +8,8 @@ import { Navigation } from "@/components/Navigation";
 import Home from "@/pages/Home";
 import Modules from "@/pages/Modules";
 import Industries from "@/pages/Industries";
+import MyApp from "@/pages/MyApp";
+import Development from "@/pages/Development";
 import Pricing from "@/pages/Pricing";
 import Process from "@/pages/Process";
 import Partners from "@/pages/Partners";
@@ -33,6 +35,18 @@ function Router() {
         <AuthGuard>
           <Navigation />
           <Industries />
+        </AuthGuard>
+      )} />
+      <Route path="/my-app" component={() => (
+        <AuthGuard>
+          <Navigation />
+          <MyApp />
+        </AuthGuard>
+      )} />
+      <Route path="/development" component={() => (
+        <AuthGuard>
+          <Navigation />
+          <Development />
         </AuthGuard>
       )} />
       <Route path="/pricing" component={() => (

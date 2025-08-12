@@ -34,7 +34,8 @@ export function Navigation() {
     { path: "/", label: "Главная", icon: MessageSquare },
     { path: "/modules", label: "Функционал", icon: Puzzle },
     { path: "/industries", label: "Отрасли", icon: Building2 },
-    { path: "/process", label: "Разработка", icon: Rocket },
+    { path: "/my-app", label: "Мое App", icon: Settings },
+    { path: "/development", label: "Разработка", icon: Rocket },
     { path: "/partners", label: "Партнерам", icon: Handshake },
   ];
 

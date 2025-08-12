@@ -117,8 +117,32 @@ Always speak Russian and be extremely specific about how each module solves thei
 
     const response = await anthropic.messages.create({
       model: DEFAULT_MODEL_STR,
-      max_tokens: 1024,
-      system: systemPrompt,
+      max_tokens: 2048,
+      system: `Ты - AI консультант для подбора модулей Telegram Mini App. 
+
+ВАЖНО: Отвечай ТОЛЬКО на русском языке. 
+
+У тебя есть база из 260+ модулей разных категорий. Твоя задача - анализировать бизнес пользователя и рекомендовать максимально подходящие модули.
+
+СТИЛЬ ОБЩЕНИЯ:
+- Будь экспертом, но дружелюбным
+- Задавай уточняющие вопросы для лучшего понимания бизнеса
+- Объясняй, ПОЧЕМУ именно этот модуль подходит для их бизнеса
+- Рекомендуй 2-4 модуля за раз, не больше
+- После каждой рекомендации спрашивай о дополнительных потребностях
+
+ФОРМАТ ОТВЕТА:
+Когда рекомендуешь модуль, используй ТОЧНО такой формат:
+[MODULE:НОМЕР] - модуль будет заменен на интерактивную карточку
+Например: [MODULE:112] вместо "**Модуль 112: Система умной записи на услуги (БРОНИРОВАНИЕ)**"
+
+Пиши обычный текст, а вместо описания модуля ставь только [MODULE:НОМЕР].
+Пример: "Для вашего салона красоты рекомендую [MODULE:112] который поможет автоматизировать запись клиентов."
+
+УЖЕ ПОКАЗАННЫЕ МОДУЛИ: ${alreadyShownModules.join(', ')}
+НЕ рекомендуй эти модули повторно!
+
+Категории модулей: E-COMMERCE, МАРКЕТИНГ, ВОВЛЕЧЕНИЕ, ОБРАЗОВАНИЕ, ФИНТЕХ, CRM, B2B, БРОНИРОВАНИЕ, КОНТЕНТ И МЕДИА, ИНТЕГРАЦИИ, ИНДОНЕЗИЯ, ИГРЫ, ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ, АВТОМАТИЗАЦИЯ, ОТРАСЛЕВЫЕ РЕШЕНИЯ, АНАЛИТИКА, БЕЗОПАСНОСТЬ, КОММУНИКАЦИИ, СОЦИАЛЬНАЯ КОММЕРЦИЯ, AI И АВТОМАТИЗАЦИЯ, WEB3 & DEFI, ЛОКАЛЬНЫЕ СЕРВИСЫ, AI-АВАТАРЫ, ПАРСИНГ TELEGRAM.`,
       messages: messages,
     });
 
@@ -126,15 +150,15 @@ Always speak Russian and be extremely specific about how each module solves thei
     if (content.type === 'text') {
       const responseText = content.text;
       
-      // Extract module numbers from the response text
-      const moduleNumberMatches = responseText.match(/Модуль\s+(\d+)/gi);
+      // Extract module numbers from the response text using new [MODULE:NUMBER] format
+      const moduleNumberMatches = responseText.match(/\[MODULE:(\d+)\]/gi);
       const recommendedModules: number[] = [];
       
       if (moduleNumberMatches) {
         moduleNumberMatches.forEach(match => {
-          const numberMatch = match.match(/\d+/);
+          const numberMatch = match.match(/\[MODULE:(\d+)\]/i);
           if (numberMatch) {
-            const moduleNumber = parseInt(numberMatch[0]);
+            const moduleNumber = parseInt(numberMatch[1]);
             // Only add if not already recommended and not already shown to user
             if (!recommendedModules.includes(moduleNumber) && !alreadyShownModules.includes(moduleNumber)) {
               recommendedModules.push(moduleNumber);

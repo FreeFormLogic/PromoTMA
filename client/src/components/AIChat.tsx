@@ -47,7 +47,7 @@ interface AIChatProps {
   currentlyDisplayedModules?: any[];
 }
 
-export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize, currentlyDisplayedModules = [] }: AIChatProps) {
+export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize, currentlyDisplayedModules = [], isFullScreen = false }: AIChatProps & { isFullScreen?: boolean }) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -231,6 +231,33 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
     setMessages(prev => [...prev, prototypeMessage]);
   };
 
+  const renderMessageWithModules = (content: string, isAssistant: boolean) => {
+    if (!isAssistant || !allModules) {
+      return content;
+    }
+
+    // Split content by [MODULE:NUMBER] pattern and replace with inline module cards
+    const parts = content.split(/(\[MODULE:\d+\])/g);
+    
+    return parts.map((part, index) => {
+      const moduleMatch = part.match(/\[MODULE:(\d+)\]/);
+      if (moduleMatch) {
+        const moduleNumber = parseInt(moduleMatch[1]);
+        const module = allModules.find(m => m.number === moduleNumber);
+        
+        if (module) {
+          return (
+            <div key={index} className="my-2">
+              <ModuleCard module={module} />
+            </div>
+          );
+        }
+        return <span key={index} className="text-red-500">Модуль {moduleNumber} не найден</span>;
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
   if (isMinimized) {
     return (
       <div className="fixed bottom-4 right-4 z-50">
@@ -250,7 +277,7 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
   }
 
   return (
-    <Card className={`h-full flex flex-col bg-gradient-to-br from-background via-background to-primary/5 border-2 border-primary/10 ${isMinimized ? 'w-80' : ''}`}>
+    <Card className={`${isFullScreen ? 'h-screen w-screen rounded-none border-0' : 'h-full'} flex flex-col bg-gradient-to-br from-background via-background to-primary/5 border-2 border-primary/10 ${isMinimized ? 'w-80' : ''}`}>
       {/* Header */}
       <div className="p-3 border-b bg-primary/5 backdrop-blur">
         <div className="flex items-center justify-between">
@@ -306,7 +333,9 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
                       : 'bg-muted shadow-sm border border-border'
                   }`}
                 >
-                  <p className="text-xs whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                  <div className="text-xs whitespace-pre-wrap leading-relaxed">
+                    {renderMessageWithModules(message.content, message.role === 'assistant')}
+                  </div>
                   <p className={`text-[10px] mt-1 ${
                     message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
                   }`}>

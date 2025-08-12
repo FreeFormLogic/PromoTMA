@@ -1,0 +1,259 @@
+import { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Smartphone, Settings, Trash2, Eye, Download, Share2, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+
+interface Module {
+  id: string;
+  number: number;
+  name: string;
+  description: string;
+  category: string;
+  keyFeatures: string | string[];
+  benefits: string;
+  icon: string;
+}
+
+export default function MyApp() {
+  const [selectedModules, setSelectedModules] = useState<Module[]>([]);
+  const [showPrototype, setShowPrototype] = useState(false);
+
+  // Load selected modules from localStorage or state management
+  // This would typically come from a global state management solution
+  
+  const { data: allModules } = useQuery<Module[]>({
+    queryKey: ['/api/modules'],
+  });
+
+  const removeModule = (moduleId: string) => {
+    setSelectedModules(prev => prev.filter(m => m.id !== moduleId));
+  };
+
+  const generatePrototype = () => {
+    setShowPrototype(true);
+    // This would trigger prototype generation
+  };
+
+  const categories = selectedModules.reduce((acc, module) => {
+    if (!acc[module.category]) {
+      acc[module.category] = [];
+    }
+    acc[module.category].push(module);
+    return acc;
+  }, {} as Record<string, Module[]>);
+
+  const categoryColors = {
+    'E-COMMERCE': 'bg-blue-100 text-blue-800',
+    'МАРКЕТИНГ': 'bg-green-100 text-green-800',
+    'ВОВЛЕЧЕНИЕ': 'bg-purple-100 text-purple-800',
+    'ОБРАЗОВАНИЕ': 'bg-orange-100 text-orange-800',
+    'ФИНТЕХ': 'bg-yellow-100 text-yellow-800',
+    'CRM': 'bg-pink-100 text-pink-800',
+    'БРОНИРОВАНИЕ': 'bg-indigo-100 text-indigo-800',
+    'ОТРАСЛЕВЫЕ РЕШЕНИЯ': 'bg-red-100 text-red-800',
+    'АВТОМАТИЗАЦИЯ': 'bg-cyan-100 text-cyan-800',
+    'КОММУНИКАЦИИ': 'bg-teal-100 text-teal-800',
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center gap-3 mb-4"
+          >
+            <Smartphone className="w-10 h-10 text-blue-600" />
+            <h1 className="text-3xl font-bold text-gray-900">Мое Telegram Mini App</h1>
+            <Sparkles className="w-8 h-8 text-yellow-500" />
+          </motion.div>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Ваш персональный набор модулей для создания идеального Telegram Mini App
+          </p>
+        </div>
+
+        {selectedModules.length === 0 ? (
+          <Card className="p-12 text-center">
+            <Smartphone className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              Пока нет выбранных модулей
+            </h3>
+            <p className="text-gray-500 mb-6">
+              Начните общение с AI-консультантом, чтобы подобрать подходящие модули для вашего бизнеса
+            </p>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              Перейти к AI-консультанту
+            </Button>
+          </Card>
+        ) : (
+          <>
+            {/* Statistics */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-blue-600 mb-1">
+                  {selectedModules.length}
+                </div>
+                <div className="text-sm text-gray-600">Модулей выбрано</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-green-600 mb-1">
+                  {Object.keys(categories).length}
+                </div>
+                <div className="text-sm text-gray-600">Категорий</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-purple-600 mb-1">
+                  {selectedModules.length >= 3 ? 'Готов' : 'В работе'}
+                </div>
+                <div className="text-sm text-gray-600">Статус прототипа</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-orange-600 mb-1">
+                  ~{selectedModules.length * 2}
+                </div>
+                <div className="text-sm text-gray-600">Дней разработки</div>
+              </Card>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-4 mb-8 justify-center">
+              <Button 
+                onClick={generatePrototype}
+                disabled={selectedModules.length < 3}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Создать прототип
+              </Button>
+              <Button variant="outline">
+                <Download className="w-4 h-4 mr-2" />
+                Экспорт ТЗ
+              </Button>
+              <Button variant="outline">
+                <Share2 className="w-4 h-4 mr-2" />
+                Поделиться
+              </Button>
+              <Button variant="outline">
+                <Settings className="w-4 h-4 mr-2" />
+                Настройки
+              </Button>
+            </div>
+
+            {/* Selected Modules by Category */}
+            <div className="space-y-6">
+              {Object.entries(categories).map(([category, modules]) => (
+                <motion.div
+                  key={category}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-xl p-6 shadow-lg"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <Badge 
+                        className={`${categoryColors[category] || 'bg-gray-100 text-gray-800'} text-sm font-medium`}
+                      >
+                        {category}
+                      </Badge>
+                      <span className="text-sm text-gray-500">
+                        {modules.length} модул{modules.length === 1 ? 'ь' : modules.length < 5 ? 'я' : 'ей'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <AnimatePresence>
+                      {modules.map((module) => (
+                        <motion.div
+                          key={module.id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          className="group"
+                        >
+                          <Card className="p-4 h-full border-2 border-green-200 bg-green-50 hover:shadow-md transition-all">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="text-sm font-medium text-green-700">
+                                    Модуль {module.number}
+                                  </span>
+                                </div>
+                                <h4 className="font-medium text-sm mb-2 line-clamp-2">
+                                  {module.name}
+                                </h4>
+                                <p className="text-xs text-gray-600 line-clamp-3 mb-3">
+                                  {module.description}
+                                </p>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeModule(module.id)}
+                                className="text-red-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Prototype Preview */}
+            {showPrototype && selectedModules.length >= 3 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-8 bg-white rounded-xl p-6 shadow-lg border-2 border-green-200"
+              >
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Sparkles className="w-6 h-6 text-yellow-500" />
+                  Прототип готов!
+                </h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold mb-3">Выбранные модули:</h4>
+                    <div className="space-y-2">
+                      {selectedModules.map((module) => (
+                        <div key={module.id} className="flex items-center gap-2 text-sm">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span>Модуль {module.number}: {module.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-3">Функциональность:</h4>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <p>• Интеграция с Telegram Bot API</p>
+                      <p>• Адаптивный интерфейс для всех устройств</p>
+                      <p>• Система авторизации через Telegram</p>
+                      <p>• Встроенная аналитика и метрики</p>
+                      <p>• Поддержка платежей Telegram Stars</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 p-4 bg-green-50 rounded-lg">
+                  <p className="text-green-800 font-medium">
+                    ✅ Ваше приложение готово к передаче в разработку! 
+                    Предполагаемое время разработки: {selectedModules.length * 2} дня
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
