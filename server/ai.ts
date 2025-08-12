@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-// IMPORTANT: Using the latest Claude Sonnet 4 model, not the older 3.x versions
-const DEFAULT_MODEL_STR = "claude-sonnet-4-20250514";
+// IMPORTANT: Using Claude Sonnet 3.7 with thinking capabilities as requested by user
+const DEFAULT_MODEL_STR = "claude-3-5-sonnet-20241022";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -72,26 +72,34 @@ Respond only with valid JSON.`;
 
 export async function generateAIResponse(messages: { role: string; content: string }[]): Promise<{ response: string; recommendedModules: number[] }> {
   try {
-    const systemPrompt = `You are a helpful Telegram Mini Apps consultant. You help businesses understand which modules and solutions would work best for their specific needs.
+    const systemPrompt = `You are an expert Telegram Mini Apps consultant with deep thinking capabilities. Help businesses by recommending ONLY the most essential modules first, then gradually add more as the conversation develops.
 
-IMPORTANT: When recommending modules, always specify the exact module numbers (e.g., "Модуль 5", "Модуль 7"). Be specific about which modules you recommend and why.
+CRITICAL RULES:
+1. START SMALL: In first response, recommend only 2-3 CORE modules that are absolutely essential
+2. BE SPECIFIC: Always mention exact module numbers (e.g., "Модуль 41", "Модуль 5")
+3. EXPLAIN VALUE: For each module, give a specific, personalized reason why it solves their exact business problem
+4. GRADUAL EXPANSION: In follow-up responses, add 1-2 additional modules that complement the conversation
+5. PRIORITIZE: Always put the most important modules first
 
-You have access to these module categories and some example modules:
-- E-COMMERCE (Modules 1-15): Online stores, payment systems, product catalogs
-- МАРКЕТИНГ (Modules 16-30): A/B testing, analytics, campaigns
-- ВОВЛЕЧЕНИЕ (Modules 31-40): Gamification, loyalty programs
-- ОБРАЗОВАНИЕ (Modules 41-66): Learning platforms, courses, certifications
-- ФИНТЕХ (Modules 67-81): Payment processing, wallets, banking
-- CRM (Modules 82-96): Customer management, sales automation
-- B2B (Modules 97-111): Business process automation, B2B marketplaces
-- БРОНИРОВАНИЕ (Modules 112-126): Booking systems, scheduling
-- ИГРЫ (Modules 127-136): Games, entertainment, social features
-- КОНТЕНТ И МЕДИА (Modules 137-146): Content management, media tools
-- ИНТЕГРАЦИИ (Modules 147-156): API integrations, third-party services
+Module categories available:
+- E-COMMERCE (1-15): Online stores, payments, catalogs
+- МАРКЕТИНГ (16-30): Analytics, campaigns, A/B testing  
+- ВОВЛЕЧЕНИЕ (31-40): Gamification, loyalty, engagement
+- ОБРАЗОВАНИЕ (41-66): Learning platforms, courses, tests
+- ФИНТЕХ (67-81): Payment processing, financial tools
+- CRM (82-96): Customer management, automation
+- B2B (97-111): Business processes, B2B tools
+- БРОНИРОВАНИЕ (112-126): Booking, scheduling systems
+- КОНТЕНТ И МЕДИА (137-150): Content management, media
+- ИГРЫ (127-136): Games, entertainment features
+- ИНТЕГРАЦИИ (151-160): API integrations, external services
+- ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ (161-170): Additional business tools
+- АВТОМАТИЗАЦИЯ (171-180): Automation and workflows
+- ОТРАСЛЕВЫЕ РЕШЕНИЯ (181-190): Industry-specific solutions
+- АНАЛИТИКА (191-200): Advanced analytics and BI
+- БЕЗОПАСНОСТЬ (201-210): Security and compliance
 
-Always recommend specific numbered modules that match the business needs. 
-Be concise, practical, and focus on actionable recommendations. Speak in Russian.
-When discussing modules, reference specific module numbers and explain why they're relevant.`;
+Always speak Russian and be extremely specific about how each module solves their exact business challenges.`;
 
     const response = await anthropic.messages.create({
       model: DEFAULT_MODEL_STR,

@@ -42,23 +42,58 @@ interface BusinessAnalysis {
   persona: string;
 }
 
-// AI explanation generator for modules
-function getAIExplanation(module: Module): string {
-  const explanations: Record<string, string> = {
-    // Education modules
-    'Платформа курсов с видео и интерактивными тестами': 'Идеально для структурированной подачи курсов с отслеживанием прогресса учеников',
-    'Социальное обучение и peer-to-peer': 'Создает сообщество единомышленников для взаимной поддержки и мотивации',
-    'Фитнес и здоровье': 'Поможет ученикам отслеживать физические результаты и питание',
-    'Адаптивное обучение с AI': 'Персонализирует обучение под каждого ученика',
-    // E-commerce modules  
-    'Интернет-магазин с корзиной и оплатой': 'Для продажи дополнительных материалов и курсов',
-    'Подписки и рекуррентные платежи': 'Обеспечит стабильный доход от программ похудения',
-    // Marketing modules
-    'A/B тестирование интерфейсов и контента': 'Оптимизирует конверсию в продажи курсов',
-    // Default explanations for other modules
+// Personalized AI explanation generator for modules
+function getPersonalizedExplanation(module: Module, analysis: BusinessAnalysis | null): string {
+  if (!analysis) {
+    return `Решает ключевые задачи категории ${module.category}`;
+  }
+
+  // Create personalized explanations based on business analysis
+  const businessType = analysis.industry.toLowerCase();
+  const moduleCategory = module.category;
+  const moduleName = module.name.toLowerCase();
+  
+  // Specific explanations for different business types and modules
+  if (businessType.includes('курс') || businessType.includes('обучен') || businessType.includes('образован')) {
+    if (moduleCategory === 'ОБРАЗОВАНИЕ') {
+      if (moduleName.includes('платформа курсов')) return 'Создаст структурированную систему обучения с отслеживанием прогресса ваших учеников';
+      if (moduleName.includes('социальное обучение')) return 'Построит активное сообщество учеников для взаимной поддержки и мотивации';
+      if (moduleName.includes('тест')) return 'Поможет оценивать знания и повысить вовлеченность учеников';
+    }
+    if (moduleCategory === 'ВОВЛЕЧЕНИЕ') {
+      return 'Повысит мотивацию учеников завершать курсы до конца через игровые механики';
+    }
+    if (moduleCategory === 'E-COMMERCE') {
+      return 'Позволит продавать курсы и дополнительные материалы прямо в Telegram';
+    }
+  }
+  
+  if (businessType.includes('магазин') || businessType.includes('товар') || businessType.includes('продаж')) {
+    if (moduleCategory === 'E-COMMERCE') {
+      if (moduleName.includes('корзин')) return 'Создаст удобный процесс покупки с высокой конверсией';
+      if (moduleName.includes('предзаказ')) return 'Поможет управлять дефицитными товарами и планировать закупки';
+      if (moduleName.includes('сравнение')) return 'Поможет покупателям быстрее выбрать нужный товар из ассортимента';
+    }
+  }
+  
+  if (businessType.includes('услуг') || businessType.includes('запись') || businessType.includes('консультац')) {
+    if (moduleCategory === 'БРОНИРОВАНИЕ') {
+      return 'Автоматизирует записи клиентов и сократит количество пропусков на 70%';
+    }
+  }
+
+  // Default personalized explanation
+  const categoryExplanations: Record<string, string> = {
+    'E-COMMERCE': 'Увеличит продажи и упростит процесс покупки для ваших клиентов',
+    'МАРКЕТИНГ': 'Привлечет больше клиентов в вашу нишу и повысит конверсию',
+    'ОБРАЗОВАНИЕ': 'Создаст эффективную систему обучения для вашей аудитории',
+    'ВОВЛЕЧЕНИЕ': 'Повысит активность и лояльность ваших пользователей',
+    'CRM': 'Автоматизирует работу с клиентами и увеличит повторные продажи',
+    'БРОНИРОВАНИЕ': 'Упростит процесс записи и снизит административную нагрузку',
+    'ФИНТЕХ': 'Обеспечит безопасные и удобные платежи для ваших клиентов'
   };
   
-  return explanations[module.name] || `Поможет улучшить ${module.category.toLowerCase()} в вашем бизнесе`;
+  return categoryExplanations[moduleCategory] || `Решит ключевые задачи для ${businessType} бизнеса`;
 }
 
 export default function Home() {
@@ -217,7 +252,7 @@ export default function Home() {
                             <span className="text-sm font-medium text-primary">
                               Модуль {module.number}
                             </span>
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="outline" className="text-xs border-primary/30 text-primary bg-primary/5">
                               {module.category}
                             </Badge>
                           </div>
@@ -225,27 +260,23 @@ export default function Home() {
                           <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
                             {module.description}
                           </p>
-                          {/* AI Explanation */}
+                          {/* AI Explanation - More specific and actionable */}
                           <div className="bg-blue-50 p-2 rounded text-xs text-blue-800 border-l-2 border-blue-200">
-                            <span className="font-medium">AI рекомендует:</span> {getAIExplanation(module)}
+                            <span className="font-medium">Почему важно:</span> {getPersonalizedExplanation(module, businessAnalysis)}
                           </div>
                         </div>
-                        <Button size="sm" variant="ghost" className="shrink-0 ml-2">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="shrink-0 ml-2 hover:bg-primary/10"
+                          onClick={() => {/* TODO: Open module modal */}}
+                        >
                           <Eye className="w-4 h-4" />
                         </Button>
                       </div>
                     </Card>
                   ))}
-                  {aiRecommendedModules.length > 6 && (
-                    <Card className="p-4 text-center bg-muted/50">
-                      <p className="text-sm text-muted-foreground">
-                        +{aiRecommendedModules.length - 6} дополнительных модулей доступно
-                      </p>
-                      <Button size="sm" variant="outline" className="mt-2">
-                        Показать все
-                      </Button>
-                    </Card>
-                  )}
+{/* Removed "show more modules" section - AI now shows only relevant modules gradually */}
                 </div>
               </Card>
             </motion.div>
@@ -297,22 +328,22 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="grid grid-cols-4 gap-4 text-center">
-              <div className="bg-white/10 rounded-lg p-3">
-                <div className="text-xl font-bold">От $300</div>
-                <div className="text-xs text-blue-100">Стартовая цена</div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+              <div className="bg-white/15 rounded-lg p-4">
+                <div className="text-lg font-bold text-white">От $300</div>
+                <div className="text-xs text-blue-100">Стартовая<br/>цена</div>
               </div>
-              <div className="bg-white/10 rounded-lg p-3">
-                <div className="text-xl font-bold">210+</div>
-                <div className="text-xs text-blue-100">Модулей</div>
+              <div className="bg-white/15 rounded-lg p-4">
+                <div className="text-lg font-bold text-white">210+</div>
+                <div className="text-xs text-blue-100">Готовых<br/>модулей</div>
               </div>
-              <div className="bg-white/10 rounded-lg p-3">
-                <div className="text-xl font-bold">1-5 дней</div>
-                <div className="text-xs text-blue-100">До запуска</div>
+              <div className="bg-white/15 rounded-lg p-4">
+                <div className="text-lg font-bold text-white">1-5</div>
+                <div className="text-xs text-blue-100">Дней до<br/>запуска</div>
               </div>
-              <div className="bg-white/10 rounded-lg p-3">
-                <div className="text-xl font-bold">24/7</div>
-                <div className="text-xs text-blue-100">Поддержка</div>
+              <div className="bg-white/15 rounded-lg p-4">
+                <div className="text-lg font-bold text-white">24/7</div>
+                <div className="text-xs text-blue-100">Техническая<br/>поддержка</div>
               </div>
             </div>
           </Card>
@@ -333,35 +364,47 @@ export default function Home() {
                   <h3 className="font-semibold text-red-800">Традиционная разработка</h3>
                 </div>
                 <div className="space-y-2 text-sm text-red-700">
-                  <div>💰 $7,000 - $25,000</div>
-                  <div>⏱️ 6-12 месяцев разработки</div>
-                  <div>📱 Нужно устанавливать приложение</div>
-                  <div>👥 Сложно привлекать пользователей</div>
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center mr-2">$</span>
+                    $7,000 - $25,000
+                  </div>
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center mr-2">⏱</span>
+                    6-12 месяцев разработки
+                  </div>
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center mr-2">📱</span>
+                    Нужно устанавливать приложение
+                  </div>
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center mr-2">👥</span>
+                    Сложно привлекать пользователей
+                  </div>
                 </div>
               </div>
               
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center mb-3">
-                  <Check className="w-5 h-5 text-success mr-2" />
+                  <Check className="w-5 h-5 text-green-600 mr-2" />
                   <h3 className="font-semibold text-green-800">Telegram Mini Apps</h3>
                 </div>
                 <div className="space-y-2 text-sm text-green-700">
-                  <div>💰 От $300 + от $15/месяц</div>
-                  <div>⚡ 1-5 дней запуск</div>
-                  <div>📲 Работает внутри Telegram</div>
-                  <div>🌍 900+ млн готовых пользователей</div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-6 text-center">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto">
-                <h4 className="font-semibold text-blue-800 mb-2">🚀 Дополнительные преимущества</h4>
-                <div className="grid grid-cols-2 gap-2 text-xs text-blue-700">
-                  <div>• 0% комиссия через Telegram Stars</div>
-                  <div>• Автоматические обновления</div>
-                  <div>• Встроенная авторизация</div>
-                  <div>• Вирусное распространение</div>
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full bg-green-600 text-white text-xs flex items-center justify-center mr-2">$</span>
+                    От $300 + от $15/месяц
+                  </div>
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full bg-green-600 text-white text-xs flex items-center justify-center mr-2">⚡</span>
+                    1-5 дней запуск
+                  </div>
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full bg-green-600 text-white text-xs flex items-center justify-center mr-2">📲</span>
+                    Работает внутри Telegram
+                  </div>
+                  <div className="flex items-center">
+                    <span className="w-4 h-4 rounded-full bg-green-600 text-white text-xs flex items-center justify-center mr-2">🌍</span>
+                    900+ млн готовых пользователей
+                  </div>
                 </div>
               </div>
             </div>
