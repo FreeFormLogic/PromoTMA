@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, Loader2, Minimize2, Maximize2, X, Heart, Plus, Check } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Loader2, Minimize2, Maximize2, X, Heart, Plus, Check, ArrowRight, Settings, Component } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { apiRequest } from '@/lib/queryClient';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
+
 
 interface Message {
   id: string;
@@ -73,16 +74,32 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
   });
 
   useEffect(() => {
-    // Smooth scroll to bottom when new messages arrive
-    if (scrollAreaRef.current) {
+    // Scroll to beginning of the new AI message, not the end
+    if (scrollAreaRef.current && messages.length > 0) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
       if (scrollContainer) {
-        setTimeout(() => {
-          scrollContainer.scrollTo({
-            top: scrollContainer.scrollHeight,
-            behavior: 'smooth'
-          });
-        }, 100);
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage.role === 'assistant') {
+          // Find the last assistant message element and scroll to its top
+          setTimeout(() => {
+            const messageElements = scrollContainer.querySelectorAll('[data-message-role="assistant"]');
+            const lastAssistantMessage = messageElements[messageElements.length - 1];
+            if (lastAssistantMessage) {
+              lastAssistantMessage.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+              });
+            }
+          }, 100);
+        } else {
+          // For user messages, scroll to bottom normally
+          setTimeout(() => {
+            scrollContainer.scrollTo({
+              top: scrollContainer.scrollHeight,
+              behavior: 'smooth'
+            });
+          }, 100);
+        }
       }
     }
   }, [messages]);
@@ -193,47 +210,175 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
     }
   };
 
+  // Color mapping for categories
+  const categoryColors: Record<string, string> = {
+    "E-COMMERCE": "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
+    "МАРКЕТИНГ": "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
+    "ВОВЛЕЧЕНИЕ": "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
+    "ОБРАЗОВАНИЕ": "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300",
+    "ФИНТЕХ": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    "CRM": "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300",
+    "B2B": "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300",
+    "БРОНИРОВАНИЕ": "bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300",
+    "КОНТЕНТ И МЕДИА": "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300",
+    "ИНТЕГРАЦИИ": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    "ИНДОНЕЗИЯ": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
+    "ИГРЫ": "bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300",
+    "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ": "bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300",
+    "АВТОМАТИЗАЦИЯ": "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
+    "ОТРАСЛЕВЫЕ РЕШЕНИЯ": "bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300",
+    "АНАЛИТИКА": "bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300",
+    "БЕЗОПАСНОСТЬ": "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300",
+    "КОММУНИКАЦИИ": "bg-lime-100 text-lime-700 dark:bg-lime-900 dark:text-lime-300",
+    "СОЦИАЛЬНАЯ КОММЕРЦИЯ": "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900 dark:text-fuchsia-300",
+    "AI И АВТОМАТИЗАЦИЯ": "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300",
+    "AI-АВАТАРЫ": "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300",
+    "ПАРСИНГ TELEGRAM": "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
+    "WEB3 & DEFI": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    "ЛОКАЛЬНЫЕ СЕРВИСЫ": "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+  };
+
   const ModuleCard = ({ module }: { module: Module }) => {
     const isSelected = selectedModules.find(m => m.id === module.id);
+    const IconComponent = Sparkles; // Use sparkles icon for now
     
     return (
-      <Card 
-        className={`p-3 cursor-pointer transition-all duration-200 border ${
-          isSelected 
-            ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
-            : 'border-gray-200 hover:border-blue-300'
-        }`}
-        onClick={() => handleModuleLike(module)}
-      >
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-medium text-primary opacity-0 hover:opacity-100 transition-opacity duration-200" title={`Модуль ${module.number}`}>
-                №{module.number}
-              </span>
-              <Badge variant="outline" className="text-[9px] px-1 py-0 h-3 bg-gray-50 text-gray-500 border-gray-200 font-normal">
-                {module.category}
-              </Badge>
-            </div>
-            <h4 className="font-medium text-sm mb-1">{module.name}</h4>
-            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
-              {module.description}
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleModuleLike(module)}
-            className={`ml-2 ${
+      <>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Card className={`group cursor-pointer transition-all duration-300 border ${
               isSelected 
-                ? 'text-green-600 hover:text-green-700' 
-                : 'text-gray-400 hover:text-blue-600'
-            }`}
-          >
-            {isSelected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          </Button>
-        </div>
-      </Card>
+                ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
+                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-600'
+            } hover:-translate-y-1 hover:shadow-lg`}>
+              <div className="p-4">
+                {/* Icon and header */}
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                    <IconComponent className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 leading-tight break-words hyphens-auto">
+                      {module.name}
+                    </h3>
+                    <Badge className={`text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
+                      #{module.number}
+                    </Badge>
+                  </div>
+                </div>
+                
+                {/* Description */}
+                <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                  {module.description}
+                </p>
+                
+                {/* Benefit and arrow */}
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-blue-600 dark:text-blue-400 font-medium line-clamp-1 flex-1">
+                    {module.benefits}
+                  </p>
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleModuleLike(module);
+                      }}
+                      className={`w-6 h-6 p-0 ${
+                        isSelected 
+                          ? 'text-green-600 hover:text-green-700' 
+                          : 'text-gray-400 hover:text-blue-600'
+                      }`}
+                    >
+                      {isSelected ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                    </Button>
+                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </DialogTrigger>
+          
+          {/* Module details modal - same as in Modules.tsx */}
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
+            <DialogHeader>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  {module.name}
+                </DialogTitle>
+                <Badge className={`${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
+                  #{module.number} {module.category}
+                </Badge>
+              </div>
+            </DialogHeader>
+            
+            <ScrollArea className="max-h-[70vh] pr-4">
+              <div className="space-y-6">
+                {/* Icon and description */}
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                    <IconComponent className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                      {module.description}
+                    </p>
+                    <div className="mt-3 inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">
+                      <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                        {module.benefits}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Key Features */}
+                {module.keyFeatures && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                      <Settings className="w-4 h-4 text-blue-600" />
+                      Ключевые возможности
+                    </h4>
+                    <div className="text-sm text-gray-700 dark:text-gray-300">
+                      {Array.isArray(module.keyFeatures) 
+                        ? module.keyFeatures.map((feature, index) => (
+                            <div key={index} className="mb-2">• {feature}</div>
+                          ))
+                        : <div>• {module.keyFeatures}</div>
+                      }
+                    </div>
+                  </div>
+                )}
+
+                {/* Add to app button */}
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <Button
+                    onClick={() => handleModuleLike(module)}
+                    className={`w-full ${
+                      isSelected 
+                        ? 'bg-green-600 hover:bg-green-700 text-white' 
+                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    }`}
+                  >
+                    {isSelected ? (
+                      <>
+                        <Check className="w-4 h-4 mr-2" />
+                        Убрать из приложения
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Добавить в приложение
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   };
 
@@ -338,6 +483,7 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
             {messages.map((message) => (
               <motion.div
                 key={message.id}
+                data-message-role={message.role}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
@@ -410,7 +556,7 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
             onClick={sendMessage}
             disabled={!input.trim() || isLoading}
             size="icon"
-            className="h-[36px] w-[36px]"
+            className="h-[36px] w-[36px] flex-shrink-0"
           >
             {isLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />

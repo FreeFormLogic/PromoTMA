@@ -63,6 +63,33 @@ export default function MyApp() {
     'КОММУНИКАЦИИ': 'bg-teal-100 text-teal-800',
   };
 
+  // Generate AI description based on selected modules
+  const generateAIDescription = () => {
+    if (selectedModules.length === 0) return "Добавьте модули через AI-конструктор для создания персонального описания приложения";
+    
+    const categories = [...new Set(selectedModules.map(m => m.category))];
+    const isIndustrySpecific = selectedModules.some(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
+    
+    if (isIndustrySpecific) {
+      const industryModule = selectedModules.find(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
+      if (industryModule?.name.includes("салон")) {
+        return "🌟 Создаем комплексное решение для салона красоты с возможностями онлайн-записи, управления клиентской базой и программой лояльности. Ваше приложение поможет автоматизировать бизнес-процессы и увеличить доходы.";
+      } else if (industryModule?.name.includes("ресторан")) {
+        return "🍽️ Разрабатываем мощную систему управления рестораном с интегрированными решениями для заказов, доставки и лояльности клиентов. Приложение оптимизирует операции и повысит прибыльность.";
+      } else if (industryModule?.name.includes("фитнес")) {
+        return "💪 Создаем инновационное приложение для фитнес-клуба с системой управления абонементами, расписанием тренировок и мотивацией участников. Современные технологии для роста вашего бизнеса.";
+      }
+    }
+    
+    if (categories.includes("E-COMMERCE")) {
+      return "🛒 Создаем мощную eCommerce-платформу с интегрированными решениями для продаж, маркетинга и аналитики. Ваше приложение станет центром цифрового бизнеса.";
+    } else if (categories.includes("ОБРАЗОВАНИЕ")) {
+      return "📚 Разрабатываем современную образовательную платформу с интерактивными курсами, системой оценки и вовлечения студентов. Технологии будущего для качественного обучения.";
+    }
+    
+    return `🚀 Создаем уникальное Telegram Mini App, объединяющее ${selectedModules.length} специально подобранных модулей. Комплексное решение для автоматизации и роста вашего бизнеса.`;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-6xl mx-auto">
@@ -73,13 +100,31 @@ export default function MyApp() {
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center justify-center gap-3 mb-4"
           >
-            <Smartphone className="w-10 h-10 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Мое Telegram Mini App</h1>
-            <Sparkles className="w-8 h-8 text-yellow-500" />
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
+              <Smartphone className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Мое Mini App
+              </h1>
+              <p className="text-gray-600 mt-1">
+                {selectedModules.length} модулей выбрано
+              </p>
+            </div>
           </motion.div>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Ваш персональный набор модулей для создания идеального Telegram Mini App
-          </p>
+          
+          {/* AI Description */}
+          <Card className="mb-8 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Sparkles className="w-6 h-6 text-green-600" />
+                <h2 className="text-xl font-semibold text-gray-800">Описание вашего приложения</h2>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                {generateAIDescription()}
+              </p>
+            </div>
+          </Card>
         </div>
 
         {selectedModules.length === 0 ? (
