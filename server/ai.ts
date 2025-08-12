@@ -81,29 +81,34 @@ CRITICAL RULES:
 4. GRADUAL EXPANSION: In follow-up responses, add 1-2 additional modules that complement the conversation
 5. PRIORITIZE: Always put the most important modules first
 
-Module categories available:
-- E-COMMERCE (1-15): Online stores, payments, catalogs
-- МАРКЕТИНГ (16-30): Analytics, campaigns, A/B testing  
-- ВОВЛЕЧЕНИЕ (31-40): Gamification, loyalty, engagement
-- ОБРАЗОВАНИЕ (41-66): Learning platforms, courses, tests
-- ФИНТЕХ (67-81): Payment processing, financial tools
-- CRM (82-96): Customer management, automation
-- B2B (97-111): Business processes, B2B tools
-- БРОНИРОВАНИЕ (112-126): Booking, scheduling systems
-- ИГРЫ (127-136): Games, entertainment features
-- КОНТЕНТ И МЕДИА (137-150): Content management, media
-- ИНТЕГРАЦИИ (151-160): API integrations, external services
-- ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ (161-170): Additional business tools
-- АВТОМАТИЗАЦИЯ (171-180): Automation and workflows
-- ОТРАСЛЕВЫЕ РЕШЕНИЯ (181-190): Industry-specific solutions
-- АНАЛИТИКА (191-200): Advanced analytics and BI
-- БЕЗОПАСНОСТЬ (201-210): Security and compliance
-- AI-АВАТАРЫ (211-215): Digital avatars, virtual influencers, AI personas
-- ПАРСИНГ TELEGRAM (216-220): Social listening, competitive intelligence
-- WEB3 & DEFI (221-225): NFT, DeFi, blockchain, crypto wallets
-- ЛОКАЛЬНЫЕ СЕРВИСЫ (226-230): Geolocation, local delivery, offline business
-- ИГРЫ (231-235): Tap-to-earn, P2E gaming, social trading
-- ДОПОЛНИТЕЛЬНЫЕ МОДУЛИ (236-260): Pre-orders, product comparison, analytics, queue management, virtual consultations, AI trainers, parsing tools, education library, unified communications
+КЛЮЧЕВЫЕ МОДУЛИ ДЛЯ РЕКОМЕНДАЦИЙ:
+
+ДЛЯ САЛОНОВ КРАСОТЫ:
+- Модуль 112: Система умной записи на услуги (БРОНИРОВАНИЕ) - AI-календарь с автоматическим подбором времени
+- Модуль 168: Управление салоном красоты (ОТРАСЛЕВЫЕ РЕШЕНИЯ) - Портфолио мастеров, учет расходников, программы ухода
+- Модуль 31: Ежедневные задания со streak-системой (ВОВЛЕЧЕНИЕ) - Программа лояльности для клиентов
+- Модуль 78: Управление клиентской базой (CRM) - Профили клиентов с историей взаимодействия
+
+ДЛЯ E-COMMERCE:
+- Модуль 1: Каталог товаров с фильтрацией
+- Модуль 2: Корзина и оформление заказов
+- Модуль 3: Система платежей
+
+ДЛЯ ОБРАЗОВАНИЯ:
+- Модуль 41: Платформа курсов с видео и тестами
+- Модуль 42: База знаний с умным поиском
+
+ДЛЯ РЕСТОРАНОВ:
+- Модуль 161: Управление рестораном (ОТРАСЛЕВЫЕ РЕШЕНИЯ)
+- Модуль 112: Система бронирования столиков
+
+ДЛЯ ФИТНЕСА:
+- Модуль 167: Управление фитнес-клубом (ОТРАСЛЕВЫЕ РЕШЕНИЯ)
+
+УНИВЕРСАЛЬНЫЕ МОДУЛИ:
+- Модуль 31: Программа лояльности (ВОВЛЕЧЕНИЕ)
+- Модуль 78: CRM система (CRM)
+- Модуль 112: Система бронирования (БРОНИРОВАНИЕ)
 
 Always speak Russian and be extremely specific about how each module solves their exact business challenges.`;
 
