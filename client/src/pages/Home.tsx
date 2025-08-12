@@ -168,15 +168,15 @@ export default function Home() {
                 <h3 className="font-semibold mb-4 text-lg">Ключевые преимущества:</h3>
                 <ul className="space-y-2 text-blue-100">
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-success mr-2" />
-                    210+ готовых модулей
+                    <Check className="w-4 h-4 text-green-300 mr-2" />
+                    260+ готовых модулей
                   </li>
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-success mr-2" />
+                    <Check className="w-4 h-4 text-green-300 mr-2" />
                     Интеграция популярных платежей: Международные, Российские, Крипта, GoPay
                   </li>
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-success mr-2" />
+                    <Check className="w-4 h-4 text-green-300 mr-2" />
                     900+ млн пользователей Telegram
                   </li>
                 </ul>
@@ -205,6 +205,7 @@ export default function Home() {
                   onModulesUpdate={setAiRecommendedModules}
                   isMinimized={chatMinimized}
                   onToggleMinimize={() => setChatMinimized(!chatMinimized)}
+                  currentlyDisplayedModules={aiRecommendedModules}
                 />
               </div>
             </div>
@@ -218,6 +219,7 @@ export default function Home() {
             onModulesUpdate={setAiRecommendedModules}
             isMinimized={chatMinimized}
             onToggleMinimize={() => setChatMinimized(!chatMinimized)}
+            currentlyDisplayedModules={aiRecommendedModules}
           />
         )}
 
@@ -293,11 +295,11 @@ export default function Home() {
                 <div className="text-2xl font-bold mb-1">260+</div>
                 <div className="text-xs opacity-90">Модулей</div>
               </div>
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-4 rounded-lg text-center">
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-4 rounded-lg text-center">
                 <div className="text-2xl font-bold mb-1">1-5</div>
                 <div className="text-xs opacity-90">Дней до запуска</div>
               </div>
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-4 rounded-lg text-center">
+              <div className="bg-gradient-to-br from-green-600 to-green-700 text-white p-4 rounded-lg text-center">
                 <div className="text-2xl font-bold mb-1">24/7</div>
                 <div className="text-xs opacity-90">Поддержка</div>
               </div>
@@ -362,19 +364,19 @@ export default function Home() {
                 </div>
                 <div className="space-y-2 text-sm text-red-700">
                   <div className="flex items-center">
-                    <span className="w-4 h-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center mr-2">$</span>
-                    $7,000 - $25,000
+                    <DollarSign className="w-4 h-4 text-red-500 mr-2" />
+                    $7,000 - $10,000
                   </div>
                   <div className="flex items-center">
-                    <span className="w-4 h-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center mr-2">⏱</span>
+                    <Clock className="w-4 h-4 text-red-500 mr-2" />
                     6-12 месяцев разработки
                   </div>
                   <div className="flex items-center">
-                    <span className="w-4 h-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center mr-2">📱</span>
+                    <Puzzle className="w-4 h-4 text-red-500 mr-2" />
                     Нужно устанавливать приложение
                   </div>
                   <div className="flex items-center">
-                    <span className="w-4 h-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center mr-2">👥</span>
+                    <Users className="w-4 h-4 text-red-500 mr-2" />
                     Сложно привлекать пользователей
                   </div>
                 </div>
@@ -387,19 +389,19 @@ export default function Home() {
                 </div>
                 <div className="space-y-2 text-sm text-green-700">
                   <div className="flex items-center">
-                    <span className="w-4 h-4 rounded-full bg-green-600 text-white text-xs flex items-center justify-center mr-2">$</span>
+                    <DollarSign className="w-4 h-4 text-green-600 mr-2" />
                     От $300 + от $15/месяц
                   </div>
                   <div className="flex items-center">
-                    <span className="w-4 h-4 rounded-full bg-green-600 text-white text-xs flex items-center justify-center mr-2">⚡</span>
+                    <Zap className="w-4 h-4 text-green-600 mr-2" />
                     1-5 дней запуск
                   </div>
                   <div className="flex items-center">
-                    <span className="w-4 h-4 rounded-full bg-green-600 text-white text-xs flex items-center justify-center mr-2">📲</span>
+                    <MessageSquare className="w-4 h-4 text-green-600 mr-2" />
                     Работает внутри Telegram
                   </div>
                   <div className="flex items-center">
-                    <span className="w-4 h-4 rounded-full bg-green-600 text-white text-xs flex items-center justify-center mr-2">🌍</span>
+                    <Users className="w-4 h-4 text-green-600 mr-2" />
                     900+ млн готовых пользователей
                   </div>
                 </div>
@@ -440,9 +442,9 @@ export default function Home() {
               <h4 className="font-semibold mb-4">Преимущества</h4>
               <ul className="space-y-1 text-gray-400 text-sm">
                 <li>✓ 260+ готовых модулей</li>
-                <li>✓ 25+ отраслевых ниш</li>
+
                 <li>✓ Запуск за 1-5 дней</li>
-                <li>✓ $300 вместо $25,000</li>
+                <li>✓ $300 вместо $10,000</li>
               </ul>
             </div>
           </div>

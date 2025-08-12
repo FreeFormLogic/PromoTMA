@@ -30,9 +30,10 @@ interface AIChatProps {
   onModulesUpdate: (modules: any[]) => void;
   isMinimized?: boolean;
   onToggleMinimize?: () => void;
+  currentlyDisplayedModules?: any[];
 }
 
-export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize }: AIChatProps) {
+export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize, currentlyDisplayedModules = [] }: AIChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -100,7 +101,8 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
         messages: [...messages, userMessage].map(m => ({
           role: m.role,
           content: m.content
-        }))
+        })),
+        alreadyShownModules: currentlyDisplayedModules.map(m => m.number)
       });
       const responseData = await response.json();
 
@@ -162,10 +164,6 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
       <div className="p-3 border-b bg-primary/5 backdrop-blur">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="relative">
-              <Bot className="h-6 w-6 text-primary" />
-              <Sparkles className="h-3 w-3 text-yellow-500 absolute -top-1 -right-1 animate-pulse" />
-            </div>
             <div>
               <h3 className="font-semibold text-sm">Подобрать функционал</h3>
               <p className="text-xs text-muted-foreground">AI Консультант</p>

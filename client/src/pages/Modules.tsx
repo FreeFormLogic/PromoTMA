@@ -62,8 +62,7 @@ const categories = [
   "AI-АВАТАРЫ",
   "ПАРСИНГ TELEGRAM",
   "WEB3 & DEFI",
-  "ЛОКАЛЬНЫЕ СЕРВИСЫ",
-  "ТРЕНДОВЫЕ ИГРЫ"
+  "ЛОКАЛЬНЫЕ СЕРВИСЫ"
 ];
 
 // Иконки для категорий
@@ -91,8 +90,7 @@ const categoryIcons: { [key: string]: any } = {
   "AI-АВАТАРЫ": Users,
   "ПАРСИНГ TELEGRAM": Search,
   "WEB3 & DEFI": Coins,
-  "ЛОКАЛЬНЫЕ СЕРВИСЫ": MapPin,
-  "ТРЕНДОВЫЕ ИГРЫ": Trophy
+  "ЛОКАЛЬНЫЕ СЕРВИСЫ": MapPin
 };
 
 // Цвета для категорий
@@ -120,8 +118,7 @@ const categoryColors: { [key: string]: string } = {
   "AI-АВАТАРЫ": "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300",
   "ПАРСИНГ TELEGRAM": "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
   "WEB3 & DEFI": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-  "ЛОКАЛЬНЫЕ СЕРВИСЫ": "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
-  "ТРЕНДОВЫЕ ИГРЫ": "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300"
+  "ЛОКАЛЬНЫЕ СЕРВИСЫ": "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
 };
 
 function parseKeyFeatures(keyFeatures: unknown): string[] {
@@ -376,8 +373,8 @@ export default function Modules() {
             </div>
           </div>
           
-          {/* Фильтры категорий */}
-          <div className="flex flex-wrap gap-3 justify-center max-w-6xl mx-auto">
+          {/* Фильтры категорий - Компактная версия */}
+          <div className="flex flex-wrap gap-2 justify-center max-w-7xl mx-auto">
             {categories.map((category) => {
               const IconComponent = categoryIcons[category] || Settings;
               return (
@@ -386,14 +383,16 @@ export default function Modules() {
                   variant={selectedCategory === category ? "secondary" : "outline"}
                   size="sm"
                   onClick={() => setSelectedCategory(category)}
-                  className={`flex items-center gap-2 text-sm font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 text-xs font-medium transition-all duration-200 px-3 py-1.5 h-8 ${
                     selectedCategory === category
                       ? "bg-white text-blue-700 hover:bg-blue-50 shadow-lg"
                       : "bg-white/10 text-white border-white/30 hover:bg-white/20 hover:border-white/50"
                   }`}
                 >
-                  <IconComponent className="w-4 h-4" />
-                  {category === "ВСЕ МОДУЛИ" ? `Все (${totalModules})` : category}
+                  <IconComponent className="w-3.5 h-3.5" />
+                  <span className="whitespace-nowrap">
+                    {category === "ВСЕ МОДУЛИ" ? `Все (${totalModules})` : category}
+                  </span>
                 </Button>
               );
             })}

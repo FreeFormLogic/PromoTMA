@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-// IMPORTANT: Using Claude Sonnet 3.5 Thinking as requested by user
-const DEFAULT_MODEL_STR = "claude-3-5-sonnet-20241022";
+// IMPORTANT: Using Claude Sonnet 3.7 as requested by user
+const DEFAULT_MODEL_STR = "claude-3-7-sonnet-20250219";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -70,7 +70,7 @@ Respond only with valid JSON.`;
   }
 }
 
-export async function generateAIResponse(messages: { role: 'user' | 'assistant'; content: string }[]): Promise<{ response: string; recommendedModules: number[] }> {
+export async function generateAIResponse(messages: { role: 'user' | 'assistant'; content: string }[], alreadyShownModules: number[] = []): Promise<{ response: string; recommendedModules: number[] }> {
   try {
     const systemPrompt = `You are an expert Telegram Mini Apps consultant with deep thinking capabilities. Help businesses by recommending ONLY the most essential modules first, then gradually add more as the conversation develops.
 
@@ -110,6 +110,9 @@ CRITICAL RULES:
 - Модуль 78: CRM система (CRM)
 - Модуль 112: Система бронирования (БРОНИРОВАНИЕ)
 
+ВАЖНОЕ ОГРАНИЧЕНИЕ: Вы уже показали пользователю модули: ${alreadyShownModules.join(', ')}
+НЕ РЕКОМЕНДУЙТЕ эти модули повторно! Предлагайте только новые дополнительные модули.
+
 Always speak Russian and be extremely specific about how each module solves their exact business challenges.`;
 
     const response = await anthropic.messages.create({
@@ -132,7 +135,8 @@ Always speak Russian and be extremely specific about how each module solves thei
           const numberMatch = match.match(/\d+/);
           if (numberMatch) {
             const moduleNumber = parseInt(numberMatch[0]);
-            if (!recommendedModules.includes(moduleNumber)) {
+            // Only add if not already recommended and not already shown to user
+            if (!recommendedModules.includes(moduleNumber) && !alreadyShownModules.includes(moduleNumber)) {
               recommendedModules.push(moduleNumber);
             }
           }

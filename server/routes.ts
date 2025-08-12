@@ -236,12 +236,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/ai/chat", async (req, res) => {
     try {
-      const { messages } = req.body;
+      const { messages, alreadyShownModules = [] } = req.body;
       if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ message: "Messages array is required" });
       }
       
-      const result = await generateAIResponse(messages);
+      const result = await generateAIResponse(messages, alreadyShownModules);
       res.json(result);
     } catch (error) {
       console.error("Error generating AI response:", error);
