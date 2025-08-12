@@ -23,7 +23,8 @@ import {
   Bot,
   Sparkles,
   TrendingUp,
-  Target
+  Target,
+  Eye
 } from "lucide-react";
 import { Link } from "wouter";
 import { type Module, type Industry, type USP } from "@shared/schema";
@@ -117,10 +118,6 @@ export default function Home() {
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-success mr-2" />
-                    25+ отраслевых ниш
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-success mr-2" />
                     Интеграция популярных платежей: Международные, Российские, Крипта, GoPay
                   </li>
                   <li className="flex items-center">
@@ -131,6 +128,169 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </section>
+
+
+
+        {/* AI Chat Section - Main Feature */}
+        <section className="mb-12">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-2">
+              <Bot className="w-8 h-8 text-primary" />
+              AI подбор модулей для вашего бизнеса
+              <Sparkles className="w-6 h-6 text-yellow-500" />
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Расскажите о вашем бизнесе, и наш AI-консультант мгновенно подберет идеальные модули из 210+ готовых решений
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* AI Chat */}
+            <div>
+              <AIChat 
+                onAnalysisUpdate={setBusinessAnalysis}
+                onModulesUpdate={setAiRecommendedModules}
+              />
+            </div>
+
+            {/* Business Insights */}
+            <div className="space-y-4">
+
+
+              {aiRecommendedModules.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <Card className="p-6">
+                    <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-success" />
+                      Рекомендованные модули ({aiRecommendedModules.length})
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Специально подобраны для вашего бизнеса на основе AI-анализа
+                    </p>
+                    <div className="space-y-3">
+                      {aiRecommendedModules.slice(0, 8).map((module) => (
+                        <Card 
+                          key={module.id} 
+                          className="p-4 cursor-pointer hover:shadow-md hover:border-primary/50 transition-all border-l-4 border-l-primary/20 hover:border-l-primary"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-sm font-medium text-primary">
+                                  Модуль {module.number}
+                                </span>
+                                <Badge variant="secondary" className="text-xs">
+                                  {module.category}
+                                </Badge>
+                              </div>
+                              <h4 className="font-medium text-sm mb-1">{module.name}</h4>
+                              <p className="text-xs text-muted-foreground line-clamp-2">
+                                {module.description}
+                              </p>
+                            </div>
+                            <Button size="sm" variant="ghost" className="shrink-0 ml-2">
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </Card>
+                      ))}
+                      {aiRecommendedModules.length > 8 && (
+                        <Card className="p-4 text-center bg-muted/50">
+                          <p className="text-sm text-muted-foreground">
+                            +{aiRecommendedModules.length - 8} дополнительных модулей доступно
+                          </p>
+                          <Button size="sm" variant="outline" className="mt-2">
+                            Показать все
+                          </Button>
+                        </Card>
+                      )}
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
+
+              {!businessAnalysis && (
+                <Card className="p-6 border-dashed border-2">
+                  <div className="text-center text-muted-foreground">
+                    <Sparkles className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                    <p className="font-medium mb-2">Начните диалог с AI</p>
+                    <p className="text-sm">
+                      Расскажите о вашем бизнесе, и здесь появятся персонализированные рекомендации
+                    </p>
+                  </div>
+                </Card>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Quick Stats */}
+        <section className="mb-12">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Готовые решения для бизнеса</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100">
+              <div className="text-3xl font-bold text-telegram mb-1">210+</div>
+              <div className="text-sm text-gray-700 font-medium">Готовых модулей</div>
+            </Card>
+            <Card className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100">
+              <div className="text-3xl font-bold text-success mb-1">25+</div>
+              <div className="text-sm text-gray-700 font-medium">Отраслевых ниш</div>
+            </Card>
+            <Card className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100">
+              <div className="text-3xl font-bold text-purple-600 mb-1">20+</div>
+              <div className="text-sm text-gray-700 font-medium">Категорий</div>
+            </Card>
+            <Card className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100">
+              <div className="text-3xl font-bold text-orange-600 mb-1">$300</div>
+              <div className="text-sm text-gray-700 font-medium">Стартовая цена</div>
+            </Card>
+          </div>
+        </section>
+
+
+
+        {/* CTA Section */}
+        <section className="mb-12">
+          <Card className="bg-gradient-to-r from-telegram to-telegram-dark text-white p-6 text-center">
+            <h2 className="text-2xl font-bold mb-3">Готовы получить прототип завтра?</h2>
+            <p className="text-blue-100 mb-4">
+              Запустим ваш проект в рекордные сроки
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+              <Button className="bg-success hover:bg-success/90 text-white px-6 py-2 font-semibold">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Начать проект прямо сейчас
+              </Button>
+              <div className="text-blue-100 text-sm">
+                Консультация бесплатна • Прототип за 1 день
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-4 gap-4 text-center">
+              <div className="bg-white/10 rounded-lg p-3">
+                <div className="text-xl font-bold">От $300</div>
+                <div className="text-xs text-blue-100">Стартовая цена</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3">
+                <div className="text-xl font-bold">210+</div>
+                <div className="text-xs text-blue-100">Модулей</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3">
+                <div className="text-xl font-bold">1-5 дней</div>
+                <div className="text-xs text-blue-100">До запуска</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3">
+                <div className="text-xl font-bold">24/7</div>
+                <div className="text-xs text-blue-100">Поддержка</div>
+              </div>
+            </div>
+          </Card>
         </section>
 
         {/* Comparison Section */}
@@ -199,228 +359,6 @@ export default function Home() {
               </CardContent>
             </Card>
           </div>
-        </section>
-
-        {/* AI Chat Section - Main Feature */}
-        <section className="mb-12">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-2">
-              <Bot className="w-8 h-8 text-primary" />
-              AI подбор модулей для вашего бизнеса
-              <Sparkles className="w-6 h-6 text-yellow-500" />
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Расскажите о вашем бизнесе, и наш AI-консультант мгновенно подберет идеальные модули из 210+ готовых решений
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* AI Chat */}
-            <div>
-              <AIChat 
-                onAnalysisUpdate={setBusinessAnalysis}
-                onModulesUpdate={setAiRecommendedModules}
-              />
-            </div>
-
-            {/* Business Insights */}
-            <div className="space-y-4">
-              {businessAnalysis && (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-                    <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                      <Target className="w-5 h-5 text-primary" />
-                      Анализ вашего бизнеса
-                    </h3>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">Отрасль</p>
-                        <Badge variant="secondary" className="text-sm">
-                          {businessAnalysis.industry}
-                        </Badge>
-                      </div>
-                      
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">Размер бизнеса</p>
-                        <Badge variant="outline" className="text-sm">
-                          {businessAnalysis.size}
-                        </Badge>
-                      </div>
-                      
-                      {businessAnalysis.challenges.length > 0 && (
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-2">Ключевые вызовы</p>
-                          <div className="flex flex-wrap gap-1">
-                            {businessAnalysis.challenges.map((challenge, i) => (
-                              <Badge key={i} variant="destructive" className="text-xs">
-                                {challenge}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {businessAnalysis.goals.length > 0 && (
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-2">Цели</p>
-                          <div className="flex flex-wrap gap-1">
-                            {businessAnalysis.goals.map((goal, i) => (
-                              <Badge key={i} className="text-xs bg-success text-white">
-                                {goal}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                </motion.div>
-              )}
-
-              {aiRecommendedModules.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  <Card className="p-6">
-                    <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-success" />
-                      Рекомендованные модули ({aiRecommendedModules.length})
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Специально подобраны для вашего бизнеса на основе AI-анализа
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {aiRecommendedModules.slice(0, 10).map((module) => (
-                        <Badge key={module.id} variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">
-                          {module.name}
-                        </Badge>
-                      ))}
-                      {aiRecommendedModules.length > 10 && (
-                        <Badge variant="outline">
-                          +{aiRecommendedModules.length - 10} еще
-                        </Badge>
-                      )}
-                    </div>
-                  </Card>
-                </motion.div>
-              )}
-
-              {!businessAnalysis && (
-                <Card className="p-6 border-dashed border-2">
-                  <div className="text-center text-muted-foreground">
-                    <Sparkles className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-                    <p className="font-medium mb-2">Начните диалог с AI</p>
-                    <p className="text-sm">
-                      Расскажите о вашем бизнесе, и здесь появятся персонализированные рекомендации
-                    </p>
-                  </div>
-                </Card>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Quick Stats */}
-        <section className="mb-12">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Готовые решения для бизнеса</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100">
-              <div className="text-3xl font-bold text-telegram mb-1">210+</div>
-              <div className="text-sm text-gray-700 font-medium">Готовых модулей</div>
-            </Card>
-            <Card className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100">
-              <div className="text-3xl font-bold text-success mb-1">25+</div>
-              <div className="text-sm text-gray-700 font-medium">Отраслевых ниш</div>
-            </Card>
-            <Card className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100">
-              <div className="text-3xl font-bold text-purple-600 mb-1">20+</div>
-              <div className="text-sm text-gray-700 font-medium">Категорий</div>
-            </Card>
-            <Card className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100">
-              <div className="text-3xl font-bold text-orange-600 mb-1">$300</div>
-              <div className="text-sm text-gray-700 font-medium">Стартовая цена</div>
-            </Card>
-          </div>
-        </section>
-
-        {/* Quick Navigation */}
-        <section className="mb-12">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Навигация по разделам</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Link href="/modules">
-              <Card className="cursor-pointer hover:shadow-md hover:scale-105 transition-all p-4 text-center group">
-                <Puzzle className="w-6 h-6 text-telegram mx-auto mb-2" />
-                <h3 className="font-semibold text-sm mb-1">Модули</h3>
-                <p className="text-xs text-gray-600">60+ готовых функций</p>
-              </Card>
-            </Link>
-
-            <Link href="/industries">
-              <Card className="cursor-pointer hover:shadow-md hover:scale-105 transition-all p-4 text-center group">
-                <Building2 className="w-6 h-6 text-telegram mx-auto mb-2" />
-                <h3 className="font-semibold text-sm mb-1">Отрасли</h3>
-                <p className="text-xs text-gray-600">30+ бизнес-ниш</p>
-              </Card>
-            </Link>
-
-            <Link href="/pricing">
-              <Card className="cursor-pointer hover:shadow-md hover:scale-105 transition-all p-4 text-center group">
-                <DollarSign className="w-6 h-6 text-telegram mx-auto mb-2" />
-                <h3 className="font-semibold text-sm mb-1">Цены</h3>
-                <p className="text-xs text-gray-600">$300 vs $10,000</p>
-              </Card>
-            </Link>
-
-            <Link href="/process">
-              <Card className="cursor-pointer hover:shadow-md hover:scale-105 transition-all p-4 text-center group">
-                <Rocket className="w-6 h-6 text-telegram mx-auto mb-2" />
-                <h3 className="font-semibold text-sm mb-1">Процесс</h3>
-                <p className="text-xs text-gray-600">1-5 дней запуск</p>
-              </Card>
-            </Link>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="mb-12">
-          <Card className="bg-gradient-to-r from-telegram to-telegram-dark text-white p-6 text-center">
-            <h2 className="text-2xl font-bold mb-3">Готовы получить прототип завтра?</h2>
-            <p className="text-blue-100 mb-4">
-              Запустим ваш проект в рекордные сроки
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-              <Button className="bg-success hover:bg-success/90 text-white px-6 py-2 font-semibold">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Начать проект прямо сейчас
-              </Button>
-              <div className="text-blue-100 text-sm">
-                Консультация бесплатна • Прототип за 1 день
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="bg-white/10 rounded-lg p-3">
-                <div className="text-xl font-bold">1 день</div>
-                <div className="text-xs text-blue-100">До прототипа</div>
-              </div>
-              <div className="bg-white/10 rounded-lg p-3">
-                <div className="text-xl font-bold">1-5 дней</div>
-                <div className="text-xs text-blue-100">До запуска</div>
-              </div>
-              <div className="bg-white/10 rounded-lg p-3">
-                <div className="text-xl font-bold">24/7</div>
-                <div className="text-xs text-blue-100">Поддержка</div>
-              </div>
-            </div>
-          </Card>
         </section>
       </main>
       {/* Footer */}

@@ -19,7 +19,8 @@ import {
   FileText, MessageSquare, UserCheck, Edit, Video, Headphones,
   Briefcase, Database, Webhook, Car, Wallet, Shield, X, Bell,
   CalendarCheck, Smartphone, Paintbrush, Users as Users3, GraduationCap as Education,
-  DollarSign as Banknote, Phone, Monitor, Video as Clapperboard, Flag
+  DollarSign as Banknote, Phone, Monitor, Video as Clapperboard, Flag,
+  MessageCircle, Share2
 } from "lucide-react";
 import type { Module } from "@shared/schema";
 
@@ -45,11 +46,19 @@ const categories = [
   "ФИНТЕХ",
   "CRM",
   "B2B",
+  "БРОНИРОВАНИЕ",
   "КОНТЕНТ И МЕДИА",
   "ИНТЕГРАЦИИ",
   "ИНДОНЕЗИЯ",
   "ИГРЫ",
-  "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"
+  "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ",
+  "АВТОМАТИЗАЦИЯ",
+  "ОТРАСЛЕВЫЕ РЕШЕНИЯ",
+  "АНАЛИТИКА",
+  "БЕЗОПАСНОСТЬ",
+  "КОММУНИКАЦИИ",
+  "СОЦИАЛЬНАЯ КОММЕРЦИЯ",
+  "AI И АВТОМАТИЗАЦИЯ"
 ];
 
 // Иконки для категорий
@@ -61,11 +70,19 @@ const categoryIcons: { [key: string]: any } = {
   "ФИНТЕХ": Banknote,
   "CRM": Phone,
   "B2B": Briefcase,
+  "БРОНИРОВАНИЕ": Calendar,
   "КОНТЕНТ И МЕДИА": Clapperboard,
   "ИНТЕГРАЦИИ": Webhook,
   "ИНДОНЕЗИЯ": Flag,
   "ИГРЫ": Gamepad2,
-  "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ": Settings
+  "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ": Settings,
+  "АВТОМАТИЗАЦИЯ": Zap,
+  "ОТРАСЛЕВЫЕ РЕШЕНИЯ": Building2,
+  "АНАЛИТИКА": BarChart3,
+  "БЕЗОПАСНОСТЬ": Shield,
+  "КОММУНИКАЦИИ": MessageCircle,
+  "СОЦИАЛЬНАЯ КОММЕРЦИЯ": Share2,
+  "AI И АВТОМАТИЗАЦИЯ": Bot
 };
 
 // Цвета для категорий
@@ -77,11 +94,19 @@ const categoryColors: { [key: string]: string } = {
   "ФИНТЕХ": "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
   "CRM": "bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300",
   "B2B": "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300",
+  "БРОНИРОВАНИЕ": "bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300",
   "КОНТЕНТ И МЕДИА": "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300",
   "ИНТЕГРАЦИИ": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
   "ИНДОНЕЗИЯ": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
   "ИГРЫ": "bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300",
-  "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ": "bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300"
+  "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ": "bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300",
+  "АВТОМАТИЗАЦИЯ": "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
+  "ОТРАСЛЕВЫЕ РЕШЕНИЯ": "bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300",
+  "АНАЛИТИКА": "bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300",
+  "БЕЗОПАСНОСТЬ": "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300",
+  "КОММУНИКАЦИИ": "bg-lime-100 text-lime-700 dark:bg-lime-900 dark:text-lime-300",
+  "СОЦИАЛЬНАЯ КОММЕРЦИЯ": "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900 dark:text-fuchsia-300",
+  "AI И АВТОМАТИЗАЦИЯ": "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300"
 };
 
 function parseKeyFeatures(keyFeatures: unknown): string[] {

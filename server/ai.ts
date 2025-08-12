@@ -37,12 +37,22 @@ Respond only with valid JSON.`;
     const response = await anthropic.messages.create({
       model: DEFAULT_MODEL_STR,
       max_tokens: 1024,
+      system: "You are a business analyst. Respond with valid JSON only, no markdown formatting or additional text.",
       messages: [{ role: 'user', content: prompt }],
     });
 
     const content = response.content[0];
     if (content.type === 'text') {
-      return JSON.parse(content.text);
+      let responseText = content.text.trim();
+      
+      // Remove markdown code blocks if present
+      if (responseText.startsWith('```json')) {
+        responseText = responseText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (responseText.startsWith('```')) {
+        responseText = responseText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      return JSON.parse(responseText);
     }
     
     throw new Error('Invalid response format');
