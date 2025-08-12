@@ -16,8 +16,7 @@ import {
   Dumbbell, Camera, Baby, DollarSign, Wrench
 } from "lucide-react";
 import { Industry } from "@shared/schema";
-import { ModulePainPoints } from "@/components/ModulePainPoints";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PainPointsSection } from "@/components/PainPointsSection";
 
 // Маппинг иконок
 const iconMap: Record<string, any> = {
@@ -122,14 +121,8 @@ function IndustryCard({ industry }: { industry: Industry }) {
           </DialogTitle>
         </DialogHeader>
         
-        <Tabs defaultValue="overview" className="h-full">
-          <TabsList className="grid w-full grid-cols-2 mx-6 mt-4">
-            <TabsTrigger value="overview">Обзор</TabsTrigger>
-            <TabsTrigger value="solutions">Проблемы и решения</TabsTrigger>
-          </TabsList>
-          
-          <ScrollArea className="max-h-[65vh]">
-            <TabsContent value="overview" className="p-6 space-y-6 mt-0">
+        <ScrollArea className="max-h-[75vh]">
+          <div className="p-6 space-y-6">
             {/* Иконка и описание */}
             <div className="flex items-start gap-4" id={`industry-description-${industry.id}`}>
               <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
@@ -149,6 +142,19 @@ function IndustryCard({ industry }: { industry: Industry }) {
               <p className="text-blue-800 dark:text-blue-300 leading-relaxed text-base">
                 {formatText(industry.importance)}
               </p>
+            </div>
+
+            <Separator />
+
+            {/* Интерактивные болевые точки и решения */}
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+                Основные болевые точки и их решение
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                Нажмите на любую проблему, чтобы увидеть решение
+              </p>
+              <PainPointsSection />
             </div>
 
             <Separator />
@@ -230,21 +236,8 @@ function IndustryCard({ industry }: { industry: Industry }) {
                 Получить консультацию
               </Button>
             </div>
-            </TabsContent>
-            
-            <TabsContent value="solutions" className="p-6 space-y-6 mt-0">
-              {/* Интерактивные болевые точки */}
-              <ModulePainPoints 
-                moduleName={industry.name}
-                painPoints={painPoints.length > 0 ? painPoints.map((point, index) => ({
-                  problem: point.split('→')[0]?.trim() || point,
-                  solution: point.split('→')[1]?.trim() || "Решение через Telegram Mini App",
-                  impact: "Значительное улучшение показателей бизнеса"
-                })) : undefined}
-              />
-            </TabsContent>
-          </ScrollArea>
-        </Tabs>
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
