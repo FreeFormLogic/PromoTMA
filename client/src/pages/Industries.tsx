@@ -50,6 +50,8 @@ const categoryColors: Record<string, string> = {
   "ПОЛЕЗНО": "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300 border-green-200 dark:border-green-800"
 };
 
+
+
 const categories = ["ВСЕ НИШИ", "КРИТИЧЕСКИ ВАЖНО", "ОЧЕНЬ ПОЛЕЗНО", "ПОЛЕЗНО"];
 
 // Компонент для форматирования текста с выделением жирным
@@ -68,6 +70,44 @@ function formatText(text: string): React.ReactNode {
 // Компактная карточка отрасли
 function IndustryCard({ industry }: { industry: Industry }) {
   const IconComponent = iconMap[industry.icon] || Building2;
+  
+  // Функция для получения преимуществ для конкретной отрасли
+  const getIndustryBenefits = (industryName: string) => {
+    const commonBenefits = [
+      {
+        problem: "Высокие комиссии маркетплейсов (15-30%)",
+        solution: "Прямые продажи через Telegram с комиссией 0%"
+      },
+      {
+        problem: "Отсутствие прямого контакта с клиентами",
+        solution: "Собственная база клиентов и прямая коммуникация"
+      },
+      {
+        problem: "Зависимость от внешних платформ",
+        solution: "Независимый канал продаж в собственности"
+      }
+    ];
+
+    // Специфичные преимущества для разных отраслей
+    if (industryName.includes("Рестораны") || industryName.includes("доставка")) {
+      return [
+        {
+          problem: "Комиссии агрегаторов до 30%",
+          solution: "Система прямых заказов через Telegram без комиссий"
+        },
+        {
+          problem: "Нет доступа к контактам клиентов",
+          solution: "Собственная база клиентов с полными контактами"
+        },
+        {
+          problem: "Сложность управления заказами в час пик",
+          solution: "Автоматизированная система обработки заказов"
+        }
+      ];
+    }
+
+    return commonBenefits;
+  };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Парсинг массивов из JSON
@@ -147,77 +187,29 @@ function IndustryCard({ industry }: { industry: Industry }) {
 
             <Separator />
 
-            {/* Болевые точки и решения */}
+            {/* Ключевые преимущества */}
             <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Основные болевые точки и их решение
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+                Ключевые преимущества Telegram Mini App
               </h3>
-              <div className="grid gap-4">
-                <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
-                  <div className="flex items-start gap-3 mb-3">
-                    <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-red-900 dark:text-red-100 mb-1">
-                        Высокие комиссии агрегаторов (до 30%)
-                      </h4>
-                      <p className="text-sm text-red-700 dark:text-red-300">
-                        Маркетплейсы и платформы забирают значительную часть прибыли
-                      </p>
+              <div className="grid gap-3">
+                {getIndustryBenefits(industry.name).map((benefit, index) => (
+                  <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50 hover:shadow-md transition-shadow">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                          {benefit.solution}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Вместо: {benefit.problem}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3 pl-8">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-sm text-green-700 dark:text-green-300 font-medium">
-                        Система прямых заказов через Telegram с комиссией 0%
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
-                  <div className="flex items-start gap-3 mb-3">
-                    <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-red-900 dark:text-red-100 mb-1">
-                        Нет доступа к клиентам
-                      </h4>
-                      <p className="text-sm text-red-700 dark:text-red-300">
-                        Все контакты остаются у посредников
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 pl-8">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-sm text-green-700 dark:text-green-300 font-medium">
-                        Собственная база клиентов с полными контактами
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
-                  <div className="flex items-start gap-3 mb-3">
-                    <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-red-900 dark:text-red-100 mb-1">
-                        Зависимость от внешних платформ
-                      </h4>
-                      <p className="text-sm text-red-700 dark:text-red-300">
-                        Риск блокировки или изменения условий
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 pl-8">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-sm text-green-700 dark:text-green-300 font-medium">
-                        Независимый канал продаж в собственности
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
