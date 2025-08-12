@@ -73,11 +73,16 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
   });
 
   useEffect(() => {
-    // Scroll to bottom when new messages arrive
+    // Smooth scroll to bottom when new messages arrive
     if (scrollAreaRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
       if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        setTimeout(() => {
+          scrollContainer.scrollTo({
+            top: scrollContainer.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 100);
       }
     }
   }, [messages]);
@@ -103,8 +108,16 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
     const isAlreadySelected = selectedModules.find(m => m.id === module.id);
     if (isAlreadySelected) {
       setSelectedModules(prev => prev.filter(m => m.id !== module.id));
+      // Remove from localStorage
+      const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+      const updatedModules = savedModules.filter((m: Module) => m.id !== module.id);
+      localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
     } else {
       setSelectedModules(prev => [...prev, module]);
+      // Save to localStorage for "Мое App" section
+      const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+      const updatedModules = [...savedModules, module];
+      localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
     }
   };
 
@@ -184,18 +197,21 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
     const isSelected = selectedModules.find(m => m.id === module.id);
     
     return (
-      <Card className={`p-3 cursor-pointer transition-all duration-200 border ${
-        isSelected 
-          ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
-          : 'border-gray-200 hover:border-blue-300'
-      }`}>
+      <Card 
+        className={`p-3 cursor-pointer transition-all duration-200 border ${
+          isSelected 
+            ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
+            : 'border-gray-200 hover:border-blue-300'
+        }`}
+        onClick={() => handleModuleLike(module)}
+      >
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-medium text-primary">
-                Модуль {module.number}
+              <span className="text-sm font-medium text-primary opacity-0 hover:opacity-100 transition-opacity duration-200" title={`Модуль ${module.number}`}>
+                №{module.number}
               </span>
-              <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 bg-blue-50 text-blue-700 border-blue-200">
+              <Badge variant="outline" className="text-[9px] px-1 py-0 h-3 bg-gray-50 text-gray-500 border-gray-200 font-normal">
                 {module.category}
               </Badge>
             </div>

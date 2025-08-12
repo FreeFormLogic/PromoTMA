@@ -36,7 +36,7 @@ export function Navigation() {
     { path: "/modules", label: "Функционал", icon: Puzzle },
     { path: "/industries", label: "Отрасли", icon: Building2 },
     { path: "/my-app", label: "Мое App", icon: Settings },
-    { path: "/development", label: "Разработка", icon: Rocket },
+    { path: "/development", label: "Ваше преимущество", icon: Rocket },
     { path: "/ai-chat", label: "AI-конструктор", icon: Bot },
     { path: "/partners", label: "Партнерам", icon: Handshake },
   ];

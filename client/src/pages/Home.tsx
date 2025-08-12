@@ -142,9 +142,9 @@ export default function Home() {
           <div className="bg-gradient-to-r from-telegram to-telegram-dark text-white rounded-2xl p-8 mb-8">
             <div className="grid lg:grid-cols-2 gap-8 items-center">
               <div>
-                <h2 className="text-4xl font-bold mb-4">Telegram Mini Apps за 1 день</h2>
+                <h2 className="text-4xl font-bold mb-4">Telegram Mini Apps за&nbsp;1&nbsp;день</h2>
                 <p className="text-xl mb-6 text-blue-100">
-                  Полноценные веб-приложения внутри Telegram без установки. Запуск за 1-5 дней вместо месяцев разработки.
+                  Полноценные веб-приложения внутри Telegram без установки. Запуск за&nbsp;1-5&nbsp;дней вместо месяцев разработки.
                 </p>
                 
                 <div className="grid grid-cols-2 gap-4 mb-6">
@@ -153,7 +153,7 @@ export default function Home() {
                     <div className="text-sm text-blue-100">вместо $10,000</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-                    <div className="text-2xl font-bold">1 день</div>
+                    <div className="text-2xl font-bold">1&nbsp;день</div>
                     <div className="text-sm text-blue-100">вместо месяцев</div>
                   </div>
                 </div>
@@ -203,25 +203,16 @@ export default function Home() {
           </div>
         )}
 
-        {/* Show chat button - positioned to avoid menu overlap */}
-        <div className="fixed bottom-24 right-6 z-40">
-          <Button
-            onClick={() => setChatMinimized(!chatMinimized)}
-            className="w-16 h-16 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg"
-          >
-            <Bot className="w-8 h-8 text-white" />
-          </Button>
-        </div>
-
-        {/* Floating Chat Button */}
+        {/* Floating Chat Button - only when minimized */}
         {chatMinimized && (
-          <AIChat 
-            onAnalysisUpdate={setBusinessAnalysis}
-            onModulesUpdate={setAiRecommendedModules}
-            isMinimized={chatMinimized}
-            onToggleMinimize={() => setChatMinimized(!chatMinimized)}
-            currentlyDisplayedModules={aiRecommendedModules}
-          />
+          <div className="fixed bottom-4 right-4 z-40">
+            <Button
+              onClick={() => setChatMinimized(false)}
+              className="w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg"
+            >
+              <Bot className="w-6 h-6 text-white" />
+            </Button>
+          </div>
         )}
 
 {/* Recommended Modules section removed - modules now displayed directly in AI chat */}

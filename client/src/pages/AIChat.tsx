@@ -29,15 +29,16 @@ export default function AIChatPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {/* Menu Button - positioned to not interfere with chat */}
+          {/* Standard Menu Button */}
           <Button 
             size="sm" 
             variant="ghost" 
-            onClick={() => setLocation('/')}
-            className="h-8 w-8 p-0"
-            title="Вернуться к главной"
+            onClick={() => setLocation('/modules')}
+            className="h-8 px-3"
+            title="Функционал"
           >
-            <Menu className="h-4 w-4" />
+            <Menu className="h-4 w-4 mr-1" />
+            Меню
           </Button>
           <Button 
             size="sm" 

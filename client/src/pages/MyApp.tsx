@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,15 +21,20 @@ export default function MyApp() {
   const [selectedModules, setSelectedModules] = useState<Module[]>([]);
   const [showPrototype, setShowPrototype] = useState(false);
 
-  // Load selected modules from localStorage or state management
-  // This would typically come from a global state management solution
+  // Load selected modules from localStorage
+  useEffect(() => {
+    const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+    setSelectedModules(savedModules);
+  }, []);
   
   const { data: allModules } = useQuery<Module[]>({
     queryKey: ['/api/modules'],
   });
 
   const removeModule = (moduleId: string) => {
-    setSelectedModules(prev => prev.filter(m => m.id !== moduleId));
+    const updatedModules = selectedModules.filter(m => m.id !== moduleId);
+    setSelectedModules(updatedModules);
+    localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
   };
 
   const generatePrototype = () => {
