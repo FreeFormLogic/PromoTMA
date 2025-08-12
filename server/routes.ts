@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import crypto from "crypto";
+import { analyzeBusinessContext, generateAIResponse, calculateModuleRelevance } from "./ai";
+import { analyzeBusinessContext, generateAIResponse, calculateModuleRelevance } from "./ai";
 
 const telegramAuthSchema = z.object({
   id: z.number(),
@@ -214,6 +216,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(objections);
     } catch (error) {
       return res.status(500).json({ message: "Ошибка загрузки возражений категории" });
+    }
+  });
+
+  // AI Chat endpoints
+  app.post("/api/ai/analyze", async (req, res) => {
+    try {
+      const { messages } = req.body;
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({ message: "Messages array is required" });
+      }
+      
+      const analysis = await analyzeBusinessContext(messages);
+      res.json(analysis);
+    } catch (error) {
+      console.error("Error analyzing business context:", error);
+      res.status(500).json({ message: "Ошибка анализа контекста" });
+    }
+  });
+
+  app.post("/api/ai/chat", async (req, res) => {
+    try {
+      const { messages } = req.body;
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({ message: "Messages array is required" });
+      }
+      
+      const response = await generateAIResponse(messages);
+      res.json({ response });
+    } catch (error) {
+      console.error("Error generating AI response:", error);
+      res.status(500).json({ message: "Ошибка генерации ответа" });
+    }
+  });
+
+  app.post("/api/ai/modules/relevant", async (req, res) => {
+    try {
+      const { analysis } = req.body;
+      if (!analysis) {
+        return res.status(400).json({ message: "Analysis is required" });
+      }
+      
+      const modules = await storage.getAllModules();
+      
+      // Calculate relevance scores for each module
+      const modulesWithScores = modules.map(module => ({
+        ...module,
+        relevanceScore: calculateModuleRelevance(module, analysis)
+      }));
+      
+      // Sort by relevance score and filter out low-scoring modules
+      const relevantModules = modulesWithScores
+        .filter(m => m.relevanceScore > 0)
+        .sort((a, b) => b.relevanceScore - a.relevanceScore)
+        .slice(0, 50); // Return top 50 most relevant modules
+      
+      res.json(relevantModules);
+    } catch (error) {
+      console.error("Error getting relevant modules:", error);
+      res.status(500).json({ message: "Ошибка получения релевантных модулей" });
     }
   });
 
