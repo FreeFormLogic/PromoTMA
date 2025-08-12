@@ -16,8 +16,8 @@ import {
   Dumbbell, Camera, Baby, DollarSign, Wrench,
   AlertTriangle, CheckCircle
 } from "lucide-react";
-import { Industry } from "@shared/schema";
-// Убрали импорт PainPointsSection - используем простую структуру
+import { Industry, Module } from "@shared/schema";
+import { ModuleModal } from "@/components/ModuleModal";
 
 // Маппинг иконок
 const iconMap: Record<string, any> = {
@@ -68,8 +68,9 @@ function formatText(text: string): React.ReactNode {
 }
 
 // Компактная карточка отрасли
-function IndustryCard({ industry }: { industry: Industry }) {
+function IndustryCard({ industry, modules }: { industry: Industry; modules: Module[] }) {
   const IconComponent = iconMap[industry.icon] || Building2;
+  const [selectedModule, setSelectedModule] = useState<Module | null>(null);
   
   // Функция для получения преимуществ для конкретной отрасли
   const getIndustryBenefits = (industryName: string) => {
@@ -299,19 +300,33 @@ function IndustryCard({ industry }: { industry: Industry }) {
                 Обязательные модули
               </h3>
               <div className="grid gap-4">
-                {requiredModules.map((module: any, index) => (
-                  <div key={index} className="border border-green-200 dark:border-green-800 rounded-lg p-4 bg-green-50 dark:bg-green-900/10">
-                    <div className="flex items-start gap-3 mb-2">
-                      <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                        №{module.number}
-                      </Badge>
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">{module.name}</h4>
+                {requiredModules.map((module: any, index) => {
+                  const fullModule = modules?.find(m => m.number === module.number);
+                  return (
+                    <div 
+                      key={index} 
+                      className={`border border-green-200 dark:border-green-800 rounded-lg p-4 bg-green-50 dark:bg-green-900/10 ${
+                        fullModule ? 'cursor-pointer hover:shadow-md hover:bg-green-100 dark:hover:bg-green-900/20 transition-all' : ''
+                      }`}
+                      onClick={() => fullModule && setSelectedModule(fullModule)}
+                    >
+                      <div className="flex items-start gap-3 mb-2">
+                        <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                          №{module.number}
+                        </Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                            {module.name}
+                            {fullModule && <ArrowRight className="w-4 h-4 opacity-60" />}
+                          </h4>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 italic leading-relaxed">
+                        {formatText(module.reason)}
+                      </p>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 italic leading-relaxed">
-                      {formatText(module.reason)}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -323,19 +338,33 @@ function IndustryCard({ industry }: { industry: Industry }) {
                 Рекомендуемые модули
               </h3>
               <div className="grid gap-4">
-                {recommendedModules.map((module: any, index) => (
-                  <div key={index} className="border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/10">
-                    <div className="flex items-start gap-3 mb-2">
-                      <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                        №{module.number}
-                      </Badge>
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">{module.name}</h4>
+                {recommendedModules.map((module: any, index) => {
+                  const fullModule = modules?.find(m => m.number === module.number);
+                  return (
+                    <div 
+                      key={index} 
+                      className={`border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/10 ${
+                        fullModule ? 'cursor-pointer hover:shadow-md hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-all' : ''
+                      }`}
+                      onClick={() => fullModule && setSelectedModule(fullModule)}
+                    >
+                      <div className="flex items-start gap-3 mb-2">
+                        <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                          №{module.number}
+                        </Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                            {module.name}
+                            {fullModule && <ArrowRight className="w-4 h-4 opacity-60" />}
+                          </h4>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 italic leading-relaxed">
+                        {formatText(module.reason)}
+                      </p>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 italic leading-relaxed">
-                      {formatText(module.reason)}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -373,6 +402,15 @@ function IndustryCard({ industry }: { industry: Industry }) {
           </div>
         </ScrollArea>
       </DialogContent>
+      
+      {/* Модальное окно модуля */}
+      {selectedModule && (
+        <ModuleModal
+          module={selectedModule}
+          isOpen={!!selectedModule}
+          onClose={() => setSelectedModule(null)}
+        />
+      )}
     </Dialog>
   );
 }
@@ -405,6 +443,10 @@ export default function Industries() {
 
   const { data: industries, isLoading, error } = useQuery<Industry[]>({
     queryKey: ['/api/industries'],
+  });
+
+  const { data: modules } = useQuery<Module[]>({
+    queryKey: ['/api/modules'],
   });
 
   const filteredIndustries = industries?.filter(industry => {
@@ -516,7 +558,7 @@ export default function Industries() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredIndustries.map((industry) => (
-                <IndustryCard key={industry.id} industry={industry} />
+                <IndustryCard key={industry.id} industry={industry} modules={modules || []} />
               ))}
             </div>
           </>
