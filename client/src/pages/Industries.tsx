@@ -73,40 +73,64 @@ function IndustryCard({ industry }: { industry: Industry }) {
   
   // Функция для получения преимуществ для конкретной отрасли
   const getIndustryBenefits = (industryName: string) => {
-    const commonBenefits = [
-      {
-        problem: "Высокие комиссии маркетплейсов (15-30%)",
-        solution: "Прямые продажи через Telegram с комиссией 0%"
-      },
-      {
-        problem: "Отсутствие прямого контакта с клиентами",
-        solution: "Собственная база клиентов и прямая коммуникация"
-      },
-      {
-        problem: "Зависимость от внешних платформ",
-        solution: "Независимый канал продаж в собственности"
-      }
-    ];
-
     // Специфичные преимущества для разных отраслей
     if (industryName.includes("Рестораны") || industryName.includes("доставка")) {
       return [
         {
-          problem: "Комиссии агрегаторов до 30%",
-          solution: "Система прямых заказов через Telegram без комиссий"
+          problem: "Высокие комиссии агрегаторов (25-35%)",
+          solution: "Собственный канал продаж без комиссий"
         },
         {
-          problem: "Нет доступа к контактам клиентов",
-          solution: "Собственная база клиентов с полными контактами"
+          problem: "Отсутствие данных о клиентах",
+          solution: "Полная информация о клиентах и их предпочтениях"
         },
         {
-          problem: "Сложность управления заказами в час пик",
-          solution: "Автоматизированная система обработки заказов"
+          problem: "Зависимость от внешних платформ",
+          solution: "Независимый канал коммуникации и продаж"
+        },
+        {
+          problem: "Сложность повторных продаж",
+          solution: "Прямые уведомления и программа лояльности"
         }
       ];
     }
 
-    return commonBenefits;
+    if (industryName.includes("e-commerce") || industryName.includes("магазин")) {
+      return [
+        {
+          problem: "Высокая стоимость CAC (Customer Acquisition Cost)",
+          solution: "Использование существующей аудитории Telegram"
+        },
+        {
+          problem: "Зависимость от маркетплейсов",
+          solution: "Создание собственного канала продаж"
+        },
+        {
+          problem: "Низкая конверсия мобильного трафика",
+          solution: "Нативный опыт без необходимости установки приложения"
+        },
+        {
+          problem: "Сложность возврата клиентов",
+          solution: "Прямая коммуникация через знакомый интерфейс Telegram"
+        }
+      ];
+    }
+
+    // Общие преимущества для остальных отраслей
+    return [
+      {
+        problem: "Отсутствие комиссий магазинов приложений",
+        solution: "Экономия 15-30% с каждой транзакции"
+      },
+      {
+        problem: "Нулевые затраты на установку",
+        solution: "Моментальный доступ без необходимости скачивания"
+      },
+      {
+        problem: "Высокая стоимость разработки",
+        solution: "Экономия 60-70% по сравнению с нативными приложениями"
+      }
+    ];
   };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -200,11 +224,11 @@ function IndustryCard({ industry }: { industry: Industry }) {
                         <CheckCircle className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                        <p className="font-medium text-gray-900 dark:text-gray-100 mb-1">
                           {benefit.solution}
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Вместо: {benefit.problem}
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          • {benefit.problem}
                         </p>
                       </div>
                     </div>
