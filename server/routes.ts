@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import crypto from "crypto";
-import { analyzeBusinessContext, generateAIResponse, calculateModuleRelevance } from "./ai";
+import { analyzeBusinessContext, generateAIResponse, calculateModuleRelevance, generateChatResponse } from "./ai";
 
 const telegramAuthSchema = z.object({
   id: z.number(),
@@ -241,8 +241,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Messages array is required" });
       }
       
-      const result = await generateAIResponse(messages, alreadyShownModules);
-      res.json(result);
+      // Get ALL modules for AI context - this is critical for accurate recommendations
+      const allModules = await storage.getAllModules();
+      
+      console.log('AI Chat Debug:');
+      console.log('- Total modules in database:', allModules.length);
+      console.log('- Messages received:', messages.length);
+      console.log('- Already shown modules:', alreadyShownModules.length);
+      
+      // Use the improved generateChatResponse with complete module database
+      const result = await generateChatResponse(messages, allModules, alreadyShownModules);
+      
+      console.log('- AI recommended module numbers:', result.recommendedModules);
+      
+      // Get recommended module details with validation
+      const recommendedModules = result.recommendedModules
+        .map(number => {
+          const module = allModules.find(m => m.number === number);
+          if (!module) {
+            console.warn(`Module #${number} not found in database of ${allModules.length} modules`);
+          }
+          return module;
+        })
+        .filter(Boolean);
+
+      console.log('- Found recommended modules:', recommendedModules.map(m => `#${m.number}: ${m.name}`));
+      
+      res.json({
+        response: result.response,
+        recommendedModules
+      });
     } catch (error) {
       console.error("Error generating AI response:", error);
       res.status(500).json({ message: "Ошибка генерации ответа" });

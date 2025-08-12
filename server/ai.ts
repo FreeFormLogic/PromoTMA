@@ -258,3 +258,96 @@ export function calculateModuleRelevance(
 
   return score;
 }
+
+export async function generateChatResponse(messages: string[], allModules: any[], displayedModules: any[]): Promise<{ response: string; recommendedModules: number[] }> {
+  // Get displayed module numbers for filtering
+  const displayedModuleNumbers = displayedModules.map(m => m.number);
+  
+  // Get COMPLETE module database for AI context with full details
+  const moduleContext = allModules.map(m => 
+    `${m.number}: ${m.name} - ${m.category} - ${m.description} - Features: ${Array.isArray(m.keyFeatures) ? m.keyFeatures.join('; ') : m.keyFeatures || 'N/A'}`
+  ).join('\n');
+
+  try {
+    const anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY!
+    });
+
+    const response = await anthropic.messages.create({
+      model: 'claude-3-7-sonnet-20250219',
+      max_tokens: 1000,
+      system: `You are an AI consultant for Telegram Mini Apps, specializing in business solutions.
+
+КРИТИЧЕСКИ ВАЖНО - ТОЧНЫЙ ПОДБОР МОДУЛЕЙ:
+- Анализируй ПОЛНОЕ описание каждого модуля включая keyFeatures
+- Рекомендуй ТОЛЬКО модули, которые ТОЧНО соответствуют бизнесу
+- Для салона красоты: модуль 164 (Система управления салоном красоты), модули для записи, отзывов, лояльности
+- Для ресторана: модуль 161 (Система управления рестораном), модули доставки, меню
+- Для фитнеса: модуль 163 (Управление фитнес-клубом), модули абонементов, тренировок
+
+ФОРМАТ ОТВЕТОВ:
+- НЕ УПОМИНАЙ "Модуль 130" или "№130" в тексте
+- Используй ТОЛЬКО [MODULE:NUMBER] для каждого модуля
+- Пример: [MODULE:164] вместо "Модуль 164"
+
+ПОЛНАЯ БАЗА МОДУЛЕЙ (${allModules.length} модулей):
+${moduleContext}
+
+УЖЕ ПОКАЗАННЫЕ МОДУЛИ (не повторяй): ${displayedModuleNumbers.join(', ')}
+
+АЛГОРИТМ ПОДБОРА:
+1. Определи тип бизнеса из сообщений
+2. Найди ТОЧНО соответствующий отраслевой модуль (161-170)
+3. Добавь 2-3 дополняющих модуля из других категорий
+4. Проверь, что все модули логично связаны с бизнесом
+5. Максимум 3 модуля за ответ
+6. Не повторяй показанные модули
+
+ОТРАСЛЕВЫЕ МОДУЛИ (161-170):
+161: Система управления рестораном - для ресторанов, кафе, пиццерий
+162: Медицинская информационная система - для клиник, врачей, медцентров  
+163: Управление фитнес-клубом - для фитнеса, спортзалов, йоги
+164: Система управления салоном красоты - для салонов красоты, парикмахерских, SPA
+165: Система управления отелем - для отелей, хостелов, гостиниц
+166: Управление автосервисом - для автосервисов, СТО, автомоек
+167: Стоматологическая информационная система - для стоматологий
+168: Система управления юридической фирмой - для юридических услуг
+169: Логистическая информационная система - для логистики, доставки
+170: Управление образовательным центром - для школ, курсов, обучения`,
+      messages: [
+        {
+          role: 'user',
+          content: messages.join('\n\n')
+        }
+      ]
+    });
+
+    let responseText = '';
+    if (Array.isArray(response.content)) {
+      responseText = response.content
+        .filter((block: any) => block.type === 'text')
+        .map((block: any) => block.text)
+        .join('');
+    } else {
+      responseText = response.content;
+    }
+
+    // Extract recommended module numbers from [MODULE:NUMBER] tags
+    const moduleMatches = responseText.match(/\[MODULE:(\d+)\]/g) || [];
+    const recommendedModuleNumbers = moduleMatches.map(match => {
+      const num = match.match(/\[MODULE:(\d+)\]/);
+      return num ? parseInt(num[1]) : null;
+    }).filter(num => num !== null);
+
+    return {
+      response: responseText,
+      recommendedModules: recommendedModuleNumbers
+    };
+  } catch (error) {
+    console.error('Error generating AI response:', error);
+    return {
+      response: 'Извините, произошла ошибка. Попробуйте еще раз.',
+      recommendedModules: []
+    };
+  }
+}
