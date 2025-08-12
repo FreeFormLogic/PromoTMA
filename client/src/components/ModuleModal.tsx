@@ -14,8 +14,10 @@ import {
   Rocket,
   Shield,
   BarChart3,
-  TrendingUp
+  TrendingUp,
+  Play
 } from "lucide-react";
+import { BeforeAfterDemo } from "./BeforeAfterDemo";
 
 // Import individual module images
 import ecommerceImage from "@assets/generated_images/E-commerce_product_catalog_interface_bf1d7b3b.png";
@@ -630,6 +632,19 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
                   </li>
                 ))}
               </ul>
+            </CardContent>
+          </Card>
+
+          {/* Interactive Before/After Demo */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-telegram" />
+                Интерактивная демонстрация
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BeforeAfterDemo moduleName={module.name} />
             </CardContent>
           </Card>
 
