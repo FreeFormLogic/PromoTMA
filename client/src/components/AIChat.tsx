@@ -37,7 +37,7 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
     {
       id: '1',
       role: 'assistant',
-      content: 'Привет! Я помогу подобрать идеальные модули для вашего бизнеса. Расскажите, чем вы занимаетесь и какие задачи хотите решить с помощью Telegram Mini Apps?',
+      content: 'Привет! Я помогу собрать приложение для вашего бизнеса. Расскажите, чем вы занимаетесь и какие задачи хотите решить с помощью Telegram Mini Apps?',
       timestamp: new Date()
     }
   ]);

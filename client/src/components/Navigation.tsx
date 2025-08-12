@@ -91,7 +91,7 @@ export function Navigation() {
       </header>
 
       {/* Кнопка меню внизу экрана для мобильных */}
-      <div className="md:hidden fixed bottom-4 right-4 z-50">
+      <div className="md:hidden fixed bottom-4 right-4 z-40">
         <Button 
           variant="default" 
           size="lg"

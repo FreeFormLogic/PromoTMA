@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-// IMPORTANT: Using Claude Sonnet 3.7 with thinking capabilities as requested by user
+// IMPORTANT: Using Claude Sonnet 3.5 Thinking as requested by user
 const DEFAULT_MODEL_STR = "claude-3-5-sonnet-20241022";
 
 const anthropic = new Anthropic({
@@ -70,7 +70,7 @@ Respond only with valid JSON.`;
   }
 }
 
-export async function generateAIResponse(messages: { role: string; content: string }[]): Promise<{ response: string; recommendedModules: number[] }> {
+export async function generateAIResponse(messages: { role: 'user' | 'assistant'; content: string }[]): Promise<{ response: string; recommendedModules: number[] }> {
   try {
     const systemPrompt = `You are an expert Telegram Mini Apps consultant with deep thinking capabilities. Help businesses by recommending ONLY the most essential modules first, then gradually add more as the conversation develops.
 
