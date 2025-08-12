@@ -70,9 +70,26 @@ Respond only with valid JSON.`;
   }
 }
 
-export async function generateAIResponse(messages: { role: string; content: string }[]): Promise<string> {
+export async function generateAIResponse(messages: { role: string; content: string }[]): Promise<{ response: string; recommendedModules: number[] }> {
   try {
-    const systemPrompt = `You are a helpful Telegram Mini Apps consultant. You help businesses understand which modules and solutions would work best for their specific needs. 
+    const systemPrompt = `You are a helpful Telegram Mini Apps consultant. You help businesses understand which modules and solutions would work best for their specific needs.
+
+IMPORTANT: When recommending modules, always specify the exact module numbers (e.g., "Модуль 5", "Модуль 7"). Be specific about which modules you recommend and why.
+
+You have access to these module categories and some example modules:
+- E-COMMERCE (Modules 1-15): Online stores, payment systems, product catalogs
+- МАРКЕТИНГ (Modules 16-30): A/B testing, analytics, campaigns
+- ВОВЛЕЧЕНИЕ (Modules 31-40): Gamification, loyalty programs
+- ОБРАЗОВАНИЕ (Modules 41-66): Learning platforms, courses, certifications
+- ФИНТЕХ (Modules 67-81): Payment processing, wallets, banking
+- CRM (Modules 82-96): Customer management, sales automation
+- B2B (Modules 97-111): Business process automation, B2B marketplaces
+- БРОНИРОВАНИЕ (Modules 112-126): Booking systems, scheduling
+- ИГРЫ (Modules 127-136): Games, entertainment, social features
+- КОНТЕНТ И МЕДИА (Modules 137-146): Content management, media tools
+- ИНТЕГРАЦИИ (Modules 147-156): API integrations, third-party services
+
+Always recommend specific numbered modules that match the business needs. 
 Be concise, practical, and focus on actionable recommendations. Speak in Russian.
 When discussing modules, reference specific module numbers and explain why they're relevant.`;
 
@@ -80,23 +97,46 @@ When discussing modules, reference specific module numbers and explain why they'
       model: DEFAULT_MODEL_STR,
       max_tokens: 1024,
       system: systemPrompt,
-      messages: messages.map(m => ({
-        role: m.role === 'user' ? 'user' : 'assistant',
-        content: m.content
-      })),
+      messages: messages,
     });
 
     const content = response.content[0];
     if (content.type === 'text') {
-      return content.text;
+      const responseText = content.text;
+      
+      // Extract module numbers from the response text
+      const moduleNumberMatches = responseText.match(/Модуль\s+(\d+)/gi);
+      const recommendedModules: number[] = [];
+      
+      if (moduleNumberMatches) {
+        moduleNumberMatches.forEach(match => {
+          const numberMatch = match.match(/\d+/);
+          if (numberMatch) {
+            const moduleNumber = parseInt(numberMatch[0]);
+            if (!recommendedModules.includes(moduleNumber)) {
+              recommendedModules.push(moduleNumber);
+            }
+          }
+        });
+      }
+      
+      return {
+        response: responseText,
+        recommendedModules: recommendedModules.sort((a, b) => a - b)
+      };
     }
     
     throw new Error('Invalid response format');
   } catch (error) {
     console.error('Error generating AI response:', error);
-    return 'Извините, произошла ошибка при обработке вашего запроса. Попробуйте еще раз.';
+    return {
+      response: 'Извините, произошла ошибка при генерации ответа.',
+      recommendedModules: []
+    };
   }
 }
+
+
 
 export function calculateModuleRelevance(
   module: any,

@@ -154,25 +154,27 @@ export default function Home() {
 
         {/* AI Chat Section - Compact */}
         {!chatMinimized && (
-          <section className="mb-12">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-2">
-                <Bot className="w-8 h-8 text-primary" />
+          <section className="mb-8">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
+                <Bot className="w-6 h-6 text-primary" />
                 AI подбор модулей для вашего бизнеса
-                <Sparkles className="w-6 h-6 text-yellow-500" />
+                <Sparkles className="w-5 h-5 text-yellow-500" />
               </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Расскажите о вашем бизнесе, и AI мгновенно подберет идеальные модули из 210+ готовых решений
+              <p className="text-gray-600 max-w-xl mx-auto text-sm">
+                Расскажите о вашем бизнесе, и AI подберет идеальные модули из 210+ решений
               </p>
             </div>
 
-            <div className="max-w-2xl mx-auto">
-              <AIChat 
-                onAnalysisUpdate={setBusinessAnalysis}
-                onModulesUpdate={setAiRecommendedModules}
-                isMinimized={chatMinimized}
-                onToggleMinimize={() => setChatMinimized(!chatMinimized)}
-              />
+            <div className="max-w-xl mx-auto">
+              <div className="h-96">
+                <AIChat 
+                  onAnalysisUpdate={setBusinessAnalysis}
+                  onModulesUpdate={setAiRecommendedModules}
+                  isMinimized={chatMinimized}
+                  onToggleMinimize={() => setChatMinimized(!chatMinimized)}
+                />
+              </div>
             </div>
           </section>
         )}
@@ -412,6 +414,19 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* AI Chat Minimize Button - Floating */}
+      {chatMinimized && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <Button
+            onClick={() => setChatMinimized(false)}
+            className="rounded-full w-12 h-12 shadow-lg bg-primary hover:bg-primary/90"
+            title="Открыть AI чат"
+          >
+            <Bot className="w-5 h-5" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

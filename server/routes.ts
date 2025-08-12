@@ -242,8 +242,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Messages array is required" });
       }
       
-      const response = await generateAIResponse(messages);
-      res.json({ response });
+      const result = await generateAIResponse(messages);
+      res.json(result);
     } catch (error) {
       console.error("Error generating AI response:", error);
       res.status(500).json({ message: "Ошибка генерации ответа" });
@@ -252,24 +252,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/ai/modules/relevant", async (req, res) => {
     try {
-      const { analysis } = req.body;
-      if (!analysis) {
-        return res.status(400).json({ message: "Analysis is required" });
+      const { moduleNumbers } = req.body;
+      if (!moduleNumbers || !Array.isArray(moduleNumbers)) {
+        return res.status(400).json({ message: "Module numbers array is required" });
       }
       
       const modules = await storage.getAllModules();
       
-      // Calculate relevance scores for each module
-      const modulesWithScores = modules.map(module => ({
-        ...module,
-        relevanceScore: calculateModuleRelevance(module, analysis)
-      }));
+      // Filter modules to only include those recommended by AI
+      const relevantModules = modules.filter(module => 
+        moduleNumbers.includes(module.number)
+      );
       
-      // Sort by relevance score and filter out low-scoring modules
-      const relevantModules = modulesWithScores
-        .filter(m => m.relevanceScore > 0)
-        .sort((a, b) => b.relevanceScore - a.relevanceScore)
-        .slice(0, 50); // Return top 50 most relevant modules
+      // Sort by the order they were recommended
+      relevantModules.sort((a, b) => {
+        const aIndex = moduleNumbers.indexOf(a.number);
+        const bIndex = moduleNumbers.indexOf(b.number);
+        return aIndex - bIndex;
+      });
       
       res.json(relevantModules);
     } catch (error) {

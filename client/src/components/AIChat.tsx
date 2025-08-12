@@ -101,7 +101,7 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
       // Analyze business context and update modules
       await analyzeAndUpdateModules(messageHistory);
       
-      // Get AI response
+      // Get AI response with recommended modules
       const response = await apiRequest('POST', '/api/ai/chat', {
         messages: [...messages, userMessage].map(m => ({
           role: m.role,
@@ -118,6 +118,15 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+
+      // If AI recommended specific modules, get them
+      if (responseData.recommendedModules && responseData.recommendedModules.length > 0) {
+        const modulesResponse = await apiRequest('POST', '/api/ai/modules/relevant', {
+          moduleNumbers: responseData.recommendedModules
+        });
+        const modulesData = await modulesResponse.json();
+        onModulesUpdate(modulesData);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: Message = {
@@ -154,7 +163,7 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
   }
 
   return (
-    <Card className={`h-[600px] flex flex-col bg-gradient-to-br from-background via-background to-primary/5 border-2 border-primary/10 ${isMinimized ? 'w-80' : ''}`}>
+    <Card className={`h-full flex flex-col bg-gradient-to-br from-background via-background to-primary/5 border-2 border-primary/10 ${isMinimized ? 'w-80' : ''}`}>
       {/* Header */}
       <div className="p-3 border-b bg-primary/5 backdrop-blur">
         <div className="flex items-center justify-between">
