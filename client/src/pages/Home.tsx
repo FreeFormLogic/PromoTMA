@@ -291,7 +291,7 @@ export default function Home() {
                 <div className="text-xs opacity-90">Стартовая цена</div>
               </div>
               <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-4 rounded-lg text-center">
-                <div className="text-2xl font-bold mb-1">235+</div>
+                <div className="text-2xl font-bold mb-1">255+</div>
                 <div className="text-xs opacity-90">Модулей</div>
               </div>
               <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-4 rounded-lg text-center">
@@ -332,7 +332,7 @@ export default function Home() {
                 <div className="text-xs text-blue-100">Стартовая<br/>цена</div>
               </div>
               <div className="bg-white/15 rounded-lg p-4">
-                <div className="text-lg font-bold text-white">235+</div>
+                <div className="text-lg font-bold text-white">255+</div>
                 <div className="text-xs text-blue-100">Готовых<br/>модулей</div>
               </div>
               <div className="bg-white/15 rounded-lg p-4">
@@ -440,7 +440,7 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4">Преимущества</h4>
               <ul className="space-y-1 text-gray-400 text-sm">
-                <li>✓ 235+ готовых модулей</li>
+                <li>✓ 255+ готовых модулей</li>
                 <li>✓ 25+ отраслевых ниш</li>
                 <li>✓ Запуск за 1-5 дней</li>
                 <li>✓ $300 вместо $25,000</li>
