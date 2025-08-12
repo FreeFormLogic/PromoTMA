@@ -217,6 +217,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin API для управления вайт-листом
+  app.get("/api/admin/whitelist", async (req, res) => {
+    try {
+      const whitelist = storage.getWhitelist();
+      res.json(whitelist);
+    } catch (error) {
+      console.error("Error fetching whitelist:", error);
+      res.status(500).json({ message: "Ошибка получения списка пользователей" });
+    }
+  });
+
+  app.post("/api/admin/whitelist", async (req, res) => {
+    try {
+      const { userId } = req.body;
+      
+      if (!userId || !/^\d+$/.test(userId)) {
+        return res.status(400).json({ message: "Некорректный Telegram ID" });
+      }
+
+      const result = storage.addToWhitelist(userId);
+      if (result.success) {
+        res.json({ message: "Пользователь добавлен в вайт-лист" });
+      } else {
+        res.status(400).json({ message: result.message });
+      }
+    } catch (error) {
+      console.error("Error adding to whitelist:", error);
+      res.status(500).json({ message: "Ошибка добавления пользователя" });
+    }
+  });
+
+  app.post("/api/admin/whitelist/bulk", async (req, res) => {
+    try {
+      const { userIds } = req.body;
+      
+      if (!Array.isArray(userIds) || userIds.length === 0) {
+        return res.status(400).json({ message: "Список пользователей не может быть пустым" });
+      }
+
+      const results = storage.bulkAddToWhitelist(userIds);
+      res.json({ 
+        message: `Добавлено ${results.added} пользователей, пропущено ${results.skipped}`,
+        results 
+      });
+    } catch (error) {
+      console.error("Error bulk adding to whitelist:", error);
+      res.status(500).json({ message: "Ошибка массового добавления пользователей" });
+    }
+  });
+
+  app.delete("/api/admin/whitelist/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      if (!userId || !/^\d+$/.test(userId)) {
+        return res.status(400).json({ message: "Некорректный Telegram ID" });
+      }
+
+      const result = storage.removeFromWhitelist(userId);
+      if (result.success) {
+        res.json({ message: "Пользователь удален из вайт-листа" });
+      } else {
+        res.status(404).json({ message: result.message });
+      }
+    } catch (error) {
+      console.error("Error removing from whitelist:", error);
+      res.status(500).json({ message: "Ошибка удаления пользователя" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

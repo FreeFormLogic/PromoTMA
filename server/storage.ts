@@ -23,6 +23,12 @@ export interface IStorage {
   
   getAllObjections(): Promise<Objection[]>;
   getObjectionsByCategory(category: string): Promise<Objection[]>;
+  
+  // Методы для управления вайт-листом
+  getWhitelist(): any[];
+  addToWhitelist(userId: string): { success: boolean; message: string };
+  bulkAddToWhitelist(userIds: string[]): { added: number; skipped: number };
+  removeFromWhitelist(userId: string): { success: boolean; message: string };
 }
 
 export class MemStorage implements IStorage {
@@ -32,6 +38,7 @@ export class MemStorage implements IStorage {
   private industries: Map<string, Industry>;
   private usps: Map<string, USP>;
   private objections: Map<string, Objection>;
+  private whitelist: Set<string>; // Хранилище разрешенных Telegram ID
 
   constructor() {
     this.users = new Map();
@@ -40,6 +47,7 @@ export class MemStorage implements IStorage {
     this.industries = new Map();
     this.usps = new Map();
     this.objections = new Map();
+    this.whitelist = new Set();
     
     this.initializeData();
   }
@@ -52,6 +60,22 @@ export class MemStorage implements IStorage {
     this.initializeIndustries();
     this.initializeUSPs();
     this.initializeObjections();
+    this.initializeWhitelist();
+  }
+
+  private initializeWhitelist() {
+    // Добавляем первоначальный список разрешенных пользователей
+    const initialWhitelist = [
+      "7418405560",
+      "5173994544", 
+      "216463929",
+      "6209116360",
+      "893850026",
+      "1577419391",
+      "5201551014"
+    ];
+    
+    initialWhitelist.forEach(id => this.whitelist.add(id));
   }
 
   private initializeModules() {
@@ -218,6 +242,51 @@ export class MemStorage implements IStorage {
     return Array.from(this.objections.values()).filter(
       (objection) => objection.category === category,
     );
+  }
+
+  // Методы для управления вайт-листом
+  getWhitelist(): any[] {
+    return Array.from(this.whitelist).map(id => ({
+      id,
+      firstName: `User`,
+      lastName: id.slice(-4),
+      username: `user_${id.slice(-4)}`,
+      addedAt: new Date().toISOString()
+    }));
+  }
+
+  addToWhitelist(userId: string): { success: boolean; message: string } {
+    if (this.whitelist.has(userId)) {
+      return { success: false, message: "Пользователь уже в вайт-листе" };
+    }
+    
+    this.whitelist.add(userId);
+    return { success: true, message: "Пользователь добавлен в вайт-лист" };
+  }
+
+  bulkAddToWhitelist(userIds: string[]): { added: number; skipped: number } {
+    let added = 0;
+    let skipped = 0;
+    
+    userIds.forEach(userId => {
+      if (this.whitelist.has(userId)) {
+        skipped++;
+      } else {
+        this.whitelist.add(userId);
+        added++;
+      }
+    });
+    
+    return { added, skipped };
+  }
+
+  removeFromWhitelist(userId: string): { success: boolean; message: string } {
+    if (!this.whitelist.has(userId)) {
+      return { success: false, message: "Пользователь не найден в вайт-листе" };
+    }
+    
+    this.whitelist.delete(userId);
+    return { success: true, message: "Пользователь удален из вайт-листа" };
   }
 }
 

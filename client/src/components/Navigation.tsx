@@ -8,7 +8,8 @@ import {
   Handshake,
   LogOut,
   Menu,
-  X
+  X,
+  Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -35,6 +36,7 @@ export function Navigation() {
     { path: "/industries", label: "Отрасли", icon: Building2 },
     { path: "/process", label: "Разработка", icon: Rocket },
     { path: "/partners", label: "Партнерам", icon: Handshake },
+    { path: "/admin", label: "Админ", icon: Settings },
   ];
 
   return (

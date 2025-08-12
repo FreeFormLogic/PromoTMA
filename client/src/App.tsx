@@ -11,6 +11,7 @@ import Industries from "@/pages/Industries";
 import Pricing from "@/pages/Pricing";
 import Process from "@/pages/Process";
 import Partners from "@/pages/Partners";
+import AdminPanel from "@/pages/AdminPanel";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -50,6 +51,12 @@ function Router() {
         <AuthGuard>
           <Navigation />
           <Partners />
+        </AuthGuard>
+      )} />
+      <Route path="/admin" component={() => (
+        <AuthGuard>
+          <Navigation />
+          <AdminPanel />
         </AuthGuard>
       )} />
       <Route component={NotFound} />
