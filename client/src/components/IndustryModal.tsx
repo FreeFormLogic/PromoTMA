@@ -16,6 +16,7 @@ import {
   Target,
   Shield
 } from "lucide-react";
+import { ModulePainPoints } from "./ModulePainPoints";
 
 interface IndustryModalProps {
   industry: any;
@@ -336,47 +337,15 @@ export function IndustryModal({ industry, isOpen, onClose }: IndustryModalProps)
           </TabsContent>
 
           <TabsContent value="solutions" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-destructive" />
-                  Проблемы и решения
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {metrics.painKillers.length > 0 ? (
-                  <div className="space-y-4">
-                    {metrics.painKillers.map((item: any, index: number) => (
-                      <div key={index} className="border-l-4 border-destructive/20 pl-4 py-3 bg-gray-50 rounded-r-lg">
-                        <p className="font-semibold text-destructive mb-2 flex items-center gap-2">
-                          <AlertTriangle className="w-4 h-4" />
-                          {item.pain}
-                        </p>
-                        <p className="text-sm text-gray-700 flex items-start gap-2">
-                          <CheckCircle className="w-4 h-4 text-success mt-0.5" />
-                          <span className="text-success font-medium">{item.solution}</span>
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {industry.painPoints.slice(0, 3).map((pain: string, index: number) => (
-                      <div key={index} className="border-l-4 border-destructive/20 pl-4 py-3 bg-gray-50 rounded-r-lg">
-                        <p className="font-semibold text-destructive mb-2 flex items-center gap-2">
-                          <AlertTriangle className="w-4 h-4" />
-                          {pain}
-                        </p>
-                        <p className="text-sm text-gray-700 flex items-start gap-2">
-                          <CheckCircle className="w-4 h-4 text-success mt-0.5" />
-                          <span className="text-success font-medium">Решение разрабатывается индивидуально под ваши задачи</span>
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Interactive Pain Points Section */}
+            <ModulePainPoints 
+              moduleName={industry.name} 
+              painPoints={metrics.painKillers.length > 0 ? metrics.painKillers.map((item: any) => ({
+                problem: item.pain,
+                solution: item.solution,
+                impact: "Значительное улучшение показателей бизнеса"
+              })) : undefined}
+            />
           </TabsContent>
 
 
