@@ -18,7 +18,8 @@ import {
   Link, Eye, Wifi, Zap, Clock, Puzzle, Sword, CheckSquare,
   FileText, MessageSquare, UserCheck, Edit, Video, Headphones,
   Briefcase, Database, Webhook, Car, Wallet, Shield, X, Bell,
-  CalendarCheck, Smartphone
+  CalendarCheck, Smartphone, Paintbrush, Users as Users3, GraduationCap as Education,
+  DollarSign as Banknote, Phone, Monitor, Video as Clapperboard, Flag
 } from "lucide-react";
 import type { Module } from "@shared/schema";
 
@@ -46,10 +47,26 @@ const categories = [
   "B2B",
   "КОНТЕНТ И МЕДИА",
   "ИНТЕГРАЦИИ",
-  "ИНДОНЕЗИЙСКИЕ ИНТЕГРАЦИИ",
+  "ИНДОНЕЗИЯ",
   "ИГРЫ",
   "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"
 ];
+
+// Иконки для категорий
+const categoryIcons: { [key: string]: any } = {
+  "E-COMMERCE": ShoppingCart,
+  "МАРКЕТИНГ": Target,
+  "ВОВЛЕЧЕНИЕ": Users3,
+  "ОБРАЗОВАНИЕ": Education,
+  "ФИНТЕХ": Banknote,
+  "CRM": Phone,
+  "B2B": Briefcase,
+  "КОНТЕНТ И МЕДИА": Clapperboard,
+  "ИНТЕГРАЦИИ": Webhook,
+  "ИНДОНЕЗИЯ": Flag,
+  "ИГРЫ": Gamepad2,
+  "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ": Settings
+};
 
 // Цвета для категорий
 const categoryColors: { [key: string]: string } = {
@@ -62,7 +79,7 @@ const categoryColors: { [key: string]: string } = {
   "B2B": "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300",
   "КОНТЕНТ И МЕДИА": "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300",
   "ИНТЕГРАЦИИ": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-  "ИНДОНЕЗИЙСКИЕ ИНТЕГРАЦИИ": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
+  "ИНДОНЕЗИЯ": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
   "ИГРЫ": "bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300",
   "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ": "bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300"
 };
@@ -268,7 +285,7 @@ export default function Modules() {
       );
     } catch {
       // Если не удается распарсить, ищем в исходной строке
-      matchesFeatures = (module.keyFeatures?.toLowerCase() || '').includes(searchLower);
+      matchesFeatures = (String(module.keyFeatures || '').toLowerCase()).includes(searchLower);
     }
     
     const matchesSearch = matchesNameOrDescription || matchesBenefits || matchesFeatures;
@@ -294,47 +311,52 @@ export default function Modules() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Заголовок */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="container mx-auto px-4 py-8">
+      {/* Заголовок с синим фоном */}
+      <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white">
+        <div className="container mx-auto px-4 py-12">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Каталог бизнес-модулей
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Каталог функционала
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
               Более {totalModules} готовых решений для вашего Telegram Mini App в {categoriesCount} категориях
             </p>
           </div>
 
-          {/* Поиск и фильтры */}
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-center max-w-4xl mx-auto">
-            <div className="relative flex-1 w-full lg:max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          {/* Поиск */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-300 w-5 h-5" />
               <Input
                 placeholder="Поиск по названию, описанию, возможностям..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                className="pl-12 pr-4 py-4 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-blue-200 focus:bg-white/20 focus:border-white/40"
               />
             </div>
-            
-            <div className="flex flex-wrap gap-2 justify-center">
-              {categories.map((category) => (
+          </div>
+          
+          {/* Фильтры категорий */}
+          <div className="flex flex-wrap gap-3 justify-center max-w-6xl mx-auto">
+            {categories.map((category) => {
+              const IconComponent = categoryIcons[category] || Settings;
+              return (
                 <Button
                   key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
+                  variant={selectedCategory === category ? "secondary" : "outline"}
                   size="sm"
                   onClick={() => setSelectedCategory(category)}
-                  className={`text-xs whitespace-nowrap ${
+                  className={`flex items-center gap-2 text-sm font-medium transition-all duration-200 ${
                     selectedCategory === category
-                      ? "bg-blue-600 hover:bg-blue-700 text-white"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                      ? "bg-white text-blue-700 hover:bg-blue-50 shadow-lg"
+                      : "bg-white/10 text-white border-white/30 hover:bg-white/20 hover:border-white/50"
                   }`}
                 >
+                  <IconComponent className="w-4 h-4" />
                   {category === "ВСЕ МОДУЛИ" ? `Все (${totalModules})` : category}
                 </Button>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
       </div>
