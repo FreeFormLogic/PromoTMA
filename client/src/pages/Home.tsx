@@ -191,11 +191,10 @@ export default function Home() {
         {!chatMinimized && (
           <section className="mb-8">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2 mb-2">
                 <Bot className="w-6 h-6 text-primary" />
-                Подобрать функционал
                 <Sparkles className="w-5 h-5 text-yellow-500" />
-              </h2>
+              </div>
 
             </div>
 
@@ -291,7 +290,7 @@ export default function Home() {
                 <div className="text-xs opacity-90">Стартовая цена</div>
               </div>
               <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-4 rounded-lg text-center">
-                <div className="text-2xl font-bold mb-1">255+</div>
+                <div className="text-2xl font-bold mb-1">260+</div>
                 <div className="text-xs opacity-90">Модулей</div>
               </div>
               <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-4 rounded-lg text-center">
@@ -332,7 +331,7 @@ export default function Home() {
                 <div className="text-xs text-blue-100">Стартовая<br/>цена</div>
               </div>
               <div className="bg-white/15 rounded-lg p-4">
-                <div className="text-lg font-bold text-white">255+</div>
+                <div className="text-lg font-bold text-white">260+</div>
                 <div className="text-xs text-blue-100">Готовых<br/>модулей</div>
               </div>
               <div className="bg-white/15 rounded-lg p-4">
@@ -440,7 +439,7 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4">Преимущества</h4>
               <ul className="space-y-1 text-gray-400 text-sm">
-                <li>✓ 255+ готовых модулей</li>
+                <li>✓ 260+ готовых модулей</li>
                 <li>✓ 25+ отраслевых ниш</li>
                 <li>✓ Запуск за 1-5 дней</li>
                 <li>✓ $300 вместо $25,000</li>

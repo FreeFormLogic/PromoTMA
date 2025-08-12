@@ -173,8 +173,8 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
               <Sparkles className="h-3 w-3 text-yellow-500 absolute -top-1 -right-1 animate-pulse" />
             </div>
             <div>
-              <h3 className="font-semibold text-sm">AI Консультант</h3>
-              <p className="text-xs text-muted-foreground">Подбор модулей</p>
+              <h3 className="font-semibold text-sm">Подобрать функционал</h3>
+              <p className="text-xs text-muted-foreground">AI Консультант</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -276,9 +276,7 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
             )}
           </Button>
         </div>
-        <p className="text-[10px] text-muted-foreground mt-1 px-1">
-          Enter - отправить, Shift+Enter - новая строка
-        </p>
+
       </div>
     </Card>
   );
