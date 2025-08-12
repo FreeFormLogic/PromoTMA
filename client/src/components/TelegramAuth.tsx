@@ -89,6 +89,27 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
       console.log('Telegram user data:', currentUser);
       
       if (!currentUser) {
+        // Check if we're in development and can use fallback
+        if (isDevelopment) {
+          const testUser = {
+            id: ALLOWED_USER_IDS[0].toString(),
+            username: 'dev_user',
+            telegramUsername: '@dev_user',
+            firstName: 'Dev',
+            lastName: 'User',
+            isAuthorized: true,
+          };
+
+          localStorage.setItem('telegram_auth', JSON.stringify({
+            user: testUser,
+            timestamp: Date.now()
+          }));
+
+          console.log('Development fallback - пользователь авторизован:', testUser);
+          onAuth(testUser);
+          return;
+        }
+        
         setError("Не удалось получить данные пользователя из Telegram");
         setIsChecking(false);
         return;
