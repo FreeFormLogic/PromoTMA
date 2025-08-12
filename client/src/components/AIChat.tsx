@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, Loader2, Minimize2, Maximize2, X } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Loader2, Minimize2, Maximize2, X, Heart, Plus, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 import { apiRequest } from '@/lib/queryClient';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 
 interface Message {
   id: string;
@@ -23,6 +26,17 @@ interface BusinessAnalysis {
   relevantCategories: string[];
   keywords: string[];
   persona: string;
+}
+
+interface Module {
+  id: string;
+  number: number;
+  name: string;
+  description: string;
+  category: string;
+  keyFeatures: string | string[];
+  benefits: string;
+  icon: string;
 }
 
 interface AIChatProps {
@@ -45,8 +59,15 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<BusinessAnalysis | null>(null);
+  const [selectedModules, setSelectedModules] = useState<Module[]>([]);
+  const [chatModules, setChatModules] = useState<Module[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Загружаем все модули для отображения в чате
+  const { data: allModules } = useQuery<Module[]>({
+    queryKey: ['/api/modules'],
+  });
 
   useEffect(() => {
     // Scroll to bottom when new messages arrive
@@ -72,6 +93,15 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
       // Skip getting modules here since we'll get them from the AI chat response
     } catch (error) {
       console.error('Error analyzing business:', error);
+    }
+  };
+
+  const handleModuleLike = (module: Module) => {
+    const isAlreadySelected = selectedModules.find(m => m.id === module.id);
+    if (isAlreadySelected) {
+      setSelectedModules(prev => prev.filter(m => m.id !== module.id));
+    } else {
+      setSelectedModules(prev => [...prev, module]);
     }
   };
 
@@ -115,13 +145,12 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // If AI recommended specific modules, get them
-      if (responseData.recommendedModules && responseData.recommendedModules.length > 0) {
-        const modulesResponse = await apiRequest('POST', '/api/ai/modules/relevant', {
-          moduleNumbers: responseData.recommendedModules
-        });
-        const modulesData = await modulesResponse.json();
-        onModulesUpdate(modulesData);
+      // If AI recommended specific modules, get them and add to chat display
+      if (responseData.recommendedModules && responseData.recommendedModules.length > 0 && allModules) {
+        const recommendedModuleDetails = allModules.filter(module => 
+          responseData.recommendedModules.includes(module.number)
+        );
+        setChatModules(prev => [...prev, ...recommendedModuleDetails]);
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -144,16 +173,78 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
     }
   };
 
+  const ModuleCard = ({ module }: { module: Module }) => {
+    const isSelected = selectedModules.find(m => m.id === module.id);
+    
+    return (
+      <Card className={`p-3 cursor-pointer transition-all duration-200 border ${
+        isSelected 
+          ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
+          : 'border-gray-200 hover:border-blue-300'
+      }`}>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-medium text-primary">
+                Модуль {module.number}
+              </span>
+              <Badge variant="outline" className="text-xs">
+                {module.category}
+              </Badge>
+            </div>
+            <h4 className="font-medium text-sm mb-1">{module.name}</h4>
+            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+              {module.description}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleModuleLike(module)}
+            className={`ml-2 ${
+              isSelected 
+                ? 'text-green-600 hover:text-green-700' 
+                : 'text-gray-400 hover:text-blue-600'
+            }`}
+          >
+            {isSelected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+          </Button>
+        </div>
+      </Card>
+    );
+  };
+
+  const generatePrototype = () => {
+    if (selectedModules.length < 3) {
+      return;
+    }
+    
+    const prototypeDescription = `Прототип приложения создан!\n\nВыбранные модули (${selectedModules.length}):\n${selectedModules.map(m => `• Модуль ${m.number}: ${m.name}`).join('\n')}\n\nВаше приложение будет включать: ${selectedModules.map(m => m.category).filter((c, i, arr) => arr.indexOf(c) === i).join(', ')}\n\nГотово к передаче в разработку! Хотите обсудить детали дизайна или дополнительные функции?`;
+    
+    const prototypeMessage: Message = {
+      id: Date.now().toString(),
+      role: 'assistant',
+      content: prototypeDescription,
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, prototypeMessage]);
+  };
+
   if (isMinimized) {
     return (
       <div className="fixed bottom-4 right-4 z-50">
         <Button
           onClick={onToggleMinimize}
           className="rounded-full w-12 h-12 shadow-lg"
-          size="sm"
         >
-          <Bot className="w-5 h-5" />
+          <Bot className="w-6 h-6" />
         </Button>
+        {selectedModules.length > 0 && (
+          <Badge className="absolute -top-2 -right-2 bg-green-500 text-white">
+            {selectedModules.length}
+          </Badge>
+        )}
       </div>
     );
   }
@@ -166,10 +257,21 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
           <div className="flex items-center gap-2">
             <div>
               <h3 className="font-semibold text-sm">Подобрать функционал</h3>
-              <p className="text-xs text-muted-foreground">AI Консультант</p>
+              <p className="text-xs text-muted-foreground">
+                AI Консультант {selectedModules.length > 0 && `(${selectedModules.length} выбрано)`}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-1">
+            {selectedModules.length >= 3 && (
+              <Button 
+                size="sm" 
+                onClick={generatePrototype}
+                className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 h-7"
+              >
+                Создать прототип
+              </Button>
+            )}
             {onToggleMinimize && (
               <Button size="sm" variant="ghost" onClick={onToggleMinimize} className="h-6 w-6 p-0">
                 <Minimize2 className="h-3 w-3" />
@@ -214,14 +316,19 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
                     })}
                   </p>
                 </div>
-                {message.role === 'user' && (
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                    <User className="h-3.5 w-3.5 text-primary-foreground" />
-                  </div>
-                )}
               </motion.div>
             ))}
           </AnimatePresence>
+          
+          {/* Display recommended modules as interactive cards */}
+          {chatModules.length > 0 && (
+            <div className="space-y-2">
+              <div className="text-xs text-muted-foreground font-medium">Рекомендованные модули:</div>
+              {chatModules.map((module) => (
+                <ModuleCard key={module.id} module={module} />
+              ))}
+            </div>
+          )}
           
           {isLoading && (
             <motion.div
@@ -234,8 +341,8 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false,
               </div>
               <div className="bg-muted rounded-xl px-3 py-2 shadow-sm border border-border">
                 <div className="flex items-center gap-2">
-                  <Loader2 className="h-3 w-3 animate-spin text-primary" />
-                  <span className="text-xs text-muted-foreground">Анализирую бизнес...</span>
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span className="text-xs text-muted-foreground">AI печатает...</span>
                 </div>
               </div>
             </motion.div>

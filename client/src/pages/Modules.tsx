@@ -373,29 +373,57 @@ export default function Modules() {
             </div>
           </div>
           
-          {/* Фильтры категорий - Компактная версия */}
-          <div className="flex flex-wrap gap-2 justify-center max-w-7xl mx-auto">
-            {categories.map((category) => {
-              const IconComponent = categoryIcons[category] || Settings;
-              return (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "secondary" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category)}
-                  className={`flex items-center gap-1.5 text-xs font-medium transition-all duration-200 px-3 py-1.5 h-8 ${
-                    selectedCategory === category
-                      ? "bg-white text-blue-700 hover:bg-blue-50 shadow-lg"
-                      : "bg-white/10 text-white border-white/30 hover:bg-white/20 hover:border-white/50"
-                  }`}
-                >
-                  <IconComponent className="w-3.5 h-3.5" />
-                  <span className="whitespace-nowrap">
-                    {category === "ВСЕ МОДУЛИ" ? `Все (${totalModules})` : category}
-                  </span>
-                </Button>
-              );
-            })}
+          {/* Фильтры категорий - Супер компактная версия */}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-8 gap-1.5">
+              {categories.map((category) => {
+                const IconComponent = categoryIcons[category] || Settings;
+                const isActive = selectedCategory === category;
+                return (
+                  <Button
+                    key={category}
+                    variant={isActive ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory(category)}
+                    className={`flex flex-col items-center gap-1 text-[10px] font-medium transition-all duration-200 px-2 py-2 h-16 ${
+                      isActive
+                        ? "bg-white text-blue-700 hover:bg-blue-50 shadow-lg border-2 border-blue-200"
+                        : "bg-white/10 text-white border-white/30 hover:bg-white/20 hover:border-white/50"
+                    }`}
+                    title={category === "ВСЕ МОДУЛИ" ? `Все модули (${totalModules})` : category}
+                  >
+                    <IconComponent className="w-4 h-4 flex-shrink-0" />
+                    <span className="text-center leading-tight line-clamp-2 text-[9px]">
+                      {category === "ВСЕ МОДУЛИ" ? `ВСЕ` : 
+                       category === "E-COMMERCE" ? "E-COM" :
+                       category === "МАРКЕТИНГ" ? "МАРК" :
+                       category === "ВОВЛЕЧЕНИЕ" ? "ВОВ" :
+                       category === "ОБРАЗОВАНИЕ" ? "ОБР" :
+                       category === "ФИНТЕХ" ? "ФИН" :
+                       category === "БРОНИРОВАНИЕ" ? "БРОН" :
+                       category === "КОНТЕНТ И МЕДИА" ? "КОНТ" :
+                       category === "ИНТЕГРАЦИИ" ? "ИНТЕ" :
+                       category === "ИНДОНЕЗИЯ" ? "ИНД" :
+                       category === "ИГРЫ" ? "ИГРЫ" :
+                       category === "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ" ? "ДОП" :
+                       category === "АВТОМАТИЗАЦИЯ" ? "АВТО" :
+                       category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ" ? "ОТРАС" :
+                       category === "АНАЛИТИКА" ? "АНАЛ" :
+                       category === "БЕЗОПАСНОСТЬ" ? "БЕЗ" :
+                       category === "КОММУНИКАЦИИ" ? "КОМ" :
+                       category === "СОЦИАЛЬНАЯ КОММЕРЦИЯ" ? "СОЦ" :
+                       category === "AI И АВТОМАТИЗАЦИЯ" ? "AI" :
+                       category === "AI-АВАТАРЫ" ? "АВАТА" :
+                       category === "ПАРСИНГ TELEGRAM" ? "ПАРС" :
+                       category === "WEB3 & DEFI" ? "WEB3" :
+                       category === "ЛОКАЛЬНЫЕ СЕРВИСЫ" ? "ЛОК" :
+                       category.slice(0, 4)
+                      }
+                    </span>
+                  </Button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

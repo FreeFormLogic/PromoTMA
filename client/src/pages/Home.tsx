@@ -223,64 +223,7 @@ export default function Home() {
           />
         )}
 
-        {/* Recommended Modules Section */}
-        {aiRecommendedModules.length > 0 && (
-          <section className="mb-12">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Card className="p-6">
-                <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-success" />
-                  Рекомендованные модули ({aiRecommendedModules.length})
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Специально подобраны для вашего бизнеса на основе AI-анализа
-                </p>
-                <div className="space-y-3">
-                  {aiRecommendedModules.slice(0, 6).map((module) => (
-                    <Card 
-                      key={module.id} 
-                      className="p-4 cursor-pointer hover:shadow-md hover:border-primary/50 transition-all border-l-4 border-l-primary/20 hover:border-l-primary"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-sm font-medium text-primary">
-                              Модуль {module.number}
-                            </span>
-                            <Badge variant="outline" className="text-xs border-primary/30 text-primary bg-primary/5">
-                              {module.category}
-                            </Badge>
-                          </div>
-                          <h4 className="font-medium text-sm mb-1">{module.name}</h4>
-                          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-                            {module.description}
-                          </p>
-                          {/* AI Explanation - More specific and actionable */}
-                          <div className="bg-blue-50 p-2 rounded text-xs text-blue-800 border-l-2 border-blue-200">
-                            <span className="font-medium">Почему важно:</span> {getPersonalizedExplanation(module, businessAnalysis)}
-                          </div>
-                        </div>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="shrink-0 ml-2 hover:bg-primary/10"
-                          onClick={() => {/* TODO: Open module modal */}}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
-{/* Removed "show more modules" section - AI now shows only relevant modules gradually */}
-                </div>
-              </Card>
-            </motion.div>
-          </section>
-        )}
+{/* Recommended Modules section removed - modules now displayed directly in AI chat */}
 
         {/* Quick Stats - Compact */}
         <section className="mb-12">
