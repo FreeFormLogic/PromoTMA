@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { type Module, type Industry, type USP } from "@shared/schema";
+import { PainPointsSection } from "@/components/PainPointsSection";
 
 export default function Home() {
   const { data: modules = [], isLoading: modulesLoading } = useQuery<Module[]>({
@@ -175,6 +176,9 @@ export default function Home() {
             </Card>
           </div>
         </section>
+
+        {/* Pain Points Interactive Section */}
+        <PainPointsSection />
 
         {/* Quick Stats */}
         <section className="mb-12">
