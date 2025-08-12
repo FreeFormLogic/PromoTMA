@@ -18,6 +18,7 @@ import {
   Play
 } from "lucide-react";
 import { BeforeAfterDemo } from "./BeforeAfterDemo";
+import { ModulePainPoints } from "./ModulePainPoints";
 
 // Import individual module images
 import ecommerceImage from "@assets/generated_images/E-commerce_product_catalog_interface_bf1d7b3b.png";
@@ -647,6 +648,9 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
               <BeforeAfterDemo moduleName={module.name} />
             </CardContent>
           </Card>
+
+          {/* Interactive Pain Points Section */}
+          <ModulePainPoints moduleName={module.name} />
 
           {details.impact && (
             <Card>
