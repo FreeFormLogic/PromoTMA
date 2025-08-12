@@ -89,11 +89,11 @@ export default function Home() {
                 <ul className="space-y-2 text-blue-100">
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-success mr-2" />
-                    60+ готовых модулей
+                    210+ готовых модулей
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-success mr-2" />
-                    30+ отраслевых решений
+                    25+ отраслевых ниш
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-success mr-2" />
@@ -307,8 +307,8 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4">Преимущества</h4>
               <ul className="space-y-1 text-gray-400 text-sm">
-                <li>✓ 60+ готовых модулей</li>
-                <li>✓ 30+ отраслевых решений</li>
+                <li>✓ 210+ готовых модулей</li>
+                <li>✓ 25+ отраслевых ниш</li>
                 <li>✓ Запуск за 1-5 дней</li>
                 <li>✓ $300 вместо $25,000</li>
               </ul>

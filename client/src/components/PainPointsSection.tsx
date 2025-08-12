@@ -86,7 +86,7 @@ const painPoints: PainPoint[] = [
 ];
 
 export function PainPointsSection() {
-  const [selectedPoint, setSelectedPoint] = useState<string | null>(null);
+  const [selectedPoint, setSelectedPoint] = useState<string | null>("time");
   const [showSolution, setShowSolution] = useState(false);
 
   const handlePointClick = (pointId: string) => {
@@ -101,19 +101,19 @@ export function PainPointsSection() {
   const selectedPainPoint = painPoints.find(p => p.id === selectedPoint);
 
   return (
-    <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
+    <section className="py-12 bg-white">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">
             Основные проблемы бизнеса
           </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          <p className="text-gray-600">
             Нажмите на любую проблему, чтобы увидеть, как Telegram Mini Apps решают её
           </p>
         </div>
 
-        {/* Problem Cards Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        {/* Compact Problem Cards Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
           {painPoints.map((point) => {
             const Icon = point.icon;
             const isSelected = selectedPoint === point.id;
@@ -121,22 +121,22 @@ export function PainPointsSection() {
             return (
               <Card
                 key={point.id}
-                className={`cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${
-                  isSelected ? 'ring-2 ring-telegram shadow-xl scale-105' : ''
+                className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                  isSelected ? 'ring-2 ring-telegram shadow-lg bg-telegram/5' : ''
                 }`}
                 onClick={() => handlePointClick(point.id)}
               >
-                <CardContent className="p-6">
-                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${point.color} flex items-center justify-center mb-4`}>
-                    <Icon className="w-6 h-6 text-white" />
+                <CardContent className="p-4">
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${point.color} flex items-center justify-center mb-3`}>
+                    <Icon className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">{point.title}</h3>
-                  <div className="text-sm text-gray-600">
+                  <h3 className="font-semibold text-gray-900 text-sm mb-1">{point.title}</h3>
+                  <div className="text-xs text-gray-500">
                     Нажмите для деталей
                   </div>
                   {isSelected && (
-                    <div className="mt-3">
-                      <Badge className="bg-telegram text-white">
+                    <div className="mt-2">
+                      <Badge className="bg-telegram text-white text-xs">
                         Выбрано
                       </Badge>
                     </div>
@@ -147,199 +147,93 @@ export function PainPointsSection() {
           })}
         </div>
 
-        {/* Detailed View */}
+        {/* Compact Detailed View */}
         {selectedPainPoint && (
-          <div className="max-w-4xl mx-auto">
-            <Card className="overflow-hidden shadow-2xl border-2 border-telegram/20">
+          <div className="max-w-3xl mx-auto">
+            <Card className="overflow-hidden shadow-lg border border-gray-200">
               <CardContent className="p-0">
-                {/* Toggle Buttons */}
-                <div className="bg-gray-50 p-6 border-b">
-                  <div className="flex items-center justify-center gap-4">
+                {/* Compact Toggle */}
+                <div className="bg-gray-50 p-4 border-b">
+                  <div className="flex items-center justify-center gap-3">
                     <Button
+                      size="sm"
                       variant={!showSolution ? "default" : "outline"}
                       onClick={() => setShowSolution(false)}
-                      className={`${!showSolution ? 'bg-red-500 hover:bg-red-600' : ''} transition-all`}
+                      className={`${!showSolution ? 'bg-red-500 hover:bg-red-600' : ''}`}
                     >
-                      <AlertTriangle className="w-4 h-4 mr-2" />
                       Проблема
                     </Button>
-                    
-                    <div className="relative">
-                      <ArrowRight className="w-8 h-8 text-gray-400 animate-pulse" />
-                    </div>
-                    
+                    <ArrowRight className="w-5 h-5 text-gray-400" />
                     <Button
+                      size="sm"
                       variant={showSolution ? "default" : "outline"}
                       onClick={() => setShowSolution(true)}
-                      className={`${showSolution ? 'bg-green-500 hover:bg-green-600' : ''} transition-all`}
+                      className={`${showSolution ? 'bg-green-500 hover:bg-green-600' : ''}`}
                     >
-                      <CheckCircle className="w-4 h-4 mr-2" />
                       Решение
                     </Button>
                   </div>
                 </div>
 
-                {/* Content Area */}
-                <div className="p-8">
-                  <div className="grid md:grid-cols-2 gap-8 items-center">
+                {/* Compact Content */}
+                <div className="p-6">
+                  <div className="grid md:grid-cols-3 gap-6">
                     {/* Text Content */}
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                          {selectedPainPoint.title}
-                        </h3>
-                        
-                        {!showSolution ? (
-                          <div className="space-y-4">
-                            <div className="flex items-start gap-3">
-                              <AlertTriangle className="w-6 h-6 text-red-500 mt-1 flex-shrink-0" />
-                              <p className="text-gray-700 leading-relaxed">
-                                {selectedPainPoint.problem}
-                              </p>
-                            </div>
-                            <Badge variant="destructive" className="text-sm">
-                              Текущая ситуация
-                            </Badge>
-                          </div>
-                        ) : (
-                          <div className="space-y-4">
-                            <div className="flex items-start gap-3">
-                              <CheckCircle className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
-                              <p className="text-gray-700 leading-relaxed">
-                                {selectedPainPoint.solution}
-                              </p>
-                            </div>
-                            <Badge className="bg-green-100 text-green-800 text-sm">
-                              С Telegram Mini Apps
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
+                    <div className="md:col-span-2 space-y-4">
+                      <h3 className="text-xl font-bold text-gray-900">
+                        {selectedPainPoint.title}
+                      </h3>
+                      
+                      <p className="text-gray-700 text-sm leading-relaxed">
+                        {!showSolution ? selectedPainPoint.problem : selectedPainPoint.solution}
+                      </p>
+                      
+                      <Badge className={`${showSolution ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} text-xs`}>
+                        {showSolution ? 'С Telegram Mini Apps' : 'Текущая ситуация'}
+                      </Badge>
+                    </div>
 
-                      {/* Metrics */}
-                      <div className="bg-gray-50 rounded-lg p-6">
-                        <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                          <BarChart3 className="w-5 h-5" />
-                          Ключевые показатели
-                        </h4>
+                    {/* Compact Metrics */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-900 mb-3 text-sm flex items-center gap-2">
+                        <BarChart3 className="w-4 h-4" />
+                        Ключевые показатели
+                      </h4>
+                      
+                      <div className="space-y-3">
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-red-500">
+                            {selectedPainPoint.metrics.before}
+                          </div>
+                          <div className="text-xs text-gray-600">До</div>
+                        </div>
                         
-                        <div className="grid grid-cols-3 gap-4 text-center">
-                          <div>
-                            <div className="text-2xl font-bold text-red-500">
-                              {selectedPainPoint.metrics.before}
-                            </div>
-                            <div className="text-sm text-gray-600">До</div>
+                        <div className="flex justify-center">
+                          <ArrowRight className="w-4 h-4 text-gray-400" />
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-green-500">
+                            {selectedPainPoint.metrics.after}
                           </div>
-                          
-                          <div className="flex items-center justify-center">
-                            <ArrowRight className="w-6 h-6 text-gray-400" />
-                          </div>
-                          
-                          <div>
-                            <div className="text-2xl font-bold text-green-500">
-                              {selectedPainPoint.metrics.after}
-                            </div>
-                            <div className="text-sm text-gray-600">После</div>
+                          <div className="text-xs text-gray-600">
+                            {showSolution ? 'После решения' : 'После'}
                           </div>
                         </div>
                         
-                        <div className="mt-4 text-center">
-                          <Badge className="bg-telegram text-white text-lg px-4 py-2">
-                            {selectedPainPoint.metrics.improvement} улучшение
+                        <div className="text-center mt-3">
+                          <Badge className="bg-telegram text-white text-xs px-2 py-1">
+                            {selectedPainPoint.metrics.improvement}
                           </Badge>
                         </div>
                       </div>
                     </div>
-
-                    {/* Visual Element with Progress Ring */}
-                    <div className="relative">
-                      <div className={`w-64 h-64 mx-auto rounded-full bg-gradient-to-r ${selectedPainPoint.color} flex items-center justify-center shadow-2xl transform transition-all duration-700 ${showSolution ? 'scale-110 rotate-6' : ''}`}>
-                        <div className="text-center text-white relative">
-                          <selectedPainPoint.icon className={`w-16 h-16 mx-auto mb-4 transition-transform duration-500 ${showSolution ? 'scale-125' : ''}`} />
-                          <div className="text-3xl font-bold mb-2">
-                            {showSolution ? selectedPainPoint.metrics.after : selectedPainPoint.metrics.before}
-                          </div>
-                          <div className="text-sm opacity-90">
-                            {showSolution ? 'После решения' : 'Текущее состояние'}
-                          </div>
-                          
-                          {/* Animated progress ring */}
-                          {showSolution && (
-                            <div className="absolute inset-0 -m-8">
-                              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                                <circle
-                                  cx="50"
-                                  cy="50"
-                                  r="45"
-                                  stroke="rgba(255,255,255,0.2)"
-                                  strokeWidth="2"
-                                  fill="transparent"
-                                />
-                                <circle
-                                  cx="50"
-                                  cy="50"
-                                  r="45"
-                                  stroke="white"
-                                  strokeWidth="3"
-                                  fill="transparent"
-                                  strokeDasharray="283"
-                                  strokeDashoffset="85"
-                                  className="animate-pulse"
-                                  strokeLinecap="round"
-                                />
-                              </svg>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Success indicators */}
-                      {showSolution && (
-                        <>
-                          <div className="absolute -top-4 -right-4 animate-bounce">
-                            <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                              <Zap className="w-6 h-6 text-white" />
-                            </div>
-                          </div>
-                          
-                          <div className="absolute -bottom-4 -left-4 animate-pulse">
-                            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                              <CheckCircle className="w-5 h-5 text-white" />
-                            </div>
-                          </div>
-                          
-                          <div className="absolute top-1/2 -right-8 animate-bounce delay-300">
-                            <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg">
-                              <Star className="w-4 h-4 text-white" />
-                            </div>
-                          </div>
-                        </>
-                      )}
-                      
-                      {/* Before state indicators */}
-                      {!showSolution && (
-                        <>
-                          <div className="absolute -top-2 -right-2 opacity-60">
-                            <div className="w-8 h-8 bg-red-400 rounded-full flex items-center justify-center">
-                              <AlertTriangle className="w-4 h-4 text-white" />
-                            </div>
-                          </div>
-                          
-                          <div className="absolute -bottom-2 -left-2 opacity-60">
-                            <div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center">
-                              <Clock className="w-3 h-3 text-white" />
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
                   </div>
                 </div>
 
-                {/* Action Button */}
-                <div className="bg-telegram/5 p-6 border-t text-center">
-                  <Button className="bg-telegram hover:bg-telegram/90 text-white px-8 py-3">
-                    <Target className="w-5 h-5 mr-2" />
+                {/* Compact Action */}
+                <div className="bg-telegram/5 p-4 text-center border-t">
+                  <Button size="sm" className="bg-telegram hover:bg-telegram/90 text-white">
                     Решить эту проблему
                   </Button>
                 </div>
