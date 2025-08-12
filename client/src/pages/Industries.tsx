@@ -14,13 +14,18 @@ import {
   Truck, Package, Briefcase, Scissors, Stethoscope,
   Home, Car, Plane, Gamepad2, Music,
   Dumbbell, Camera, Baby, DollarSign, Wrench,
-  AlertTriangle, CheckCircle
+  AlertTriangle, CheckCircle, Component, Store, CreditCard,
+  Aperture, Gift, Repeat, Heart, BarChart3, TestTube2, Mail,
+  Users2, MousePointerClick, Link, Crown, Award, Calendar, Coins,
+  Trophy, Eye, Bot, Globe, Settings, UserPlus, Wifi, Zap,
+  Clock, Puzzle, Sword, CheckSquare, FileText, MessageSquare, UserCheck,
+  Edit, Video, Headphones, Database, Webhook, Wallet, Shield,
+  Bell, CalendarCheck, Paintbrush, Phone, Monitor, Flag
 } from "lucide-react";
 import { Industry, Module } from "@shared/schema";
-import { ModuleModal } from "@/components/ModuleModal";
 
-// Маппинг иконок
-const iconMap: Record<string, any> = {
+// Маппинг иконок для отраслей
+const industryIconMap: Record<string, any> = {
   "🍕": Utensils,
   "🛍️": ShoppingCart,
   "📱": Smartphone,
@@ -42,6 +47,170 @@ const iconMap: Record<string, any> = {
   "💰": DollarSign,
   "🔧": Wrench,
 };
+
+// Маппинг иконок для модулей (как в Modules.tsx)
+const moduleIconMap: { [key: string]: any } = {
+  Store, Camera, ShoppingCart, CreditCard, Package, Truck, Aperture, Gift, 
+  Repeat, Users, Star, Heart, BarChart3, TestTube2, TrendingUp, Target, Mail,
+  Users2, MousePointerClick, Link, Crown, Award, Calendar, Gamepad2, Coins,
+  Trophy, Eye, GraduationCap, Brain, Bot, Globe, Settings, Building2,
+  Component, Search, ArrowRight, DollarSign, UserPlus, Wifi, Zap,
+  Clock, Puzzle, Sword, CheckSquare, FileText, MessageSquare, UserCheck,
+  Edit, Video, Headphones, Briefcase, Database, Webhook, Car, Wallet, Shield,
+  Bell, CalendarCheck, Smartphone
+};
+
+// Цвета для категорий модулей (как в Modules.tsx)
+const moduleCategoryColors: { [key: string]: string } = {
+  "E-COMMERCE": "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300",
+  "МАРКЕТИНГ": "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
+  "ВОВЛЕЧЕНИЕ": "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
+  "ОБРАЗОВАНИЕ": "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300",
+  "ФИНТЕХ": "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
+  "CRM": "bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300",
+  "B2B": "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300",
+  "КОНТЕНТ И МЕДИА": "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300",
+  "ИНТЕГРАЦИИ": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+  "ИНДОНЕЗИЯ": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
+  "ИГРЫ": "bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300",
+  "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ": "bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300"
+};
+
+// Функции для парсинга данных модулей (как в Modules.tsx)
+function parseKeyFeatures(keyFeatures: unknown): string[] {
+  if (Array.isArray(keyFeatures)) {
+    return keyFeatures;
+  }
+  if (typeof keyFeatures === 'string') {
+    try {
+      const parsed = JSON.parse(keyFeatures);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [keyFeatures];
+    }
+  }
+  return [];
+}
+
+function formatFeatureText(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      const boldText = part.slice(2, -2);
+      return <strong key={index} className="font-semibold text-gray-900 dark:text-gray-100">{boldText}</strong>;
+    }
+    return <span key={index}>{part}</span>;
+  });
+}
+
+// Модульное модальное окно (идентичное Modules.tsx)
+function ModuleInlineModal({ module, variant }: { module: Module; variant: 'required' | 'recommended' }) {
+  const IconComponent = moduleIconMap[module.icon] || Component;
+  const keyFeatures = parseKeyFeatures(module.keyFeatures);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  const borderColor = variant === 'required' ? 'border-green-200 dark:border-green-800' : 'border-blue-200 dark:border-blue-800';
+  const bgColor = variant === 'required' ? 'bg-green-50 dark:bg-green-900/10' : 'bg-blue-50 dark:bg-blue-900/10';
+  const hoverBgColor = variant === 'required' ? 'hover:bg-green-100 dark:hover:bg-green-900/20' : 'hover:bg-blue-100 dark:hover:bg-blue-900/20';
+  const badgeColor = variant === 'required' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+
+  return (
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTrigger asChild>
+        <div className={`border ${borderColor} rounded-lg p-4 ${bgColor} cursor-pointer hover:shadow-md ${hoverBgColor} transition-all`}>
+          <div className="flex items-start gap-3 mb-2">
+            <Badge variant="outline" className={badgeColor}>
+              №{module.number}
+            </Badge>
+            <div className="flex-1">
+              <h4 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                {module.name}
+                <ArrowRight className="w-4 h-4 opacity-60" />
+              </h4>
+            </div>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+            {module.description}
+          </p>
+        </div>
+      </DialogTrigger>
+      
+      {/* Модальное окно - точная копия из Modules.tsx */}
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              {module.name}
+            </DialogTitle>
+            <Badge className={`${moduleCategoryColors[module.category] || moduleCategoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
+              #{module.number} {module.category}
+            </Badge>
+          </div>
+        </DialogHeader>
+        
+        <ScrollArea className="max-h-[70vh] pr-4">
+          <div className="space-y-6">
+            {/* Иконка и описание */}
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                <IconComponent className="w-8 h-8 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  {module.description}
+                </p>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Ключевые возможности */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                Ключевые возможности
+              </h3>
+              <div className="space-y-3">
+                {keyFeatures.map((feature, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                      {formatFeatureText(feature)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Бизнес-преимущества */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                Бизнес-преимущества
+              </h3>
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                <p className="text-green-800 dark:text-green-300 font-medium">
+                  {module.benefits}
+                </p>
+              </div>
+            </div>
+
+            {/* Кнопки действий */}
+            <div className="flex gap-3 pt-4">
+              <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+                Добавить в проект
+              </Button>
+              <Button variant="outline" className="flex-1">
+                Подробнее
+              </Button>
+            </div>
+          </div>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 // Цвета для категорий важности
 const categoryColors: Record<string, string> = {
@@ -69,8 +238,7 @@ function formatText(text: string): React.ReactNode {
 
 // Компактная карточка отрасли
 function IndustryCard({ industry, modules }: { industry: Industry; modules: Module[] }) {
-  const IconComponent = iconMap[industry.icon] || Building2;
-  const [selectedModule, setSelectedModule] = useState<Module | null>(null);
+  const IconComponent = industryIconMap[industry.icon] || Building2;
   
   // Функция для получения преимуществ для конкретной отрасли
   const getIndustryBenefits = (industryName: string) => {
@@ -302,24 +470,15 @@ function IndustryCard({ industry, modules }: { industry: Industry; modules: Modu
               <div className="grid gap-4">
                 {requiredModules.map((module: any, index) => {
                   const fullModule = modules?.find(m => m.number === module.number);
-                  return (
-                    <div 
-                      key={index} 
-                      className={`border border-green-200 dark:border-green-800 rounded-lg p-4 bg-green-50 dark:bg-green-900/10 ${
-                        fullModule ? 'cursor-pointer hover:shadow-md hover:bg-green-100 dark:hover:bg-green-900/20 transition-all' : ''
-                      }`}
-                      onClick={() => fullModule && setSelectedModule(fullModule)}
-                    >
+                  return fullModule ? (
+                    <ModuleInlineModal key={index} module={fullModule} variant="required" />
+                  ) : (
+                    <div key={index} className="border border-green-200 dark:border-green-800 rounded-lg p-4 bg-green-50 dark:bg-green-900/10">
                       <div className="flex items-start gap-3 mb-2">
                         <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
                           №{module.number}
                         </Badge>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                            {module.name}
-                            {fullModule && <ArrowRight className="w-4 h-4 opacity-60" />}
-                          </h4>
-                        </div>
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-100">{module.name}</h4>
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-400 italic leading-relaxed">
                         {formatText(module.reason)}
@@ -340,24 +499,15 @@ function IndustryCard({ industry, modules }: { industry: Industry; modules: Modu
               <div className="grid gap-4">
                 {recommendedModules.map((module: any, index) => {
                   const fullModule = modules?.find(m => m.number === module.number);
-                  return (
-                    <div 
-                      key={index} 
-                      className={`border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/10 ${
-                        fullModule ? 'cursor-pointer hover:shadow-md hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-all' : ''
-                      }`}
-                      onClick={() => fullModule && setSelectedModule(fullModule)}
-                    >
+                  return fullModule ? (
+                    <ModuleInlineModal key={index} module={fullModule} variant="recommended" />
+                  ) : (
+                    <div key={index} className="border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/10">
                       <div className="flex items-start gap-3 mb-2">
                         <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
                           №{module.number}
                         </Badge>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                            {module.name}
-                            {fullModule && <ArrowRight className="w-4 h-4 opacity-60" />}
-                          </h4>
-                        </div>
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-100">{module.name}</h4>
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-400 italic leading-relaxed">
                         {formatText(module.reason)}
@@ -403,14 +553,6 @@ function IndustryCard({ industry, modules }: { industry: Industry; modules: Modu
         </ScrollArea>
       </DialogContent>
       
-      {/* Модальное окно модуля */}
-      {selectedModule && (
-        <ModuleModal
-          module={selectedModule}
-          isOpen={!!selectedModule}
-          onClose={() => setSelectedModule(null)}
-        />
-      )}
     </Dialog>
   );
 }
