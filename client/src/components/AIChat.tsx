@@ -239,69 +239,71 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
   };
 
   const ModuleCard = ({ module }: { module: Module }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const isSelected = selectedModules.find(m => m.id === module.id);
     const IconComponent = Sparkles; // Use sparkles icon for now
     
     return (
       <>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Card className={`group cursor-pointer transition-all duration-300 border ${
-              isSelected 
-                ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
-                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-600'
-            } hover:-translate-y-1 hover:shadow-lg`}>
-              <div className="p-4">
-                {/* Icon and header */}
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                    <IconComponent className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 leading-tight break-words hyphens-auto">
-                      {module.name}
-                    </h3>
-                    <Badge className={`text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
-                      #{module.number}
-                    </Badge>
-                  </div>
-                </div>
-                
-                {/* Description */}
-                <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
-                  {module.description}
-                </p>
-                
-                {/* Benefit and arrow */}
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-blue-600 dark:text-blue-400 font-medium line-clamp-1 flex-1">
-                    {module.benefits}
-                  </p>
-                  <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleModuleLike(module);
-                      }}
-                      className={`w-6 h-6 p-0 ${
-                        isSelected 
-                          ? 'text-green-600 hover:text-green-700' 
-                          : 'text-gray-400 hover:text-blue-600'
-                      }`}
-                    >
-                      {isSelected ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
-                    </Button>
-                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                  </div>
-                </div>
+        <Card 
+          className={`group cursor-pointer transition-all duration-300 border ${
+            isSelected 
+              ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
+              : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-600'
+          } hover:-translate-y-1 hover:shadow-lg`}
+          onClick={() => setIsModalOpen(true)}
+        >
+          <div className="p-4">
+            {/* Icon and header */}
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                <IconComponent className="w-5 h-5 text-white" />
               </div>
-            </Card>
-          </DialogTrigger>
-          
-          {/* Module details modal - same as in Modules.tsx */}
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 leading-tight break-words hyphens-auto">
+                  {module.name}
+                </h3>
+                <Badge className={`text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
+                  #{module.number}
+                </Badge>
+              </div>
+            </div>
+            
+            {/* Description */}
+            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+              {module.description}
+            </p>
+            
+            {/* Benefit and arrow */}
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium line-clamp-1 flex-1">
+                {module.benefits}
+              </p>
+              <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleModuleLike(module);
+                  }}
+                  className={`w-6 h-6 p-0 ${
+                    isSelected 
+                      ? 'text-green-600 hover:text-green-700' 
+                      : 'text-gray-400 hover:text-blue-600'
+                  }`}
+                >
+                  {isSelected ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                </Button>
+                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              </div>
+            </div>
+          </div>
+        </Card>
+        
+        {/* Module details modal */}
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden z-[9999]">
             <DialogHeader>
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -354,7 +356,10 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
                 {/* Add to app button */}
                 <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                   <Button
-                    onClick={() => handleModuleLike(module)}
+                    onClick={() => {
+                      handleModuleLike(module);
+                      setIsModalOpen(false);
+                    }}
                     className={`w-full ${
                       isSelected 
                         ? 'bg-green-600 hover:bg-green-700 text-white' 
