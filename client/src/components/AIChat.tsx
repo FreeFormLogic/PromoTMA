@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Component as ReactComponent } from 'react';
 import { Send, Bot, User, Sparkles, Loader2, Minimize2, Maximize2, X, Heart, Plus, Check, ArrowRight, Settings, Component } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -58,7 +58,58 @@ let persistentMessages: Message[] = [
   }
 ];
 
-export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize, currentlyDisplayedModules = [], isFullScreen = false }: AIChatProps & { isFullScreen?: boolean }) {
+// Error Boundary Component to handle external extension errors
+class ChatErrorBoundary extends ReactComponent<{children: React.ReactNode}, {hasError: boolean}> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    // Update state so the next render will show the fallback UI
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    // Log error but don't break the app
+    console.warn('AIChat Error Boundary caught error:', error, errorInfo);
+    
+    // Check if it's a browser extension error and ignore it
+    if (error?.stack?.includes('extension') || 
+        error?.message?.includes('extension') ||
+        error?.stack?.includes('chrome-extension') ||
+        error?.stack?.includes('moz-extension')) {
+      console.log('Browser extension error ignored:', error);
+      this.setState({ hasError: false }); // Reset state to continue
+      return;
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Card className="h-full flex items-center justify-center p-4">
+          <div className="text-center">
+            <Bot className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+            <p className="text-sm text-gray-600">AI чат временно недоступен</p>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => this.setState({ hasError: false })}
+              className="mt-2"
+            >
+              Попробовать снова
+            </Button>
+          </div>
+        </Card>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize, currentlyDisplayedModules = [], isFullScreen = false }: AIChatProps & { isFullScreen?: boolean }) {
   const [messages, setMessages] = useState<Message[]>(persistentMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -406,7 +457,8 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
 
   const renderMessageWithModules = (content: string, isAssistant: boolean) => {
     if (!isAssistant || !allModules) {
-      return content;
+      // Format text for user messages with bold support
+      return formatText(content);
     }
 
     // Split content by [MODULE:NUMBER] pattern and replace with inline module cards
@@ -427,7 +479,27 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
         }
         return <span key={index} className="text-red-500">Модуль {moduleNumber} не найден</span>;
       }
-      return <span key={index}>{part}</span>;
+      return <span key={index} className="inline">{formatText(part)}</span>;
+    });
+  };
+
+  // Function to format text with bold support
+  const formatText = (text: string) => {
+    if (!text) return text;
+    
+    // Split by **bold** patterns and render accordingly
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        const boldText = part.slice(2, -2);
+        return (
+          <strong key={index} className="font-semibold text-gray-900 dark:text-gray-100">
+            {boldText}
+          </strong>
+        );
+      }
+      return part;
     });
   };
 
@@ -485,42 +557,54 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 min-h-0">
         <div className="space-y-3 min-h-[200px]">
           <AnimatePresence>
-            {messages.map((message) => (
-              <motion.div
-                key={message.id}
-                data-message-role={message.role}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className={`flex gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                {message.role === 'assistant' && (
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Bot className="h-3.5 w-3.5 text-primary" />
+            {messages.map((message) => {
+              try {
+                return (
+                  <motion.div
+                    key={message.id}
+                    data-message-role={message.role}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className={`flex gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    {message.role === 'assistant' && (
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Bot className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                    )}
+                    <div
+                      className={`max-w-[80%] rounded-xl px-3 py-2 ${
+                        message.role === 'user'
+                          ? 'bg-primary text-primary-foreground shadow-lg'
+                          : 'bg-muted shadow-sm border border-border'
+                      }`}
+                    >
+                      <div className="text-xs whitespace-pre-wrap leading-relaxed">
+                        {renderMessageWithModules(message.content, message.role === 'assistant')}
+                      </div>
+                      <p className={`text-[10px] mt-1 ${
+                        message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                      }`}>
+                        {message.timestamp.toLocaleTimeString('ru-RU', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              } catch (error) {
+                // Catch any errors in message rendering and show fallback
+                console.warn('Error rendering message:', error);
+                return (
+                  <div key={message.id} className="text-xs text-gray-500 p-2">
+                    Ошибка отображения сообщения
                   </div>
-                )}
-                <div
-                  className={`max-w-[80%] rounded-xl px-3 py-2 ${
-                    message.role === 'user'
-                      ? 'bg-primary text-primary-foreground shadow-lg'
-                      : 'bg-muted shadow-sm border border-border'
-                  }`}
-                >
-                  <div className="text-xs whitespace-pre-wrap leading-relaxed">
-                    {renderMessageWithModules(message.content, message.role === 'assistant')}
-                  </div>
-                  <p className={`text-[10px] mt-1 ${
-                    message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                  }`}>
-                    {message.timestamp.toLocaleTimeString('ru-RU', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+                );
+              }
+            })}
           </AnimatePresence>
           
 
@@ -573,5 +657,14 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
 
       </div>
     </Card>
+  );
+}
+
+// Wrap the component with error boundary and export
+export default function AIChat(props: AIChatProps & { isFullScreen?: boolean }) {
+  return (
+    <ChatErrorBoundary>
+      <AIChatComponent {...props} />
+    </ChatErrorBoundary>
   );
 }
