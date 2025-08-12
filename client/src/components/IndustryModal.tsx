@@ -226,6 +226,9 @@ const recommendedModules: Record<string, string[]> = {
 };
 
 export function IndustryModal({ industry, isOpen, onClose }: IndustryModalProps) {
+  // Simple debug logging first
+  console.log('🔥 IndustryModal RENDERED! Industry name:', industry.name);
+  
   const metrics = industryMetrics[industry.name] || {
     uspTitle: "Готовые решения для " + industry.name.toLowerCase(),
     usps: [
@@ -245,12 +248,13 @@ export function IndustryModal({ industry, isOpen, onClose }: IndustryModalProps)
   };
   
   // Debug logging
-  console.log('IndustryModal DEBUG:', {
+  console.log('🔍 IndustryModal DEBUG:', {
     industryName: industry.name,
     metricsFound: !!industryMetrics[industry.name],
     painKillersExists: !!metrics.painKillers,
     painKillersLength: metrics.painKillers ? metrics.painKillers.length : 0,
-    painKillers: metrics.painKillers
+    painKillers: metrics.painKillers,
+    availableKeys: Object.keys(industryMetrics)
   });
 
   return (
