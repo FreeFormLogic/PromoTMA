@@ -78,19 +78,23 @@ function IndustryCard({ industry }: { industry: Industry }) {
       return [
         {
           problem: "Высокие комиссии агрегаторов (25-35%)",
-          solution: "Собственный канал продаж без комиссий"
+          solution: "Собственный канал продаж без комиссий",
+          impact: "Экономия до $5000/месяц при обороте $20,000"
         },
         {
           problem: "Отсутствие данных о клиентах",
-          solution: "Полная информация о клиентах и их предпочтениях"
+          solution: "Полная информация о клиентах и их предпочтениях",
+          impact: "Рост повторных заказов на 40-60%"
         },
         {
           problem: "Зависимость от внешних платформ",
-          solution: "Независимый канал коммуникации и продаж"
+          solution: "Независимый канал коммуникации и продаж",
+          impact: "100% контроль над клиентской базой"
         },
         {
           problem: "Сложность повторных продаж",
-          solution: "Прямые уведомления и программа лояльности"
+          solution: "Прямые уведомления и программа лояльности",
+          impact: "Увеличение LTV клиента на 35-45%"
         }
       ];
     }
@@ -99,19 +103,63 @@ function IndustryCard({ industry }: { industry: Industry }) {
       return [
         {
           problem: "Высокая стоимость CAC (Customer Acquisition Cost)",
-          solution: "Использование существующей аудитории Telegram"
+          solution: "Использование существующей аудитории Telegram",
+          impact: "Снижение CAC на 50-70%"
         },
         {
           problem: "Зависимость от маркетплейсов",
-          solution: "Создание собственного канала продаж"
+          solution: "Создание собственного канала продаж",
+          impact: "Увеличение маржинальности на 15-35%"
         },
         {
           problem: "Низкая конверсия мобильного трафика",
-          solution: "Нативный опыт без необходимости установки приложения"
+          solution: "Нативный опыт без необходимости установки приложения",
+          impact: "Рост конверсии на 30-45%"
         },
         {
           problem: "Сложность возврата клиентов",
-          solution: "Прямая коммуникация через знакомый интерфейс Telegram"
+          solution: "Прямая коммуникация через знакомый интерфейс Telegram",
+          impact: "Повышение retention rate на 25-50%"
+        }
+      ];
+    }
+
+    if (industryName.includes("Образование") || industryName.includes("курсы")) {
+      return [
+        {
+          problem: "Низкое вовлечение учеников",
+          solution: "Интерактивные задания и геймификация",
+          impact: "Завершаемость курсов растет на 40-60%"
+        },
+        {
+          problem: "Высокая стоимость платформ для обучения",
+          solution: "Встроенная LMS система в Telegram",
+          impact: "Экономия $200-500/месяц на инфраструктуре"
+        },
+        {
+          problem: "Сложность организации вебинаров",
+          solution: "Прямые трансляции и записи в приложении",
+          impact: "Увеличение посещаемости на 35-50%"
+        }
+      ];
+    }
+
+    if (industryName.includes("Медицина") || industryName.includes("клиника")) {
+      return [
+        {
+          problem: "Пропущенные приемы из-за забывчивости",
+          solution: "Автоматические напоминания о визитах",
+          impact: "Снижение no-show на 60-70%"
+        },
+        {
+          problem: "Долгое ожидание по телефону",
+          solution: "Онлайн-запись на удобное время",
+          impact: "Сокращение нагрузки на колл-центр на 50%"
+        },
+        {
+          problem: "Потеря медицинской истории",
+          solution: "Цифровая карта пациента всегда под рукой",
+          impact: "100% доступность медданных"
         }
       ];
     }
@@ -120,15 +168,18 @@ function IndustryCard({ industry }: { industry: Industry }) {
     return [
       {
         problem: "Отсутствие комиссий магазинов приложений",
-        solution: "Экономия 15-30% с каждой транзакции"
+        solution: "Экономия 15-30% с каждой транзакции",
+        impact: "До $1000/месяц дополнительной прибыли"
       },
       {
         problem: "Нулевые затраты на установку",
-        solution: "Моментальный доступ без необходимости скачивания"
+        solution: "Моментальный доступ без необходимости скачивания",
+        impact: "Конверсия в первое использование +40%"
       },
       {
         problem: "Высокая стоимость разработки",
-        solution: "Экономия 60-70% по сравнению с нативными приложениями"
+        solution: "Экономия 60-70% по сравнению с нативными приложениями",
+        impact: "ROI достигается в 3 раза быстрее"
       }
     ];
   };
@@ -216,19 +267,22 @@ function IndustryCard({ industry }: { industry: Industry }) {
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
                 Ключевые преимущества Telegram Mini App
               </h3>
-              <div className="grid gap-3">
+              <div className="grid gap-2">
                 {getIndustryBenefits(industry.name).map((benefit, index) => (
-                  <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-gray-800/50 hover:shadow-md transition-shadow">
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                        <CheckCircle className="w-5 h-5 text-white" />
+                  <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-800/50 hover:shadow-sm transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-md flex items-center justify-center">
+                        <CheckCircle className="w-4 h-4 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 dark:text-gray-100 mb-1">
+                        <p className="font-medium text-gray-900 dark:text-gray-100 text-sm leading-tight">
                           {benefit.solution}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          • {benefit.problem}
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-through">
+                          {benefit.problem}
+                        </p>
+                        <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
+                          → {benefit.impact}
                         </p>
                       </div>
                     </div>
