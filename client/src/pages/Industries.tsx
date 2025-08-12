@@ -13,10 +13,11 @@ import {
   ShoppingCart, Utensils, Smartphone, GraduationCap, Brain,
   Truck, Package, Briefcase, Scissors, Stethoscope,
   Home, Car, Plane, Gamepad2, Music,
-  Dumbbell, Camera, Baby, DollarSign, Wrench
+  Dumbbell, Camera, Baby, DollarSign, Wrench,
+  AlertTriangle, CheckCircle
 } from "lucide-react";
 import { Industry } from "@shared/schema";
-import { PainPointsSection } from "@/components/PainPointsSection";
+// Убрали импорт PainPointsSection - используем простую структуру
 
 // Маппинг иконок
 const iconMap: Record<string, any> = {
@@ -146,15 +147,78 @@ function IndustryCard({ industry }: { industry: Industry }) {
 
             <Separator />
 
-            {/* Интерактивные болевые точки и решения */}
+            {/* Болевые точки и решения */}
             <div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
                 Основные болевые точки и их решение
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                Нажмите на любую проблему, чтобы увидеть решение
-              </p>
-              <PainPointsSection />
+              <div className="grid gap-4">
+                <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
+                  <div className="flex items-start gap-3 mb-3">
+                    <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-red-900 dark:text-red-100 mb-1">
+                        Высокие комиссии агрегаторов (до 30%)
+                      </h4>
+                      <p className="text-sm text-red-700 dark:text-red-300">
+                        Маркетплейсы и платформы забирают значительную часть прибыли
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 pl-8">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm text-green-700 dark:text-green-300 font-medium">
+                        Система прямых заказов через Telegram с комиссией 0%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
+                  <div className="flex items-start gap-3 mb-3">
+                    <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-red-900 dark:text-red-100 mb-1">
+                        Нет доступа к клиентам
+                      </h4>
+                      <p className="text-sm text-red-700 dark:text-red-300">
+                        Все контакты остаются у посредников
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 pl-8">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm text-green-700 dark:text-green-300 font-medium">
+                        Собственная база клиентов с полными контактами
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
+                  <div className="flex items-start gap-3 mb-3">
+                    <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-red-900 dark:text-red-100 mb-1">
+                        Зависимость от внешних платформ
+                      </h4>
+                      <p className="text-sm text-red-700 dark:text-red-300">
+                        Риск блокировки или изменения условий
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 pl-8">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm text-green-700 dark:text-green-300 font-medium">
+                        Независимый канал продаж в собственности
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <Separator />
