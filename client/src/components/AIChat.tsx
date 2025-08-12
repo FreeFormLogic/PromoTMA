@@ -47,15 +47,18 @@ interface AIChatProps {
   currentlyDisplayedModules?: any[];
 }
 
+// Global state for chat persistence
+let persistentMessages: Message[] = [
+  {
+    id: '1',
+    role: 'assistant',
+    content: 'Привет! Я помогу собрать приложение для вашего бизнеса. Расскажите, чем вы занимаетесь и какие задачи хотите решить с помощью Telegram Mini Apps?',
+    timestamp: new Date()
+  }
+];
+
 export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize, currentlyDisplayedModules = [], isFullScreen = false }: AIChatProps & { isFullScreen?: boolean }) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: 'Привет! Я помогу собрать приложение для вашего бизнеса. Расскажите, чем вы занимаетесь и какие задачи хотите решить с помощью Telegram Mini Apps?',
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>(persistentMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<BusinessAnalysis | null>(null);
@@ -115,7 +118,9 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    persistentMessages = updatedMessages;
     setInput('');
     setIsLoading(true);
 
@@ -143,7 +148,9 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
         timestamp: new Date()
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      const finalMessages = [...updatedMessages, assistantMessage];
+      setMessages(finalMessages);
+      persistentMessages = finalMessages;
 
       // If AI recommended specific modules, get them and add to chat display
       if (responseData.recommendedModules && responseData.recommendedModules.length > 0 && allModules) {
@@ -349,15 +356,7 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
             ))}
           </AnimatePresence>
           
-          {/* Display recommended modules as interactive cards */}
-          {chatModules.length > 0 && (
-            <div className="space-y-2">
-              <div className="text-xs text-muted-foreground font-medium">Рекомендованные модули:</div>
-              {chatModules.map((module) => (
-                <ModuleCard key={module.id} module={module} />
-              ))}
-            </div>
-          )}
+
           
           {isLoading && (
             <motion.div

@@ -203,8 +203,8 @@ export default function Home() {
           </div>
         )}
 
-        {/* Show chat button */}
-        <div className="fixed bottom-6 right-6 z-50">
+        {/* Show chat button - positioned to avoid menu overlap */}
+        <div className="fixed bottom-24 right-6 z-40">
           <Button
             onClick={() => setChatMinimized(!chatMinimized)}
             className="w-16 h-16 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg"
