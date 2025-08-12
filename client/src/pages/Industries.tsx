@@ -16,6 +16,7 @@ import {
   Dumbbell, Camera, Baby, DollarSign, Wrench
 } from "lucide-react";
 import { Industry } from "@shared/schema";
+import { IndustryModal } from "@/components/IndustryModal";
 
 // Маппинг иконок
 const iconMap: Record<string, any> = {
@@ -109,141 +110,12 @@ function IndustryCard({ industry }: { industry: Industry }) {
         </Card>
       </DialogTrigger>
       
-      {/* Модальное окно с детальной информацией */}
-      <DialogContent 
-        className="max-w-5xl max-h-[90vh] overflow-hidden p-0" 
-        aria-describedby={`industry-description-${industry.id}`}
-      >
-        <DialogHeader className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {industry.name}
-          </DialogTitle>
-        </DialogHeader>
-        
-        <ScrollArea className="max-h-[75vh]">
-          <div className="p-6 space-y-6">
-            {/* Иконка и описание */}
-            <div className="flex items-start gap-4" id={`industry-description-${industry.id}`}>
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
-                <IconComponent className="w-8 h-8 text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-base">
-                  {industry.description}
-                </p>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Ключевая информация */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-              <p className="text-blue-800 dark:text-blue-300 leading-relaxed text-base">
-                {formatText(industry.importance)}
-              </p>
-            </div>
-
-            <Separator />
-
-            {/* Болевые точки и решения */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Основные болевые точки и их решение
-              </h3>
-              <div className="grid gap-3">
-                {painPoints.map((point, index) => (
-                  <div key={index} className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <ArrowRight className="w-4 h-4 text-blue-500 mt-1 flex-shrink-0" />
-                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed flex-1 min-w-0">
-                      {formatText(point)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Обязательные модули */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Обязательные модули
-              </h3>
-              <div className="grid gap-4">
-                {requiredModules.map((module: any, index) => (
-                  <div key={index} className="border border-green-200 dark:border-green-800 rounded-lg p-4 bg-green-50 dark:bg-green-900/10">
-                    <div className="flex items-start gap-3 mb-2">
-                      <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                        №{module.number}
-                      </Badge>
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">{module.name}</h4>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 italic leading-relaxed">
-                      {formatText(module.reason)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Рекомендуемые модули */}
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Рекомендуемые модули
-              </h3>
-              <div className="grid gap-4">
-                {recommendedModules.map((module: any, index) => (
-                  <div key={index} className="border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/10">
-                    <div className="flex items-start gap-3 mb-2">
-                      <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                        №{module.number}
-                      </Badge>
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">{module.name}</h4>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 italic leading-relaxed">
-                      {formatText(module.reason)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Ключевые метрики */}
-            {keyMetrics.length > 0 && (
-              <>
-                <Separator />
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                    Ключевые метрики эффективности
-                  </h3>
-                  <div className="grid gap-3">
-                    {keyMetrics.map((metric, index) => (
-                      <div key={index} className="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                        <TrendingUp className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-green-800 dark:text-green-300 font-medium leading-relaxed">
-                          {formatText(metric)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Кнопки действий */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-6 pb-2">
-              <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-12">
-                Получить прототип
-              </Button>
-              <Button variant="outline" className="flex-1 h-12">
-                Получить консультацию
-              </Button>
-            </div>
-          </div>
-        </ScrollArea>
-      </DialogContent>
+      {/* Используем IndustryModal компонент */}
+      <IndustryModal 
+        industry={industry} 
+        isOpen={isDialogOpen} 
+        onClose={() => setIsDialogOpen(false)} 
+      />
     </Dialog>
   );
 }
