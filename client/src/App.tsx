@@ -10,6 +10,7 @@ import Modules from "@/pages/Modules";
 import Industries from "@/pages/Industries";
 import MyApp from "@/pages/MyApp";
 import Development from "@/pages/Development";
+import AIChatPage from "@/pages/AIChat";
 import Pricing from "@/pages/Pricing";
 import Process from "@/pages/Process";
 import Partners from "@/pages/Partners";
@@ -47,6 +48,11 @@ function Router() {
         <AuthGuard>
           <Navigation />
           <Development />
+        </AuthGuard>
+      )} />
+      <Route path="/ai-chat" component={() => (
+        <AuthGuard>
+          <AIChatPage />
         </AuthGuard>
       )} />
       <Route path="/pricing" component={() => (

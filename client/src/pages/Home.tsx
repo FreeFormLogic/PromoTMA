@@ -401,18 +401,7 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* AI Chat Minimize Button - Positioned to avoid menu overlap */}
-      {chatMinimized && (
-        <div className="fixed bottom-4 left-4 md:right-4 md:left-auto z-50">
-          <Button
-            onClick={() => setChatMinimized(false)}
-            className="rounded-full w-12 h-12 shadow-lg bg-primary hover:bg-primary/90"
-            title="Открыть AI чат"
-          >
-            <Bot className="w-5 h-5" />
-          </Button>
-        </div>
-      )}
+
     </div>
   );
 }

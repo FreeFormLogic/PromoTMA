@@ -9,7 +9,8 @@ import {
   LogOut,
   Menu,
   X,
-  Settings
+  Settings,
+  Bot
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -36,6 +37,7 @@ export function Navigation() {
     { path: "/industries", label: "Отрасли", icon: Building2 },
     { path: "/my-app", label: "Мое App", icon: Settings },
     { path: "/development", label: "Разработка", icon: Rocket },
+    { path: "/ai-chat", label: "AI-конструктор", icon: Bot },
     { path: "/partners", label: "Партнерам", icon: Handshake },
   ];
 
@@ -92,7 +94,7 @@ export function Navigation() {
       </header>
 
       {/* Кнопка меню внизу экрана для мобильных */}
-      <div className="md:hidden fixed bottom-4 right-4 z-40">
+      <div className="md:hidden fixed bottom-24 right-4 z-40">
         <Button 
           variant="default" 
           size="lg"

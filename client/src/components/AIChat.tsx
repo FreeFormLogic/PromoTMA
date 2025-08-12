@@ -195,7 +195,7 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
               <span className="text-sm font-medium text-primary">
                 Модуль {module.number}
               </span>
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 bg-blue-50 text-blue-700 border-blue-200">
                 {module.category}
               </Badge>
             </div>
@@ -316,8 +316,8 @@ export default function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized 
       </div>
 
       {/* Messages */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 p-3">
-        <div className="space-y-3">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 min-h-0">
+        <div className="space-y-3 min-h-[200px]">
           <AnimatePresence>
             {messages.map((message) => (
               <motion.div
