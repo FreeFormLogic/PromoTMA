@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, Loader2 } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Loader2, Minimize2, Maximize2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -28,9 +28,11 @@ interface BusinessAnalysis {
 interface AIChatProps {
   onAnalysisUpdate: (analysis: BusinessAnalysis | null) => void;
   onModulesUpdate: (modules: any[]) => void;
+  isMinimized?: boolean;
+  onToggleMinimize?: () => void;
 }
 
-export function AIChat({ onAnalysisUpdate, onModulesUpdate }: AIChatProps) {
+export function AIChat({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize }: AIChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -137,31 +139,42 @@ export function AIChat({ onAnalysisUpdate, onModulesUpdate }: AIChatProps) {
     }
   };
 
+  if (isMinimized) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50">
+        <Button
+          onClick={onToggleMinimize}
+          className="rounded-full w-12 h-12 shadow-lg"
+          size="sm"
+        >
+          <Bot className="w-5 h-5" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <Card className="h-[600px] flex flex-col bg-gradient-to-br from-background via-background to-primary/5 border-2 border-primary/10">
+    <Card className={`h-[600px] flex flex-col bg-gradient-to-br from-background via-background to-primary/5 border-2 border-primary/10 ${isMinimized ? 'w-80' : ''}`}>
       {/* Header */}
-      <div className="p-4 border-b bg-primary/5 backdrop-blur">
+      <div className="p-3 border-b bg-primary/5 backdrop-blur">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <div className="relative">
-              <Bot className="h-8 w-8 text-primary" />
-              <Sparkles className="h-4 w-4 text-yellow-500 absolute -top-1 -right-1 animate-pulse" />
+              <Bot className="h-6 w-6 text-primary" />
+              <Sparkles className="h-3 w-3 text-yellow-500 absolute -top-1 -right-1 animate-pulse" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg">AI Бизнес-консультант</h3>
-              <p className="text-xs text-muted-foreground">Powered by Claude Sonnet 4</p>
+              <h3 className="font-semibold text-sm">AI Консультант</h3>
+              <p className="text-xs text-muted-foreground">Подбор модулей</p>
             </div>
           </div>
-          {analysis && (
-            <div className="flex gap-2">
-              <Badge variant="secondary" className="animate-in slide-in-from-right">
-                {analysis.industry}
-              </Badge>
-              <Badge variant="outline" className="animate-in slide-in-from-right animation-delay-100">
-                {analysis.size} бизнес
-              </Badge>
-            </div>
-          )}
+          <div className="flex items-center gap-1">
+            {onToggleMinimize && (
+              <Button size="sm" variant="ghost" onClick={onToggleMinimize} className="h-6 w-6 p-0">
+                <Minimize2 className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
