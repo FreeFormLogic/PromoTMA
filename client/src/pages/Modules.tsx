@@ -20,7 +20,7 @@ import {
   Briefcase, Database, Webhook, Car, Wallet, Shield, X, Bell,
   CalendarCheck, Smartphone, Paintbrush, Users as Users3, GraduationCap as Education,
   DollarSign as Banknote, Phone, Monitor, Video as Clapperboard, Flag,
-  MessageCircle, Share2
+  MessageCircle, Share2, MapPin
 } from "lucide-react";
 import type { Module } from "@shared/schema";
 
@@ -58,7 +58,12 @@ const categories = [
   "БЕЗОПАСНОСТЬ",
   "КОММУНИКАЦИИ",
   "СОЦИАЛЬНАЯ КОММЕРЦИЯ",
-  "AI И АВТОМАТИЗАЦИЯ"
+  "AI И АВТОМАТИЗАЦИЯ",
+  "AI-АВАТАРЫ",
+  "ПАРСИНГ TELEGRAM",
+  "WEB3 & DEFI",
+  "ЛОКАЛЬНЫЕ СЕРВИСЫ",
+  "ТРЕНДОВЫЕ ИГРЫ"
 ];
 
 // Иконки для категорий
@@ -82,7 +87,12 @@ const categoryIcons: { [key: string]: any } = {
   "БЕЗОПАСНОСТЬ": Shield,
   "КОММУНИКАЦИИ": MessageCircle,
   "СОЦИАЛЬНАЯ КОММЕРЦИЯ": Share2,
-  "AI И АВТОМАТИЗАЦИЯ": Bot
+  "AI И АВТОМАТИЗАЦИЯ": Bot,
+  "AI-АВАТАРЫ": Users,
+  "ПАРСИНГ TELEGRAM": Search,
+  "WEB3 & DEFI": Coins,
+  "ЛОКАЛЬНЫЕ СЕРВИСЫ": MapPin,
+  "ТРЕНДОВЫЕ ИГРЫ": Trophy
 };
 
 // Цвета для категорий
@@ -106,7 +116,12 @@ const categoryColors: { [key: string]: string } = {
   "БЕЗОПАСНОСТЬ": "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300",
   "КОММУНИКАЦИИ": "bg-lime-100 text-lime-700 dark:bg-lime-900 dark:text-lime-300",
   "СОЦИАЛЬНАЯ КОММЕРЦИЯ": "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900 dark:text-fuchsia-300",
-  "AI И АВТОМАТИЗАЦИЯ": "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300"
+  "AI И АВТОМАТИЗАЦИЯ": "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300",
+  "AI-АВАТАРЫ": "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300",
+  "ПАРСИНГ TELEGRAM": "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
+  "WEB3 & DEFI": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+  "ЛОКАЛЬНЫЕ СЕРВИСЫ": "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
+  "ТРЕНДОВЫЕ ИГРЫ": "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300"
 };
 
 function parseKeyFeatures(keyFeatures: unknown): string[] {

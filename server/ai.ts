@@ -90,14 +90,19 @@ Module categories available:
 - CRM (82-96): Customer management, automation
 - B2B (97-111): Business processes, B2B tools
 - БРОНИРОВАНИЕ (112-126): Booking, scheduling systems
-- КОНТЕНТ И МЕДИА (137-150): Content management, media
 - ИГРЫ (127-136): Games, entertainment features
+- КОНТЕНТ И МЕДИА (137-150): Content management, media
 - ИНТЕГРАЦИИ (151-160): API integrations, external services
 - ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ (161-170): Additional business tools
 - АВТОМАТИЗАЦИЯ (171-180): Automation and workflows
 - ОТРАСЛЕВЫЕ РЕШЕНИЯ (181-190): Industry-specific solutions
 - АНАЛИТИКА (191-200): Advanced analytics and BI
 - БЕЗОПАСНОСТЬ (201-210): Security and compliance
+- AI-АВАТАРЫ (211-215): Digital avatars, virtual influencers, AI personas
+- ПАРСИНГ TELEGRAM (216-220): Social listening, competitive intelligence
+- WEB3 & DEFI (221-225): NFT, DeFi, blockchain, crypto wallets
+- ЛОКАЛЬНЫЕ СЕРВИСЫ (226-230): Geolocation, local delivery, offline business
+- ТРЕНДОВЫЕ ИГРЫ (231-235): Tap-to-earn, P2E gaming, social trading
 
 Always speak Russian and be extremely specific about how each module solves their exact business challenges.`;
 
