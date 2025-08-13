@@ -62,6 +62,9 @@ Preferred communication style: Simple, everyday language.
 - ✅ COMPLETED: Tourism companies now get proper modules: Hotel(169), Logistics(173), Booking(112), CRM(78)
 - ✅ COMPLETED: AI now receives ALL 260+ modules instead of limited 100-module subset
 - ✅ COMPLETED: Enhanced system prompts with explicit business-specific module restrictions
+- ✅ COMPLETED: Deleted modules 151 "API-конструктор без кода" and 155 "Визуальный инструмент для создания автоматизированных workflow" completely from database
+- ✅ COMPLETED: Enhanced AI system with persuasive sales-focused prompts to encourage app development purchases
+- ✅ COMPLETED: AI now emphasizes ROI, concrete financial benefits, and investment value rather than just features
 
 ### Module Database Expansion & Chat UX Fixes (January 13, 2025)
 - ✅ COMPLETED: Added 15 new E-commerce modules (221-235) expanding database to 244+ total modules
