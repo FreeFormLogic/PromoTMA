@@ -24,7 +24,7 @@ export default function AIChatPage() {
       <div className="p-3 border-b bg-primary/5 backdrop-blur flex items-center justify-between">
         <div className="flex flex-col">
           <h1 className="font-semibold text-lg">AI-конструктор приложений</h1>
-          <p className="text-xs text-gray-500 mt-1">Расскажите о бизнесе → Получите модули → Создайте приложение</p>
+          <p className="text-xs text-gray-500 mt-1">Создадим приложение вместе</p>
         </div>
         <div className="flex items-center gap-2">
           <Button 

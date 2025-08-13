@@ -64,10 +64,10 @@ const moduleImages: Record<string, string> = {
   "Лента новостей с алгоритмической подачей": newsFeedImage,
   "Встроенный блог с редактором и SEO": blogEditorImage,
   "Стриминг видео с адаптивным качеством": videoStreamingImage,
-  "Push-уведомления с персонализацией по поведению": notificationImage,
-  "Система скидок и промокодов": discountImage,
-  "Система статусов заказов с real-time трекингом": trackingImage,
-  "Интеграция с СДЭК, Boxberry, Почтой России": deliveryImage
+  "Push-уведомления с персонализацией по поведению": showcaseSystemImage,
+  "Система скидок и промокодов": showcaseSystemImage,
+  "Система статусов заказов с real-time трекингом": showcaseSystemImage,
+  "Интеграция с СДЭК, Boxberry, Почтой России": showcaseSystemImage
 };
 
 export function ModuleCard({ module }: ModuleCardProps) {
@@ -105,15 +105,25 @@ export function ModuleCard({ module }: ModuleCardProps) {
         <div className="space-y-2">
           <h4 className="text-xs font-medium text-gray-700">Возможности:</h4>
           <ul className="space-y-1">
-            {(module.features as string[]).slice(0, 3).map((feature, index) => (
-              <li key={index} className="text-xs text-gray-600 flex items-start">
-                <div className="w-1 h-1 bg-success rounded-full mt-1.5 mr-2 flex-shrink-0"></div>
-                <span className="line-clamp-1">{feature}</span>
-              </li>
-            ))}
-            {(module.features as string[]).length > 3 && (
+            {Array.isArray(module.keyFeatures) 
+              ? (module.keyFeatures as string[]).slice(0, 3).map((feature, index) => (
+                  <li key={index} className="text-xs text-gray-600 flex items-start">
+                    <div className="w-1 h-1 bg-success rounded-full mt-1.5 mr-2 flex-shrink-0"></div>
+                    <span className="line-clamp-1">{feature}</span>
+                  </li>
+                ))
+              : typeof module.keyFeatures === 'string' 
+                ? [module.keyFeatures].map((feature, index) => (
+                    <li key={index} className="text-xs text-gray-600 flex items-start">
+                      <div className="w-1 h-1 bg-success rounded-full mt-1.5 mr-2 flex-shrink-0"></div>
+                      <span className="line-clamp-1">{feature}</span>
+                    </li>
+                  ))
+                : []
+            }
+            {Array.isArray(module.keyFeatures) && (module.keyFeatures as string[]).length > 3 && (
               <li className="text-xs text-gray-400">
-                +{(module.features as string[]).length - 3} возможностей...
+                +{(module.keyFeatures as string[]).length - 3} возможностей...
               </li>
             )}
           </ul>

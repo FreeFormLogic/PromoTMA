@@ -376,12 +376,19 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     <div className="mt-3 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 rounded-lg border border-blue-200 dark:border-blue-800">
                       <div className="flex items-start gap-2">
                         <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                        <div 
-                          className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed"
-                          dangerouslySetInnerHTML={{
-                            __html: module.benefits.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                          }}
-                        />
+                        <div className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed text-left">
+                          {module.benefits.split(/(\*\*.*?\*\*)/).map((part, index) => {
+                            if (part.startsWith('**') && part.endsWith('**')) {
+                              const boldText = part.slice(2, -2);
+                              return (
+                                <strong key={index} className="font-semibold">
+                                  {boldText}
+                                </strong>
+                              );
+                            }
+                            return <span key={index}>{part}</span>;
+                          })}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -554,34 +561,43 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     return renderedParts;
   };
 
-  // Function to format text with bold support and preserve line breaks
+  // Function to format text with bold support, headers and preserve line breaks
   const formatText = (text: string) => {
     if (!text) return text;
     
-    // Split by **bold** patterns and render accordingly
-    const parts = text.split(/(\*\*.*?\*\*)/g);
+    // First handle headers (## text) and bold (**text**)
+    const lines = text.split('\n');
     
     return (
       <>
-        {parts.map((part, index) => {
-          if (part.startsWith('**') && part.endsWith('**')) {
-            const boldText = part.slice(2, -2);
+        {lines.map((line, lineIndex) => {
+          // Handle headers
+          if (line.startsWith('## ')) {
+            const headerText = line.slice(3);
             return (
-              <strong key={index} className="font-semibold text-gray-900 dark:text-gray-100">
-                {boldText}
-              </strong>
+              <h3 key={lineIndex} className="text-lg font-bold text-gray-900 dark:text-gray-100 mt-4 mb-2">
+                {headerText}
+              </h3>
             );
           }
-          // Handle line breaks
-          const lines = part.split('\n');
+          
+          // Handle bold text within the line
+          const parts = line.split(/(\*\*.*?\*\*)/g);
+          
           return (
-            <span key={index}>
-              {lines.map((line, lineIndex) => (
-                <span key={lineIndex}>
-                  {line}
-                  {lineIndex < lines.length - 1 && <br />}
-                </span>
-              ))}
+            <span key={lineIndex}>
+              {parts.map((part, partIndex) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                  const boldText = part.slice(2, -2);
+                  return (
+                    <strong key={partIndex} className="font-semibold text-gray-900 dark:text-gray-100">
+                      {boldText}
+                    </strong>
+                  );
+                }
+                return <span key={partIndex}>{part}</span>;
+              })}
+              {lineIndex < lines.length - 1 && <br />}
             </span>
           );
         })}
