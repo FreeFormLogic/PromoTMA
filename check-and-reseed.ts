@@ -16,9 +16,14 @@ async function checkAndReseed() {
     const industryCount = await db.select().from(industries);
     console.log(`🏭 Индустрий в базе: ${industryCount.length}`);
     
-    // Если данных нет или мало - пересоздаем
-    if (moduleCount.length < 60 || industryCount.length < 25) {
-      console.log('🚨 Обнаружена нехватка данных, запуск пересоздания...');
+    // Проверяем аргумент принудительного обновления или нехватку данных
+    const forceReseed = process.argv.includes('force');
+    if (forceReseed || moduleCount.length < allModulesData.length || industryCount.length < 25) {
+      if (forceReseed) {
+        console.log('🚨 Принудительное обновление базы данных...');
+      } else {
+        console.log('🚨 Обнаружена нехватка данных, запуск пересоздания...');
+      }
       
       // Очищаем таблицы
       await db.delete(modules);

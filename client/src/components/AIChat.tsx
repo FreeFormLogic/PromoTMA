@@ -544,7 +544,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
 
       {/* Messages */}
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 min-h-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        <div className="space-y-3 min-h-[100px]">
+        <div className="space-y-3 min-h-[100px] pb-4">
           <AnimatePresence>
             {messages.map((message) => {
               try {
@@ -564,7 +564,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       </div>
                     )}
                     <div
-                      className={`max-w-[80%] rounded-xl px-3 py-2 ${
+                      className={`max-w-[85%] rounded-xl px-3 py-2 ${
                         message.role === 'user'
                           ? 'bg-primary text-primary-foreground shadow-lg'
                           : 'bg-muted shadow-sm border border-border'
@@ -584,8 +584,8 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       
                       {/* Add clickable text after AI messages with modules */}
                       {message.role === 'assistant' && currentlyDisplayedModules && currentlyDisplayedModules.length > 0 && (
-                        <div className="mt-3 pt-2 border-t border-gray-200">
-                          <div className="flex flex-wrap gap-4 text-xs">
+                        <div className="mt-4 pt-3 border-t border-gray-300">
+                          <div className="flex flex-wrap gap-4 text-xs font-medium">
                             <span
                               onClick={() => {
                                 const userMessage: Message = {
@@ -643,7 +643,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                                 onClick={() => window.location.href = '/my-app'}
                                 className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline font-medium"
                               >
-                                Мое App
+                                Мое App ({selectedModules.length})
                               </span>
                             )}
                           </div>
@@ -690,73 +690,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
 
       {/* Input - Fixed positioning with proper width */}
       <div className="sticky bottom-0 bg-background border-t border-gray-200 z-10">
-        {/* Action buttons above input */}
-        <div className="p-2 pb-1 flex gap-2">
-          <Button
-            onClick={() => {
-              const userMessage: Message = {
-                id: Date.now().toString(),
-                role: 'user',
-                content: 'Предложи больше функций',
-                timestamp: new Date()
-              };
-              setMessages(prev => [...prev, userMessage]);
-              setIsLoading(true);
-              
-              setTimeout(async () => {
-                try {
-                  const response = await fetch('/api/ai/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      message: 'Предложи больше функций',
-                      context: {
-                        businessAnalysis: analysis,
-                        currentlyDisplayedModules: currentlyDisplayedModules || [],
-                        selectedModules: selectedModules
-                      }
-                    })
-                  });
-                  
-                  const data = await response.json();
-                  
-                  if (data.recommendations) {
-                    onModulesUpdate(data.recommendations);
-                  }
-                  
-                  const botMessage: Message = {
-                    id: Date.now().toString() + '_bot',
-                    role: 'assistant',
-                    content: data.message,
-                    timestamp: new Date()
-                  };
-                  
-                  setMessages(prev => [...prev, botMessage]);
-                } catch (error) {
-                  console.error('Chat error:', error);
-                } finally {
-                  setIsLoading(false);
-                }
-              }, 500);
-            }}
-            variant="outline"
-            size="sm"
-            className="text-xs px-3 py-1.5 h-7 text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
-          >
-            Еще функции
-          </Button>
-          
-          {selectedModules.length > 0 && (
-            <Button
-              onClick={() => window.location.href = '/my-app'}
-              variant="outline"
-              size="sm"
-              className="text-xs px-3 py-1.5 h-7 text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
-            >
-              Мое App
-            </Button>
-          )}
-        </div>
+
         
         {/* Input field */}
         <div className="p-2 pt-1 flex gap-2 w-full max-w-full">
