@@ -105,18 +105,91 @@ export default function MyApp() {
     'AI И АВТОМАТИЗАЦИЯ': 'bg-blue-100 text-blue-800',
   };
 
-  // Generate generic Russian app name
+  // Get business context from localStorage
+  const getBusinessContext = () => {
+    try {
+      const chatData = localStorage.getItem('aiChatMessages');
+      if (chatData) {
+        const messages = JSON.parse(chatData);
+        const userMessages = messages.filter((m: any) => m.role === 'user');
+        if (userMessages.length > 0) {
+          return userMessages[0].content.toLowerCase();
+        }
+      }
+    } catch (e) {
+      console.log('No chat context found');
+    }
+    return '';
+  };
+
+  // Generate personalized app name based on business context
   const generateAppName = () => {
     if (uniqueModules.length === 0) return "Мое Mini App";
+    
+    const context = getBusinessContext();
+    const categories = Array.from(new Set(uniqueModules.map(m => m.category)));
+    const isIndustrySpecific = uniqueModules.some(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
+    
+    if (isIndustrySpecific) {
+      const industryModule = uniqueModules.find(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
+      if (industryModule?.name.includes("салон")) return "Салон Красоты App";
+      if (industryModule?.name.includes("ресторан")) return "Ресторан Manager";
+      if (industryModule?.name.includes("фитнес")) return "Фитнес Клуб App";
+      if (industryModule?.name.includes("отель")) return "Отель Booking";
+      if (industryModule?.name.includes("авто")) return "Автосервис App";
+      if (industryModule?.name.includes("стома")) return "Стоматология App";
+      if (industryModule?.name.includes("юрид")) return "Юридические Услуги";
+      if (industryModule?.name.includes("логист")) return "Логистика App";
+      if (industryModule?.name.includes("образов")) return "Образовательный Центр";
+      if (industryModule?.name.includes("медкл")) return "Медицинская Клиника";
+    }
+    
+    // Business context-based names
+    if (context.includes("собак") || context.includes("питомц")) return "Питомцы Care";
+    if (context.includes("кальян")) return "Кальянная App";
+    if (context.includes("каннабис") || context.includes("марихуан")) return "Dispensary App";
+    if (context.includes("ресторан") || context.includes("кафе")) return "Ресторан App";
+    if (context.includes("магазин") || context.includes("продаж")) return "Торговля App";
+    
+    if (categories.includes("E-COMMERCE")) return "Интернет Магазин";
+    if (categories.includes("ОБРАЗОВАНИЕ")) return "Обучение App";
+    if (categories.includes("ФИНТЕХ")) return "Финансы App";
+    if (categories.includes("CRM")) return "Клиенты App";
+    if (categories.includes("МАРКЕТИНГ")) return "Маркетинг App";
     
     return "Бизнес Приложение";
   };
 
-  // Generate generic AI description
+  // Generate personalized AI description
   const generateAIDescription = () => {
     if (uniqueModules.length === 0) return "Добавьте модули через AI-конструктор для создания персонального описания приложения";
     
-    return `Создаем универсальное Telegram Mini App, объединяющее ${uniqueModules.length} специально подобранных модулей. Комплексное решение для автоматизации и роста вашего бизнеса.`;
+    const context = getBusinessContext();
+    const categories = Array.from(new Set(uniqueModules.map(m => m.category)));
+    const isIndustrySpecific = uniqueModules.some(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
+    
+    if (isIndustrySpecific) {
+      const industryModule = uniqueModules.find(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
+      if (industryModule?.name.includes("салон")) {
+        return "Создаем комплексное решение для салона красоты с возможностями онлайн-записи, управления клиентской базой и программой лояльности. Ваше приложение поможет автоматизировать бизнес-процессы и увеличить доходы.";
+      } else if (industryModule?.name.includes("ресторан")) {
+        return "Разрабатываем мощную систему управления рестораном с интегрированными решениями для заказов, доставки и лояльности клиентов. Приложение оптимизирует операции и повысит прибыльность.";
+      }
+    }
+    
+    // Business context-based descriptions
+    if (context.includes("собак") || context.includes("питомц")) {
+      return "Создаем специализированное приложение для ухода за питомцами с системой записи, управления клиентами и удобным каталогом услуг. Автоматизируем ваш бизнес и улучшаем сервис для клиентов.";
+    }
+    if (context.includes("кальян")) {
+      return "Разрабатываем приложение для кальянной с системой бронирования, меню, программой лояльности и мультиязычной поддержкой для туристов. Увеличиваем поток клиентов и доходы.";
+    }
+    
+    if (categories.includes("E-COMMERCE")) {
+      return "Создаем мощную eCommerce-платформу с интегрированными решениями для продаж, маркетинга и аналитики. Ваше приложение станет центром цифрового бизнеса.";
+    }
+    
+    return `Создаем персонализированное Telegram Mini App, объединяющее ${uniqueModules.length} специально подобранных модулей. Комплексное решение для автоматизации и роста вашего бизнеса.`;
   };
 
   return (

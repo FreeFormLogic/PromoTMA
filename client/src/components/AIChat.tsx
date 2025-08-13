@@ -110,11 +110,45 @@ class ChatErrorBoundary extends ReactComponent<{children: React.ReactNode}, {has
 }
 
 function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize, currentlyDisplayedModules = [], isFullScreen = false }: AIChatProps & { isFullScreen?: boolean }) {
-  const [messages, setMessages] = useState<Message[]>(persistentMessages);
+  // Initialize from localStorage first
+  const initializeFromStorage = () => {
+    try {
+      const savedMessages = localStorage.getItem('aiChatMessages');
+      const savedSelectedModules = localStorage.getItem('selectedModules');
+      
+      if (savedMessages) {
+        const parsed = JSON.parse(savedMessages);
+        persistentMessages = parsed;
+        return parsed;
+      } else {
+        const defaultMessage = [{
+          id: '1',
+          role: 'assistant' as const,
+          content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
+          timestamp: new Date()
+        }];
+        persistentMessages = defaultMessage;
+        localStorage.setItem('aiChatMessages', JSON.stringify(defaultMessage));
+        return defaultMessage;
+      }
+    } catch (e) {
+      console.error('Failed to load from storage:', e);
+      return persistentMessages;
+    }
+  };
+
+  const [messages, setMessages] = useState<Message[]>(() => initializeFromStorage());
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<BusinessAnalysis | null>(null);
-  const [selectedModules, setSelectedModules] = useState<Module[]>([]);
+  const [selectedModules, setSelectedModules] = useState<Module[]>(() => {
+    try {
+      const saved = localStorage.getItem('selectedModules');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [chatModules, setChatModules] = useState<Module[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -181,11 +215,18 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       const updatedModules = savedModules.filter((m: Module) => m.id !== module.id);
       localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
     } else {
-      setSelectedModules(prev => [...prev, module]);
-      // Save to localStorage for "Мое App" section
-      const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-      const updatedModules = [...savedModules, module];
-      localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+      // Prevent duplicates by double-checking
+      const alreadyExists = selectedModules.find(m => m.id === module.id);
+      if (!alreadyExists) {
+        setSelectedModules(prev => [...prev, module]);
+        // Save to localStorage for "Мое App" section
+        const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+        const moduleExists = savedModules.find((m: Module) => m.id === module.id);
+        if (!moduleExists) {
+          const updatedModules = [...savedModules, module];
+          localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+        }
+      }
     }
   };
 
@@ -202,6 +243,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     persistentMessages = updatedMessages;
+    localStorage.setItem('aiChatMessages', JSON.stringify(updatedMessages));
     setInput('');
     setIsLoading(true);
 
@@ -232,6 +274,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       const finalMessages = [...updatedMessages, assistantMessage];
       setMessages(finalMessages);
       persistentMessages = finalMessages;
+      localStorage.setItem('aiChatMessages', JSON.stringify(finalMessages));
 
       // If AI recommended specific modules, get them and add to chat display
       if (responseData.recommendedModules && responseData.recommendedModules.length > 0 && allModules) {
@@ -297,7 +340,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     return (
       <>
         <Card 
-          className={`group cursor-pointer transition-all duration-300 border ${
+          className={`group cursor-pointer transition-all duration-300 border mb-3 ${
             isSelected 
               ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
               : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-600'
@@ -573,6 +616,37 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline font-medium"
               >
                 Мое App ({selectedModules.length})
+              </span>
+            )}
+            
+            {/* Reset button - not shown after first message */}
+            {messages.length > 2 && (
+              <span
+                onClick={() => {
+                  if (window.confirm('Вы действительно хотите сбросить весь чат?\n\n☑️ Также сбросить выбранные модули?')) {
+                    // Reset chat
+                    const welcomeMessage = {
+                      id: '1',
+                      role: 'assistant' as const,
+                      content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
+                      timestamp: new Date()
+                    };
+                    
+                    setMessages([welcomeMessage]);
+                    persistentMessages = [welcomeMessage];
+                    setChatModules([]);
+                    
+                    // Clear selected modules too
+                    setSelectedModules([]);
+                    localStorage.removeItem('selectedModules');
+                    localStorage.removeItem('aiChatMessages');
+                    
+                    onModulesUpdate([]);
+                  }
+                }}
+                className="text-red-600 hover:text-red-700 cursor-pointer hover:underline font-medium"
+              >
+                Сбросить
               </span>
             )}
           </div>
