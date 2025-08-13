@@ -35,7 +35,7 @@ export function Navigation() {
     { path: "/", label: "Главная", icon: MessageSquare },
     { path: "/modules", label: "Функционал", icon: Puzzle },
     { path: "/industries", label: "Отрасли", icon: Building2 },
-    { path: "/ai-chat", label: "AI-конструктор", icon: Bot, highlighted: true },
+    { path: "/ai-chat", label: "AI-конструктор", icon: Bot },
     { path: "/my-app", label: "Мое App", icon: Settings },
     { path: "/development", label: "Ваше преимущество", icon: Rocket },
     { path: "/partners", label: "Партнерам", icon: Handshake },
@@ -76,8 +76,8 @@ export function Navigation() {
                     <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer ${
                       isActive 
                         ? 'bg-blue-600 text-white' 
-                        : item.highlighted
-                        ? 'bg-blue-100 text-blue-700 border-2 border-blue-300 font-semibold'
+                        : item.path === '/ai-chat'
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
                         : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                     }`}>
                       <Icon className="w-4 h-4" />
@@ -109,8 +109,13 @@ export function Navigation() {
         
       {/* Mobile Menu - снизу экрана */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 shadow-lg rounded-t-xl">
-          <div className="px-4 py-6 space-y-3">
+        <>
+          <div 
+            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 shadow-lg rounded-t-xl">
+            <div className="px-4 py-6 space-y-3">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location === item.path;
@@ -138,8 +143,8 @@ export function Navigation() {
                     className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors cursor-pointer ${
                       isActive 
                         ? 'bg-blue-600 text-white' 
-                        : item.highlighted
-                        ? 'bg-blue-100 text-blue-700 border-2 border-blue-300 font-semibold'
+                        : item.path === '/ai-chat'
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
                         : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -152,8 +157,9 @@ export function Navigation() {
             })}
             
             {/* Убрали кнопку "Выйти" из мобильного меню */}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );

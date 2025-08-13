@@ -166,7 +166,7 @@ function CompactModuleCard({ module }: { module: Module }) {
                 <IconComponent className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 leading-tight break-words hyphens-auto">
+                <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 leading-tight break-words hyphens-auto overflow-visible whitespace-normal">
                   {module.name}
                 </h3>
                 <Badge className={`text-xs mt-1 ${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>

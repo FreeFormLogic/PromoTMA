@@ -19,7 +19,7 @@ import {
 
 export default function Development() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white">
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
@@ -40,8 +40,17 @@ export default function Development() {
               Создайте экосистему для вашего бизнеса внутри Telegram, экономьте миллионы на разработке 
               и получайте прямой доступ к 900+ миллионам пользователей.
             </p>
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-4">
-              Получить бесплатную консультацию
+            <Button 
+              size="lg" 
+              className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-4"
+              onClick={() => {
+                const message = encodeURIComponent(
+                  "Привет! Интересует разработка Telegram Mini App. Рассмотрел каталог модулей на вашей платформе. Можете рассказать подробнее о возможностях и стоимости?"
+                );
+                window.open(`https://t.me/balilegend?text=${message}`, '_blank');
+              }}
+            >
+              Написать нам
             </Button>
           </motion.div>
         </div>
@@ -376,9 +385,18 @@ export default function Development() {
               Telegram Mini Apps — главный тренд 2024-2025 годов. Мы предлагаем быстрый старт благодаря 
               библиотеке из 220+ готовых модулей и гарантируем результат, фиксируя KPI в договоре.
             </p>
-            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-12 py-4">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-12 py-4"
+              onClick={() => {
+                const message = encodeURIComponent(
+                  "Привет! Интересует разработка Telegram Mini App. Рассмотрел каталог модулей на вашей платформе. Можете рассказать подробнее о возможностях и стоимости?"
+                );
+                window.open(`https://t.me/balilegend?text=${message}`, '_blank');
+              }}
+            >
               <MessageCircle className="w-6 h-6 mr-3" />
-              Обсудить мой проект
+              Написать нам
               <ArrowRight className="w-6 h-6 ml-3" />
             </Button>
           </motion.div>
