@@ -465,8 +465,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
 
     // Split content by [MODULE:NUMBER] pattern and replace with inline module cards
     const parts = content.split(/(\[MODULE:\d+\])/g);
+    const hasModules = parts.some(part => part.match(/\[MODULE:\d+\]/));
     
-    return parts.map((part, index) => {
+    const renderedParts = parts.map((part, index) => {
       const moduleMatch = part.match(/\[MODULE:(\d+)\]/);
       if (moduleMatch) {
         const moduleNumber = parseInt(moduleMatch[1]);
@@ -483,6 +484,78 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       }
       return <span key={index}>{formatText(part)}</span>;
     });
+
+    // Add clickable text at the end if this message contains modules
+    if (hasModules && currentlyDisplayedModules && currentlyDisplayedModules.length > 0) {
+      renderedParts.push(
+        <div key="actions" className="mt-4 pt-3 border-t border-gray-200">
+          <div className="flex flex-wrap gap-4 text-xs">
+            <span
+              onClick={() => {
+                const userMessage: Message = {
+                  id: Date.now().toString(),
+                  role: 'user',
+                  content: 'Предложи больше функций',
+                  timestamp: new Date()
+                };
+                setMessages(prev => [...prev, userMessage]);
+                setIsLoading(true);
+                
+                setTimeout(async () => {
+                  try {
+                    const response = await fetch('/api/ai/chat', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        message: 'Предложи больше функций',
+                        context: {
+                          businessAnalysis: analysis,
+                          currentlyDisplayedModules: currentlyDisplayedModules || [],
+                          selectedModules: selectedModules
+                        }
+                      })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.recommendations) {
+                      onModulesUpdate(data.recommendations);
+                    }
+                    
+                    const botMessage: Message = {
+                      id: Date.now().toString() + '_bot',
+                      role: 'assistant',
+                      content: data.message,
+                      timestamp: new Date()
+                    };
+                    
+                    setMessages(prev => [...prev, botMessage]);
+                  } catch (error) {
+                    console.error('Chat error:', error);
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }, 500);
+              }}
+              className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline font-medium"
+            >
+              Больше функций
+            </span>
+            
+            {selectedModules.length > 0 && (
+              <span
+                onClick={() => window.location.href = '/my-app'}
+                className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline font-medium"
+              >
+                Мое App ({selectedModules.length})
+              </span>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    return renderedParts;
   };
 
   // Function to format text with bold support and preserve line breaks
@@ -581,74 +654,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                           minute: '2-digit' 
                         })}
                       </p>
-                      
-                      {/* Add clickable text after AI messages with modules */}
-                      {message.role === 'assistant' && currentlyDisplayedModules && currentlyDisplayedModules.length > 0 && (
-                        <div className="mt-4 pt-3 border-t border-gray-300">
-                          <div className="flex flex-wrap gap-4 text-xs font-medium">
-                            <span
-                              onClick={() => {
-                                const userMessage: Message = {
-                                  id: Date.now().toString(),
-                                  role: 'user',
-                                  content: 'Предложи больше функций',
-                                  timestamp: new Date()
-                                };
-                                setMessages(prev => [...prev, userMessage]);
-                                setIsLoading(true);
-                                
-                                setTimeout(async () => {
-                                  try {
-                                    const response = await fetch('/api/ai/chat', {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({
-                                        message: 'Предложи больше функций',
-                                        context: {
-                                          businessAnalysis: analysis,
-                                          currentlyDisplayedModules: currentlyDisplayedModules || [],
-                                          selectedModules: selectedModules
-                                        }
-                                      })
-                                    });
-                                    
-                                    const data = await response.json();
-                                    
-                                    if (data.recommendations) {
-                                      onModulesUpdate(data.recommendations);
-                                    }
-                                    
-                                    const botMessage: Message = {
-                                      id: Date.now().toString() + '_bot',
-                                      role: 'assistant',
-                                      content: data.message,
-                                      timestamp: new Date()
-                                    };
-                                    
-                                    setMessages(prev => [...prev, botMessage]);
-                                  } catch (error) {
-                                    console.error('Chat error:', error);
-                                  } finally {
-                                    setIsLoading(false);
-                                  }
-                                }, 500);
-                              }}
-                              className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline font-medium"
-                            >
-                              Еще функции
-                            </span>
-                            
-                            {selectedModules.length > 0 && (
-                              <span
-                                onClick={() => window.location.href = '/my-app'}
-                                className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline font-medium"
-                              >
-                                Мое App ({selectedModules.length})
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
+
                       
 
                     </div>
