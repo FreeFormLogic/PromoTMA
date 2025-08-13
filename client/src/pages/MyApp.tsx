@@ -38,8 +38,11 @@ export default function MyApp() {
   };
 
   const generatePrototype = () => {
-    setShowPrototype(true);
-    // This would trigger prototype generation
+    // Redirect to @balilegend for prototype creation
+    const message = encodeURIComponent(
+      `Привет! Хочу создать прототип Telegram Mini App. Выбрал ${selectedModules.length} модулей:\n\n${selectedModules.map(m => `• ${m.name} (${m.category})`).join('\n')}\n\nМожете создать прототип на основе этих модулей?`
+    );
+    window.open(`https://t.me/balilegend?text=${message}`, '_blank');
   };
 
   const categories = selectedModules.reduce((acc, module) => {
@@ -50,7 +53,7 @@ export default function MyApp() {
     return acc;
   }, {} as Record<string, Module[]>);
 
-  const categoryColors = {
+  const categoryColors: Record<string, string> = {
     'E-COMMERCE': 'bg-blue-100 text-blue-800',
     'МАРКЕТИНГ': 'bg-green-100 text-green-800',
     'ВОВЛЕЧЕНИЕ': 'bg-purple-100 text-purple-800',
@@ -61,13 +64,18 @@ export default function MyApp() {
     'ОТРАСЛЕВЫЕ РЕШЕНИЯ': 'bg-red-100 text-red-800',
     'АВТОМАТИЗАЦИЯ': 'bg-cyan-100 text-cyan-800',
     'КОММУНИКАЦИИ': 'bg-teal-100 text-teal-800',
+    'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ': 'bg-gray-100 text-gray-800',
+    'АНАЛИТИКА': 'bg-purple-100 text-purple-800',
+    'БЕЗОПАСНОСТЬ': 'bg-red-100 text-red-800',
+    'СОЦИАЛЬНАЯ КОММЕРЦИЯ': 'bg-pink-100 text-pink-800',
+    'AI И АВТОМАТИЗАЦИЯ': 'bg-blue-100 text-blue-800',
   };
 
   // Generate AI description based on selected modules
   const generateAIDescription = () => {
     if (selectedModules.length === 0) return "Добавьте модули через AI-конструктор для создания персонального описания приложения";
     
-    const categories = [...new Set(selectedModules.map(m => m.category))];
+    const categories = Array.from(new Set(selectedModules.map(m => m.category)));
     const isIndustrySpecific = selectedModules.some(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
     
     if (isIndustrySpecific) {
@@ -158,9 +166,9 @@ export default function MyApp() {
               </Card>
               <Card className="p-4 text-center">
                 <div className="text-2xl font-bold text-purple-600 mb-1">
-                  {selectedModules.length >= 3 ? 'Готов' : 'В работе'}
+                  В работе
                 </div>
-                <div className="text-sm text-gray-600">Статус прототипа</div>
+                <div className="text-sm text-gray-600">Статус</div>
               </Card>
               <Card className="p-4 text-center">
                 <div className="text-2xl font-bold text-orange-600 mb-1">

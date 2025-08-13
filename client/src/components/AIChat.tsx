@@ -53,7 +53,7 @@ let persistentMessages: Message[] = [
   {
     id: '1',
     role: 'assistant',
-    content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3+ модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
+    content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
     timestamp: new Date()
   }
 ];
@@ -656,6 +656,61 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             ) : (
               <Send className="h-3.5 w-3.5" />
             )}
+          </Button>
+        </div>
+        
+        {/* Suggest More Button */}
+        <div className="px-3 pb-2">
+          <Button
+            onClick={() => {
+              const userMessage: Message = {
+                id: Date.now().toString(),
+                role: 'user',
+                content: 'предложить еще',
+                timestamp: new Date()
+              };
+              setMessages(prev => [...prev, userMessage]);
+              setIsLoading(true);
+              
+              setTimeout(async () => {
+                try {
+                  const response = await apiRequest('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      message: 'предложить еще',
+                      context: {
+                        businessAnalysis: currentAnalysis,
+                        currentlyDisplayedModules: currentlyDisplayedModules || [],
+                        selectedModules: selectedModules
+                      }
+                    })
+                  });
+                  
+                  if (response.recommendations) {
+                    onModulesUpdate(response.recommendations);
+                  }
+                  
+                  const botMessage: Message = {
+                    id: Date.now().toString() + '_bot',
+                    role: 'assistant',
+                    content: response.message,
+                    timestamp: new Date()
+                  };
+                  
+                  setMessages(prev => [...prev, botMessage]);
+                } catch (error) {
+                  console.error('Chat error:', error);
+                } finally {
+                  setIsLoading(false);
+                }
+              }, 500);
+            }}
+            variant="outline" 
+            size="sm"
+            className="w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
+          >
+            предложить еще
           </Button>
         </div>
 

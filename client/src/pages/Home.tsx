@@ -445,18 +445,6 @@ export default function Home() {
                   <MessageSquare className="w-4 h-4 mr-2" />
                   Telegram Mini Apps
                 </div>
-                <Button
-                  onClick={() => {
-                    const message = encodeURIComponent(
-                      "Привет! Интересует разработка Telegram Mini App. Рассмотрел каталог модулей на вашей платформе. Можете рассказать подробнее о возможностях и стоимости?"
-                    );
-                    window.open(`https://t.me/balilegend?text=${message}`, '_blank');
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-4 rounded-lg transition-colors"
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Написать нам
-                </Button>
               </div>
             </div>
             

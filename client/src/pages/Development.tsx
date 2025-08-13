@@ -382,7 +382,7 @@ export default function Development() {
           >
             <h2 className="text-4xl font-bold mb-6">Действуйте сейчас, пока это делают ваши конкуренты</h2>
             <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-              Telegram Mini Apps — главный тренд 2024-2025 годов. Мы предлагаем быстрый старт благодаря 
+              Telegram Mini Apps — главный тренд 2025 годов. Мы предлагаем быстрый старт благодаря 
               библиотеке из 220+ готовых модулей и гарантируем результат, фиксируя KPI в договоре.
             </p>
             <Button 
