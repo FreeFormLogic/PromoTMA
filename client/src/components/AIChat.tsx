@@ -53,7 +53,7 @@ let persistentMessages: Message[] = [
   {
     id: '1',
     role: 'assistant',
-    content: 'Привет! Я помогу собрать приложение для вашего бизнеса. Расскажите, чем вы занимаетесь и какие задачи хотите решить с помощью Telegram Mini Apps?',
+    content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3+ модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
     timestamp: new Date()
   }
 ];
@@ -299,7 +299,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         <Card 
           className={`group cursor-pointer transition-all duration-300 border ${
             isSelected 
-              ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
+              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
               : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-600'
           } hover:-translate-y-1 hover:shadow-lg`}
           onClick={() => setIsModalOpen(true)}
@@ -315,7 +315,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                   {module.name}
                 </h3>
                 <Badge className={`text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
-                  #{module.number}
+                  {module.category}
                 </Badge>
               </div>
             </div>
@@ -340,7 +340,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                   }}
                   className={`w-6 h-6 p-0 ${
                     isSelected 
-                      ? 'text-green-600 hover:text-green-700' 
+                      ? 'text-blue-600 hover:text-blue-700' 
                       : 'text-gray-400 hover:text-blue-600'
                   }`}
                 >
@@ -413,7 +413,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     }}
                     className={`w-full ${
                       isSelected 
-                        ? 'bg-green-600 hover:bg-green-700 text-white' 
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white' 
                         : 'bg-blue-600 hover:bg-blue-700 text-white'
                     }`}
                   >
@@ -490,17 +490,21 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     // Split by **bold** patterns and render accordingly
     const parts = text.split(/(\*\*.*?\*\*)/g);
     
-    return parts.map((part, index) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        const boldText = part.slice(2, -2);
-        return (
-          <strong key={index} className="font-semibold text-gray-900 dark:text-gray-100">
-            {boldText}
-          </strong>
-        );
-      }
-      return part;
-    });
+    return (
+      <>
+        {parts.map((part, index) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            const boldText = part.slice(2, -2);
+            return (
+              <strong key={index} className="font-semibold text-gray-900 dark:text-gray-100">
+                {boldText}
+              </strong>
+            );
+          }
+          return <span key={index}>{part}</span>;
+        })}
+      </>
+    );
   };
 
   if (isMinimized) {
@@ -513,7 +517,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           <Bot className="w-6 h-6" />
         </Button>
         {selectedModules.length > 0 && (
-          <Badge className="absolute -top-2 -right-2 bg-green-500 text-white">
+          <Badge className="absolute -top-2 -right-2 bg-blue-500 text-white">
             {selectedModules.length}
           </Badge>
         )}

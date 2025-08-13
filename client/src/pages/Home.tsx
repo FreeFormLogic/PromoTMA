@@ -168,15 +168,15 @@ export default function Home() {
                 <h3 className="font-semibold mb-4 text-lg">Ключевые преимущества:</h3>
                 <ul className="space-y-2 text-blue-100">
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-green-300 mr-2" />
+                    <Check className="w-4 h-4 text-blue-300 mr-2" />
                     260+ готовых модулей
                   </li>
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-green-300 mr-2" />
+                    <Check className="w-4 h-4 text-blue-300 mr-2" />
                     Интеграция популярных платежей: Международные, Российские, Крипта, GoPay
                   </li>
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-green-300 mr-2" />
+                    <Check className="w-4 h-4 text-blue-300 mr-2" />
                     900+ млн пользователей Telegram
                   </li>
                 </ul>
@@ -216,15 +216,15 @@ export default function Home() {
                 <div className="text-2xl font-bold mb-1">От $300</div>
                 <div className="text-xs opacity-90">Стартовая цена</div>
               </div>
-              <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-4 rounded-lg text-center">
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-4 rounded-lg text-center">
                 <div className="text-2xl font-bold mb-1">260+</div>
                 <div className="text-xs opacity-90">Модулей</div>
               </div>
-              <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-4 rounded-lg text-center">
+              <div className="bg-gradient-to-br from-blue-700 to-blue-800 text-white p-4 rounded-lg text-center">
                 <div className="text-2xl font-bold mb-1">1-5</div>
                 <div className="text-xs opacity-90">Дней до запуска</div>
               </div>
-              <div className="bg-gradient-to-br from-green-600 to-green-700 text-white p-4 rounded-lg text-center">
+              <div className="bg-gradient-to-br from-blue-800 to-blue-900 text-white p-4 rounded-lg text-center">
                 <div className="text-2xl font-bold mb-1">24/7</div>
                 <div className="text-xs opacity-90">Поддержка</div>
               </div>
@@ -282,40 +282,40 @@ export default function Home() {
             </Card>
 
             {/* Telegram Mini Apps */}
-            <Card className="p-6 border-2 border-green-200 bg-green-50">
+            <Card className="p-6 border-2 border-blue-200 bg-blue-50">
               <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
                   <Check className="w-6 h-6 text-white" />
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-green-700 text-center mb-4">Telegram Mini Apps</h3>
+              <h3 className="text-xl font-bold text-blue-700 text-center mb-4">Telegram Mini Apps</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">💰</span>
                   <div>
-                    <div className="font-semibold text-green-700">От $300 + от $15/месяц</div>
-                    <div className="text-sm text-green-600">Доступные цены для любого бизнеса</div>
+                    <div className="font-semibold text-blue-700">От $300 + от $15/месяц</div>
+                    <div className="text-sm text-blue-600">Доступные цены для любого бизнеса</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">⚡</span>
                   <div>
-                    <div className="font-semibold text-green-700">1-5 дней запуск</div>
-                    <div className="text-sm text-green-600">Мгновенный результат</div>
+                    <div className="font-semibold text-blue-700">1-5 дней запуск</div>
+                    <div className="text-sm text-blue-600">Мгновенный результат</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">💬</span>
                   <div>
-                    <div className="font-semibold text-green-700">Работает внутри Telegram</div>
-                    <div className="text-sm text-green-600">Без установки приложений</div>
+                    <div className="font-semibold text-blue-700">Работает внутри Telegram</div>
+                    <div className="text-sm text-blue-600">Без установки приложений</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">👥</span>
                   <div>
-                    <div className="font-semibold text-green-700">900+ млн готовых пользователей</div>
-                    <div className="text-sm text-green-600">Огромная аудитория в Telegram</div>
+                    <div className="font-semibold text-blue-700">900+ млн готовых пользователей</div>
+                    <div className="text-sm text-blue-600">Огромная аудитория в Telegram</div>
                   </div>
                 </div>
               </div>
@@ -396,26 +396,26 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center mb-3">
-                  <Check className="w-5 h-5 text-green-600 mr-2" />
-                  <h3 className="font-semibold text-green-800">Telegram Mini Apps</h3>
+                  <Check className="w-5 h-5 text-blue-600 mr-2" />
+                  <h3 className="font-semibold text-blue-800">Telegram Mini Apps</h3>
                 </div>
-                <div className="space-y-2 text-sm text-green-700">
+                <div className="space-y-2 text-sm text-blue-700">
                   <div className="flex items-center">
-                    <DollarSign className="w-4 h-4 text-green-600 mr-2" />
+                    <DollarSign className="w-4 h-4 text-blue-600 mr-2" />
                     От $300 + от $15/месяц
                   </div>
                   <div className="flex items-center">
-                    <Zap className="w-4 h-4 text-green-600 mr-2" />
+                    <Zap className="w-4 h-4 text-blue-600 mr-2" />
                     1-5 дней запуск
                   </div>
                   <div className="flex items-center">
-                    <MessageSquare className="w-4 h-4 text-green-600 mr-2" />
+                    <MessageSquare className="w-4 h-4 text-blue-600 mr-2" />
                     Работает внутри Telegram
                   </div>
                   <div className="flex items-center">
-                    <Users className="w-4 h-4 text-green-600 mr-2" />
+                    <Users className="w-4 h-4 text-blue-600 mr-2" />
                     900+ млн готовых пользователей
                   </div>
                 </div>
@@ -440,15 +440,23 @@ export default function Home() {
             
             <div>
               <h4 className="font-semibold mb-4">Контакты</h4>
-              <div className="space-y-2 text-gray-400 text-sm">
+              <div className="space-y-3 text-gray-400 text-sm">
                 <div className="flex items-center">
                   <MessageSquare className="w-4 h-4 mr-2" />
                   Telegram Mini Apps
                 </div>
-                <div className="flex items-center">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Только через Telegram
-                </div>
+                <Button
+                  onClick={() => {
+                    const message = encodeURIComponent(
+                      "Привет! Интересует разработка Telegram Mini App. Рассмотрел каталог модулей на вашей платформе. Можете рассказать подробнее о возможностях и стоимости?"
+                    );
+                    window.open(`https://t.me/balilegend?text=${message}`, '_blank');
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-4 rounded-lg transition-colors"
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Связаться с @balilegend
+                </Button>
               </div>
             </div>
             
@@ -458,7 +466,7 @@ export default function Home() {
                 <li>✓ 260+ готовых модулей</li>
 
                 <li>✓ Запуск за 1-5 дней</li>
-                <li>✓ $300 вместо $10,000</li>
+                <li>✓ От $300 вместо $10,000</li>
               </ul>
             </div>
           </div>

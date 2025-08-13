@@ -35,9 +35,9 @@ export function Navigation() {
     { path: "/", label: "Главная", icon: MessageSquare },
     { path: "/modules", label: "Функционал", icon: Puzzle },
     { path: "/industries", label: "Отрасли", icon: Building2 },
+    { path: "/ai-chat", label: "AI-конструктор", icon: Bot, highlighted: true },
     { path: "/my-app", label: "Мое App", icon: Settings },
     { path: "/development", label: "Ваше преимущество", icon: Rocket },
-    { path: "/ai-chat", label: "AI-конструктор", icon: Bot },
     { path: "/partners", label: "Партнерам", icon: Handshake },
   ];
 
@@ -48,7 +48,7 @@ export function Navigation() {
           <nav className="flex items-center justify-between h-16">
             <Link href="/">
               <div className="flex items-center space-x-3 cursor-pointer">
-                <MessageSquare className="text-green-500 text-2xl" />
+                <MessageSquare className="text-blue-500 text-2xl" />
                 <h1 className="text-xl font-semibold text-gray-900">Mini Apps Directory</h1>
               </div>
             </Link>
@@ -75,8 +75,10 @@ export function Navigation() {
                   <Link key={item.path} href={item.path}>
                     <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer ${
                       isActive 
-                        ? 'bg-telegram text-white' 
-                        : 'text-gray-700 hover:text-telegram hover:bg-telegram/10'
+                        ? 'bg-blue-600 text-white' 
+                        : item.highlighted
+                        ? 'bg-blue-100 text-blue-700 border-2 border-blue-300 font-semibold'
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                     }`}>
                       <Icon className="w-4 h-4" />
                       <span className="text-sm font-medium">{item.label}</span>
@@ -98,7 +100,7 @@ export function Navigation() {
         <Button 
           variant="default" 
           size="lg"
-          className="bg-green-500 hover:bg-green-600 text-white rounded-full w-14 h-14 shadow-lg"
+          className="bg-blue-500 hover:bg-blue-600 text-white rounded-full w-14 h-14 shadow-lg"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -135,8 +137,10 @@ export function Navigation() {
                   <div 
                     className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors cursor-pointer ${
                       isActive 
-                        ? 'bg-telegram text-white' 
-                        : 'text-gray-700 hover:text-telegram hover:bg-telegram/10'
+                        ? 'bg-blue-600 text-white' 
+                        : item.highlighted
+                        ? 'bg-blue-100 text-blue-700 border-2 border-blue-300 font-semibold'
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
