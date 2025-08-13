@@ -105,61 +105,18 @@ export default function MyApp() {
     'AI И АВТОМАТИЗАЦИЯ': 'bg-blue-100 text-blue-800',
   };
 
-  // Generate app name based on selected modules
+  // Generate generic Russian app name
   const generateAppName = () => {
     if (uniqueModules.length === 0) return "Мое Mini App";
     
-    const categories = Array.from(new Set(uniqueModules.map(m => m.category)));
-    const isIndustrySpecific = uniqueModules.some(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
-    
-    if (isIndustrySpecific) {
-      const industryModule = uniqueModules.find(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
-      if (industryModule?.name.includes("салон")) return "BeautyBooking Pro";
-      if (industryModule?.name.includes("ресторан")) return "RestaurantManager Plus";
-      if (industryModule?.name.includes("фитнес")) return "FitnessClub Hub";
-      if (industryModule?.name.includes("отель")) return "HotelBooking Suite";
-      if (industryModule?.name.includes("авто")) return "AutoService Manager";
-      if (industryModule?.name.includes("стома")) return "DentalCare System";
-      if (industryModule?.name.includes("юрид")) return "LegalServices Pro";
-      if (industryModule?.name.includes("логист")) return "LogisticsPlatform";
-      if (industryModule?.name.includes("образов")) return "EduCenter Manager";
-      if (industryModule?.name.includes("медкл")) return "ClinicCare System";
-    }
-    
-    if (categories.includes("E-COMMERCE")) return "ShopMaster Pro";
-    if (categories.includes("ОБРАЗОВАНИЕ")) return "LearnHub Platform";
-    if (categories.includes("ФИНТЕХ")) return "FinancePro Suite";
-    if (categories.includes("CRM")) return "BusinessCRM Hub";
-    if (categories.includes("МАРКЕТИНГ")) return "MarketingBoost Pro";
-    
-    return `BusinessApp ${Math.floor(Math.random() * 1000)}`;
+    return "Бизнес Приложение";
   };
 
-  // Generate AI description based on selected modules
+  // Generate generic AI description
   const generateAIDescription = () => {
     if (uniqueModules.length === 0) return "Добавьте модули через AI-конструктор для создания персонального описания приложения";
     
-    const categories = Array.from(new Set(uniqueModules.map(m => m.category)));
-    const isIndustrySpecific = uniqueModules.some(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
-    
-    if (isIndustrySpecific) {
-      const industryModule = uniqueModules.find(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
-      if (industryModule?.name.includes("салон")) {
-        return "Создаем комплексное решение для салона красоты с возможностями онлайн-записи, управления клиентской базой и программой лояльности. Ваше приложение поможет автоматизировать бизнес-процессы и увеличить доходы.";
-      } else if (industryModule?.name.includes("ресторан")) {
-        return "Разрабатываем мощную систему управления рестораном с интегрированными решениями для заказов, доставки и лояльности клиентов. Приложение оптимизирует операции и повысит прибыльность.";
-      } else if (industryModule?.name.includes("фитнес")) {
-        return "Создаем инновационное приложение для фитнес-клуба с системой управления абонементами, расписанием тренировок и мотивацией участников. Современные технологии для роста вашего бизнеса.";
-      }
-    }
-    
-    if (categories.includes("E-COMMERCE")) {
-      return "Создаем мощную eCommerce-платформу с интегрированными решениями для продаж, маркетинга и аналитики. Ваше приложение станет центром цифрового бизнеса.";
-    } else if (categories.includes("ОБРАЗОВАНИЕ")) {
-      return "Разрабатываем современную образовательную платформу с интерактивными курсами, системой оценки и вовлечения студентов. Технологии будущего для качественного обучения.";
-    }
-    
-    return `Создаем уникальное Telegram Mini App, объединяющее ${uniqueModules.length} специально подобранных модулей. Комплексное решение для автоматизации и роста вашего бизнеса.`;
+    return `Создаем универсальное Telegram Mini App, объединяющее ${uniqueModules.length} специально подобранных модулей. Комплексное решение для автоматизации и роста вашего бизнеса.`;
   };
 
   return (

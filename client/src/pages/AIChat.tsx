@@ -30,7 +30,10 @@ export default function AIChatPage() {
           <Button 
             size="sm" 
             variant="ghost" 
-            onClick={() => setLocation('/')}
+            onClick={() => {
+              console.log('Close button clicked');
+              setLocation('/');
+            }}
             className="h-8 w-8 p-0"
             title="Закрыть"
           >
