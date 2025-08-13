@@ -35,7 +35,7 @@ export function Navigation() {
     { path: "/home", label: "Главная", icon: MessageSquare },
     { path: "/modules", label: "Функционал", icon: Puzzle },
     { path: "/industries", label: "Отрасли", icon: Building2 },
-    { path: "/", label: "AI-конструктор", icon: Bot },
+    { path: "/ai-chat", label: "AI-конструктор", icon: Bot },
     { path: "/my-app", label: "Мое App", icon: Settings },
     { path: "/development", label: "Ваше преимущество", icon: Rocket },
     { path: "/partners", label: "Партнерам", icon: Handshake },
@@ -96,15 +96,15 @@ export function Navigation() {
       </header>
 
 
-      {/* Mobile menu button - снизу экрана */}
-      <div className="md:hidden fixed bottom-32 right-4 z-40">
+      {/* Mobile menu button - в углу экрана */}
+      <div className="md:hidden fixed bottom-6 right-6 z-40">
         <Button 
           variant="default" 
           size="lg"
-          className="bg-green-500 hover:bg-green-600 text-white rounded-full w-14 h-14 shadow-lg"
+          className="bg-green-500 hover:bg-green-600 text-white rounded-full w-16 h-16 shadow-xl"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
-          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {isMobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
         </Button>
       </div>
         

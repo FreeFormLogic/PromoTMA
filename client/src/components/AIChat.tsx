@@ -749,7 +749,13 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           <Button 
             size="sm" 
             variant="ghost" 
-            onClick={() => window.location.href = '/'}
+            onClick={() => {
+              // Force navigation without page reload loop
+              if (typeof window !== 'undefined') {
+                window.history.pushState(null, '', '/');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }
+            }}
             className="h-8 w-8 p-0"
             title="Закрыть"
           >

@@ -1,160 +1,60 @@
 # Overview
 
-This is a full-stack web application for a Telegram Mini Apps directory and showcase platform. The application serves as a business catalog and marketing tool for showcasing modular Mini App solutions, allowing users to explore different app modules, industry-specific solutions, pricing models, and development processes. The platform appears to target businesses looking to deploy Telegram Mini Apps quickly using pre-built components.
+This project is a full-stack web application serving as a Telegram Mini Apps directory and showcase platform. Its primary purpose is to function as a business catalog and marketing tool, highlighting modular Mini App solutions. The platform enables users to explore various app modules, industry-specific solutions, pricing models, and development processes, targeting businesses seeking rapid Telegram Mini App deployment using pre-built components.
 
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (January 2025)
-- ✅ COMPLETED: Implemented real Telegram ID-based authorization with whitelist
-- ✅ COMPLETED: Added strict access control for specific Telegram IDs: 7418405560, 5173994544, 216463929, 6209116360, 893850026, 1577419391, 5201551014
-- ✅ COMPLETED: Removed fake @balilegend display from authorization system
-- ✅ COMPLETED: Fixed mobile navigation - moved hamburger menu to bottom-right floating button
-- ✅ COMPLETED: Mobile menu now opens from bottom of screen to avoid conflicts with battery/back button
-- ✅ COMPLETED: System blocks all unauthorized users completely, even if bot/app is already added
-- ✅ COMPLETED: Module modals in Industries section now 100% identical to Modules section functionality
-- ✅ COMPLETED: Created separate admin panel at /admin for whitelist management (password protected)
-- ✅ COMPLETED: Admin panel not accessible from main app navigation - only direct link
-- ✅ COMPLETED: Expanded module database from 140 to 260+ modules with comprehensive categories:
-  - ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ (модули 137-150): Push-уведомления, AI-чат поддержка, календарь, QR-коды, отзывы, мультиязычность, виртуальные события, CMS, IoT, блокчейн, AR, управление знаниями, лиды, корпоративная социальная сеть
-  - АВТОМАТИЗАЦИЯ (модули 151-160): Конструктор бизнес-процессов, RPA, управление задачами, workflow, маршрутизация, документооборот, бизнес-правила, планировщик ресурсов, управление инцидентами, интеграционная шина
-  - ОТРАСЛЕВЫЕ РЕШЕНИЯ (модули 161-170): Ресторан, медклиника, фитнес-клуб, салон красоты, отель, автосервис, стоматология, юридическая фирма, логистика, образовательный центр  
-  - АНАЛИТИКА (модули 171-180): Предиктивная аналитика, CDP, BI дашборды, ML платформа, sentiment анализ, рекомендательная система, process mining, качество данных, attribution modeling, real-time аналитика
-  - БЕЗОПАСНОСТЬ (модули 181-190): IAM, GDPR, обнаружение мошенничества, шифрование, аудит, DLP, управление уязвимостями, backup & DR, SOC, compliance management
-  - КОММУНИКАЦИИ (модули 191-200): Омниканальная платформа, видеоконференции, массовые рассылки, AI чат-боты, голосовой ассистент, транскрибация
-  - СОЦИАЛЬНАЯ КОММЕРЦИЯ (модули 201-205): Live Shopping, социальные покупки с друзьями, инфлюенсер маркетплейс, UGC, социальные рекомендации
-  - AI И АВТОМАТИЗАЦИЯ (модули 206-210): AI Sales Assistant, Predictive Inventory, Dynamic Pricing AI, AI Content Generator, Autonomous Customer Service
-  - ДОПОЛНИТЕЛЬНЫЕ МОДУЛИ (модули 236-255): Предзаказы товаров, сравнение характеристик, Google Analytics интеграция, экспорт отчетов, колесо фортуны, управление расписанием, Google Calendar синхронизация, напоминания о встречах, предоплата при бронировании, управление очередями, отзывы после услуг, виртуальные консультации, казуальные игры, виртуальные питомцы, карточные игры, AI-тренер, виртуальный HR-менеджер, AI Medical Assistant, Virtual Event Host, AI Content Creator
-
-### Latest AI-Driven Experience Upgrade (January 2025)
-- ✅ COMPLETED: Comprehensive UI/UX overhaul with strict blue/white color scheme enforcement
-- ✅ COMPLETED: Updated Claude Sonnet 3 to Claude Sonnet 3.7 for enhanced AI capabilities
-- ✅ COMPLETED: Changed pricing display from $25,000 to $10,000 throughout platform
-- ✅ COMPLETED: Updated module statistics from 210+ to 260+ reflecting actual database size
-- ✅ COMPLETED: Merged "ТРЕНДОВЫЕ ИГРЫ" and "ИГРЫ" categories completely - updated modules 231-234
-- ✅ COMPLETED: Implemented advanced chat-first experience with intelligent duplicate prevention
-- ✅ COMPLETED: AI system now receives already displayed modules to prevent repetitive recommendations
-- ✅ COMPLETED: Enhanced filtering logic prevents recommending modules already shown in recommended block
-- ✅ COMPLETED: Made category filters more compact with reduced button size and padding
-- ✅ COMPLETED: Fixed green checkmarks visibility and removed AI chat header icons for cleaner design
-- ✅ COMPLETED: Removed emoji inconsistencies across comparison sections
-- ✅ COMPLETED: AI provides gradual, personalized module recommendations based on business analysis
-- ✅ COMPLETED: Real-time business insights with Claude 3.7 intelligent conversation system
-- ✅ COMPLETED: Smart module filtering prevents duplicate suggestions across chat sessions
-
-### Major Design & Functionality Update (January 13, 2025)
-- ✅ COMPLETED: Fixed critical markdown formatting issue - **bold text** now properly displays in chat
-- ✅ COMPLETED: Complete green-to-blue color scheme transformation across entire platform
-- ✅ COMPLETED: Removed module numbers from chat display while keeping them in detailed modals
-- ✅ COMPLETED: Enhanced Navigation with AI-конструктор highlighting and blue color scheme
-- ✅ COMPLETED: Updated Home page comparison sections with blue color scheme
-- ✅ COMPLETED: Fixed statistics section gradients with blue color variations
-- ✅ COMPLETED: Added @balilegend contact functionality with prepared message integration
-- ✅ COMPLETED: Updated mobile navigation menu with improved highlighting logic
-- ✅ COMPLETED: Chat introduction message explaining plus button functionality for module selection
-- ✅ COMPLETED: Comprehensive button and UI element color consistency throughout platform
-
-### Critical AI Module Recommendation Fix (January 13, 2025)
-- ✅ COMPLETED: Fixed incorrect module numbers in AI system - was recommending "ресторан" (#165) for tourism companies
-- ✅ COMPLETED: Corrected module mapping: 169=Hotel Management, 173=Logistics Management  
-- ✅ COMPLETED: Added strict business-type validation preventing inappropriate recommendations
-- ✅ COMPLETED: Tourism companies now get proper modules: Hotel(169), Logistics(173), Booking(112), CRM(78)
-- ✅ COMPLETED: AI now receives ALL 260+ modules instead of limited 100-module subset
-- ✅ COMPLETED: Enhanced system prompts with explicit business-specific module restrictions
-- ✅ COMPLETED: Deleted modules 151 "API-конструктор без кода" and 155 "Визуальный инструмент для создания автоматизированных workflow" completely from database
-- ✅ COMPLETED: Enhanced AI system with persuasive sales-focused prompts to encourage app development purchases
-- ✅ COMPLETED: AI now emphasizes ROI, concrete financial benefits, and investment value rather than just features
-
-### Analytics Integration (January 13, 2025)
-- ✅ COMPLETED: Integrated Google Analytics (G-FMM4BECLK5) for comprehensive user tracking
-- ✅ COMPLETED: Added Yandex.Metrika (103742841) with webvisor, clickmap, and ecommerce tracking
-- ✅ COMPLETED: Configured proper HTML structure to avoid parse5 validation errors
-- ✅ COMPLETED: Both analytics systems now track user interactions, page views, and business events
-- ✅ COMPLETED: Enhanced Yandex webvisor to track form fields, keystrokes, and user interactions with proper configuration
-- ✅ COMPLETED: Fixed browser extension conflict errors by adding global error handling for external wallet extensions
-- ✅ COMPLETED: Resolved close button navigation issue in AI chat section allowing proper return to menu
-- ✅ COMPLETED: Added comprehensive error boundary handling to prevent external extension crashes
-
-### Module Database Expansion & Chat UX Fixes (January 13, 2025)
-- ✅ COMPLETED: Added 15 new E-commerce modules (221-235) expanding database to 244+ total modules
-- ✅ COMPLETED: Fixed AI chat message cutoff issue - messages now have proper bottom spacing (pb-20)
-- ✅ COMPLETED: "Еще функции" now properly displays as clickable text at end of AI messages with modules
-- ✅ COMPLETED: Removed duplicate "Еще функции" buttons from chat interface - only clickable text remains
-- ✅ COMPLETED: "Мое App" clickable text shows module count in parentheses for better UX
-- ✅ COMPLETED: Enhanced chat input area with shadow for better visual separation
-- ✅ COMPLETED: Improved AI message rendering with error handling and fallback display
-
 # System Architecture
 
 ## Frontend Architecture
-The client is built using React with TypeScript, utilizing a modern component-based architecture:
-- **UI Framework**: React with TypeScript for type safety and modern development practices
-- **Styling**: Tailwind CSS with shadcn/ui component library for consistent, accessible UI components
-- **Routing**: Wouter for lightweight client-side routing
-- **State Management**: TanStack React Query for server state management and caching
-- **Build Tool**: Vite for fast development and optimized production builds
+The client is built with React and TypeScript, leveraging a modern component-based architecture. It uses Tailwind CSS with shadcn/ui for consistent UI, Wouter for lightweight routing, and TanStack React Query for server state management. Vite is used for fast development and optimized builds.
 
 ## Backend Architecture
-The server follows a RESTful API design pattern:
-- **Framework**: Express.js with TypeScript for type-safe server-side development
-- **API Design**: RESTful endpoints for authentication, modules, industries, and other business data
-- **Route Organization**: Modular route structure with dedicated route handlers
-- **Development Integration**: Custom Vite middleware for seamless full-stack development experience
+The server follows a RESTful API design pattern using Express.js with TypeScript. It features modular route structures for authentication, modules, and industry data, integrating seamlessly with the Vite development environment.
 
 ## Authentication System
-The application implements a simplified, reliable authentication system:
-- **Method**: One-click authentication without external dependencies or registration
-- **Storage**: Local storage for client-side session persistence with 24-hour expiry
-- **User Creation**: Automatic unique user generation with random usernames  
-- **Interface**: Clean, professional login page with clear call-to-action
-- **Protection**: Route guards ensure authenticated access to the module catalog
-- **Stability**: No browser extension conflicts or external service dependencies
+The application employs a simplified, one-click authentication system. It uses local storage for client-side session persistence with a 24-hour expiry, automatically generating unique users. A dedicated admin panel at `/admin` (password protected) manages whitelist access for specific Telegram IDs. The system strictly blocks unauthorized users.
 
 ## Database and ORM
-- **ORM**: Drizzle ORM for type-safe database operations and migrations
-- **Schema Definition**: Centralized schema definitions in shared directory for consistency
-- **Validation**: Zod integration with Drizzle for runtime type validation
-- **Migration Management**: Automated migration system through Drizzle Kit
+Drizzle ORM is used for type-safe database operations and migrations, with schema definitions centralized and Zod integration for runtime type validation.
 
 ## Component Architecture
-- **Design System**: Comprehensive component library using Radix UI primitives
-- **Theming**: CSS custom properties for consistent theming and dark mode support
-- **Responsive Design**: Mobile-first responsive design with Tailwind CSS utilities
-- **Accessibility**: Built-in accessibility features through Radix UI components
+A comprehensive design system is implemented using Radix UI primitives, with CSS custom properties for theming and dark mode support. It features a mobile-first responsive design using Tailwind CSS and built-in accessibility through Radix UI components.
 
 ## Data Management
-The application manages several key data entities:
-- **Modules**: Catalog of available Mini App components and features
-- **Industries**: Industry-specific solutions and use cases
-- **USPs**: Unique selling propositions and benefits
-- **Objections**: FAQ and objection handling content
-- **Users**: User accounts and authorization status
+The application manages data entities including Modules (Mini App components), Industries (industry-specific solutions), USPs, Objections (FAQ), and Users (authorization status). The module database has been expanded to 260+ entries across various categories like additional services, automation, industry solutions, analytics, security, communications, social commerce, and AI-driven solutions.
+
+## UI/UX Decisions
+The platform enforces a strict blue/white color scheme. It features enhanced mobile navigation with a bottom-right floating button and bottom-screen menu opening. The AI chat provides gradual, personalized module recommendations, preventing duplicates and offering real-time business insights. Module modals include gradient backgrounds and markdown formatting support. The pricing display is standardized at $10,000.
 
 # External Dependencies
 
 ## Database Services
-- **PostgreSQL**: Primary database using Drizzle dialect configuration
-- **Neon Database**: Cloud PostgreSQL provider via @neondatabase/serverless
+- **PostgreSQL**: Primary database.
+- **Neon Database**: Cloud PostgreSQL provider.
 
 ## UI and Styling
-- **Radix UI**: Complete suite of accessible, unstyled UI primitives
-- **Tailwind CSS**: Utility-first CSS framework with PostCSS processing
-- **Lucide React**: Consistent icon library for user interface elements
+- **Radix UI**: Accessible, unstyled UI primitives.
+- **Tailwind CSS**: Utility-first CSS framework.
+- **Lucide React**: Icon library.
 
 ## Development Tools
-- **TypeScript**: Static type checking across the entire stack
-- **Vite**: Modern build tool with hot module replacement and fast builds
-- **ESBuild**: Fast JavaScript bundler for production server builds
-- **Replit Integration**: Development environment integration with runtime error handling
+- **TypeScript**: Static type checking.
+- **Vite**: Modern build tool.
+- **ESBuild**: Fast JavaScript bundler.
 
 ## Runtime Libraries
-- **React Hook Form**: Form handling with validation through @hookform/resolvers
-- **TanStack React Query**: Powerful data fetching and state management
-- **Wouter**: Lightweight routing solution for single-page applications
-- **Date-fns**: Date manipulation and formatting utilities
-- **clsx/class-variance-authority**: Dynamic className generation and variants
+- **React Hook Form**: Form handling with validation.
+- **TanStack React Query**: Data fetching and state management.
+- **Wouter**: Lightweight routing.
+- **Date-fns**: Date manipulation.
+- **clsx/class-variance-authority**: Dynamic className generation.
 
 ## Session Management
-- **connect-pg-simple**: PostgreSQL session store for Express sessions
-- **Local Storage**: Client-side session persistence for authentication state
+- **connect-pg-simple**: PostgreSQL session store.
+
+## Analytics
+- **Google Analytics**: For user tracking (G-FMM4BECLK5).
+- **Yandex.Metrika**: With webvisor, clickmap, and ecommerce tracking (103742841).

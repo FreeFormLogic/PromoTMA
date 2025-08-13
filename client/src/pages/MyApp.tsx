@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Smartphone, Settings, Trash2, Eye, Download, Share2, Sparkles, Plus, Check, Zap, DollarSign, Users } from 'lucide-react';
+import { Smartphone, Settings, Trash2, Eye, Download, Share2, Sparkles, Plus, Check, Zap, DollarSign, Users, Component } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -486,47 +486,78 @@ export default function MyApp() {
       
       {/* Module Detail Modal */}
       <Dialog open={!!selectedModuleForModal} onOpenChange={() => setSelectedModuleForModal(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-gray-900">
-              {selectedModuleForModal?.name}
-            </DialogTitle>
-          </DialogHeader>
-          <ScrollArea className="h-[60vh] pr-4">
+        <DialogContent className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-blue-50 to-indigo-100 border-0 shadow-2xl">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 -m-6 mb-6 rounded-t-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur">
+                <Component className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold leading-tight">
+                  {selectedModuleForModal?.name}
+                </h2>
+                <p className="text-blue-100 text-sm mt-1">
+                  {selectedModuleForModal?.category}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <ScrollArea className="max-h-[50vh] pr-4">
             {selectedModuleForModal && (
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wide">
-                    {selectedModuleForModal.category}
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed">
+                <div className="bg-white/80 backdrop-blur p-5 rounded-xl">
+                  <p className="text-gray-700 leading-relaxed text-base">
                     {selectedModuleForModal.description}
                   </p>
                 </div>
                 
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Ключевые возможности</h3>
-                  <div className="space-y-2">
+                <div className="bg-white/80 backdrop-blur p-5 rounded-xl">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    Ключевые возможности
+                  </h3>
+                  <div className="space-y-3">
                     {Array.isArray(selectedModuleForModal.keyFeatures) ? 
-                      selectedModuleForModal.keyFeatures.map((feature, index) => (
-                        <div key={index} className="flex items-start gap-2">
-                          <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-gray-700 text-sm">{feature}</span>
-                        </div>
-                      )) : 
-                      <div className="flex items-start gap-2">
-                        <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700 text-sm">{selectedModuleForModal.keyFeatures}</span>
+                      selectedModuleForModal.keyFeatures.map((feature, index) => {
+                        // Process markdown formatting
+                        const processedFeature = feature.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                        return (
+                          <div key={index} className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                            <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                            <span 
+                              className="text-gray-800 text-sm leading-relaxed"
+                              dangerouslySetInnerHTML={{ __html: processedFeature }}
+                            />
+                          </div>
+                        );
+                      }) : 
+                      <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                        <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                        <span 
+                          className="text-gray-800 text-sm leading-relaxed"
+                          dangerouslySetInnerHTML={{ 
+                            __html: selectedModuleForModal.keyFeatures.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') 
+                          }}
+                        />
                       </div>
                     }
                   </div>
                 </div>
                 
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Бизнес-преимущества</h3>
-                  <p className="text-gray-700 leading-relaxed">
-                    {selectedModuleForModal.benefits}
-                  </p>
+                <div className="bg-white/80 backdrop-blur p-5 rounded-xl">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-blue-500" />
+                    Бизнес-преимущества
+                  </h3>
+                  <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                    <p 
+                      className="text-gray-800 leading-relaxed"
+                      dangerouslySetInnerHTML={{ 
+                        __html: selectedModuleForModal.benefits.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') 
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             )}
