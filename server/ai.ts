@@ -281,12 +281,19 @@ export async function generateChatResponse(messages: {role: string, content: str
   // Get displayed module numbers for filtering
   const displayedModuleNumbers = displayedModules.map(m => m.number);
   
-  // Reduce module context to save tokens - only send essential info
-  const moduleContext = allModules
-    .filter(m => !displayedModuleNumbers.includes(m.number)) // Exclude already shown
-    .slice(0, 100) // Limit to 100 modules to reduce tokens
-    .map(m => `${m.number}: ${m.name} - ${m.category}`)
-    .join('\n');
+  // Include ALL modules for better AI recommendations, exclude already shown
+  const availableModules = allModules.filter(m => !displayedModuleNumbers.includes(m.number));
+  
+  // Create comprehensive module context with categories
+  const modulesByCategory = availableModules.reduce((acc: any, module: any) => {
+    if (!acc[module.category]) acc[module.category] = [];
+    acc[module.category].push(`${module.number}: ${module.name}`);
+    return acc;
+  }, {});
+  
+  const moduleContext = Object.entries(modulesByCategory)
+    .map(([category, modules]: [string, any]) => `${category}:\n${(modules as string[]).join('\n')}`)
+    .join('\n\n');
 
   try {
     const anthropic = new Anthropic({
@@ -304,19 +311,26 @@ export async function generateChatResponse(messages: {role: string, content: str
     const response = await anthropic.messages.create({
       model: 'claude-3-7-sonnet-20250219',
       max_tokens: 800, // Reduced to save tokens
-      system: `AI консультант для Telegram Mini Apps. Анализируй бизнес и рекомендуй модули.
+      system: `AI консультант для Telegram Mini Apps. АНАЛИЗИРУЙ бизнес и подбирай МАКСИМАЛЬНО подходящие модули.
 
-ПРАВИЛА:
-- Максимум 3 модуля за ответ
-- Используй [MODULE:NUMBER] формат
-- Не повторяй показанные: ${displayedModuleNumbers.join(', ')}
+ПРАВИЛА ПОДБОРА:
+- Максимум 3 модуля за раз
+- Формат: [MODULE:NUMBER] 
+- НЕ повторяй: ${displayedModuleNumbers.join(', ')}
+- ВСЕГДА сначала ищи отраслевые модули (161-170)
+- Для туризма: 169 (Логистика), 165 (Отель), 112 (Бронирование), 78 (CRM)
+- Для образования: 170 (Образовательный центр), 41-50 (ОБРАЗОВАНИЕ)
+- Для медицины: 162 (Медклиника), 112 (Бронирование)
+- Для красоты: 164 (Салон красоты), 112 (Бронирование)
 
-КЛЮЧЕВЫЕ МОДУЛИ:
-161: Ресторан 162: Медклиника 163: Фитнес 164: ESB 165: Отель 166: Автосервис 167: Стоматология 168: Салон красоты 169: Логистика 170: Обучение
+ОТРАСЛЕВЫЕ МОДУЛИ (ПРИОРИТЕТ):
+161: Ресторан, 162: Медклиника, 163: Фитнес, 164: Салон красоты, 165: Отель, 166: Автосервис, 167: Стоматология, 168: Юридическая фирма, 169: Логистика, 170: Образовательный центр
 
-ДОСТУПНЫЕ МОДУЛИ (исключая показанные):
-${moduleContext}
-170: Управление образовательным центром - для школ, курсов, обучения`,
+УНИВЕРСАЛЬНЫЕ:
+112: Бронирование, 78: CRM, 69: Платежи, 31: Лояльность, 1: Каталог товаров
+
+ДОСТУПНЫЕ МОДУЛИ:
+${moduleContext}`,
       messages: messages.map(msg => ({
         role: msg.role as 'user' | 'assistant',
         content: msg.content

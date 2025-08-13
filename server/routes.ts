@@ -268,7 +268,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .filter(Boolean);
 
-      console.log('- Found recommended modules:', recommendedModules.map(m => `#${m.number}: ${m.name}`));
+      console.log('- Found recommended modules:', recommendedModules.map(m => m ? `#${m.number}: ${m.name}` : 'undefined'));
       
       res.json({
         response: result.response,
@@ -278,7 +278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error generating AI response:", error);
       
       // Handle rate limiting specifically
-      if (error.status === 429 || error.message?.includes('rate_limit')) {
+      if ((error as any).status === 429 || (error as any).message?.includes('rate_limit')) {
         return res.json({
           response: "⏱️ Слишком много запросов. Пожалуйста, подождите 1-2 минуты перед следующим запросом.",
           recommendedModules: []
@@ -286,7 +286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Handle overload errors
-      if (error.status === 529 || error.message?.includes('overloaded')) {
+      if ((error as any).status === 529 || (error as any).message?.includes('overloaded')) {
         return res.json({
           response: "🔄 Система временно перегружена. Попробуйте еще раз через несколько секунд.",
           recommendedModules: []

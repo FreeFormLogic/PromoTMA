@@ -105,6 +105,36 @@ export default function MyApp() {
     'AI И АВТОМАТИЗАЦИЯ': 'bg-blue-100 text-blue-800',
   };
 
+  // Generate app name based on selected modules
+  const generateAppName = () => {
+    if (uniqueModules.length === 0) return "Мое Mini App";
+    
+    const categories = Array.from(new Set(uniqueModules.map(m => m.category)));
+    const isIndustrySpecific = uniqueModules.some(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
+    
+    if (isIndustrySpecific) {
+      const industryModule = uniqueModules.find(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
+      if (industryModule?.name.includes("салон")) return "BeautyBooking Pro";
+      if (industryModule?.name.includes("ресторан")) return "RestaurantManager Plus";
+      if (industryModule?.name.includes("фитнес")) return "FitnessClub Hub";
+      if (industryModule?.name.includes("отель")) return "HotelBooking Suite";
+      if (industryModule?.name.includes("авто")) return "AutoService Manager";
+      if (industryModule?.name.includes("стома")) return "DentalCare System";
+      if (industryModule?.name.includes("юрид")) return "LegalServices Pro";
+      if (industryModule?.name.includes("логист")) return "LogisticsPlatform";
+      if (industryModule?.name.includes("образов")) return "EduCenter Manager";
+      if (industryModule?.name.includes("медкл")) return "ClinicCare System";
+    }
+    
+    if (categories.includes("E-COMMERCE")) return "ShopMaster Pro";
+    if (categories.includes("ОБРАЗОВАНИЕ")) return "LearnHub Platform";
+    if (categories.includes("ФИНТЕХ")) return "FinancePro Suite";
+    if (categories.includes("CRM")) return "BusinessCRM Hub";
+    if (categories.includes("МАРКЕТИНГ")) return "MarketingBoost Pro";
+    
+    return `BusinessApp ${Math.floor(Math.random() * 1000)}`;
+  };
+
   // Generate AI description based on selected modules
   const generateAIDescription = () => {
     if (uniqueModules.length === 0) return "Добавьте модули через AI-конструктор для создания персонального описания приложения";
@@ -161,38 +191,13 @@ export default function MyApp() {
             <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
                 <Sparkles className="w-6 h-6 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-800">Возможности приложения</h2>
+                <h2 className="text-xl font-semibold text-gray-800">{generateAppName()}</h2>
               </div>
               <p className="text-gray-700 leading-relaxed mb-4">
                 {generateAIDescription()}
               </p>
               
-              {/* Benefits Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <div className="bg-white p-4 rounded-lg border border-blue-100">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-                    <Zap className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Быстрый запуск</h4>
-                  <p className="text-sm text-gray-600">Разработка и запуск за 2-5 дней вместо месяцев</p>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg border border-blue-100">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-                    <DollarSign className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Экономия 60%</h4>
-                  <p className="text-sm text-gray-600">От $10,000 вместо $25,000 за традиционную разработку</p>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg border border-blue-100">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-                    <Users className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">900+ млн пользователей</h4>
-                  <p className="text-sm text-gray-600">Доступ к огромной аудитории Telegram</p>
-                </div>
-              </div>
+
             </div>
           </Card>
         </div>

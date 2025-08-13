@@ -97,7 +97,7 @@ export function Navigation() {
 
 
       {/* Mobile menu button - снизу экрана */}
-      <div className="md:hidden fixed bottom-24 right-4 z-40">
+      <div className="md:hidden fixed bottom-32 right-4 z-40">
         <Button 
           variant="default" 
           size="lg"
