@@ -169,9 +169,9 @@ function CompactModuleCard({ module }: { module: Module }) {
                 <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 leading-tight break-words hyphens-auto overflow-visible whitespace-normal">
                   {module.name}
                 </h3>
-                <Badge className={`text-xs mt-1 font-normal ${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
-                  #{module.number}
-                </Badge>
+                <div className="text-[10px] mt-1 font-normal text-gray-500 uppercase">
+                  {module.category}
+                </div>
               </div>
             </div>
             
@@ -180,12 +180,11 @@ function CompactModuleCard({ module }: { module: Module }) {
               {module.description}
             </p>
             
-            {/* Бенефит и стрелка */}
-            <div className="flex items-center justify-between">
+            {/* Бенефит */}
+            <div className="flex items-center">
               <p className="text-xs text-blue-600 dark:text-blue-400 font-medium line-clamp-1 flex-1">
                 {module.benefits}
               </p>
-              <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors flex-shrink-0 ml-2" />
             </div>
           </div>
         </Card>
@@ -198,9 +197,9 @@ function CompactModuleCard({ module }: { module: Module }) {
             <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {module.name}
             </DialogTitle>
-            <Badge className={`text-xs font-normal ${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
+            <div className="text-[10px] font-normal text-gray-500 uppercase">
               {module.category}
-            </Badge>
+            </div>
           </div>
         </DialogHeader>
         

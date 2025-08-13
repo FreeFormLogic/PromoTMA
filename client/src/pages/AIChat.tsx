@@ -23,10 +23,7 @@ export default function AIChatPage() {
       {/* Header with Menu Button */}
       <div className="p-3 border-b bg-primary/5 backdrop-blur flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h1 className="font-semibold text-lg">AI-конструктор</h1>
-          <p className="text-sm text-muted-foreground">
-            Создайте ваше приложение с AI
-          </p>
+          <h1 className="font-semibold text-lg">AI-конструктор приложений</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button 
