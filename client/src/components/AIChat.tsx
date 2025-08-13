@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { apiRequest } from '@/lib/queryClient';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 
 
 interface Message {
@@ -121,6 +122,7 @@ class ChatErrorBoundary extends ReactComponent<{children: React.ReactNode}, {has
 }
 
 function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize, currentlyDisplayedModules = [], isFullScreen = false }: AIChatProps & { isFullScreen?: boolean }) {
+  const [, setLocation] = useLocation();
   // Initialize from localStorage first
   const initializeFromStorage = () => {
     try {
@@ -750,11 +752,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             size="sm" 
             variant="ghost" 
             onClick={() => {
-              // Force navigation without page reload loop
-              if (typeof window !== 'undefined') {
-                window.history.pushState(null, '', '/');
-                window.dispatchEvent(new PopStateEvent('popstate'));
-              }
+              setLocation('/');
             }}
             className="h-8 w-8 p-0"
             title="Закрыть"
