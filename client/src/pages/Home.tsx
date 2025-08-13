@@ -318,109 +318,154 @@ export default function Home() {
           </Card>
         </section>
 
-        {/* Traditional vs Telegram Mini Apps Comparison */}
-        <section className="mb-12">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Зачем переплачивать?</h2>
-            <p className="text-gray-600 mb-8">Сравните традиционную разработку с Telegram Mini Apps</p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {/* Traditional Development */}
-            <Card className="p-6 border-2 border-red-200 bg-red-50">
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
-                  <X className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-red-700 text-center mb-4">Традиционная разработка</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <DollarSign className="w-5 h-5 text-red-600" />
-                  <div>
-                    <div className="font-semibold text-red-700">$7,000 - $10,000</div>
-                    <div className="text-sm text-red-600">Высокие затраты на разработку</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Clock className="w-5 h-5 text-red-600" />
-                  <div>
-                    <div className="font-semibold text-red-700">6-12 месяцев разработки</div>
-                    <div className="text-sm text-red-600">Долгие сроки до запуска</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Smartphone className="w-5 h-5 text-red-600" />
-                  <div>
-                    <div className="font-semibold text-red-700">Нужно устанавливать приложение</div>
-                    <div className="text-sm text-red-600">Барьер для пользователей</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Users className="w-5 h-5 text-red-600" />
-                  <div>
-                    <div className="font-semibold text-red-700">Сложно привлекать пользователей</div>
-                    <div className="text-sm text-red-600">Большие затраты на маркетинг</div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Telegram Mini Apps */}
-            <Card className="p-6 border-2 border-blue-200 bg-blue-50">
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                  <Check className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-blue-700 text-center mb-4">Telegram Mini Apps</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <DollarSign className="w-5 h-5 text-blue-600" />
-                  <div>
-                    <div className="font-semibold text-blue-700">От $300 + от $15/месяц</div>
-                    <div className="text-sm text-blue-600">Доступные цены для любого бизнеса</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Zap className="w-5 h-5 text-blue-600" />
-                  <div>
-                    <div className="font-semibold text-blue-700">1-5 дней запуск</div>
-                    <div className="text-sm text-blue-600">Мгновенный результат</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MessageSquare className="w-5 h-5 text-blue-600" />
-                  <div>
-                    <div className="font-semibold text-blue-700">Работает внутри Telegram</div>
-                    <div className="text-sm text-blue-600">Без установки приложений</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Users className="w-5 h-5 text-blue-600" />
-                  <div>
-                    <div className="font-semibold text-blue-700">900+ млн готовых пользователей</div>
-                    <div className="text-sm text-blue-600">Огромная аудитория в Telegram</div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          <div className="text-center mt-8">
-            <Button
-              onClick={() => {
-                const message = encodeURIComponent(
-                  "Привет! Интересует разработка Telegram Mini App. Рассмотрел каталог модулей на вашей платформе. Можете рассказать подробнее о возможностях и стоимости?"
-                );
-                window.open(`https://t.me/balilegend?text=${message}`, '_blank');
-              }}
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+        {/* Cost Comparison Section - Complete Redesign */}
+        <section className="mb-12 py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
             >
-              <MessageSquare className="w-5 h-5 mr-2" />
-              Написать нам
-            </Button>
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Зачем переплачивать?</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Сравните традиционную разработку с готовыми модульными решениями Telegram Mini Apps
+              </p>
+            </motion.div>
+
+            <div className="grid lg:grid-cols-2 gap-12 items-start">
+              {/* Traditional Development */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+              >
+                <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-lg">
+                  <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-gray-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Building2 className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Традиционная разработка</h3>
+                    <div className="text-4xl font-bold text-gray-700 mb-1">$25,000</div>
+                    <p className="text-gray-600">Высокие затраты на разработку</p>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <p className="font-semibold text-gray-900">6-12 месяцев разработки</p>
+                        <p className="text-gray-600 text-sm">Долгие сроки до запуска продукта</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <p className="font-semibold text-gray-900">Установка приложения</p>
+                        <p className="text-gray-600 text-sm">Барьер для пользователей, потеря аудитории</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <p className="font-semibold text-gray-900">Привлечение пользователей</p>
+                        <p className="text-gray-600 text-sm">Большие затраты на маркетинг и продвижение</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <p className="font-semibold text-gray-900">Команда разработчиков</p>
+                        <p className="text-gray-600 text-sm">Поиск и содержание штатных специалистов</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Telegram Mini Apps */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+              >
+                <div className="bg-blue-50 rounded-2xl p-8 border-2 border-blue-200 relative overflow-hidden shadow-xl">
+                  <div className="absolute top-4 right-4">
+                    <Badge className="bg-blue-600 text-white px-3 py-1 text-sm font-semibold">
+                      ЭКОНОМИЯ 60%
+                    </Badge>
+                  </div>
+                  
+                  <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Rocket className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-blue-900 mb-2">Модульные Telegram Mini Apps</h3>
+                    <div className="text-4xl font-bold text-blue-700 mb-1">$10,000</div>
+                    <p className="text-blue-700">Готовые решения под ключ</p>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <p className="font-semibold text-blue-900">2-5 дней до запуска</p>
+                        <p className="text-blue-700 text-sm">Мгновенный результат с готовыми модулями</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <p className="font-semibold text-blue-900">Работает внутри Telegram</p>
+                        <p className="text-blue-700 text-sm">Без установки, сразу доступно пользователям</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <p className="font-semibold text-blue-900">900+ млн готовых пользователей</p>
+                        <p className="text-blue-700 text-sm">Огромная аудитория уже в Telegram</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <p className="font-semibold text-blue-900">260+ готовых модулей</p>
+                        <p className="text-blue-700 text-sm">Проверенные решения для любого бизнеса</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Bottom CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+              className="text-center mt-12"
+            >
+              <Button
+                onClick={() => {
+                  const message = encodeURIComponent(
+                    "Привет! Интересует разработка Telegram Mini App. Рассмотрел каталог модулей на вашей платформе. Можете рассказать подробнее о возможностях и стоимости?"
+                  );
+                  window.open(`https://t.me/balilegend?text=${message}`, '_blank');
+                }}
+                size="lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all"
+              >
+                Начать экономить прямо сейчас
+              </Button>
+            </motion.div>
           </div>
         </section>
       </main>

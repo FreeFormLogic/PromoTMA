@@ -32,10 +32,10 @@ export function Navigation() {
   };
 
   const navItems = [
-    { path: "/", label: "Главная", icon: MessageSquare },
+    { path: "/home", label: "Главная", icon: MessageSquare },
     { path: "/modules", label: "Функционал", icon: Puzzle },
     { path: "/industries", label: "Отрасли", icon: Building2 },
-    { path: "/ai-chat", label: "AI-конструктор", icon: Bot },
+    { path: "/", label: "AI-конструктор", icon: Bot },
     { path: "/my-app", label: "Мое App", icon: Settings },
     { path: "/development", label: "Ваше преимущество", icon: Rocket },
     { path: "/partners", label: "Партнерам", icon: Handshake },

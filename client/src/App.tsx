@@ -22,6 +22,11 @@ function Router() {
     <Switch>
       <Route path="/" component={() => (
         <AuthGuard>
+          <AIChatPage />
+        </AuthGuard>
+      )} />
+      <Route path="/home" component={() => (
+        <AuthGuard>
           <Navigation />
           <Home />
         </AuthGuard>
@@ -50,11 +55,7 @@ function Router() {
           <Development />
         </AuthGuard>
       )} />
-      <Route path="/ai-chat" component={() => (
-        <AuthGuard>
-          <AIChatPage />
-        </AuthGuard>
-      )} />
+
       <Route path="/pricing" component={() => (
         <AuthGuard>
           <Navigation />

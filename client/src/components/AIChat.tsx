@@ -314,7 +314,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 leading-tight break-words hyphens-auto">
                   {module.name}
                 </h3>
-                <Badge className={`text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
+                <Badge className={`text-xs mt-1 opacity-100 ${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
                   {module.category}
                 </Badge>
               </div>
@@ -327,7 +327,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             
             {/* Benefit and arrow */}
             <div className="flex items-center justify-between">
-              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium line-clamp-1 flex-1">
+              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium flex-1">
                 {module.benefits}
               </p>
               <div className="flex items-center gap-2 flex-shrink-0 ml-2">
@@ -361,7 +361,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                   {module.name}
                 </DialogTitle>
                 <Badge className={`${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
-                  #{module.number} {module.category}
+                  {module.category}
                 </Badge>
               </div>
             </DialogHeader>
@@ -549,22 +549,11 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
               <p className="text-xs text-muted-foreground">
                 {selectedModules.length > 0 ? `${selectedModules.length} выбрано` : 'Подберите функционал'}
               </p>
-              {/* Permanently visible categories with smaller font */}
-              <div className="text-[10px] text-gray-500 mt-1 flex flex-wrap gap-1">
-                E-COMMERCE • МАРКЕТИНГ • CRM • АВТОМАТИЗАЦИЯ • АНАЛИТИКА • ОТРАСЛИ
-              </div>
+
             </div>
           </div>
           <div className="flex items-center gap-1">
-            {selectedModules.length >= 3 && (
-              <Button 
-                size="sm" 
-                onClick={generatePrototype}
-                className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 h-7"
-              >
-                Создать прототип
-              </Button>
-            )}
+
             {onToggleMinimize && (
               <Button size="sm" variant="ghost" onClick={onToggleMinimize} className="h-6 w-6 p-0">
                 <Minimize2 className="h-3 w-3" />
@@ -614,7 +603,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                         })}
                       </p>
                       
-                      {/* Add suggest more button after AI messages */}
+                      {/* Add buttons after AI messages with modules */}
                       {message.role === 'assistant' && currentlyDisplayedModules && currentlyDisplayedModules.length > 0 && (
                         <div className="mt-3 flex gap-2 flex-wrap">
                           <Button
@@ -670,17 +659,20 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                           >
                             Больше функций
                           </Button>
-                          
-                          {selectedModules.length > 0 && (
-                            <Button
-                              onClick={() => window.location.href = '/my-app'}
-                              variant="ghost"
-                              size="sm" 
-                              className="text-xs px-2 py-1 text-blue-600 hover:text-blue-700 h-auto font-normal hover:bg-blue-50 border border-blue-200 rounded-md ml-2"
-                            >
-                              Мое App
-                            </Button>
-                          )}
+                        </div>
+                      )}
+                      
+                      {/* Show "Мое App" button after every message if modules are selected */}
+                      {selectedModules.length > 0 && (
+                        <div className={`mt-2 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <Button
+                            onClick={() => window.location.href = '/my-app'}
+                            variant="ghost"
+                            size="sm" 
+                            className="text-xs px-2 py-1 text-blue-600 hover:text-blue-700 h-auto font-normal hover:bg-blue-50 border border-blue-200 rounded-md"
+                          >
+                            Мое App
+                          </Button>
                         </div>
                       )}
                     </div>
