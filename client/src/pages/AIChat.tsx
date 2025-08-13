@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import AIChat from '@/components/AIChat';
 import { Card } from '@/components/ui/card';
 import { X, Menu } from 'lucide-react';
@@ -18,6 +18,15 @@ export default function AIChatPage() {
     setCurrentlyDisplayedModules(modules);
   };
 
+  const handleClose = useCallback(() => {
+    console.log('Close button clicked - navigating home');
+    // Force navigation to home with delay to ensure state is updated
+    setTimeout(() => {
+      setLocation('/');
+      window.location.href = '/';
+    }, 100);
+  }, [setLocation]);
+
   return (
     <div className="h-screen w-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col relative">
       {/* Header with Menu Button */}
@@ -30,10 +39,7 @@ export default function AIChatPage() {
           <Button 
             size="sm" 
             variant="ghost" 
-            onClick={() => {
-              console.log('Close button clicked');
-              setLocation('/');
-            }}
+            onClick={handleClose}
             className="h-8 w-8 p-0"
             title="Закрыть"
           >

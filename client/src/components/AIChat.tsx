@@ -66,7 +66,16 @@ class ChatErrorBoundary extends ReactComponent<{children: React.ReactNode}, {has
   }
 
   static getDerivedStateFromError(error: any) {
-    // Update state so the next render will show the fallback UI
+    // Check if it's a browser extension error and ignore it completely
+    if (error?.stack?.includes('extension') || 
+        error?.message?.includes('extension') ||
+        error?.stack?.includes('chrome-extension') ||
+        error?.stack?.includes('moz-extension') ||
+        error?.stack?.includes('binance') ||
+        error?.stack?.includes('egjidjbpglichdcondbcbdnbeeppgdph')) {
+      console.log('Browser extension error ignored during render:', error);
+      return { hasError: false }; // Don't show error UI for extensions
+    }
     return { hasError: true };
   }
 
@@ -78,7 +87,9 @@ class ChatErrorBoundary extends ReactComponent<{children: React.ReactNode}, {has
     if (error?.stack?.includes('extension') || 
         error?.message?.includes('extension') ||
         error?.stack?.includes('chrome-extension') ||
-        error?.stack?.includes('moz-extension')) {
+        error?.stack?.includes('moz-extension') ||
+        error?.stack?.includes('binance') ||
+        error?.stack?.includes('egjidjbpglichdcondbcbdnbeeppgdph')) {
       console.log('Browser extension error ignored:', error);
       this.setState({ hasError: false }); // Reset state to continue
       return;
@@ -529,6 +540,12 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
   };
 
   const renderMessageWithModules = (content: string, isAssistant: boolean, hasDisplayedModules: boolean = false) => {
+    // Safety check for content
+    if (!content || typeof content !== 'string') {
+      console.warn('Error rendering message:', content);
+      return <span>Ошибка отображения сообщения</span>;
+    }
+
     if (!isAssistant || !allModules) {
       // Format text for user messages with bold support
       return formatText(content);

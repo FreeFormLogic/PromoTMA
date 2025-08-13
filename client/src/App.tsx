@@ -22,7 +22,8 @@ function Router() {
     <Switch>
       <Route path="/" component={() => (
         <AuthGuard>
-          <AIChatPage />
+          <Navigation />
+          <Home />
         </AuthGuard>
       )} />
       <Route path="/ai-chat" component={() => (
