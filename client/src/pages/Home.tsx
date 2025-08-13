@@ -98,9 +98,10 @@ function getPersonalizedExplanation(module: Module, analysis: BusinessAnalysis |
 }
 
 export default function Home() {
+  console.log('Home component rendering');
   const [businessAnalysis, setBusinessAnalysis] = useState<BusinessAnalysis | null>(null);
   const [aiRecommendedModules, setAiRecommendedModules] = useState<Module[]>([]);
-  const [showAIChat, setShowAIChat] = useState(true);
+  const [showAIChat, setShowAIChat] = useState(false); // Changed to false - AI chat should not show by default
   const [chatMinimized, setChatMinimized] = useState(false);
 
   const { data: modules = [], isLoading: modulesLoading } = useQuery<Module[]>({

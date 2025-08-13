@@ -754,7 +754,8 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('Chat close button clicked');
+              console.log('Chat close button clicked - current URL:', window.location.href);
+              console.log('Navigating to:', window.location.origin + '/');
               // Force immediate navigation using window.location
               window.location.href = window.location.origin + '/';
             }}
