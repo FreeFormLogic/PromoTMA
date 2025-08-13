@@ -19,15 +19,20 @@ export interface BusinessAnalysis {
 
 export async function analyzeBusinessContext(messages: string[]): Promise<BusinessAnalysis> {
   try {
-    const prompt = `Analyze the following business conversation and extract key information.
-Return a JSON object with these fields:
-- industry: main industry/niche
-- size: business size (small/medium/large)
-- challenges: array of main challenges mentioned
-- goals: array of business goals
-- relevantCategories: array of most relevant module categories from [E-COMMERCE, МАРКЕТИНГ, ВОВЛЕЧЕНИЕ, ОБРАЗОВАНИЕ, ФИНТЕХ, CRM, B2B, КОНТЕНТ И МЕДИА, ИНТЕГРАЦИИ, ИГРЫ, ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ, АВТОМАТИЗАЦИЯ, ОТРАСЛЕВЫЕ РЕШЕНИЯ, АНАЛИТИКА, БЕЗОПАСНОСТЬ, КОММУНИКАЦИИ, СОЦИАЛЬНАЯ КОММЕРЦИЯ, AI И АВТОМАТИЗАЦИЯ]
-- keywords: array of important keywords for filtering modules
-- persona: brief description of the business persona
+    const prompt = `Анализируй разговор о бизнесе и извлеки ключевую информацию. ВАЖНО: Люди часто пишут кратко и косвенно - анализируй подтекст:
+
+ПРИМЕРЫ АНАЛИЗА:
+• "Я таролог" → industry: "esoteric_services", goals: ["онлайн-консультации", "запись клиентов"], relevantCategories: ["CRM", "ОБРАЗОВАНИЕ", "КОММУНИКАЦИИ"]
+• "Салон красоты" → industry: "beauty_salon", goals: ["запись клиентов", "лояльность"], relevantCategories: ["CRM", "ОТРАСЛЕВЫЕ РЕШЕНИЯ"]
+
+Верни JSON с полями:
+- industry: тип бизнеса (e.g., ecommerce, restaurant, salon, education, fintech, esoteric_services, etc.)
+- size: размер бизнеса (small/medium/large)
+- challenges: массив основных проблем
+- goals: массив бизнес-целей
+- relevantCategories: массив подходящих категорий модулей из [E-COMMERCE, МАРКЕТИНГ, ВОВЛЕЧЕНИЕ, ОБРАЗОВАНИЕ, ФИНТЕХ, CRM, B2B, КОНТЕНТ И МЕДИА, ИНТЕГРАЦИИ, ИГРЫ, ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ, АВТОМАТИЗАЦИЯ, ОТРАСЛЕВЫЕ РЕШЕНИЯ, АНАЛИТИКА, БЕЗОПАСНОСТЬ, КОММУНИКАЦИИ, СОЦИАЛЬНАЯ КОММЕРЦИЯ, AI И АВТОМАТИЗАЦИЯ]
+- keywords: массив ключевых слов
+- persona: краткое описание бизнес-персоны
 
 Conversation:
 ${messages.join('\n')}
@@ -74,12 +79,15 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
   try {
     const systemPrompt = `You are an expert Telegram Mini Apps consultant with deep thinking capabilities. Help businesses by recommending ONLY the most essential modules first, then gradually add more as the conversation develops.
 
+ВАЖНО: Люди не всегда пишут прямо - анализируйте контекст и подтекст. Если человек пишет просто "Я таролог", это означает бизнес в сфере эзотерических услуг.
+
 CRITICAL RULES:
 1. START SMALL: In first response, recommend only 2-3 CORE modules that are absolutely essential
 2. BE SPECIFIC: Always mention exact module numbers (e.g., "Модуль 41", "Модуль 5")
 3. EXPLAIN VALUE: For each module, give a specific, personalized reason why it solves their exact business problem
 4. GRADUAL EXPANSION: In follow-up responses, add 1-2 additional modules that complement the conversation
 5. PRIORITIZE: Always put the most important modules first
+6. INDIRECT COMMUNICATION: Read between the lines - single words or short phrases often describe entire business models
 
 ИНТЕЛЛЕКТУАЛЬНАЯ СИСТЕМА ПОДБОРА МОДУЛЕЙ:
 
@@ -313,10 +321,23 @@ export async function generateChatResponse(messages: {role: string, content: str
     // Update token usage tracking
     tokenUsage += estimatedTokens;
 
-    const response = await anthropic.messages.create({
-      model: 'claude-3-7-sonnet-20250219',
-      max_tokens: 1200, // Increased for detailed responses
-      system: `AI консультант для Telegram Mini Apps. Анализируй бизнес и подбирай максимально подходящие модули на основе их КОНКРЕТНЫХ возможностей.
+    // Add retry logic for rate limit errors
+    let response;
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    while (retryCount < maxRetries) {
+      try {
+        response = await anthropic.messages.create({
+          model: 'claude-3-7-sonnet-20250219',
+          max_tokens: 1200, // Increased for detailed responses
+          system: `AI консультант для Telegram Mini Apps. Анализируй бизнес и подбирай максимально подходящие модули на основе их КОНКРЕТНЫХ возможностей.
+
+ВАЖНО: Люди не всегда пишут прямо - анализируйте контекст и подтекст:
+• "Я таролог" = эзотерические услуги, онлайн-консультации → рекомендуй модули: 112 (Бронирование), 78 (CRM), 140 (AI-чат поддержка), 160 (Управление задачами)
+• "Салон красоты" = запись клиентов, услуги, лояльность → рекомендуй модули: 164 (Салон красоты), 78 (CRM), 31 (Лояльность)
+• "Ресторан" = заказы, доставка, меню, бронирование → рекомендуй модули: 161 (Ресторан), 1 (Каталог товаров), 69 (Платежи)
+• "Туризм" = бронирование, отели, экскурсии → рекомендуй модули: 169 (Отель), 112 (Бронирование), 173 (Логистика)
 
 ТЕПЕРЬ У ТЕБЯ ЕСТЬ ПОЛНАЯ ИНФОРМАЦИЯ О ВОЗМОЖНОСТЯХ МОДУЛЕЙ - используй её для точного подбора!
 
@@ -344,11 +365,26 @@ export async function generateChatResponse(messages: {role: string, content: str
 
 ДОСТУПНЫЕ МОДУЛИ С ПОЛНЫМИ ВОЗМОЖНОСТЯМИ:
 ${moduleContext}`,
-      messages: messages.map(msg => ({
-        role: msg.role as 'user' | 'assistant',
-        content: msg.content
-      }))
-    });
+          messages: messages.map(msg => ({
+            role: msg.role as 'user' | 'assistant',
+            content: msg.content
+          }))
+        });
+        break; // Success, exit retry loop
+      } catch (error: any) {
+        if (error.status === 529 && retryCount < maxRetries - 1) {
+          retryCount++;
+          console.log(`Rate limit hit, retrying in ${retryCount * 2} seconds... (attempt ${retryCount})`);
+          await new Promise(resolve => setTimeout(resolve, retryCount * 2000));
+          continue;
+        }
+        throw error; // Re-throw if not a rate limit error or max retries reached
+      }
+    }
+
+    if (!response) {
+      throw new Error('Failed to get response after retries');
+    }
 
     let responseText = '';
     if (Array.isArray(response.content)) {
