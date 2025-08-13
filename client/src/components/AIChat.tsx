@@ -737,10 +737,20 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
   }
 
   return (
-    <Card className={`${isFullScreen ? 'h-screen w-screen rounded-none border-0 overflow-hidden' : 'h-full'} flex flex-col bg-gradient-to-br from-background via-background to-primary/5 border-2 border-primary/10 ${isMinimized ? 'w-80' : ''}`}>
+    <div className={`${isFullScreen ? 'h-full w-full' : 'h-full'} flex flex-col bg-gradient-to-br from-background via-background to-primary/5 ${isMinimized ? 'w-80' : ''}`}>
+
+      {/* Header - only show for full screen */}
+      {isFullScreen && (
+        <div className="p-4 border-b bg-primary/5 backdrop-blur flex items-center justify-between flex-shrink-0">
+          <div className="flex flex-col">
+            <h1 className="font-semibold text-lg">AI-конструктор приложений</h1>
+            <p className="text-xs text-gray-500 mt-1">Создадим приложение вместе</p>
+          </div>
+        </div>
+      )}
 
       {/* Messages */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 min-h-0 overflow-hidden">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 min-h-0">
         <div className="space-y-3 min-h-[100px] pb-20">
           <AnimatePresence>
             {messages.map((message) => {
@@ -822,36 +832,44 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         </div>
       </ScrollArea>
 
-      {/* Input - Fixed positioning with proper width */}
-      <div className="sticky bottom-0 bg-background border-t border-gray-200 z-10 shadow-lg">
-
-        
-        {/* Input field */}
-        <div className="p-2 pt-1 flex gap-2 w-full max-w-full">
+      {/* Input area */}
+      <div className="p-3 border-t bg-muted/30 flex-shrink-0">
+        <div className="flex gap-2">
           <Textarea
             ref={textareaRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyPress}
+            onChange={(e) => {
+              setInput(e.target.value);
+              // Auto-resize
+              if (textareaRef.current) {
+                textareaRef.current.style.height = 'auto';
+                textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+              }
+            }}
             placeholder="Расскажите о бизнесе..."
-            className="min-h-[36px] max-h-[80px] resize-none text-xs flex-1 min-w-0"
-            disabled={isLoading}
+            className="flex-1 min-h-[40px] max-h-[120px] text-xs resize-none"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
           />
-          <Button
-            onClick={sendMessage}
+          <Button 
+            onClick={sendMessage} 
             disabled={!input.trim() || isLoading}
-            size="icon"
-            className="h-[36px] w-[36px] flex-shrink-0"
+            size="sm" 
+            className="self-end"
           >
             {isLoading ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 className="h-3 w-3 animate-spin" />
             ) : (
-              <Send className="h-3.5 w-3.5" />
+              <Send className="h-3 w-3" />
             )}
           </Button>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
 

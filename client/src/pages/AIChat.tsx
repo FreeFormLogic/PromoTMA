@@ -29,26 +29,8 @@ export default function AIChatPage() {
 
   return (
     <div className="h-screen w-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col relative overflow-hidden">
-      {/* Header with Menu Button */}
-      <div className="p-3 border-b bg-primary/5 backdrop-blur flex items-center justify-between flex-shrink-0">
-        <div className="flex flex-col">
-          <h1 className="font-semibold text-lg">AI-конструктор приложений</h1>
-          <p className="text-xs text-gray-500 mt-1">Создадим приложение вместе</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button 
-            size="sm" 
-            variant="ghost" 
-            onClick={handleClose}
-            className="h-8 w-8 p-0"
-            title="Закрыть"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Full Screen AI Chat */}
+      
+      {/* Full Screen AI Chat - it will render its own header */}
       <div className="flex-1 overflow-hidden min-h-0">
         <AIChat
           onAnalysisUpdate={handleAnalysisUpdate}
@@ -57,6 +39,17 @@ export default function AIChatPage() {
           isFullScreen={true}
         />
       </div>
+
+      {/* Close Button - Floating */}
+      <Button 
+        size="sm" 
+        variant="ghost" 
+        onClick={handleClose}
+        className="absolute top-3 right-3 h-8 w-8 p-0 z-50 bg-white/90 hover:bg-white shadow-sm"
+        title="Закрыть"
+      >
+        <X className="h-4 w-4" />
+      </Button>
     </div>
   );
 }
