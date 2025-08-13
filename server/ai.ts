@@ -263,7 +263,7 @@ export function calculateModuleRelevance(
 let lastRequestTime = 0;
 let tokenUsage = 0;
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
-const MAX_TOKENS_PER_MINUTE = 15000; // Leave buffer for API limits
+const MAX_TOKENS_PER_MINUTE = 20000; // Increased for detailed module data
 
 export async function generateChatResponse(messages: {role: string, content: string}[], allModules: any[], displayedModules: any[]): Promise<{ response: string; recommendedModules: number[] }> {
   // Rate limiting check
@@ -284,10 +284,12 @@ export async function generateChatResponse(messages: {role: string, content: str
   // Include ALL modules for better AI recommendations, exclude already shown
   const availableModules = allModules.filter(m => !displayedModuleNumbers.includes(m.number));
   
-  // Create comprehensive module context with categories
+  // Create comprehensive module context with FULL DETAILS for better AI matching
   const modulesByCategory = availableModules.reduce((acc: any, module: any) => {
     if (!acc[module.category]) acc[module.category] = [];
-    acc[module.category].push(`${module.number}: ${module.name}`);
+    // Include full module details: number, name, description, and key features
+    const features = module.features.slice(0, 3).join(', '); // First 3 features for context
+    acc[module.category].push(`${module.number}: ${module.name} - ${module.description}. Ключевые возможности: ${features}`);
     return acc;
   }, {});
   
@@ -300,8 +302,9 @@ export async function generateChatResponse(messages: {role: string, content: str
       apiKey: process.env.ANTHROPIC_API_KEY!
     });
 
-    // Estimate token usage (rough approximation)
-    const systemPromptTokens = 800; // Reduced system prompt
+    // Estimate token usage (rough approximation) - more accurate for detailed module context
+    const moduleContextTokens = moduleContext.length * 0.3; // Estimate tokens for module context
+    const systemPromptTokens = 1200 + moduleContextTokens; // Include module context in estimation
     const messagesTokens = messages.map(m => m.content.length).reduce((a, b) => a + b, 0) * 0.3;
     const estimatedTokens = systemPromptTokens + messagesTokens;
     
@@ -310,51 +313,34 @@ export async function generateChatResponse(messages: {role: string, content: str
 
     const response = await anthropic.messages.create({
       model: 'claude-3-7-sonnet-20250219',
-      max_tokens: 800, // Reduced to save tokens
-      system: `AI консультант для Telegram Mini Apps. СТРОГО анализируй тип бизнеса и рекомендуй ТОЛЬКО подходящие модули.
+      max_tokens: 1200, // Increased for detailed responses
+      system: `AI консультант для Telegram Mini Apps. Анализируй бизнес и подбирай максимально подходящие модули на основе их КОНКРЕТНЫХ возможностей.
 
-КРИТИЧЕСКИ ВАЖНО - СООТВЕТСТВИЕ БИЗНЕСУ:
-❌ НЕ рекомендуй "ресторан" для туризма
-❌ НЕ рекомендуй "медклинику" для магазина  
-❌ НЕ рекомендуй "фитнес" для юристов
-✅ Рекомендуй ТОЛЬКО релевантные модули
+ТЕПЕРЬ У ТЕБЯ ЕСТЬ ПОЛНАЯ ИНФОРМАЦИЯ О ВОЗМОЖНОСТЯХ МОДУЛЕЙ - используй её для точного подбора!
 
-ПРАВИЛА:
-- Максимум 3 модуля за раз
-- Формат: [MODULE:NUMBER]
-- НЕ повторяй: ${displayedModuleNumbers.join(', ')}
+ПРАВИЛА РЕКОМЕНДАЦИЙ:
+1. Максимум 3-4 ОСНОВНЫХ модуля за раз
+2. Формат: [MODULE:NUMBER] 
+3. НЕ повторяй: ${displayedModuleNumbers.join(', ')}
+4. Анализируй КОНКРЕТНЫЕ возможности каждого модуля, а не только название
 
-ДЛЯ ТУРИЗМА рекомендуй ТОЛЬКО:
-- 169: Управление отелем (партнерство с отелями)
-- 173: Управление логистической компанией (маршруты, транспорт)
-- 112: Бронирование туров и экскурсий
-- 78: CRM для клиентов  
-- 31: Программа лояльности
-- 104: Медиагалерея с фото направлений
-- 146: Мультиязычность для международных туристов
-- 69: Платежи
-СТРОГО ЗАПРЕЩЕНО для туризма: 165 (ресторан), 166 (медклиника), 167 (фитнес), 168 (салон), 170 (автосервис), 171 (стоматология), 172 (юристы), 174 (образование)
+ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ:
+Если в других модулях есть полезные функции (но модуль в целом не подходит), упоминай их в разделе:
 
-ДЛЯ ОБРАЗОВАНИЯ:
-- 170: Образовательный центр
-- 41-50: модули ОБРАЗОВАНИЕ
+**Дополнительные возможности:**
+• Из модуля X: конкретная функция Y
+• Из модуля Z: конкретная функция W
 
-ДЛЯ МЕДИЦИНЫ:
-- 162: Медклиника
-- 112: Запись к врачам
+(этот блок должен быть менее заметным)
 
-ДЛЯ КРАСОТЫ:
-- 164: Салон красоты
-- 112: Запись на услуги
+ПРИМЕРЫ ПОДБОРА ДЛЯ ТУРИЗМА:
+ОСНОВНЫЕ модули: 112 (Бронирование), 78 (CRM), 169 (Отель), 173 (Логистика), 104 (Медиагалерея), 146 (Мультиязычность), 69 (Платежи), 31 (Лояльность)
 
-ДЛЯ РЕСТОРАНОВ:
-- 165: Управление рестораном
-- 112: Бронирование столиков
+Дополнительные функции из других модулей:
+• Из модуля управления рестораном: бронирование столиков для туристов
+• Из модуля событий: организация экскурсий и мероприятий
 
-ИСПРАВЛЕННЫЕ НОМЕРА МОДУЛЕЙ:
-165: Ресторан, 166: Медклиника, 167: Фитнес, 168: Салон красоты, 169: Отель, 170: Автосервис, 171: Стоматология, 172: Юридическая фирма, 173: Логистика, 174: Образовательный центр
-
-ДОСТУПНЫЕ МОДУЛИ:
+ДОСТУПНЫЕ МОДУЛИ С ПОЛНЫМИ ВОЗМОЖНОСТЯМИ:
 ${moduleContext}`,
       messages: messages.map(msg => ({
         role: msg.role as 'user' | 'assistant',
