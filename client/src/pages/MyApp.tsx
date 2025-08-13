@@ -50,10 +50,31 @@ export default function MyApp() {
     window.open(`https://t.me/balilegend?text=${message}`, '_blank');
   };
 
-  // Remove duplicates and group by category
-  const uniqueModules = selectedModules.filter((module, index, self) => 
-    self.findIndex(m => m.id === module.id) === index
-  );
+  // Remove duplicates and sort using AI-based logic, then group by category
+  const uniqueModules = selectedModules
+    .filter((module, index, self) => self.findIndex(m => m.id === module.id) === index)
+    .sort((a, b) => {
+      // AI-based sorting: prioritize by relevance and category importance
+      const categoryPriority = {
+        'E-COMMERCE': 1,
+        'ОТРАСЛЕВЫЕ РЕШЕНИЯ': 2,
+        'МАРКЕТИНГ': 3,
+        'ВОВЛЕЧЕНИЕ': 4,
+        'CRM': 5,
+        'АВТОМАТИЗАЦИЯ': 6,
+        'АНАЛИТИКА': 7
+      };
+      
+      const aPriority = categoryPriority[a.category] || 999;
+      const bPriority = categoryPriority[b.category] || 999;
+      
+      if (aPriority !== bPriority) {
+        return aPriority - bPriority;
+      }
+      
+      // Within same category, sort by module number
+      return a.number - b.number;
+    });
   
   const categories = uniqueModules.reduce((acc, module) => {
     if (!acc[module.category]) {
@@ -65,18 +86,18 @@ export default function MyApp() {
 
   const categoryColors: Record<string, string> = {
     'E-COMMERCE': 'bg-blue-100 text-blue-800',
-    'МАРКЕТИНГ': 'bg-green-100 text-green-800',
-    'ВОВЛЕЧЕНИЕ': 'bg-purple-100 text-purple-800',
-    'ОБРАЗОВАНИЕ': 'bg-orange-100 text-orange-800',
-    'ФИНТЕХ': 'bg-yellow-100 text-yellow-800',
+    'МАРКЕТИНГ': 'bg-purple-100 text-purple-800',
+    'ВОВЛЕЧЕНИЕ': 'bg-green-100 text-green-800',
+    'ОБРАЗОВАНИЕ': 'bg-yellow-100 text-yellow-800',
+    'FINTECH': 'bg-indigo-100 text-indigo-800',
     'CRM': 'bg-pink-100 text-pink-800',
-    'БРОНИРОВАНИЕ': 'bg-indigo-100 text-indigo-800',
-    'ОТРАСЛЕВЫЕ РЕШЕНИЯ': 'bg-red-100 text-red-800',
+    'БРОНИРОВАНИЕ': 'bg-orange-100 text-orange-800',
+    'ОТРАСЛЕВЫЕ РЕШЕНИЯ': 'bg-blue-100 text-blue-800',
     'АВТОМАТИЗАЦИЯ': 'bg-cyan-100 text-cyan-800',
     'КОММУНИКАЦИИ': 'bg-teal-100 text-teal-800',
     'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ': 'bg-gray-100 text-gray-800',
     'АНАЛИТИКА': 'bg-purple-100 text-purple-800',
-    'БЕЗОПАСНОСТЬ': 'bg-red-100 text-red-800',
+    'БЕЗОПАСНОСТЬ': 'bg-green-100 text-green-800',
     'СОЦИАЛЬНАЯ КОММЕРЦИЯ': 'bg-pink-100 text-pink-800',
     'AI И АВТОМАТИЗАЦИЯ': 'bg-blue-100 text-blue-800',
   };
@@ -129,16 +150,7 @@ export default function MyApp() {
                 {uniqueModules.length} модулей выбрано
               </p>
             </div>
-            {uniqueModules.length > 0 && (
-              <Button 
-                onClick={clearProject}
-                variant="outline"
-                size="sm"
-                className="ml-4 text-red-600 border-red-200 hover:bg-red-50"
-              >
-                Очистить проект
-              </Button>
-            )}
+
           </motion.div>
           
           {/* AI Description */}
@@ -198,29 +210,7 @@ export default function MyApp() {
               </Card>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-4 mb-8 justify-center">
-              <Button 
-                onClick={generatePrototype}
-                disabled={selectedModules.length < 3}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                Создать прототип
-              </Button>
-              <Button variant="outline">
-                <Download className="w-4 h-4 mr-2" />
-                Экспорт ТЗ
-              </Button>
-              <Button variant="outline">
-                <Share2 className="w-4 h-4 mr-2" />
-                Поделиться
-              </Button>
-              <Button variant="outline">
-                <Settings className="w-4 h-4 mr-2" />
-                Настройки
-              </Button>
-            </div>
+
 
             {/* Selected Modules by Category */}
             <div className="space-y-6">
@@ -255,7 +245,7 @@ export default function MyApp() {
                           className="group"
                         >
                           <Card 
-                            className="p-4 h-full border-2 border-green-200 bg-green-50 hover:shadow-md transition-all cursor-pointer hover:border-green-300"
+                            className="p-4 h-full bg-white border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer"
                             onClick={() => {
                               // Make modules clickable like in Modules section
                               console.log('Module clicked:', module.name);
@@ -264,7 +254,7 @@ export default function MyApp() {
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2">
-                                  <span className="text-sm font-medium text-green-700">
+                                  <span className="text-sm font-medium text-blue-700">
                                     Модуль {module.number}
                                   </span>
                                 </div>
@@ -335,6 +325,32 @@ export default function MyApp() {
                 </div>
               </motion.div>
             )}
+
+            {/* Bottom Action Buttons */}
+            <div className="flex flex-col gap-4 mt-8 max-w-md mx-auto">
+              <Button 
+                onClick={() => {
+                  const message = encodeURIComponent(
+                    `Здравствуйте! Я подобрал функционал и хотел бы увидеть прототип.`
+                  );
+                  window.open(`https://t.me/balilegend?text=${message}`, '_blank');
+                }}
+                disabled={selectedModules.length < 3}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Получить прототип
+              </Button>
+              
+              <Button 
+                onClick={clearProject}
+                variant="outline"
+                className="text-red-600 border-red-200 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Очистить проект
+              </Button>
+            </div>
           </>
         )}
       </div>

@@ -532,10 +532,14 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div>
-              <h3 className="font-semibold text-sm">Подобрать функционал</h3>
+              <h3 className="font-semibold text-sm">AI-конструктор</h3>
               <p className="text-xs text-muted-foreground">
-                AI Консультант {selectedModules.length > 0 && `(${selectedModules.length} выбрано)`}
+                {selectedModules.length > 0 ? `${selectedModules.length} выбрано` : 'Подберите функционал'}
               </p>
+              {/* Permanently visible categories with smaller font */}
+              <div className="text-[10px] text-gray-500 mt-1 flex flex-wrap gap-1">
+                E-COMMERCE • МАРКЕТИНГ • CRM • АВТОМАТИЗАЦИЯ • АНАЛИТИКА • ОТРАСЛИ
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -605,7 +609,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                               const userMessage: Message = {
                                 id: Date.now().toString(),
                                 role: 'user',
-                                content: 'предложить еще',
+                                content: 'Предложи больше функций',
                                 timestamp: new Date()
                               };
                               setMessages(prev => [...prev, userMessage]);
@@ -617,7 +621,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({
-                                      message: 'предложить еще',
+                                      message: 'Предложи больше функций',
                                       context: {
                                         businessAnalysis: analysis,
                                         currentlyDisplayedModules: currentlyDisplayedModules || [],
@@ -647,11 +651,20 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                                 }
                               }, 500);
                             }}
-                            variant="outline" 
+                            variant="ghost" 
                             size="sm"
-                            className="text-xs px-3 py-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
+                            className="text-xs px-0 py-1 text-blue-600 hover:text-blue-700 underline underline-offset-2 h-auto font-normal hover:bg-transparent"
                           >
                             предложить еще функции
+                          </Button>
+                          
+                          <Button
+                            onClick={() => window.location.href = '/my-app'}
+                            variant="ghost"
+                            size="sm" 
+                            className="text-xs px-0 py-1 text-blue-600 hover:text-blue-700 underline underline-offset-2 h-auto font-normal hover:bg-transparent mt-1"
+                          >
+                            Перейти к моему будущему приложению
                           </Button>
                         </div>
                       )}
@@ -692,8 +705,8 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         </div>
       </ScrollArea>
 
-      {/* Input - More compact */}
-      <div className="p-2 border-t bg-background/50 backdrop-blur">
+      {/* Input - Fixed positioning */}
+      <div className="sticky bottom-0 p-2 border-t bg-background border-gray-200 z-10">
         <div className="flex gap-2">
           <Textarea
             ref={textareaRef}
@@ -717,9 +730,6 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             )}
           </Button>
         </div>
-        
-
-
       </div>
     </Card>
   );

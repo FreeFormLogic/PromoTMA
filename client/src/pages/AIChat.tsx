@@ -25,7 +25,7 @@ export default function AIChatPage() {
         <div className="flex items-center gap-2">
           <h1 className="font-semibold text-lg">AI-конструктор</h1>
           <p className="text-sm text-muted-foreground">
-            Персональный подбор модулей для вашего бизнеса
+            Создайте ваше приложение с AI
           </p>
         </div>
         <div className="flex items-center gap-2">

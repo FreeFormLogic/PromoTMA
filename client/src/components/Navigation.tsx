@@ -77,7 +77,7 @@ export function Navigation() {
                       isActive 
                         ? 'bg-blue-600 text-white' 
                         : item.path === '/ai-chat'
-                        ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
+                        ? 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
                         : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                     }`}>
                       <Icon className="w-4 h-4" />
@@ -144,7 +144,7 @@ export function Navigation() {
                       isActive 
                         ? 'bg-blue-600 text-white' 
                         : item.path === '/ai-chat'
-                        ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
+                        ? 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
                         : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}

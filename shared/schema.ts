@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, jsonb, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, jsonb, integer, boolean, serial, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -51,6 +51,30 @@ export const objections = pgTable("objections", {
   category: text("category").notNull(),
 });
 
+// Authorized users table (first whitelist - app access)
+export const authorizedUsers = pgTable("authorized_users", {
+  id: serial("id").primaryKey(),
+  telegramId: varchar("telegram_id", { length: 255 }).notNull().unique(),
+  username: varchar("username", { length: 255 }),
+  firstName: varchar("first_name", { length: 255 }),
+  lastName: varchar("last_name", { length: 255 }),
+  addedAt: timestamp("added_at").defaultNow(),
+  addedBy: varchar("added_by", { length: 255 }),
+  isActive: boolean("is_active").default(true),
+});
+
+// Functionality access users table (second whitelist - module access)
+export const functionalityUsers = pgTable("functionality_users", {
+  id: serial("id").primaryKey(),
+  telegramId: varchar("telegram_id", { length: 255 }).notNull().unique(),
+  username: varchar("username", { length: 255 }),
+  firstName: varchar("first_name", { length: 255 }),
+  lastName: varchar("last_name", { length: 255 }),
+  addedAt: timestamp("added_at").defaultNow(),
+  addedBy: varchar("added_by", { length: 255 }),
+  isActive: boolean("is_active").default(true),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -74,6 +98,16 @@ export const insertObjectionSchema = createInsertSchema(objections).omit({
   id: true,
 });
 
+export const insertAuthorizedUserSchema = createInsertSchema(authorizedUsers).omit({
+  id: true,
+  addedAt: true,
+});
+
+export const insertFunctionalityUserSchema = createInsertSchema(functionalityUsers).omit({
+  id: true,
+  addedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Module = typeof modules.$inferSelect;
@@ -81,3 +115,7 @@ export type Industry = typeof industries.$inferSelect;
 export type InsertIndustry = z.infer<typeof insertIndustrySchema>;
 export type USP = typeof usps.$inferSelect;
 export type Objection = typeof objections.$inferSelect;
+export type AuthorizedUser = typeof authorizedUsers.$inferSelect;
+export type FunctionalityUser = typeof functionalityUsers.$inferSelect;
+export type InsertAuthorizedUser = z.infer<typeof insertAuthorizedUserSchema>;
+export type InsertFunctionalityUser = z.infer<typeof insertFunctionalityUserSchema>;
