@@ -30,4 +30,17 @@ window.addEventListener('unhandledrejection', (event) => {
   }
 });
 
+// Override console.error to hide runtime error overlay for extension errors
+const originalConsoleError = console.error;
+console.error = (...args) => {
+  const errorString = args.join(' ');
+  if (errorString.includes('chrome-extension') ||
+      errorString.includes('extension') ||
+      errorString.includes('binance') ||
+      errorString.includes('egjidjbpglichdcondbcbdnbeeppgdph')) {
+    return; // Don't log extension errors
+  }
+  originalConsoleError.apply(console, args);
+};
+
 createRoot(document.getElementById("root")!).render(<App />);

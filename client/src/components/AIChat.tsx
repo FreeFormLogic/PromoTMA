@@ -53,8 +53,8 @@ let persistentMessages: Message[] = [
   {
     id: '1',
     role: 'assistant',
-    content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
-    timestamp: new Date()
+    content: 'Привет! Я помогу создать ваное собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
+    timestamp: Date.now()
   }
 ];
 
@@ -136,7 +136,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           id: '1',
           role: 'assistant' as const,
           content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
-          timestamp: new Date()
+          timestamp: Date.now()
         }];
         persistentMessages = defaultMessage;
         localStorage.setItem('aiChatMessages', JSON.stringify(defaultMessage));
@@ -248,7 +248,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       id: Date.now().toString(),
       role: 'user',
       content: input.trim(),
-      timestamp: new Date()
+      timestamp: Date.now()
     };
 
     const updatedMessages = [...messages, userMessage];
@@ -279,7 +279,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: responseData.response,
-        timestamp: new Date()
+        timestamp: Date.now()
       };
 
       const finalMessages = [...updatedMessages, assistantMessage];
@@ -300,7 +300,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: 'Извините, произошла ошибка. Попробуйте еще раз.',
-        timestamp: new Date()
+        timestamp: Date.now()
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -533,7 +533,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       id: Date.now().toString(),
       role: 'assistant',
       content: prototypeDescription,
-      timestamp: new Date()
+      timestamp: Date.now()
     };
     
     setMessages(prev => [...prev, prototypeMessage]);
@@ -737,10 +737,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
   }
 
   return (
-    <Card className={`${isFullScreen ? 'h-screen w-screen rounded-none border-0' : 'h-full'} flex flex-col bg-gradient-to-br from-background via-background to-primary/5 border-2 border-primary/10 ${isMinimized ? 'w-80' : ''}`}>
+    <Card className={`${isFullScreen ? 'h-screen w-screen rounded-none border-0 overflow-hidden' : 'h-full'} flex flex-col bg-gradient-to-br from-background via-background to-primary/5 border-2 border-primary/10 ${isMinimized ? 'w-80' : ''}`}>
 
       {/* Messages */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 min-h-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 min-h-0 overflow-hidden">
         <div className="space-y-3 min-h-[100px] pb-20">
           <AnimatePresence>
             {messages.map((message) => {
@@ -777,7 +777,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       <p className={`text-[10px] mt-1 ${
                         message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
                       }`}>
-                        {message.timestamp.toLocaleTimeString('ru-RU', { 
+                        {new Date(message.timestamp).toLocaleTimeString('ru-RU', { 
                           hour: '2-digit', 
                           minute: '2-digit' 
                         })}

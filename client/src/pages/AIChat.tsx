@@ -28,9 +28,9 @@ export default function AIChatPage() {
   }, [setLocation]);
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col relative">
+    <div className="h-screen w-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col relative overflow-hidden">
       {/* Header with Menu Button */}
-      <div className="p-3 border-b bg-primary/5 backdrop-blur flex items-center justify-between">
+      <div className="p-3 border-b bg-primary/5 backdrop-blur flex items-center justify-between flex-shrink-0">
         <div className="flex flex-col">
           <h1 className="font-semibold text-lg">AI-конструктор приложений</h1>
           <p className="text-xs text-gray-500 mt-1">Создадим приложение вместе</p>
@@ -49,7 +49,7 @@ export default function AIChatPage() {
       </div>
 
       {/* Full Screen AI Chat */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden min-h-0">
         <AIChat
           onAnalysisUpdate={handleAnalysisUpdate}
           onModulesUpdate={handleModulesUpdate}
