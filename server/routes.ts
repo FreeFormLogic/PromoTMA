@@ -276,7 +276,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error generating AI response:", error);
-      res.status(500).json({ message: "Ошибка генерации ответа" });
+      
+      // Handle rate limiting specifically
+      if (error.status === 429 || error.message?.includes('rate_limit')) {
+        return res.json({
+          response: "⏱️ Слишком много запросов. Пожалуйста, подождите 1-2 минуты перед следующим запросом.",
+          recommendedModules: []
+        });
+      }
+      
+      // Handle overload errors
+      if (error.status === 529 || error.message?.includes('overloaded')) {
+        return res.json({
+          response: "🔄 Система временно перегружена. Попробуйте еще раз через несколько секунд.",
+          recommendedModules: []
+        });
+      }
+      
+      // Generic error
+      res.json({
+        response: "Извините, произошла ошибка. Попробуйте еще раз.",
+        recommendedModules: []
+      });
     }
   });
 

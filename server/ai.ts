@@ -259,60 +259,63 @@ export function calculateModuleRelevance(
   return score;
 }
 
+// Rate limiting state
+let lastRequestTime = 0;
+let tokenUsage = 0;
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_TOKENS_PER_MINUTE = 15000; // Leave buffer for API limits
+
 export async function generateChatResponse(messages: {role: string, content: string}[], allModules: any[], displayedModules: any[]): Promise<{ response: string; recommendedModules: number[] }> {
+  // Rate limiting check
+  const now = Date.now();
+  if (now - lastRequestTime < RATE_LIMIT_WINDOW && tokenUsage > MAX_TOKENS_PER_MINUTE) {
+    throw new Error('Rate limit exceeded. Please wait a moment before making another request.');
+  }
+  
+  // Reset token usage if window has passed
+  if (now - lastRequestTime >= RATE_LIMIT_WINDOW) {
+    tokenUsage = 0;
+    lastRequestTime = now;
+  }
+  
   // Get displayed module numbers for filtering
   const displayedModuleNumbers = displayedModules.map(m => m.number);
   
-  // Get COMPLETE module database for AI context with full details
-  const moduleContext = allModules.map(m => 
-    `${m.number}: ${m.name} - ${m.category} - ${m.description} - Features: ${Array.isArray(m.keyFeatures) ? m.keyFeatures.join('; ') : m.keyFeatures || 'N/A'}`
-  ).join('\n');
+  // Reduce module context to save tokens - only send essential info
+  const moduleContext = allModules
+    .filter(m => !displayedModuleNumbers.includes(m.number)) // Exclude already shown
+    .slice(0, 100) // Limit to 100 modules to reduce tokens
+    .map(m => `${m.number}: ${m.name} - ${m.category}`)
+    .join('\n');
 
   try {
     const anthropic = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY!
     });
 
+    // Estimate token usage (rough approximation)
+    const systemPromptTokens = 800; // Reduced system prompt
+    const messagesTokens = messages.map(m => m.content.length).reduce((a, b) => a + b, 0) * 0.3;
+    const estimatedTokens = systemPromptTokens + messagesTokens;
+    
+    // Update token usage tracking
+    tokenUsage += estimatedTokens;
+
     const response = await anthropic.messages.create({
       model: 'claude-3-7-sonnet-20250219',
-      max_tokens: 1000,
-      system: `You are an AI consultant for Telegram Mini Apps, specializing in business solutions.
+      max_tokens: 800, // Reduced to save tokens
+      system: `AI консультант для Telegram Mini Apps. Анализируй бизнес и рекомендуй модули.
 
-КРИТИЧЕСКИ ВАЖНО - ТОЧНЫЙ ПОДБОР МОДУЛЕЙ:
-- Анализируй ПОЛНОЕ описание каждого модуля включая keyFeatures
-- Рекомендуй ТОЛЬКО модули, которые ТОЧНО соответствуют бизнесу
-- Для салона красоты: модуль 168 (Управление салоном красоты), модули для записи, отзывов, лояльности
-- Для ресторана: модуль 161 (Система управления рестораном), модули доставки, меню
-- Для фитнеса: модуль 163 (Управление фитнес-клубом), модули абонементов, тренировок
+ПРАВИЛА:
+- Максимум 3 модуля за ответ
+- Используй [MODULE:NUMBER] формат
+- Не повторяй показанные: ${displayedModuleNumbers.join(', ')}
 
-ФОРМАТ ОТВЕТОВ:
-- НЕ УПОМИНАЙ "Модуль 130" или "№130" в тексте
-- Используй ТОЛЬКО [MODULE:NUMBER] для каждого модуля
-- Пример: [MODULE:164] вместо "Модуль 164"
+КЛЮЧЕВЫЕ МОДУЛИ:
+161: Ресторан 162: Медклиника 163: Фитнес 164: ESB 165: Отель 166: Автосервис 167: Стоматология 168: Салон красоты 169: Логистика 170: Обучение
 
-ПОЛНАЯ БАЗА МОДУЛЕЙ (${allModules.length} модулей):
+ДОСТУПНЫЕ МОДУЛИ (исключая показанные):
 ${moduleContext}
-
-УЖЕ ПОКАЗАННЫЕ МОДУЛИ (не повторяй): ${displayedModuleNumbers.join(', ')}
-
-АЛГОРИТМ ПОДБОРА:
-1. Определи тип бизнеса из сообщений
-2. Найди ТОЧНО соответствующий отраслевой модуль (161-170)
-3. Добавь 2-3 дополняющих модуля из других категорий
-4. Проверь, что все модули логично связаны с бизнесом
-5. Максимум 3 модуля за ответ
-6. Не повторяй показанные модули
-
-ОТРАСЛЕВЫЕ МОДУЛИ (161-170):
-161: Система управления рестораном - для ресторанов, кафе, пиццерий
-162: Медицинская информационная система - для клиник, врачей, медцентров  
-163: Управление фитнес-клубом - для фитнеса, спортзалов, йоги
-164: Интеграционная шина (ESB) - для системных интеграций
-165: Система управления отелем - для отелей, хостелов, гостиниц
-166: Управление автосервисом - для автосервисов, СТО, автомоек
-167: Стоматологическая информационная система - для стоматологий
-168: Управление салоном красоты - для салонов красоты, парикмахерских, SPA
-169: Логистическая информационная система - для логистики, доставки
 170: Управление образовательным центром - для школ, курсов, обучения`,
       messages: messages.map(msg => ({
         role: msg.role as 'user' | 'assistant',
