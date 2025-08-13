@@ -259,7 +259,7 @@ export function calculateModuleRelevance(
   return score;
 }
 
-export async function generateChatResponse(messages: string[], allModules: any[], displayedModules: any[]): Promise<{ response: string; recommendedModules: number[] }> {
+export async function generateChatResponse(messages: {role: string, content: string}[], allModules: any[], displayedModules: any[]): Promise<{ response: string; recommendedModules: number[] }> {
   // Get displayed module numbers for filtering
   const displayedModuleNumbers = displayedModules.map(m => m.number);
   
@@ -314,12 +314,10 @@ ${moduleContext}
 168: Система управления юридической фирмой - для юридических услуг
 169: Логистическая информационная система - для логистики, доставки
 170: Управление образовательным центром - для школ, курсов, обучения`,
-      messages: [
-        {
-          role: 'user',
-          content: messages.join('\n\n')
-        }
-      ]
+      messages: messages.map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content
+      }))
     });
 
     let responseText = '';

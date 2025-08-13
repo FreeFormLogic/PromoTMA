@@ -249,6 +249,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('- Messages received:', messages.length);
       console.log('- Already shown modules:', alreadyShownModules.length);
       
+      // Convert message objects to proper format for AI
+      console.log('- Raw messages format:', messages.map(m => `${m.role}: "${m.content}"`));
+      
       // Use the improved generateChatResponse with complete module database
       const result = await generateChatResponse(messages, allModules, alreadyShownModules);
       
