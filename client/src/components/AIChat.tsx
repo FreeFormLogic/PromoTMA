@@ -457,7 +457,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     setMessages(prev => [...prev, prototypeMessage]);
   };
 
-  const renderMessageWithModules = (content: string, isAssistant: boolean) => {
+  const renderMessageWithModules = (content: string, isAssistant: boolean, hasDisplayedModules: boolean = false) => {
     if (!isAssistant || !allModules) {
       // Format text for user messages with bold support
       return formatText(content);
@@ -485,8 +485,8 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       return <span key={index}>{formatText(part)}</span>;
     });
 
-    // Add clickable text at the end if this message contains modules
-    if (hasModules && currentlyDisplayedModules && currentlyDisplayedModules.length > 0) {
+    // Add clickable text at the end if this message has modules or if modules are currently displayed
+    if ((hasModules || hasDisplayedModules) && currentlyDisplayedModules && currentlyDisplayedModules.length > 0) {
       renderedParts.push(
         <div key="actions" className="mt-4 pt-3 border-t border-gray-200">
           <div className="flex flex-wrap gap-4 text-xs">
@@ -644,7 +644,11 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       }`}
                     >
                       <div className="text-xs whitespace-pre-wrap leading-relaxed">
-                        {renderMessageWithModules(message.content, message.role === 'assistant')}
+                        {renderMessageWithModules(
+                          message.content, 
+                          message.role === 'assistant', 
+                          message.role === 'assistant' && currentlyDisplayedModules && currentlyDisplayedModules.length > 0
+                        )}
                       </div>
                       <p className={`text-[10px] mt-1 ${
                         message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
