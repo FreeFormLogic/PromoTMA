@@ -294,14 +294,17 @@ export default function MyApp() {
                                 <div 
                                   className="text-xs text-blue-600 leading-relaxed"
                                   dangerouslySetInnerHTML={{
-                                    __html: module.benefits.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').substring(0, 100) + '...'
+                                    __html: module.benefits.replace(/\.\.\..*/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                                   }}
                                 />
                               </div>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => removeModule(module.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeModule(module.id);
+                                }}
                                 className="text-red-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
                               >
                                 <Trash2 className="w-4 h-4" />

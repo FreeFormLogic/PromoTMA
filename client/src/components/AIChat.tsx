@@ -327,9 +327,12 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             
             {/* Benefit and arrow */}
             <div className="flex items-center justify-between">
-              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium flex-1">
-                {module.benefits}
-              </p>
+              <div 
+                className="text-xs text-blue-600 dark:text-blue-400 font-medium flex-1"
+                dangerouslySetInnerHTML={{
+                  __html: module.benefits.replace(/\.\.\..*/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                }}
+              />
               <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                 <Button
                   variant="ghost"
@@ -361,6 +364,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 </DialogTitle>
               </div>
 
+              <DialogDescription className="sr-only">
+                Детальная информация о выбранном модуле
+              </DialogDescription>
             </DialogHeader>
             
             <ScrollArea className="max-h-[70vh] pr-4">
@@ -375,19 +381,12 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       {module.description}
                     </p>
                     <div className="mt-3 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                      <div className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed text-left">
-                          {module.benefits.split(/(\*\*.*?\*\*)/).map((part, index) => {
-                            if (part.startsWith('**') && part.endsWith('**')) {
-                              const boldText = part.slice(2, -2);
-                              return (
-                                <strong key={index} className="font-semibold">
-                                  {boldText}
-                                </strong>
-                              );
-                            }
-                            return <span key={index}>{part}</span>;
-                          })}
-                      </div>
+                      <div 
+                        className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed text-left"
+                        dangerouslySetInnerHTML={{
+                          __html: module.benefits.replace(/\.\.\..*/, '').replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
