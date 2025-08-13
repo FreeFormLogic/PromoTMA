@@ -105,13 +105,13 @@ const categoryColors: { [key: string]: string } = {
   "БРОНИРОВАНИЕ": "bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300",
   "КОНТЕНТ И МЕДИА": "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300",
   "ИНТЕГРАЦИИ": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-  "ИНДОНЕЗИЯ": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
+  "ИНДОНЕЗИЯ": "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
   "ИГРЫ": "bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300",
   "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ": "bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300",
   "АВТОМАТИЗАЦИЯ": "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
   "ОТРАСЛЕВЫЕ РЕШЕНИЯ": "bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300",
   "АНАЛИТИКА": "bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300",
-  "БЕЗОПАСНОСТЬ": "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300",
+  "БЕЗОПАСНОСТЬ": "bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300",
   "КОММУНИКАЦИИ": "bg-lime-100 text-lime-700 dark:bg-lime-900 dark:text-lime-300",
   "СОЦИАЛЬНАЯ КОММЕРЦИЯ": "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900 dark:text-fuchsia-300",
   "AI И АВТОМАТИЗАЦИЯ": "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300",
@@ -169,7 +169,7 @@ function CompactModuleCard({ module }: { module: Module }) {
                 <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 leading-tight break-words hyphens-auto overflow-visible whitespace-normal">
                   {module.name}
                 </h3>
-                <Badge className={`text-xs mt-1 ${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
+                <Badge className={`text-xs mt-1 font-normal ${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
                   #{module.number}
                 </Badge>
               </div>
@@ -198,7 +198,7 @@ function CompactModuleCard({ module }: { module: Module }) {
             <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {module.name}
             </DialogTitle>
-            <Badge className={`${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
+            <Badge className={`text-xs font-normal ${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
               {module.category}
             </Badge>
           </div>
@@ -339,7 +339,7 @@ export default function Modules() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Ошибка загрузки модулей</h1>
+          <h1 className="text-2xl font-bold text-blue-600 mb-4">Ошибка загрузки модулей</h1>
           <p className="text-gray-600">Попробуйте обновить страницу</p>
         </div>
       </div>

@@ -613,7 +613,7 @@ export default function Industries() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Ошибка загрузки ниш</h1>
+          <h1 className="text-2xl font-bold text-blue-600 mb-4">Ошибка загрузки ниш</h1>
           <p className="text-gray-600">Попробуйте обновить страницу</p>
         </div>
       </div>

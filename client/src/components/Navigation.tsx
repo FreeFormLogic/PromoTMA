@@ -96,6 +96,17 @@ export function Navigation() {
       </header>
 
 
+      {/* Mobile menu button - снизу экрана */}
+      <div className="md:hidden fixed bottom-24 right-4 z-40">
+        <Button 
+          variant="default" 
+          size="lg"
+          className="bg-green-500 hover:bg-green-600 text-white rounded-full w-14 h-14 shadow-lg"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </Button>
+      </div>
         
       {/* Mobile Menu - снизу экрана */}
       {isMobileMenuOpen && (
