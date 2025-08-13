@@ -55,6 +55,14 @@ Preferred communication style: Simple, everyday language.
 - ✅ COMPLETED: Chat introduction message explaining plus button functionality for module selection
 - ✅ COMPLETED: Comprehensive button and UI element color consistency throughout platform
 
+### Critical AI Module Recommendation Fix (January 13, 2025)
+- ✅ COMPLETED: Fixed incorrect module numbers in AI system - was recommending "ресторан" (#165) for tourism companies
+- ✅ COMPLETED: Corrected module mapping: 169=Hotel Management, 173=Logistics Management  
+- ✅ COMPLETED: Added strict business-type validation preventing inappropriate recommendations
+- ✅ COMPLETED: Tourism companies now get proper modules: Hotel(169), Logistics(173), Booking(112), CRM(78)
+- ✅ COMPLETED: AI now receives ALL 260+ modules instead of limited 100-module subset
+- ✅ COMPLETED: Enhanced system prompts with explicit business-specific module restrictions
+
 ### Module Database Expansion & Chat UX Fixes (January 13, 2025)
 - ✅ COMPLETED: Added 15 new E-commerce modules (221-235) expanding database to 244+ total modules
 - ✅ COMPLETED: Fixed AI chat message cutoff issue - messages now have proper bottom spacing (pb-20)
