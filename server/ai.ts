@@ -327,13 +327,13 @@ export async function generateChatResponse(messages: {role: string, content: str
 4. Анализируй КОНКРЕТНЫЕ возможности каждого модуля, а не только название
 
 ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ:
-Если в других модулях есть полезные функции (но модуль в целом не подходит), упоминай их в разделе:
+Если в других модулях есть полезные функции (но модуль в целом не подходит), упоминай их тоже в формате [MODULE:NUMBER]:
 
 **Дополнительные возможности:**
-• Из модуля X: конкретная функция Y
-• Из модуля Z: конкретная функция W
+[MODULE:104] Медиагалерея - для презентации блюд
+[MODULE:146] Мультиязычность - для иностранных клиентов  
 
-(этот блок должен быть менее заметным)
+ВСЕ рекомендуемые модули должны быть в формате [MODULE:NUMBER] чтобы система их корректно отобразила!
 
 ПРИМЕРЫ ПОДБОРА ДЛЯ ТУРИЗМА:
 ОСНОВНЫЕ модули: 112 (Бронирование), 78 (CRM), 169 (Отель), 173 (Логистика), 104 (Медиагалерея), 146 (Мультиязычность), 69 (Платежи), 31 (Лояльность)
@@ -367,9 +367,19 @@ ${moduleContext}`,
       return num ? parseInt(num[1]) : null;
     }).filter(num => num !== null);
 
+    // Also extract additional module numbers mentioned in text (e.g., "модуля 104:", "модуля 146:")
+    const additionalMatches = responseText.match(/модуля (\d+):/g) || [];
+    const additionalModuleNumbers = additionalMatches.map(match => {
+      const num = match.match(/модуля (\d+):/);
+      return num ? parseInt(num[1]) : null;
+    }).filter((num): num is number => num !== null && !recommendedModuleNumbers.includes(num));
+
+    // Combine both lists
+    const allRecommendedNumbers = [...recommendedModuleNumbers, ...additionalModuleNumbers];
+
     return {
       response: responseText,
-      recommendedModules: recommendedModuleNumbers
+      recommendedModules: allRecommendedNumbers
     };
   } catch (error) {
     console.error('Error generating AI response:', error);
