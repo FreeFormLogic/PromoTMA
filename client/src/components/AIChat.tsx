@@ -582,78 +582,75 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                         })}
                       </p>
                       
-                      {/* Add buttons after AI messages with modules */}
+                      {/* Add clickable text after AI messages with modules */}
                       {message.role === 'assistant' && currentlyDisplayedModules && currentlyDisplayedModules.length > 0 && (
-                        <div className="mt-3 flex gap-2 flex-wrap">
-                          <Button
-                            onClick={() => {
-                              const userMessage: Message = {
-                                id: Date.now().toString(),
-                                role: 'user',
-                                content: 'Предложи больше функций',
-                                timestamp: new Date()
-                              };
-                              setMessages(prev => [...prev, userMessage]);
-                              setIsLoading(true);
-                              
-                              setTimeout(async () => {
-                                try {
-                                  const response = await fetch('/api/ai/chat', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                      message: 'Предложи больше функций',
-                                      context: {
-                                        businessAnalysis: analysis,
-                                        currentlyDisplayedModules: currentlyDisplayedModules || [],
-                                        selectedModules: selectedModules
-                                      }
-                                    })
-                                  });
-                                  
-                                  const data = await response.json();
-                                  
-                                  if (data.recommendations) {
-                                    onModulesUpdate(data.recommendations);
+                        <div className="mt-3 pt-2 border-t border-gray-200">
+                          <div className="flex flex-wrap gap-4 text-xs">
+                            <span
+                              onClick={() => {
+                                const userMessage: Message = {
+                                  id: Date.now().toString(),
+                                  role: 'user',
+                                  content: 'Предложи больше функций',
+                                  timestamp: new Date()
+                                };
+                                setMessages(prev => [...prev, userMessage]);
+                                setIsLoading(true);
+                                
+                                setTimeout(async () => {
+                                  try {
+                                    const response = await fetch('/api/ai/chat', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        message: 'Предложи больше функций',
+                                        context: {
+                                          businessAnalysis: analysis,
+                                          currentlyDisplayedModules: currentlyDisplayedModules || [],
+                                          selectedModules: selectedModules
+                                        }
+                                      })
+                                    });
+                                    
+                                    const data = await response.json();
+                                    
+                                    if (data.recommendations) {
+                                      onModulesUpdate(data.recommendations);
+                                    }
+                                    
+                                    const botMessage: Message = {
+                                      id: Date.now().toString() + '_bot',
+                                      role: 'assistant',
+                                      content: data.message,
+                                      timestamp: new Date()
+                                    };
+                                    
+                                    setMessages(prev => [...prev, botMessage]);
+                                  } catch (error) {
+                                    console.error('Chat error:', error);
+                                  } finally {
+                                    setIsLoading(false);
                                   }
-                                  
-                                  const botMessage: Message = {
-                                    id: Date.now().toString() + '_bot',
-                                    role: 'assistant',
-                                    content: data.message,
-                                    timestamp: new Date()
-                                  };
-                                  
-                                  setMessages(prev => [...prev, botMessage]);
-                                } catch (error) {
-                                  console.error('Chat error:', error);
-                                } finally {
-                                  setIsLoading(false);
-                                }
-                              }, 500);
-                            }}
-                            variant="ghost" 
-                            size="sm"
-                            className="text-xs px-2 py-1 text-blue-600 hover:text-blue-700 h-auto font-normal hover:bg-blue-50 border border-blue-200 rounded-md"
-                          >
-                            Больше функций
-                          </Button>
+                                }, 500);
+                              }}
+                              className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline font-medium"
+                            >
+                              Еще функции
+                            </span>
+                            
+                            {selectedModules.length > 0 && (
+                              <span
+                                onClick={() => window.location.href = '/my-app'}
+                                className="text-blue-600 hover:text-blue-700 cursor-pointer hover:underline font-medium"
+                              >
+                                Мое App
+                              </span>
+                            )}
+                          </div>
                         </div>
                       )}
                       
-                      {/* Show "Мое App" button after every message if modules are selected */}
-                      {selectedModules.length > 0 && (
-                        <div className={`mt-2 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <Button
-                            onClick={() => window.location.href = '/my-app'}
-                            variant="ghost"
-                            size="sm" 
-                            className="text-xs px-2 py-1 text-blue-600 hover:text-blue-700 h-auto font-normal hover:bg-blue-50 border border-blue-200 rounded-md"
-                          >
-                            Мое App
-                          </Button>
-                        </div>
-                      )}
+
                     </div>
                   </motion.div>
                 );
