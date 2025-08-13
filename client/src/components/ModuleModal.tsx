@@ -592,9 +592,7 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">{module.name}</DialogTitle>
-          <DialogDescription className="text-gray-600">
-            {details.description || module.description}
-          </DialogDescription>
+
           <div className="flex items-center gap-2 mt-2">
             {module.isPopular && (
               <Badge className="bg-orange-100 text-orange-800">Популярный</Badge>

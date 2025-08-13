@@ -360,9 +360,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                   {module.name}
                 </DialogTitle>
               </div>
-              <DialogDescription className="text-gray-600 dark:text-gray-300">
-                Подробная информация о модуле и его возможностях
-              </DialogDescription>
+
             </DialogHeader>
             
             <ScrollArea className="max-h-[70vh] pr-4">
@@ -377,9 +375,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       {module.description}
                     </p>
                     <div className="mt-3 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                      <div className="flex items-start gap-2">
-                        <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                        <div className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed text-left -ml-1">
+                      <div className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed text-left">
                           {module.benefits.split(/(\*\*.*?\*\*)/).map((part, index) => {
                             if (part.startsWith('**') && part.endsWith('**')) {
                               const boldText = part.slice(2, -2);
@@ -391,7 +387,6 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                             }
                             return <span key={index}>{part}</span>;
                           })}
-                        </div>
                       </div>
                     </div>
                   </div>
