@@ -558,8 +558,8 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       </div>
 
       {/* Messages */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 min-h-0">
-        <div className="space-y-3 min-h-[200px]">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 min-h-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        <div className="space-y-3 min-h-[100px]">
           <AnimatePresence>
             {messages.map((message) => {
               try {
@@ -596,6 +596,65 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                           minute: '2-digit' 
                         })}
                       </p>
+                      
+                      {/* Add suggest more button after AI messages */}
+                      {message.role === 'assistant' && (
+                        <div className="mt-3">
+                          <Button
+                            onClick={() => {
+                              const userMessage: Message = {
+                                id: Date.now().toString(),
+                                role: 'user',
+                                content: 'предложить еще',
+                                timestamp: new Date()
+                              };
+                              setMessages(prev => [...prev, userMessage]);
+                              setIsLoading(true);
+                              
+                              setTimeout(async () => {
+                                try {
+                                  const response = await fetch('/api/chat', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      message: 'предложить еще',
+                                      context: {
+                                        businessAnalysis: analysis,
+                                        currentlyDisplayedModules: currentlyDisplayedModules || [],
+                                        selectedModules: selectedModules
+                                      }
+                                    })
+                                  });
+                                  
+                                  const data = await response.json();
+                                  
+                                  if (data.recommendations) {
+                                    onModulesUpdate(data.recommendations);
+                                  }
+                                  
+                                  const botMessage: Message = {
+                                    id: Date.now().toString() + '_bot',
+                                    role: 'assistant',
+                                    content: data.message,
+                                    timestamp: new Date()
+                                  };
+                                  
+                                  setMessages(prev => [...prev, botMessage]);
+                                } catch (error) {
+                                  console.error('Chat error:', error);
+                                } finally {
+                                  setIsLoading(false);
+                                }
+                              }, 500);
+                            }}
+                            variant="outline" 
+                            size="sm"
+                            className="text-xs px-3 py-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
+                          >
+                            предложить еще функции
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 );
@@ -642,7 +701,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyPress}
             placeholder="Расскажите о бизнесе..."
-            className="min-h-[36px] max-h-[80px] resize-none text-xs"
+            className="min-h-[36px] max-h-[80px] resize-none text-xs flex-1"
             disabled={isLoading}
           />
           <Button
@@ -659,60 +718,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           </Button>
         </div>
         
-        {/* Suggest More Button */}
-        <div className="px-3 pb-2">
-          <Button
-            onClick={() => {
-              const userMessage: Message = {
-                id: Date.now().toString(),
-                role: 'user',
-                content: 'предложить еще',
-                timestamp: new Date()
-              };
-              setMessages(prev => [...prev, userMessage]);
-              setIsLoading(true);
-              
-              setTimeout(async () => {
-                try {
-                  const response = await apiRequest('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      message: 'предложить еще',
-                      context: {
-                        businessAnalysis: currentAnalysis,
-                        currentlyDisplayedModules: currentlyDisplayedModules || [],
-                        selectedModules: selectedModules
-                      }
-                    })
-                  });
-                  
-                  if (response.recommendations) {
-                    onModulesUpdate(response.recommendations);
-                  }
-                  
-                  const botMessage: Message = {
-                    id: Date.now().toString() + '_bot',
-                    role: 'assistant',
-                    content: response.message,
-                    timestamp: new Date()
-                  };
-                  
-                  setMessages(prev => [...prev, botMessage]);
-                } catch (error) {
-                  console.error('Chat error:', error);
-                } finally {
-                  setIsLoading(false);
-                }
-              }, 500);
-            }}
-            variant="outline" 
-            size="sm"
-            className="w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
-          >
-            предложить еще
-          </Button>
-        </div>
+
 
       </div>
     </Card>

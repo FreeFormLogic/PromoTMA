@@ -19,6 +19,11 @@ interface Module {
 
 export default function MyApp() {
   const [selectedModules, setSelectedModules] = useState<Module[]>([]);
+  
+  const clearProject = () => {
+    setSelectedModules([]);
+    localStorage.removeItem('selectedModules');
+  };
   const [showPrototype, setShowPrototype] = useState(false);
 
   // Load selected modules from localStorage
@@ -45,7 +50,12 @@ export default function MyApp() {
     window.open(`https://t.me/balilegend?text=${message}`, '_blank');
   };
 
-  const categories = selectedModules.reduce((acc, module) => {
+  // Remove duplicates and group by category
+  const uniqueModules = selectedModules.filter((module, index, self) => 
+    self.findIndex(m => m.id === module.id) === index
+  );
+  
+  const categories = uniqueModules.reduce((acc, module) => {
     if (!acc[module.category]) {
       acc[module.category] = [];
     }
@@ -73,29 +83,29 @@ export default function MyApp() {
 
   // Generate AI description based on selected modules
   const generateAIDescription = () => {
-    if (selectedModules.length === 0) return "Добавьте модули через AI-конструктор для создания персонального описания приложения";
+    if (uniqueModules.length === 0) return "Добавьте модули через AI-конструктор для создания персонального описания приложения";
     
-    const categories = Array.from(new Set(selectedModules.map(m => m.category)));
-    const isIndustrySpecific = selectedModules.some(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
+    const categories = Array.from(new Set(uniqueModules.map(m => m.category)));
+    const isIndustrySpecific = uniqueModules.some(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
     
     if (isIndustrySpecific) {
-      const industryModule = selectedModules.find(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
+      const industryModule = uniqueModules.find(m => m.category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ");
       if (industryModule?.name.includes("салон")) {
-        return "🌟 Создаем комплексное решение для салона красоты с возможностями онлайн-записи, управления клиентской базой и программой лояльности. Ваше приложение поможет автоматизировать бизнес-процессы и увеличить доходы.";
+        return "Создаем комплексное решение для салона красоты с возможностями онлайн-записи, управления клиентской базой и программой лояльности. Ваше приложение поможет автоматизировать бизнес-процессы и увеличить доходы.";
       } else if (industryModule?.name.includes("ресторан")) {
-        return "🍽️ Разрабатываем мощную систему управления рестораном с интегрированными решениями для заказов, доставки и лояльности клиентов. Приложение оптимизирует операции и повысит прибыльность.";
+        return "Разрабатываем мощную систему управления рестораном с интегрированными решениями для заказов, доставки и лояльности клиентов. Приложение оптимизирует операции и повысит прибыльность.";
       } else if (industryModule?.name.includes("фитнес")) {
-        return "💪 Создаем инновационное приложение для фитнес-клуба с системой управления абонементами, расписанием тренировок и мотивацией участников. Современные технологии для роста вашего бизнеса.";
+        return "Создаем инновационное приложение для фитнес-клуба с системой управления абонементами, расписанием тренировок и мотивацией участников. Современные технологии для роста вашего бизнеса.";
       }
     }
     
     if (categories.includes("E-COMMERCE")) {
-      return "🛒 Создаем мощную eCommerce-платформу с интегрированными решениями для продаж, маркетинга и аналитики. Ваше приложение станет центром цифрового бизнеса.";
+      return "Создаем мощную eCommerce-платформу с интегрированными решениями для продаж, маркетинга и аналитики. Ваше приложение станет центром цифрового бизнеса.";
     } else if (categories.includes("ОБРАЗОВАНИЕ")) {
-      return "📚 Разрабатываем современную образовательную платформу с интерактивными курсами, системой оценки и вовлечения студентов. Технологии будущего для качественного обучения.";
+      return "Разрабатываем современную образовательную платформу с интерактивными курсами, системой оценки и вовлечения студентов. Технологии будущего для качественного обучения.";
     }
     
-    return `🚀 Создаем уникальное Telegram Mini App, объединяющее ${selectedModules.length} специально подобранных модулей. Комплексное решение для автоматизации и роста вашего бизнеса.`;
+    return `Создаем уникальное Telegram Mini App, объединяющее ${uniqueModules.length} специально подобранных модулей. Комплексное решение для автоматизации и роста вашего бизнеса.`;
   };
 
   return (
@@ -116,9 +126,19 @@ export default function MyApp() {
                 Мое Mini App
               </h1>
               <p className="text-gray-600 mt-1">
-                {selectedModules.length} модулей выбрано
+                {uniqueModules.length} модулей выбрано
               </p>
             </div>
+            {uniqueModules.length > 0 && (
+              <Button 
+                onClick={clearProject}
+                variant="outline"
+                size="sm"
+                className="ml-4 text-red-600 border-red-200 hover:bg-red-50"
+              >
+                Очистить проект
+              </Button>
+            )}
           </motion.div>
           
           {/* AI Description */}
@@ -135,7 +155,7 @@ export default function MyApp() {
           </Card>
         </div>
 
-        {selectedModules.length === 0 ? (
+        {uniqueModules.length === 0 ? (
           <Card className="p-12 text-center">
             <Smartphone className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
@@ -234,7 +254,13 @@ export default function MyApp() {
                           exit={{ opacity: 0, scale: 0.95 }}
                           className="group"
                         >
-                          <Card className="p-4 h-full border-2 border-green-200 bg-green-50 hover:shadow-md transition-all">
+                          <Card 
+                            className="p-4 h-full border-2 border-green-200 bg-green-50 hover:shadow-md transition-all cursor-pointer hover:border-green-300"
+                            onClick={() => {
+                              // Make modules clickable like in Modules section
+                              console.log('Module clicked:', module.name);
+                            }}
+                          >
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2">
@@ -242,10 +268,10 @@ export default function MyApp() {
                                     Модуль {module.number}
                                   </span>
                                 </div>
-                                <h4 className="font-medium text-sm mb-2 line-clamp-2">
+                                <h4 className="font-medium text-sm mb-2">
                                   {module.name}
                                 </h4>
-                                <p className="text-xs text-gray-600 line-clamp-3 mb-3">
+                                <p className="text-xs text-gray-600 mb-3">
                                   {module.description}
                                 </p>
                               </div>
@@ -268,7 +294,7 @@ export default function MyApp() {
             </div>
 
             {/* Prototype Preview */}
-            {showPrototype && selectedModules.length >= 3 && (
+            {showPrototype && uniqueModules.length >= 3 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -282,7 +308,7 @@ export default function MyApp() {
                   <div>
                     <h4 className="font-semibold mb-3">Выбранные модули:</h4>
                     <div className="space-y-2">
-                      {selectedModules.map((module) => (
+                      {uniqueModules.map((module) => (
                         <div key={module.id} className="flex items-center gap-2 text-sm">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                           <span>Модуль {module.number}: {module.name}</span>
@@ -304,7 +330,7 @@ export default function MyApp() {
                 <div className="mt-6 p-4 bg-green-50 rounded-lg">
                   <p className="text-green-800 font-medium">
                     ✅ Ваше приложение готово к передаче в разработку! 
-                    Предполагаемое время разработки: {selectedModules.length * 2} дня
+                    Предполагаемое время разработки: {uniqueModules.length * 2} дня
                   </p>
                 </div>
               </motion.div>

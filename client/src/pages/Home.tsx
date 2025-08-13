@@ -223,7 +223,7 @@ export default function Home() {
               <Button
                 onClick={() => setChatMinimized(false)}
                 size="lg"
-                className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all animate-pulse hover:animate-none"
               >
                 <Bot className="w-6 h-6 mr-3" />
                 AI-конструктор APP
@@ -251,23 +251,23 @@ export default function Home() {
 {/* Recommended Modules section removed - modules now displayed directly in AI chat */}
 
         {/* Quick Stats - Compact */}
-        <section className="mb-12">
+        <section className="mb-12 mt-16">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Готовые решения для бизнеса</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto">
-              <div className="bg-gradient-to-br from-blue-100 to-blue-200 text-blue-800 p-4 rounded-lg text-center border border-blue-300">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 p-4 rounded-lg text-center border border-blue-200">
                 <div className="text-2xl font-bold mb-1">От $300</div>
                 <div className="text-xs opacity-70">Стартовая цена</div>
               </div>
-              <div className="bg-gradient-to-br from-blue-100 to-blue-200 text-blue-800 p-4 rounded-lg text-center border border-blue-300">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 p-4 rounded-lg text-center border border-blue-200">
                 <div className="text-2xl font-bold mb-1">260+</div>
                 <div className="text-xs opacity-70">Модулей</div>
               </div>
-              <div className="bg-gradient-to-br from-blue-100 to-blue-200 text-blue-800 p-4 rounded-lg text-center border border-blue-300">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 p-4 rounded-lg text-center border border-blue-200">
                 <div className="text-2xl font-bold mb-1">1-5</div>
                 <div className="text-xs opacity-70">Дней до запуска</div>
               </div>
-              <div className="bg-gradient-to-br from-blue-100 to-blue-200 text-blue-800 p-4 rounded-lg text-center border border-blue-300">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 p-4 rounded-lg text-center border border-blue-200">
                 <div className="text-2xl font-bold mb-1">24/7</div>
                 <div className="text-xs opacity-70">Поддержка</div>
               </div>
