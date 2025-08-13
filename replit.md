@@ -2,6 +2,12 @@
 
 This project is a full-stack web application serving as a Telegram Mini Apps directory and showcase platform. Its primary purpose is to function as a business catalog and marketing tool, highlighting modular Mini App solutions. The platform enables users to explore various app modules, industry-specific solutions, pricing models, and development processes, targeting businesses seeking rapid Telegram Mini App deployment using pre-built components.
 
+## Recent Updates (August 2025)
+- ✅ **Fixed Authorization System**: Dynamic whitelist checking from server-side, removing hardcoded dependencies
+- ✅ **Added User Access**: User 666024781 manually added to server-side whitelist for immediate access
+- ✅ **Implemented Comprehensive Analytics**: Full Yandex.Metrika integration with webvisor tracking all user text inputs and interactions
+- ✅ **Enhanced AI Chat Analytics**: Complete tracking of all chat interactions, module selections, and user behaviors
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

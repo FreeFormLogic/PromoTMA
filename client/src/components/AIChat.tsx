@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { apiRequest } from '@/lib/queryClient';
 import { trackAIChat, trackTextInput, trackModule, trackUserInteraction } from '@/lib/analytics';
@@ -167,6 +168,8 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     }
   });
   const [chatModules, setChatModules] = useState<Module[]>([]);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [resetModulesToo, setResetModulesToo] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -657,28 +660,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             {/* Reset button - not shown after first message */}
             {messages.length > 2 && (
               <span
-                onClick={() => {
-                  if (window.confirm('Вы действительно хотите сбросить весь чат?\n\n☑️ Также сбросить выбранные модули?')) {
-                    // Reset chat
-                    const welcomeMessage = {
-                      id: '1',
-                      role: 'assistant' as const,
-                      content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
-                      timestamp: Date.now()
-                    };
-                    
-                    setMessages([welcomeMessage]);
-                    persistentMessages = [welcomeMessage];
-                    setChatModules([]);
-                    
-                    // Clear selected modules too
-                    setSelectedModules([]);
-                    localStorage.removeItem('selectedModules');
-                    localStorage.removeItem('aiChatMessages');
-                    
-                    onModulesUpdate([]);
-                  }
-                }}
+                onClick={() => setShowResetDialog(true)}
                 className="text-red-600 hover:text-red-700 cursor-pointer hover:underline font-medium"
               >
                 Сбросить
@@ -903,6 +885,71 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           </Button>
         </div>
       </div>
+      
+      {/* Reset Dialog */}
+      <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Сброс чата</DialogTitle>
+            <DialogDescription>
+              Вы действительно хотите сбросить весь чат?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="reset-modules"
+                checked={resetModulesToo}
+                onCheckedChange={setResetModulesToo}
+              />
+              <label 
+                htmlFor="reset-modules"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Также сбросить выбранные модули?
+              </label>
+            </div>
+            
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowResetDialog(false)}
+              >
+                Отмена
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={() => {
+                  trackUserInteraction('reset_chat_confirmed', { resetModules: resetModulesToo });
+                  
+                  // Reset chat
+                  const welcomeMessage = {
+                    id: '1',
+                    role: 'assistant' as const,
+                    content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
+                    timestamp: Date.now()
+                  };
+                  
+                  setMessages([welcomeMessage]);
+                  persistentMessages = [welcomeMessage];
+                  setChatModules([]);
+                  
+                  if (resetModulesToo) {
+                    setSelectedModules([]);
+                    localStorage.removeItem('selectedModules');
+                  }
+                  
+                  localStorage.removeItem('aiChatMessages');
+                  onModulesUpdate([]);
+                  setShowResetDialog(false);
+                }}
+              >
+                OK
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
