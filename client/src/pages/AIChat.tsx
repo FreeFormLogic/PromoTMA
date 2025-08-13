@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import AIChat from '@/components/AIChat';
 import { Card } from '@/components/ui/card';
 import { X, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
+import { trackAIChat } from '@/lib/analytics';
 
 export default function AIChatPage() {
   const [, setLocation] = useLocation();
@@ -20,8 +21,14 @@ export default function AIChatPage() {
 
   const handleClose = useCallback(() => {
     console.log('Close button clicked - navigating home');
+    trackAIChat('close_chat');
     setLocation('/');
   }, [setLocation]);
+
+  // Track chat opening when component mounts
+  useEffect(() => {
+    trackAIChat('open_chat', { isReturningUser: true });
+  }, []);
 
   return (
     <div className="h-screen w-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col relative overflow-hidden">

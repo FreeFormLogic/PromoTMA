@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { apiRequest } from '@/lib/queryClient';
+import { trackAIChat, trackTextInput, trackModule, trackUserInteraction } from '@/lib/analytics';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
@@ -134,6 +135,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         persistentMessages = parsed;
         return parsed;
       } else {
+        // Track chat initialization for new users
+        trackAIChat('open_chat', { isNewUser: true });
+        
         const defaultMessage = [{
           id: '1',
           role: 'assistant' as const,
@@ -222,6 +226,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
   const handleModuleLike = (module: Module) => {
     const isAlreadySelected = selectedModules.find(m => m.id === module.id);
     if (isAlreadySelected) {
+      trackModule('remove_from_selection', module.id, module.name);
       setSelectedModules(prev => prev.filter(m => m.id !== module.id));
       // Remove from localStorage
       const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
@@ -231,6 +236,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       // Prevent duplicates by double-checking
       const alreadyExists = selectedModules.find(m => m.id === module.id);
       if (!alreadyExists) {
+        trackModule('add_to_selection', module.id, module.name);
         setSelectedModules(prev => [...prev, module]);
         // Save to localStorage for "Мое App" section
         const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
@@ -245,6 +251,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
+
+    // Track user text input for Yandex.Metrika webvisor
+    trackTextInput('ai_chat_message', input.trim(), 'chat_input');
+    trackAIChat('send_message', { messageLength: input.trim().length });
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -276,6 +286,12 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         alreadyShownModules: currentlyDisplayedModules.map(m => m.number)
       });
       const responseData = await response.json();
+
+      // Track AI response received
+      trackAIChat('receive_response', { 
+        responseLength: responseData.response.length,
+        modulesRecommended: responseData.recommendedModules?.length || 0 
+      });
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -587,7 +603,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                   id: Date.now().toString(),
                   role: 'user',
                   content: 'Предложи больше функций',
-                  timestamp: new Date()
+                  timestamp: Date.now()
                 };
                 setMessages(prev => [...prev, userMessage]);
                 setIsLoading(true);
@@ -613,7 +629,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       id: Date.now().toString() + '_bot',
                       role: 'assistant',
                       content: data.response,
-                      timestamp: new Date()
+                      timestamp: Date.now()
                     };
                     
                     setMessages(prev => [...prev, botMessage]);
@@ -648,7 +664,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       id: '1',
                       role: 'assistant' as const,
                       content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
-                      timestamp: new Date()
+                      timestamp: Date.now()
                     };
                     
                     setMessages([welcomeMessage]);

@@ -72,7 +72,8 @@ export class MemStorage implements IStorage {
       "6209116360",
       "893850026",
       "1577419391",
-      "5201551014"
+      "5201551014",
+      "666024781"
     ];
     
     initialWhitelist.forEach(id => this.whitelist.add(id));

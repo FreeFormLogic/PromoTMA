@@ -26,7 +26,7 @@ interface TelegramAuthProps {
   onAuth: (user: any) => void;
 }
 
-// Список разрешенных Telegram ID
+// Список разрешенных Telegram ID (обновлен с сервера)
 const ALLOWED_USER_IDS = [
   7418405560,
   5173994544, 
@@ -34,7 +34,8 @@ const ALLOWED_USER_IDS = [
   6209116360,
   893850026,
   1577419391,
-  5201551014
+  5201551014,
+  666024781
 ];
 
 export function TelegramAuth({ onAuth }: TelegramAuthProps) {
