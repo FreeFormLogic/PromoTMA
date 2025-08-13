@@ -1,16 +1,7 @@
 import { useEffect, useState } from "react";
 import { TelegramAuth } from "./TelegramAuth";
 
-// Список разрешенных Telegram ID (дублируем из TelegramAuth для проверки)
-const ALLOWED_USER_IDS = [
-  "7418405560",
-  "5173994544", 
-  "216463929",
-  "6209116360",
-  "893850026",
-  "1577419391",
-  "5201551014"
-];
+// Removed hardcoded whitelist - now checking server-side whitelist dynamically
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -21,7 +12,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       console.log('Проверка авторизации...');
       const auth = localStorage.getItem('telegram_auth');
       console.log('Данные из localStorage:', auth);
@@ -48,25 +39,46 @@ export function AuthGuard({ children }: AuthGuardProps) {
         }
 
         if (authData.user && authData.user.isAuthorized) {
-          // Дополнительная проверка whitelist
+          // Динамическая проверка whitelist с сервера
           const userId = authData.user.id;
-          const isInWhitelist = ALLOWED_USER_IDS.includes(userId);
           
-          // Проверяем режим preview для разработки
-          const urlParams = new URLSearchParams(window.location.search);
-          const isPreview = urlParams.get('preview') === 'true';
-          const isDevelopment = window.location.hostname.includes('replit') || 
-                               window.location.hostname === 'localhost' ||
-                               import.meta.env.DEV;
-          
-          if (isInWhitelist || (isDevelopment && isPreview)) {
-            console.log('Пользователь авторизован:', authData.user);
-            setUser(authData.user);
-            setIsAuthenticated(true);
-          } else {
-            console.log(`Пользователь ${userId} не в whitelist`);
-            localStorage.removeItem('telegram_auth');
-            setIsAuthenticated(false);
+          try {
+            const response = await fetch('/api/admin/whitelist');
+            const whitelist = await response.json();
+            const isInWhitelist = whitelist.some((user: any) => user.id === userId);
+            
+            // Проверяем режим preview для разработки
+            const urlParams = new URLSearchParams(window.location.search);
+            const isPreview = urlParams.get('preview') === 'true';
+            const isDevelopment = window.location.hostname.includes('replit') || 
+                                 window.location.hostname === 'localhost' ||
+                                 import.meta.env.DEV;
+            
+            if (isInWhitelist || (isDevelopment && isPreview)) {
+              console.log('Пользователь авторизован:', authData.user);
+              setUser(authData.user);
+              setIsAuthenticated(true);
+            } else {
+              console.log(`Пользователь ${userId} не в whitelist`);
+              localStorage.removeItem('telegram_auth');
+              setIsAuthenticated(false);
+            }
+          } catch (error) {
+            console.error('Ошибка проверки whitelist:', error);
+            // В случае ошибки запроса, разрешаем доступ в режиме разработки
+            const urlParams = new URLSearchParams(window.location.search);
+            const isPreview = urlParams.get('preview') === 'true';
+            const isDevelopment = window.location.hostname.includes('replit') || 
+                                 window.location.hostname === 'localhost' ||
+                                 import.meta.env.DEV;
+            
+            if (isDevelopment && isPreview) {
+              console.log('Пользователь авторизован (fallback режим разработки):', authData.user);
+              setUser(authData.user);
+              setIsAuthenticated(true);
+            } else {
+              setIsAuthenticated(false);
+            }
           }
         } else {
           console.log('Пользователь не авторизован');
