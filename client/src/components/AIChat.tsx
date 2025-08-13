@@ -16,7 +16,7 @@ interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  timestamp: Date;
+  timestamp: number;
 }
 
 interface BusinessAnalysis {
@@ -746,6 +746,15 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             <h1 className="font-semibold text-lg">AI-конструктор приложений</h1>
             <p className="text-xs text-gray-500 mt-1">Создадим приложение вместе</p>
           </div>
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={() => window.location.href = '/'}
+            className="h-8 w-8 p-0"
+            title="Закрыть"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       )}
 

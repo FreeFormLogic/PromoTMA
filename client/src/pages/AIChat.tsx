@@ -40,16 +40,7 @@ export default function AIChatPage() {
         />
       </div>
 
-      {/* Close Button - Floating */}
-      <Button 
-        size="sm" 
-        variant="ghost" 
-        onClick={handleClose}
-        className="absolute top-3 right-3 h-8 w-8 p-0 z-50 bg-white/90 hover:bg-white shadow-sm"
-        title="Закрыть"
-      >
-        <X className="h-4 w-4" />
-      </Button>
+
     </div>
   );
 }

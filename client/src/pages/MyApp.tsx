@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Smartphone, Settings, Trash2, Eye, Download, Share2, Sparkles, Plus, Check, Zap, DollarSign, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -23,10 +24,17 @@ export default function MyApp() {
   const [selectedModules, setSelectedModules] = useState<Module[]>([]);
   const [showPrototype, setShowPrototype] = useState(false);
   const [selectedModuleForModal, setSelectedModuleForModal] = useState<Module | null>(null);
+  const [showClearDialog, setShowClearDialog] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
   
   const clearProject = () => {
-    setSelectedModules([]);
-    localStorage.removeItem('selectedModules');
+    if (confirmClear) {
+      setSelectedModules([]);
+      localStorage.removeItem('selectedModules');
+      localStorage.removeItem('aiChatMessages');
+      setShowClearDialog(false);
+      setConfirmClear(false);
+    }
   };
 
   // Load selected modules from localStorage
@@ -409,7 +417,7 @@ export default function MyApp() {
               </Button>
               
               <Button 
-                onClick={clearProject}
+                onClick={() => setShowClearDialog(true)}
                 variant="outline"
                 className="text-red-600 border-red-200 hover:bg-red-50"
               >
@@ -420,6 +428,61 @@ export default function MyApp() {
           </>
         )}
       </div>
+      
+      {/* Clear Project Confirmation Dialog */}
+      <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-red-600 flex items-center gap-2">
+              <Trash2 className="w-6 h-6" />
+              Очистить проект?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600">
+              Вы действительно хотите удалить все выбранные модули и сбросить проект? 
+              Это действие нельзя отменить.
+            </p>
+            <p className="text-sm text-gray-500">
+              Будут удалены: {selectedModules.length} модулей и история чата с AI
+            </p>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="confirm-clear"
+                checked={confirmClear}
+                onCheckedChange={setConfirmClear}
+              />
+              <label 
+                htmlFor="confirm-clear"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Да, я подтверждаю удаление всех данных
+              </label>
+            </div>
+            
+            <div className="flex gap-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowClearDialog(false);
+                  setConfirmClear(false);
+                }}
+                className="flex-1"
+              >
+                Отмена
+              </Button>
+              <Button 
+                onClick={clearProject}
+                disabled={!confirmClear}
+                className="flex-1 bg-red-600 hover:bg-red-700"
+              >
+                Очистить проект
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       
       {/* Module Detail Modal */}
       <Dialog open={!!selectedModuleForModal} onOpenChange={() => setSelectedModuleForModal(null)}>
