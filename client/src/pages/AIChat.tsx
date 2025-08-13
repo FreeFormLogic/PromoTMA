@@ -20,11 +20,7 @@ export default function AIChatPage() {
 
   const handleClose = useCallback(() => {
     console.log('Close button clicked - navigating home');
-    // Force navigation to home with delay to ensure state is updated
-    setTimeout(() => {
-      setLocation('/');
-      window.location.href = '/';
-    }, 100);
+    setLocation('/');
   }, [setLocation]);
 
   return (

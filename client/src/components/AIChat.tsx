@@ -751,7 +751,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           <Button 
             size="sm" 
             variant="ghost" 
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('Chat close button clicked');
               setLocation('/');
             }}
             className="h-8 w-8 p-0"
