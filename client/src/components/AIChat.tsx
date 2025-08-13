@@ -479,7 +479,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         }
         return <span key={index} className="text-red-500">Модуль {moduleNumber} не найден</span>;
       }
-      return <span key={index} className="inline">{formatText(part)}</span>;
+      return <span key={index}>{formatText(part)}</span>;
     });
   };
 
