@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { apiRequest } from '@/lib/queryClient';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -360,6 +360,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                   {module.name}
                 </DialogTitle>
               </div>
+              <DialogDescription className="text-gray-600 dark:text-gray-300">
+                Подробная информация о модуле и его возможностях
+              </DialogDescription>
             </DialogHeader>
             
             <ScrollArea className="max-h-[70vh] pr-4">
@@ -376,7 +379,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     <div className="mt-3 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 rounded-lg border border-blue-200 dark:border-blue-800">
                       <div className="flex items-start gap-2">
                         <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                        <div className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed text-left">
+                        <div className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed text-left -ml-1">
                           {module.benefits.split(/(\*\*.*?\*\*)/).map((part, index) => {
                             if (part.startsWith('**') && part.endsWith('**')) {
                               const boldText = part.slice(2, -2);
@@ -404,9 +407,34 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     <div className="text-sm text-gray-700 dark:text-gray-300">
                       {Array.isArray(module.keyFeatures) 
                         ? module.keyFeatures.map((feature, index) => (
-                            <div key={index} className="mb-2">• {feature}</div>
+                            <div key={index} className="mb-2">
+                              • {feature.split(/(\*\*.*?\*\*)/).map((part, partIndex) => {
+                                if (part.startsWith('**') && part.endsWith('**')) {
+                                  const boldText = part.slice(2, -2);
+                                  return (
+                                    <strong key={partIndex} className="font-semibold">
+                                      {boldText}
+                                    </strong>
+                                  );
+                                }
+                                return <span key={partIndex}>{part}</span>;
+                              })}
+                            </div>
                           ))
-                        : <div>• {module.keyFeatures}</div>
+                        : <div>• {typeof module.keyFeatures === 'string' 
+                            ? module.keyFeatures.split(/(\*\*.*?\*\*)/).map((part, partIndex) => {
+                                if (part.startsWith('**') && part.endsWith('**')) {
+                                  const boldText = part.slice(2, -2);
+                                  return (
+                                    <strong key={partIndex} className="font-semibold">
+                                      {boldText}
+                                    </strong>
+                                  );
+                                }
+                                return <span key={partIndex}>{part}</span>;
+                              })
+                            : module.keyFeatures
+                          }</div>
                       }
                     </div>
                   </div>
