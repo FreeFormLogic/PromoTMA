@@ -30,7 +30,7 @@ import {
 import { Link } from "wouter";
 import { type Module, type Industry, type USP } from "@shared/schema";
 import { PainPointsSection } from "@/components/PainPointsSection";
-import AIChat from "@/components/AIChat";
+// AIChat removed from Home page - only accessible via /ai-chat route
 import { motion, AnimatePresence } from "framer-motion";
 
 interface BusinessAnalysis {
@@ -101,8 +101,7 @@ export default function Home() {
   console.log('Home component rendering');
   const [businessAnalysis, setBusinessAnalysis] = useState<BusinessAnalysis | null>(null);
   const [aiRecommendedModules, setAiRecommendedModules] = useState<Module[]>([]);
-  const [showAIChat, setShowAIChat] = useState(false); // Changed to false - AI chat should not show by default
-  const [chatMinimized, setChatMinimized] = useState(false);
+  // AI Chat state removed - chat is now on dedicated page
 
   const { data: modules = [], isLoading: modulesLoading } = useQuery<Module[]>({
     queryKey: ["/api/modules"],
@@ -222,7 +221,7 @@ export default function Home() {
               </div>
 
               <Button
-                onClick={() => setChatMinimized(false)}
+                onClick={() => window.location.href = '/ai-chat'}
                 size="lg"
                 className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all animate-pulse hover:animate-none"
               >
@@ -233,19 +232,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Full-screen AI Chat */}
-        {!chatMinimized && (
-          <div className="fixed inset-0 z-50 bg-white">
-            <AIChat 
-              onAnalysisUpdate={setBusinessAnalysis}
-              onModulesUpdate={setAiRecommendedModules}
-              isMinimized={false}
-              onToggleMinimize={() => setChatMinimized(true)}
-              currentlyDisplayedModules={aiRecommendedModules}
-              isFullScreen={true}
-            />
-          </div>
-        )}
+        {/* AI Chat removed from Home page - only accessible via /ai-chat route */}
 
 
 
