@@ -508,25 +508,21 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
-                        message: 'Предложи больше функций',
-                        context: {
-                          businessAnalysis: analysis,
-                          currentlyDisplayedModules: currentlyDisplayedModules || [],
-                          selectedModules: selectedModules
-                        }
+                        messages: [...messages, userMessage],
+                        alreadyShownModules: currentlyDisplayedModules || []
                       })
                     });
                     
                     const data = await response.json();
                     
-                    if (data.recommendations) {
-                      onModulesUpdate(data.recommendations);
+                    if (data.recommendedModules) {
+                      onModulesUpdate(data.recommendedModules);
                     }
                     
                     const botMessage: Message = {
                       id: Date.now().toString() + '_bot',
                       role: 'assistant',
-                      content: data.message,
+                      content: data.response,
                       timestamp: new Date()
                     };
                     
