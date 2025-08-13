@@ -544,7 +544,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
 
       {/* Messages */}
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 min-h-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        <div className="space-y-3 min-h-[100px] pb-4">
+        <div className="space-y-3 min-h-[100px] pb-20">
           <AnimatePresence>
             {messages.map((message) => {
               try {
@@ -689,7 +689,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       </ScrollArea>
 
       {/* Input - Fixed positioning with proper width */}
-      <div className="sticky bottom-0 bg-background border-t border-gray-200 z-10">
+      <div className="sticky bottom-0 bg-background border-t border-gray-200 z-10 shadow-lg">
 
         
         {/* Input field */}
