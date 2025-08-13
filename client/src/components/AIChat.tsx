@@ -360,9 +360,6 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {module.name}
                 </DialogTitle>
-                <Badge className={`${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
-                  {module.category}
-                </Badge>
               </div>
             </DialogHeader>
             
@@ -380,9 +377,12 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     <div className="mt-3 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 rounded-lg border border-blue-200 dark:border-blue-800">
                       <div className="flex items-start gap-2">
                         <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                        <div className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
-                          {module.benefits}
-                        </div>
+                        <div 
+                          className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed"
+                          dangerouslySetInnerHTML={{
+                            __html: module.benefits.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -540,28 +540,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
 
   return (
     <Card className={`${isFullScreen ? 'h-screen w-screen rounded-none border-0' : 'h-full'} flex flex-col bg-gradient-to-br from-background via-background to-primary/5 border-2 border-primary/10 ${isMinimized ? 'w-80' : ''}`}>
-      {/* Header */}
-      <div className="p-3 border-b bg-primary/5 backdrop-blur">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div>
-              <h3 className="font-semibold text-sm">AI-конструктор</h3>
-              <p className="text-xs text-muted-foreground">
-                {selectedModules.length > 0 ? `${selectedModules.length} выбрано` : 'Подберите функционал'}
-              </p>
 
-            </div>
-          </div>
-          <div className="flex items-center gap-1">
-
-            {onToggleMinimize && (
-              <Button size="sm" variant="ghost" onClick={onToggleMinimize} className="h-6 w-6 p-0">
-                <Minimize2 className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* Messages */}
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 min-h-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
@@ -713,8 +692,77 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       </ScrollArea>
 
       {/* Input - Fixed positioning with proper width */}
-      <div className="sticky bottom-0 p-2 border-t bg-background border-gray-200 z-10">
-        <div className="flex gap-2 w-full max-w-full">
+      <div className="sticky bottom-0 bg-background border-t border-gray-200 z-10">
+        {/* Action buttons above input */}
+        <div className="p-2 pb-1 flex gap-2">
+          <Button
+            onClick={() => {
+              const userMessage: Message = {
+                id: Date.now().toString(),
+                role: 'user',
+                content: 'Предложи больше функций',
+                timestamp: new Date()
+              };
+              setMessages(prev => [...prev, userMessage]);
+              setIsLoading(true);
+              
+              setTimeout(async () => {
+                try {
+                  const response = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      message: 'Предложи больше функций',
+                      context: {
+                        businessAnalysis: analysis,
+                        currentlyDisplayedModules: currentlyDisplayedModules || [],
+                        selectedModules: selectedModules
+                      }
+                    })
+                  });
+                  
+                  const data = await response.json();
+                  
+                  if (data.recommendations) {
+                    onModulesUpdate(data.recommendations);
+                  }
+                  
+                  const botMessage: Message = {
+                    id: Date.now().toString() + '_bot',
+                    role: 'assistant',
+                    content: data.message,
+                    timestamp: new Date()
+                  };
+                  
+                  setMessages(prev => [...prev, botMessage]);
+                } catch (error) {
+                  console.error('Chat error:', error);
+                } finally {
+                  setIsLoading(false);
+                }
+              }, 500);
+            }}
+            variant="outline"
+            size="sm"
+            className="text-xs px-3 py-1.5 h-7 text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+          >
+            Еще функции
+          </Button>
+          
+          {selectedModules.length > 0 && (
+            <Button
+              onClick={() => window.location.href = '/my-app'}
+              variant="outline"
+              size="sm"
+              className="text-xs px-3 py-1.5 h-7 text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+            >
+              Мое App
+            </Button>
+          )}
+        </div>
+        
+        {/* Input field */}
+        <div className="p-2 pt-1 flex gap-2 w-full max-w-full">
           <Textarea
             ref={textareaRef}
             value={input}

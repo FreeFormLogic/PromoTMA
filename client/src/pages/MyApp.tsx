@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Smartphone, Settings, Trash2, Eye, Download, Share2, Sparkles, Plus, Check } from 'lucide-react';
+import { Smartphone, Settings, Trash2, Eye, Download, Share2, Sparkles, Plus, Check, Zap, DollarSign, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -156,16 +156,43 @@ export default function MyApp() {
 
           </motion.div>
           
-          {/* AI Description */}
-          <Card className="mb-8 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+          {/* App Benefits */}
+          <Card className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
             <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
-                <Sparkles className="w-6 h-6 text-green-600" />
-                <h2 className="text-xl font-semibold text-gray-800">Описание вашего приложения</h2>
+                <Sparkles className="w-6 h-6 text-blue-600" />
+                <h2 className="text-xl font-semibold text-gray-800">Возможности приложения</h2>
               </div>
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-gray-700 leading-relaxed mb-4">
                 {generateAIDescription()}
               </p>
+              
+              {/* Benefits Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <div className="bg-white p-4 rounded-lg border border-blue-100">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                    <Zap className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Быстрый запуск</h4>
+                  <p className="text-sm text-gray-600">Разработка и запуск за 2-5 дней вместо месяцев</p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-lg border border-blue-100">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                    <DollarSign className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Экономия 60%</h4>
+                  <p className="text-sm text-gray-600">От $10,000 вместо $25,000 за традиционную разработку</p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-lg border border-blue-100">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                    <Users className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">900+ млн пользователей</h4>
+                  <p className="text-sm text-gray-600">Доступ к огромной аудитории Telegram</p>
+                </div>
+              </div>
             </div>
           </Card>
         </div>
@@ -179,7 +206,10 @@ export default function MyApp() {
             <p className="text-gray-500 mb-6">
               Начните общение с AI-консультантом, чтобы подобрать подходящие модули для вашего бизнеса
             </p>
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button 
+              onClick={() => window.location.href = '/ai-chat'}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
               Перейти к AI-консультанту
             </Button>
           </Card>
@@ -231,9 +261,6 @@ export default function MyApp() {
                       >
                         {category}
                       </Badge>
-                      <span className="text-sm text-gray-500">
-                        {modules.length} модул{modules.length === 1 ? 'ь' : modules.length < 5 ? 'я' : 'ей'}
-                      </span>
                     </div>
                   </div>
 
@@ -253,17 +280,18 @@ export default function MyApp() {
                           >
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <span className="text-sm font-medium text-blue-700">
-                                    Модуль {module.number}
-                                  </span>
-                                </div>
                                 <h4 className="font-medium text-sm mb-2">
                                   {module.name}
                                 </h4>
                                 <p className="text-xs text-gray-600 mb-3">
                                   {module.description}
                                 </p>
+                                <div 
+                                  className="text-xs text-blue-600 leading-relaxed"
+                                  dangerouslySetInnerHTML={{
+                                    __html: module.benefits.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').substring(0, 100) + '...'
+                                  }}
+                                />
                               </div>
                               <Button
                                 variant="ghost"
