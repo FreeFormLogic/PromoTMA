@@ -377,11 +377,13 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                       {module.description}
                     </p>
-                    <div className="mt-3 inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">
-                      <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                        {module.benefits}
-                      </span>
+                    <div className="mt-3 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-start gap-2">
+                        <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
+                          {module.benefits}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -483,7 +485,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     });
   };
 
-  // Function to format text with bold support
+  // Function to format text with bold support and preserve line breaks
   const formatText = (text: string) => {
     if (!text) return text;
     
@@ -501,7 +503,18 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
               </strong>
             );
           }
-          return <span key={index}>{part}</span>;
+          // Handle line breaks
+          const lines = part.split('\n');
+          return (
+            <span key={index}>
+              {lines.map((line, lineIndex) => (
+                <span key={lineIndex}>
+                  {line}
+                  {lineIndex < lines.length - 1 && <br />}
+                </span>
+              ))}
+            </span>
+          );
         })}
       </>
     );
@@ -602,8 +615,8 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       </p>
                       
                       {/* Add suggest more button after AI messages */}
-                      {message.role === 'assistant' && (
-                        <div className="mt-3">
+                      {message.role === 'assistant' && currentlyDisplayedModules && currentlyDisplayedModules.length > 0 && (
+                        <div className="mt-3 flex gap-2 flex-wrap">
                           <Button
                             onClick={() => {
                               const userMessage: Message = {
@@ -617,7 +630,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                               
                               setTimeout(async () => {
                                 try {
-                                  const response = await fetch('/api/chat', {
+                                  const response = await fetch('/api/ai/chat', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({
@@ -653,19 +666,21 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                             }}
                             variant="ghost" 
                             size="sm"
-                            className="text-xs px-0 py-1 text-blue-600 hover:text-blue-700 underline underline-offset-2 h-auto font-normal hover:bg-transparent"
+                            className="text-xs px-2 py-1 text-blue-600 hover:text-blue-700 h-auto font-normal hover:bg-blue-50 border border-blue-200 rounded-md"
                           >
-                            предложить еще функции
+                            Больше функций
                           </Button>
                           
-                          <Button
-                            onClick={() => window.location.href = '/my-app'}
-                            variant="ghost"
-                            size="sm" 
-                            className="text-xs px-0 py-1 text-blue-600 hover:text-blue-700 underline underline-offset-2 h-auto font-normal hover:bg-transparent mt-1"
-                          >
-                            Перейти к моему будущему приложению
-                          </Button>
+                          {selectedModules.length > 0 && (
+                            <Button
+                              onClick={() => window.location.href = '/my-app'}
+                              variant="ghost"
+                              size="sm" 
+                              className="text-xs px-2 py-1 text-blue-600 hover:text-blue-700 h-auto font-normal hover:bg-blue-50 border border-blue-200 rounded-md ml-2"
+                            >
+                              Мое App
+                            </Button>
+                          )}
                         </div>
                       )}
                     </div>
@@ -705,16 +720,16 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         </div>
       </ScrollArea>
 
-      {/* Input - Fixed positioning */}
+      {/* Input - Fixed positioning with proper width */}
       <div className="sticky bottom-0 p-2 border-t bg-background border-gray-200 z-10">
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full max-w-full">
           <Textarea
             ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyPress}
             placeholder="Расскажите о бизнесе..."
-            className="min-h-[36px] max-h-[80px] resize-none text-xs flex-1"
+            className="min-h-[36px] max-h-[80px] resize-none text-xs flex-1 min-w-0"
             disabled={isLoading}
           />
           <Button

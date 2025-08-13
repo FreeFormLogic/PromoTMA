@@ -199,7 +199,7 @@ function CompactModuleCard({ module }: { module: Module }) {
               {module.name}
             </DialogTitle>
             <Badge className={`${categoryColors[module.category] || categoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
-              #{module.number} {module.category}
+              {module.category}
             </Badge>
           </div>
         </DialogHeader>
@@ -385,14 +385,14 @@ export default function Modules() {
                     variant={isActive ? "secondary" : "outline"}
                     size="sm"
                     onClick={() => setSelectedCategory(category)}
-                    className={`flex flex-col items-center gap-1 text-[10px] font-medium transition-all duration-200 px-2 py-2 h-16 ${
+                    className={`flex flex-col items-center gap-0.5 text-[9px] font-medium transition-all duration-200 px-1.5 py-1.5 h-12 ${
                       isActive
                         ? "bg-white text-blue-700 hover:bg-blue-50 shadow-lg border-2 border-blue-200"
                         : "bg-white/10 text-white border-white/30 hover:bg-white/20 hover:border-white/50"
                     }`}
                     title={category === "ВСЕ МОДУЛИ" ? `Все модули (${totalModules})` : category}
                   >
-                    <IconComponent className="w-4 h-4 flex-shrink-0" />
+                    <IconComponent className="w-3 h-3 flex-shrink-0" />
                     <span className="text-center leading-tight line-clamp-2 text-[9px]">
                       {category === "ВСЕ МОДУЛИ" ? `ВСЕ` : 
                        category === "E-COMMERCE" ? "E-COM" :

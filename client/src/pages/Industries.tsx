@@ -144,7 +144,7 @@ function ModuleInlineModal({ module, variant }: { module: Module; variant: 'requ
               {module.name}
             </DialogTitle>
             <Badge className={`${moduleCategoryColors[module.category] || moduleCategoryColors["ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]}`}>
-              #{module.number} {module.category}
+              {module.category}
             </Badge>
           </div>
         </DialogHeader>

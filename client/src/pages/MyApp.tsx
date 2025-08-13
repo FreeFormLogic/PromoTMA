@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Smartphone, Settings, Trash2, Eye, Download, Share2, Sparkles } from 'lucide-react';
+import { Smartphone, Settings, Trash2, Eye, Download, Share2, Sparkles, Plus, Check } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 
@@ -19,12 +21,13 @@ interface Module {
 
 export default function MyApp() {
   const [selectedModules, setSelectedModules] = useState<Module[]>([]);
+  const [showPrototype, setShowPrototype] = useState(false);
+  const [selectedModuleForModal, setSelectedModuleForModal] = useState<Module | null>(null);
   
   const clearProject = () => {
     setSelectedModules([]);
     localStorage.removeItem('selectedModules');
   };
-  const [showPrototype, setShowPrototype] = useState(false);
 
   // Load selected modules from localStorage
   useEffect(() => {
@@ -50,18 +53,18 @@ export default function MyApp() {
     window.open(`https://t.me/balilegend?text=${message}`, '_blank');
   };
 
-  // Remove duplicates and sort using AI-based logic, then group by category
+  // Remove duplicates by ID and sort using AI-based relevance logic
   const uniqueModules = selectedModules
     .filter((module, index, self) => self.findIndex(m => m.id === module.id) === index)
     .sort((a, b) => {
-      // AI-based sorting: prioritize by relevance and category importance
-      const categoryPriority = {
-        'E-COMMERCE': 1,
-        'ОТРАСЛЕВЫЕ РЕШЕНИЯ': 2,
-        'МАРКЕТИНГ': 3,
-        'ВОВЛЕЧЕНИЕ': 4,
-        'CRM': 5,
-        'АВТОМАТИЗАЦИЯ': 6,
+      // AI-based sorting: prioritize by business relevance and category importance
+      const categoryPriority: Record<string, number> = {
+        'ОТРАСЛЕВЫЕ РЕШЕНИЯ': 1,     // Industry-specific first
+        'E-COMMERCE': 2,
+        'CRM': 3,
+        'МАРКЕТИНГ': 4,
+        'АВТОМАТИЗАЦИЯ': 5,
+        'ВОВЛЕЧЕНИЕ': 6,
         'АНАЛИТИКА': 7
       };
       
@@ -72,7 +75,7 @@ export default function MyApp() {
         return aPriority - bPriority;
       }
       
-      // Within same category, sort by module number
+      // Within same category, sort by module number for consistency
       return a.number - b.number;
     });
   
@@ -204,7 +207,7 @@ export default function MyApp() {
               </Card>
               <Card className="p-4 text-center">
                 <div className="text-2xl font-bold text-orange-600 mb-1">
-                  ~{selectedModules.length * 2}
+                  ~{Math.max(1, Math.round(uniqueModules.length * 0.5))}
                 </div>
                 <div className="text-sm text-gray-600">Дней разработки</div>
               </Card>
@@ -246,10 +249,7 @@ export default function MyApp() {
                         >
                           <Card 
                             className="p-4 h-full bg-white border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer"
-                            onClick={() => {
-                              // Make modules clickable like in Modules section
-                              console.log('Module clicked:', module.name);
-                            }}
+                            onClick={() => setSelectedModuleForModal(module)}
                           >
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex-1">
@@ -354,6 +354,56 @@ export default function MyApp() {
           </>
         )}
       </div>
+      
+      {/* Module Detail Modal */}
+      <Dialog open={!!selectedModuleForModal} onOpenChange={() => setSelectedModuleForModal(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900">
+              {selectedModuleForModal?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="h-[60vh] pr-4">
+            {selectedModuleForModal && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wide">
+                    {selectedModuleForModal.category}
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    {selectedModuleForModal.description}
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Ключевые возможности</h3>
+                  <div className="space-y-2">
+                    {Array.isArray(selectedModuleForModal.keyFeatures) ? 
+                      selectedModuleForModal.keyFeatures.map((feature, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-gray-700 text-sm">{feature}</span>
+                        </div>
+                      )) : 
+                      <div className="flex items-start gap-2">
+                        <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700 text-sm">{selectedModuleForModal.keyFeatures}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Бизнес-преимущества</h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    {selectedModuleForModal.benefits}
+                  </p>
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

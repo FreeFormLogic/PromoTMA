@@ -19,10 +19,9 @@ import {
 
 export default function Development() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-20">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
+    <div className="min-h-screen bg-white">
+      {/* Hero Section - Clean and Modern */}
+      <section className="relative overflow-hidden py-24 bg-gradient-to-br from-blue-50 to-blue-100">
         <div className="relative max-w-7xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -30,19 +29,19 @@ export default function Development() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Telegram Mini App
+            <h1 className="text-6xl md:text-7xl font-bold mb-6 text-gray-900">
+              Ваше преимущество
             </h1>
-            <h2 className="text-2xl md:text-3xl font-semibold mb-6">
-              Ваше конкурентное преимущество в 2024-2025 годах
+            <h2 className="text-2xl md:text-3xl font-semibold mb-8 text-blue-600">
+              Telegram Mini Apps vs Традиционная разработка
             </h2>
-            <p className="text-xl text-gray-300 max-w-4xl mx-auto mb-8">
-              Создайте экосистему для вашего бизнеса внутри Telegram, экономьте миллионы на разработке 
-              и получайте прямой доступ к 900+ миллионам пользователей.
+            <p className="text-xl text-gray-700 max-w-4xl mx-auto mb-12">
+              Экономьте время и бюджет, получайте конкурентные преимущества с готовыми 
+              модульными решениями для Telegram экосистемы.
             </p>
             <Button 
               size="lg" 
-              className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-4"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-12 py-4 rounded-lg shadow-lg hover:shadow-xl transition-all"
               onClick={() => {
                 const message = encodeURIComponent(
                   "Привет! Интересует разработка Telegram Mini App. Рассмотрел каталог модулей на вашей платформе. Можете рассказать подробнее о возможностях и стоимости?"
@@ -50,14 +49,14 @@ export default function Development() {
                 window.open(`https://t.me/balilegend?text=${message}`, '_blank');
               }}
             >
-              Написать нам
+              Начать проект
             </Button>
           </motion.div>
         </div>
       </section>
 
-      {/* Business Math Section */}
-      <section className="py-20 bg-gray-800/50">
+      {/* Main Comparison Section */}
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -65,11 +64,12 @@ export default function Development() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4">Бизнес-математика, которая убеждает</h2>
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">Сравнение подходов</h2>
+            <p className="text-xl text-gray-600">Почему модульные решения выигрывают</p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Direct Savings */}
+          <div className="grid lg:grid-cols-2 gap-12">
+            {/* Traditional Development */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -162,7 +162,7 @@ export default function Development() {
       </section>
 
       {/* Strategic Advantages */}
-      <section className="py-20">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -170,7 +170,8 @@ export default function Development() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4">Почему это стратегически верное решение</h2>
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">Стратегические преимущества</h2>
+            <p className="text-xl text-gray-600">Долгосрочные выгоды для вашего бизнеса</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -180,12 +181,12 @@ export default function Development() {
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
             >
-              <Card className="p-8 h-full bg-gray-800/50 border-gray-700">
-                <TrendingUp className="w-12 h-12 text-blue-400 mb-6" />
-                <h3 className="text-2xl font-bold mb-4">Опередите рынок</h3>
-                <p className="text-gray-300">
-                  Пока ваши конкуренты только присматриваются к технологии, вы уже будете зарабатывать 
-                  и захватывать долю рынка. Запуск MVP всего за 2-4 недели.
+              <Card className="p-8 h-full bg-white border border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
+                <TrendingUp className="w-12 h-12 text-blue-600 mb-6" />
+                <h3 className="text-2xl font-bold mb-4 text-gray-900">Быстрый запуск</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Пока конкуренты только планируют, вы уже зарабатываете. 
+                  Готовые модули позволяют запустить MVP за 2-5 дней.
                 </p>
               </Card>
             </motion.div>
@@ -196,12 +197,12 @@ export default function Development() {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="p-8 h-full bg-gray-800/50 border-gray-700">
-                <Shield className="w-12 h-12 text-green-400 mb-6" />
-                <h3 className="text-2xl font-bold mb-4">Полная независимость и контроль</h3>
-                <p className="text-gray-300">
-                  Забудьте о правилах и комиссиях Apple и Google. Ваша клиентская база, ваши правила, 
-                  ваши доходы — всё принадлежит только вам.
+              <Card className="p-8 h-full bg-white border border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
+                <Shield className="w-12 h-12 text-blue-600 mb-6" />
+                <h3 className="text-2xl font-bold mb-4 text-gray-900">Экономия ресурсов</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Экономия до 80% бюджета и времени на разработке. 
+                  Больше инвестиций в маркетинг и развитие бизнеса.
                 </p>
               </Card>
             </motion.div>
@@ -212,12 +213,12 @@ export default function Development() {
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
             >
-              <Card className="p-8 h-full bg-gray-800/50 border-gray-700">
-                <Globe className="w-12 h-12 text-purple-400 mb-6" />
-                <h3 className="text-2xl font-bold mb-4">Неприступная экосистема</h3>
-                <p className="text-gray-300">
-                  Вы строите не просто приложение, а целую экосистему вокруг клиента, которую 
-                  конкурентам будет практически невозможно скопировать.
+              <Card className="p-8 h-full bg-white border border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
+                <Globe className="w-12 h-12 text-blue-600 mb-6" />
+                <h3 className="text-2xl font-bold mb-4 text-gray-900">Огромная аудитория</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Мгновенный доступ к 900+ миллионам пользователей Telegram. 
+                  Без установки приложений и магазинов приложений.
                 </p>
               </Card>
             </motion.div>
