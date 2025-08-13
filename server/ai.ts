@@ -287,8 +287,10 @@ export async function generateChatResponse(messages: {role: string, content: str
   // Create comprehensive module context with FULL DETAILS for better AI matching
   const modulesByCategory = availableModules.reduce((acc: any, module: any) => {
     if (!acc[module.category]) acc[module.category] = [];
-    // Include full module details: number, name, description, and key features
-    const features = module.features.slice(0, 3).join(', '); // First 3 features for context
+    // Include full module details: number, name, description, and key features (with safety check)
+    const features = module.features && Array.isArray(module.features) 
+      ? module.features.slice(0, 3).join(', ') 
+      : 'Подробности доступны в модальном окне';
     acc[module.category].push(`${module.number}: ${module.name} - ${module.description}. Ключевые возможности: ${features}`);
     return acc;
   }, {});
