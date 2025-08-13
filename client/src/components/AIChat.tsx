@@ -486,7 +486,8 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     });
 
     // Add clickable text at the end if this message has modules or if modules are currently displayed
-    if ((hasModules || hasDisplayedModules) && currentlyDisplayedModules && currentlyDisplayedModules.length > 0) {
+    // Debug: Always show for assistant messages that follow module recommendations
+    if (isAssistant && (hasModules || hasDisplayedModules || (currentlyDisplayedModules && currentlyDisplayedModules.length > 0))) {
       renderedParts.push(
         <div key="actions" className="mt-4 pt-3 border-t border-gray-200">
           <div className="flex flex-wrap gap-4 text-xs">
@@ -613,7 +614,6 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
 
   return (
     <Card className={`${isFullScreen ? 'h-screen w-screen rounded-none border-0' : 'h-full'} flex flex-col bg-gradient-to-br from-background via-background to-primary/5 border-2 border-primary/10 ${isMinimized ? 'w-80' : ''}`}>
-
 
       {/* Messages */}
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-3 min-h-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
