@@ -755,7 +755,8 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
               e.preventDefault();
               e.stopPropagation();
               console.log('Chat close button clicked');
-              setLocation('/');
+              // Force immediate navigation using window.location
+              window.location.href = window.location.origin + '/';
             }}
             className="h-8 w-8 p-0"
             title="Закрыть"
