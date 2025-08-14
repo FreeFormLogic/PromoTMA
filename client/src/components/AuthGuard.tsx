@@ -13,75 +13,91 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     const checkAuth = async () => {
-      console.log('Проверка авторизации...');
       const auth = localStorage.getItem('telegram_auth');
-      console.log('Данные из localStorage:', auth);
       
       if (!auth) {
-        console.log('Авторизация не найдена');
         setIsAuthenticated(false);
         return;
       }
 
       try {
         const authData = JSON.parse(auth);
-        console.log('Распарсенные данные:', authData);
         
         // Check if auth data is less than 24 hours old
         const authAge = Date.now() - authData.timestamp;
         const maxAge = 24 * 60 * 60 * 1000; // 24 hours
 
         if (authAge > maxAge) {
-          console.log('Сессия истекла');
           localStorage.removeItem('telegram_auth');
           setIsAuthenticated(false);
           return;
         }
 
         if (authData.user && authData.user.isAuthorized) {
-          // Динамическая проверка whitelist с сервера
           const userId = authData.user.id;
           
+          // Кэшированная проверка whitelist для ускорения
+          const cacheKey = `whitelist_check_${userId}`;
+          const cachedCheck = localStorage.getItem(cacheKey);
+          
+          if (cachedCheck) {
+            const { isInWhitelist, timestamp } = JSON.parse(cachedCheck);
+            const cacheAge = Date.now() - timestamp;
+            
+            // Кэш на 10 минут
+            if (cacheAge < 10 * 60 * 1000) {
+              if (isInWhitelist) {
+                setUser(authData.user);
+                setIsAuthenticated(true);
+                return;
+              } else {
+                localStorage.removeItem('telegram_auth');
+                setIsAuthenticated(false);
+                return;
+              }
+            }
+          }
+          
+          // Быстрая проверка с сервера только если кэш устарел
           try {
-            const response = await fetch('/api/admin/whitelist');
-            const whitelist = await response.json();
-            const isInWhitelist = whitelist.some((user: any) => user.id === userId);
-            
-            // Проверяем режим preview для разработки
-            const urlParams = new URLSearchParams(window.location.search);
-            const isPreview = urlParams.get('preview') === 'true';
-            const isDevelopment = window.location.hostname.includes('replit') || 
-                                 window.location.hostname === 'localhost' ||
-                                 import.meta.env.DEV;
-            
-            if (isInWhitelist || (isDevelopment && isPreview)) {
-              console.log('Пользователь авторизован:', authData.user);
-              setUser(authData.user);
-              setIsAuthenticated(true);
+            const response = await fetch(`/api/admin/whitelist/${userId}`);
+            if (response.ok) {
+              const userData = await response.json();
+              const isInWhitelist = userData && userData.isActive;
+              
+              // Сохраняем в кэш
+              localStorage.setItem(cacheKey, JSON.stringify({
+                isInWhitelist,
+                timestamp: Date.now()
+              }));
+              
+              if (isInWhitelist) {
+                setUser(authData.user);
+                setIsAuthenticated(true);
+              } else {
+                localStorage.removeItem('telegram_auth');
+                setIsAuthenticated(false);
+              }
             } else {
-              console.log(`Пользователь ${userId} не в whitelist`);
-              localStorage.removeItem('telegram_auth');
-              setIsAuthenticated(false);
+              // Fallback для разработки
+              const isDevelopment = window.location.hostname.includes('replit') || 
+                                   window.location.hostname === 'localhost' ||
+                                   import.meta.env.DEV;
+              const urlParams = new URLSearchParams(window.location.search);
+              const isPreview = urlParams.get('preview') === 'true';
+              
+              if (isDevelopment && isPreview) {
+                setUser(authData.user);
+                setIsAuthenticated(true);
+              } else {
+                setIsAuthenticated(false);
+              }
             }
           } catch (error) {
             console.error('Ошибка проверки whitelist:', error);
-            // В случае ошибки запроса, разрешаем доступ в режиме разработки
-            const urlParams = new URLSearchParams(window.location.search);
-            const isPreview = urlParams.get('preview') === 'true';
-            const isDevelopment = window.location.hostname.includes('replit') || 
-                                 window.location.hostname === 'localhost' ||
-                                 import.meta.env.DEV;
-            
-            if (isDevelopment && isPreview) {
-              console.log('Пользователь авторизован (fallback режим разработки):', authData.user);
-              setUser(authData.user);
-              setIsAuthenticated(true);
-            } else {
-              setIsAuthenticated(false);
-            }
+            setIsAuthenticated(false);
           }
         } else {
-          console.log('Пользователь не авторизован');
           setIsAuthenticated(false);
         }
       } catch (error) {

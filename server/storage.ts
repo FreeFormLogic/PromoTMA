@@ -17,7 +17,7 @@ import { eq, desc, asc, sql, and } from "drizzle-orm";
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  getUserByTelegramId(telegramId: string): Promise<User | undefined>;
+  getUserByTelegramId(telegramId: string): Promise<AuthorizedUser | undefined>;
   createUser(user: InsertUser): Promise<User>;
   linkTelegramId(userId: string, telegramId: string): Promise<void>;
   authenticateTelegramUser(username: string): Promise<User | undefined>;
@@ -224,9 +224,13 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getUserByTelegramId(telegramId: string): Promise<User | undefined> {
-    // Для совместимости - не используется в новой системе
-    return undefined;
+  async getUserByTelegramId(telegramId: string): Promise<AuthorizedUser | undefined> {
+    try {
+      const [user] = await db.select().from(authorizedUsers).where(eq(authorizedUsers.telegramId, telegramId));
+      return user;
+    } catch {
+      return undefined;
+    }
   }
 
   async linkTelegramId(userId: string, telegramId: string): Promise<void> {

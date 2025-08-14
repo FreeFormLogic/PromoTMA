@@ -45,6 +45,29 @@ function verifyTelegramAuth(authData: any): boolean {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Оптимизированная проверка whitelist для одного пользователя
+  app.get("/api/admin/whitelist/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await storage.getUserByTelegramId(userId);
+      
+      if (user && user.appAccess) {
+        res.json({ 
+          isActive: true,
+          userId: user.id,
+          telegramId: user.telegramId,
+          username: user.username,
+          realName: user.realName
+        });
+      } else {
+        res.status(404).json({ isActive: false });
+      }
+    } catch (error) {
+      console.error("Whitelist check error:", error);
+      res.status(500).json({ isActive: false });
+    }
+  });
+
   // Simplified authentication routes
   app.post("/api/auth/simple", async (req, res) => {
     try {
