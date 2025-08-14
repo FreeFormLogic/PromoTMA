@@ -317,13 +317,20 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Извините, произошла ошибка. Попробуйте еще раз.',
-        timestamp: Date.now()
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      
+      // Don't add error message if it's a network/auth error that might cause navigation issues
+      const errorStr = String(error);
+      if (!errorStr.includes('401') && !errorStr.includes('Unauthorized')) {
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'Извините, произошла ошибка. Попробуйте еще раз.',
+          timestamp: Date.now()
+        };
+        setMessages(prev => [...prev, errorMessage]);
+        persistentMessages = [...persistentMessages, errorMessage];
+        localStorage.setItem('aiChatMessages', JSON.stringify([...persistentMessages, errorMessage]));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -752,10 +759,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('Chat close button clicked - current URL:', window.location.href);
-              console.log('Navigating to:', window.location.origin + '/');
-              // Force immediate navigation using window.location
-              window.location.href = window.location.origin + '/';
+              console.log('Chat close button clicked');
+              // Use wouter navigation instead of window.location to avoid abrupt exits
+              setLocation('/');
             }}
             className="h-8 w-8 p-0"
             title="Закрыть"

@@ -138,53 +138,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       {/* Убрали строку авторизации */}
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Hero Section */}
-        <section className="mb-12">
-          <div className="bg-gradient-to-r from-telegram to-telegram-dark text-white rounded-2xl p-8 mb-8">
-            <div className="grid lg:grid-cols-2 gap-8 items-center">
-              <div>
-                <h2 className="text-4xl font-bold mb-4">Telegram Mini Apps за&nbsp;1&nbsp;день</h2>
-                <p className="text-xl mb-6 text-blue-100">
-                  Полноценные веб-приложения внутри Telegram без установки. Запуск за&nbsp;1-5&nbsp;дней вместо месяцев разработки.
-                </p>
-                
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-                    <div className="text-2xl font-bold">1&nbsp;день</div>
-                    <div className="text-sm text-blue-100">время запуска</div>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-                    <div className="text-2xl font-bold">260+</div>
-                    <div className="text-sm text-blue-100">модулей</div>
-                  </div>
-                </div>
-                
-                <Button className="bg-success hover:bg-success/90 text-white px-8 py-3 rounded-lg font-semibold">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Узнать подробнее
-                </Button>
-              </div>
-              
-              <div className="bg-white/10 backdrop-blur rounded-xl p-6">
-                <h3 className="font-semibold mb-4 text-lg">Ключевые преимущества:</h3>
-                <ul className="space-y-2 text-blue-100">
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-blue-300 mr-2" />
-                    260+ модулей
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-blue-300 mr-2" />
-                    Интеграция популярных платежей: Международные, Российские, Крипта, GoPay
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-blue-300 mr-2" />
-                    900+ млн пользователей Telegram
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
+
 
 
 
@@ -238,73 +192,13 @@ export default function Home() {
 
 {/* Recommended Modules section removed - modules now displayed directly in AI chat */}
 
-        {/* Quick Stats - Compact */}
-        <section className="mb-12 mt-16">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Готовые решения для бизнеса</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 p-4 rounded-lg text-center border border-blue-200">
-                <div className="text-2xl font-bold mb-1">1-5 дней</div>
-                <div className="text-xs opacity-70">Время запуска</div>
-              </div>
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 p-4 rounded-lg text-center border border-blue-200">
-                <div className="text-2xl font-bold mb-1">260+</div>
-                <div className="text-xs opacity-70">Модулей</div>
-              </div>
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 p-4 rounded-lg text-center border border-blue-200">
-                <div className="text-2xl font-bold mb-1">1-5</div>
-                <div className="text-xs opacity-70">Дней до запуска</div>
-              </div>
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 p-4 rounded-lg text-center border border-blue-200">
-                <div className="text-2xl font-bold mb-1">24/7</div>
-                <div className="text-xs opacity-70">Поддержка</div>
-              </div>
-            </div>
-          </div>
-        </section>
 
 
 
 
 
-        {/* CTA Section */}
-        <section className="mb-12">
-          <Card className="bg-gradient-to-r from-telegram to-telegram-dark text-white p-6 text-center">
-            <h2 className="text-2xl font-bold mb-3">Готовы получить прототип завтра?</h2>
-            <p className="text-blue-100 mb-4">
-              Запустим ваш проект в рекордные сроки
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-              <Button className="bg-success hover:bg-success/90 text-white px-6 py-2 font-semibold">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Начать проект прямо сейчас
-              </Button>
-              <div className="text-blue-100 text-sm">
-                Консультация бесплатна • Прототип за 1 день
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-              <div className="bg-white/15 rounded-lg p-4">
-                <div className="text-lg font-bold text-white">1-5 дней</div>
-                <div className="text-xs text-blue-100">Время<br/>запуска</div>
-              </div>
-              <div className="bg-white/15 rounded-lg p-4">
-                <div className="text-lg font-bold text-white">260+</div>
-                <div className="text-xs text-blue-100">Модулей</div>
-              </div>
-              <div className="bg-white/15 rounded-lg p-4">
-                <div className="text-lg font-bold text-white">1-5</div>
-                <div className="text-xs text-blue-100">Дней до<br/>запуска</div>
-              </div>
-              <div className="bg-white/15 rounded-lg p-4">
-                <div className="text-lg font-bold text-white">24/7</div>
-                <div className="text-xs text-blue-100">Техническая<br/>поддержка</div>
-              </div>
-            </div>
-          </Card>
-        </section>
+
+
 
         {/* Cost Comparison Section - Complete Redesign */}
         <section className="mb-12 py-16 bg-gray-50">
