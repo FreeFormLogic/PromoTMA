@@ -26,6 +26,9 @@ interface WhitelistUser {
   accessMyApp: boolean;
   accessAdvantages: boolean;
   accessPartners: boolean;
+  referralCode?: string;
+  referredBy?: string;
+  phone?: string;
 }
 
 interface AiChatStats {

@@ -2,7 +2,8 @@ import {
   type User, type InsertUser, type Module, type Industry, type USP, type Objection,
   type AuthorizedUser, type InsertAuthorizedUser, type UpdateAuthorizedUser,
   type AiChatSession, type AiChatMessage, type AiChatUserStats,
-  type InsertAiChatSession, type InsertAiChatMessage, type InsertAiChatUserStats
+  type InsertAiChatSession, type InsertAiChatMessage, type InsertAiChatUserStats,
+  type ReferralRegistration, type InsertReferralRegistration
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { allModulesData } from "./seedModules";
@@ -10,7 +11,7 @@ import { allIndustriesData } from "./seedIndustries";
 import { db } from "./db";
 import { 
   users, authorizedUsers, modules, industries, usps, objections,
-  aiChatSessions, aiChatMessages, aiChatUserStats
+  aiChatSessions, aiChatMessages, aiChatUserStats, referralRegistrations
 } from "@shared/schema";
 import { eq, desc, asc, sql, and } from "drizzle-orm";
 
@@ -53,6 +54,12 @@ export interface IStorage {
   getAllUserStats(): Promise<any[]>;
   getUserChatHistory(telegramId: string, limit?: number, offset?: number): Promise<any[]>;
   getSessionMessages(sessionId: string): Promise<AiChatMessage[]>;
+
+  // Referral system methods
+  generateReferralCode(telegramId: string): Promise<string>;
+  getUserReferralInfo(telegramId: string): Promise<{ referralCode: string; referrals: ReferralRegistration[] }>;
+  registerViaReferral(referralCode: string, newUserName: string, newUserPhone: string): Promise<{ success: boolean; message: string }>;
+  getReferralStats(): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -532,6 +539,101 @@ export class DatabaseStorage implements IStorage {
       .from(aiChatMessages)
       .where(eq(aiChatMessages.sessionId, sessionId))
       .orderBy(asc(aiChatMessages.timestamp));
+  }
+
+  // Referral system methods
+  async generateReferralCode(telegramId: string): Promise<string> {
+    try {
+      // Генерируем уникальный реферальный код
+      const referralCode = `REF_${telegramId}_${Date.now()}`;
+      
+      // Обновляем пользователя с реферальным кодом
+      await db.update(authorizedUsers)
+        .set({ referralCode })
+        .where(eq(authorizedUsers.telegramId, telegramId));
+      
+      return referralCode;
+    } catch (error) {
+      console.error("Error generating referral code:", error);
+      throw error;
+    }
+  }
+
+  async getUserReferralInfo(telegramId: string): Promise<{ referralCode: string; referrals: ReferralRegistration[] }> {
+    try {
+      const [user] = await db.select()
+        .from(authorizedUsers)
+        .where(eq(authorizedUsers.telegramId, telegramId));
+      
+      if (!user) {
+        throw new Error("User not found");
+      }
+      
+      // Если у пользователя нет реферального кода, создаем его
+      let referralCode = user.referralCode;
+      if (!referralCode) {
+        referralCode = await this.generateReferralCode(telegramId);
+      }
+      
+      // Получаем всех рефералов этого пользователя
+      const referrals = await db.select()
+        .from(referralRegistrations)
+        .where(eq(referralRegistrations.referrerTelegramId, telegramId))
+        .orderBy(desc(referralRegistrations.registeredAt));
+      
+      return { referralCode, referrals };
+    } catch (error) {
+      console.error("Error getting referral info:", error);
+      throw error;
+    }
+  }
+
+  async registerViaReferral(referralCode: string, newUserName: string, newUserPhone: string): Promise<{ success: boolean; message: string }> {
+    try {
+      // Находим пользователя по реферальному коду
+      const [referrer] = await db.select()
+        .from(authorizedUsers)
+        .where(eq(authorizedUsers.referralCode, referralCode));
+      
+      if (!referrer) {
+        return { success: false, message: "Реферальный код не найден" };
+      }
+      
+      // Создаем запись регистрации по реферальной ссылке
+      const [registration] = await db.insert(referralRegistrations)
+        .values({
+          referralCode,
+          referrerTelegramId: referrer.telegramId,
+          newUserName,
+          newUserPhone,
+        })
+        .returning();
+      
+      return { success: true, message: `Регистрация успешна! ID: ${registration.id}` };
+    } catch (error) {
+      console.error("Error registering via referral:", error);
+      return { success: false, message: `Ошибка регистрации: ${error}` };
+    }
+  }
+
+  async getReferralStats(): Promise<any[]> {
+    try {
+      const stats = await db.select({
+        referrerTelegramId: referralRegistrations.referrerTelegramId,
+        referrerName: authorizedUsers.realName,
+        referrerUsername: authorizedUsers.username,
+        totalReferrals: sql<number>`count(*)`.as('totalReferrals')
+      })
+      .from(referralRegistrations)
+      .leftJoin(authorizedUsers, eq(referralRegistrations.referrerTelegramId, authorizedUsers.telegramId))
+      .groupBy(referralRegistrations.referrerTelegramId, authorizedUsers.realName, authorizedUsers.username)
+      .orderBy(desc(sql`count(*)`));
+
+      return stats;
+    } catch (error) {
+      console.error("Error getting referral stats:", error);
+      return [];
+    }
   }
 }
 

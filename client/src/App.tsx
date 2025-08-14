@@ -13,6 +13,7 @@ import Development from "@/pages/Development";
 import AIChatPage from "@/pages/AIChat";
 import Pricing from "@/pages/Pricing";
 import Process from "@/pages/Process";
+import Advantages from "@/pages/Advantages";
 import Partners from "@/pages/Partners";
 import AdminPanel from "@/pages/AdminPanel";
 import NotFound from "@/pages/not-found";
@@ -72,6 +73,12 @@ function Router() {
         <AuthGuard>
           <Navigation />
           <Process />
+        </AuthGuard>
+      )} />
+      <Route path="/advantages" component={() => (
+        <AuthGuard>
+          <Navigation />
+          <Advantages />
         </AuthGuard>
       )} />
       <Route path="/partners" component={() => (

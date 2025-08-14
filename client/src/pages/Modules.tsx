@@ -410,7 +410,7 @@ export default function Modules() {
                       : "bg-white/10 text-white border-white/30 hover:bg-white/20"
                   }`}
                 >
-                  Все модули ({totalModules})
+                  Все модули
                 </Button>
               </div>
               
@@ -425,16 +425,15 @@ export default function Modules() {
                       key={categoryName}
                       variant={selectedCategory === categoryName ? "secondary" : "outline"}
                       onClick={() => setSelectedCategory(categoryName)}
-                      className={`p-3 h-auto flex flex-col items-center justify-center gap-2 text-xs ${
+                      className={`p-2 h-auto flex flex-col items-center justify-center gap-1 text-xs min-h-[60px] ${
                         selectedCategory === categoryName 
                           ? "bg-white text-blue-700 hover:bg-blue-50" 
                           : "bg-white/10 text-white border-white/30 hover:bg-white/20"
                       }`}
                     >
-                      <IconComponent className="w-5 h-5" />
-                      <div className="text-center">
-                        <div className="font-semibold leading-tight">{categoryName}</div>
-                        <div className="text-xs opacity-75">{categoryCount} модулей</div>
+                      <IconComponent className="w-5 h-5 flex-shrink-0" />
+                      <div className="text-center min-w-0">
+                        <div className="font-semibold leading-tight text-xs break-words">{categoryName}</div>
                       </div>
                     </Button>
                   );
@@ -472,7 +471,7 @@ export default function Modules() {
 
         {/* Контент в зависимости от режима просмотра */}
         {viewMode === "catalog" ? (
-          <div className="space-y-6">
+          <div className="space-y-6 pb-20 overflow-hidden">
             {/* Используем новый компонент ModuleCatalog */}
             <ModuleCatalog allModulesData={modules || []} />
           </div>

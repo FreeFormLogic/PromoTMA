@@ -30,7 +30,7 @@ export function Navigation() {
     { path: "/ai-chat", label: "AI-конструктор", icon: Bot },
     { path: "/my-app", label: "Мое Telegram Mini App", icon: Settings },
     { path: "/development", label: "Ваше преимущество", icon: Rocket },
-    { path: "/partners", label: "Партнерам", icon: Handshake },
+    { path: "/partners", label: "Порекомендовать и получить 💰", icon: Handshake },
   ];
 
   return (

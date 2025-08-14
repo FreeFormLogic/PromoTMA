@@ -70,6 +70,22 @@ export const authorizedUsers = pgTable("authorized_users", {
   accessMyApp: boolean("access_my_app").default(true),
   accessAdvantages: boolean("access_advantages").default(true),
   accessPartners: boolean("access_partners").default(true),
+  // Реферальная система
+  referralCode: varchar("referral_code", { length: 50 }).unique(),
+  referredBy: varchar("referred_by", { length: 255 }), // ID того, кто пригласил
+  phone: varchar("phone", { length: 20 }),
+});
+
+// Реферальная система - регистрации по реферальным ссылкам
+export const referralRegistrations = pgTable("referral_registrations", {
+  id: serial("id").primaryKey(),
+  referralCode: varchar("referral_code", { length: 50 }).notNull(),
+  referrerTelegramId: varchar("referrer_telegram_id", { length: 255 }).notNull(),
+  newUserTelegramId: varchar("new_user_telegram_id", { length: 255 }),
+  newUserName: varchar("new_user_name", { length: 255 }).notNull(),
+  newUserPhone: varchar("new_user_phone", { length: 20 }).notNull(),
+  registeredAt: timestamp("registered_at").defaultNow(),
+  isActive: boolean("is_active").default(true),
 });
 
 // Functionality access users table (second whitelist - module access)
@@ -199,3 +215,7 @@ export type AiChatUserStats = typeof aiChatUserStats.$inferSelect;
 export type InsertAiChatSession = z.infer<typeof insertAiChatSessionSchema>;
 export type InsertAiChatMessage = z.infer<typeof insertAiChatMessageSchema>;
 export type InsertAiChatUserStats = z.infer<typeof insertAiChatUserStatsSchema>;
+
+// Referral system types
+export type ReferralRegistration = typeof referralRegistrations.$inferSelect;
+export type InsertReferralRegistration = typeof referralRegistrations.$inferInsert;

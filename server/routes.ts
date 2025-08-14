@@ -521,6 +521,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Chat Statistics routes
+  // Referral system routes
+  app.get('/api/referrals/:telegramId', async (req, res) => {
+    try {
+      const { telegramId } = req.params;
+      
+      if (!telegramId || !/^\d+$/.test(telegramId)) {
+        return res.status(400).json({ message: "Некорректный Telegram ID" });
+      }
+
+      const referralInfo = await storage.getUserReferralInfo(telegramId);
+      res.json(referralInfo);
+    } catch (error) {
+      console.error("Error getting referral info:", error);
+      res.status(500).json({ message: "Ошибка получения реферальной информации" });
+    }
+  });
+
+  app.post('/api/referrals/register', async (req, res) => {
+    try {
+      const { referralCode, newUserName, newUserPhone } = req.body;
+      
+      if (!referralCode || !newUserName || !newUserPhone) {
+        return res.status(400).json({ message: "Все поля обязательны для заполнения" });
+      }
+
+      const result = await storage.registerViaReferral(referralCode, newUserName, newUserPhone);
+      
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error) {
+      console.error("Error registering via referral:", error);
+      res.status(500).json({ message: "Ошибка регистрации по реферальной ссылке" });
+    }
+  });
+
+  app.get('/api/admin/referral-stats', async (req, res) => {
+    try {
+      const stats = await storage.getReferralStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error getting referral stats:", error);
+      res.status(500).json({ message: "Ошибка получения статистики рефералов" });
+    }
+  });
+
   app.get('/api/admin/ai-stats', async (req, res) => {
     try {
       const stats = await storage.getAllUserStats();
