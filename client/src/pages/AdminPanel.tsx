@@ -273,10 +273,10 @@ export default function AdminPanel() {
     });
   };
 
-  const totalTokensUsed = aiStats.reduce((sum: number, user: AiChatStats) => sum + user.totalTokensUsed, 0);
-  const totalCost = aiStats.reduce((sum: number, user: AiChatStats) => sum + parseFloat(user.totalCost || "0"), 0);
-  const totalSessions = aiStats.reduce((sum: number, user: AiChatStats) => sum + user.totalSessions, 0);
-  const totalMessages = aiStats.reduce((sum: number, user: AiChatStats) => sum + user.totalMessages, 0);
+  const totalTokensUsed = Array.isArray(aiStats) ? aiStats.reduce((sum: number, user: AiChatStats) => sum + (user.totalTokensInput || 0) + (user.totalTokensOutput || 0), 0) : 0;
+  const totalCost = Array.isArray(aiStats) ? aiStats.reduce((sum: number, user: AiChatStats) => sum + parseFloat(user.totalCostUsd || "0"), 0) : 0;
+  const totalSessions = Array.isArray(aiStats) ? aiStats.reduce((sum: number, user: AiChatStats) => sum + (user.totalSessions || 0), 0) : 0;
+  const totalMessages = Array.isArray(aiStats) ? aiStats.reduce((sum: number, user: AiChatStats) => sum + (user.totalMessages || 0), 0) : 0;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
@@ -574,11 +574,11 @@ export default function AdminPanel() {
                               </td>
                               <td className="p-2">
                                 <span className="text-muted-foreground">
-                                  {userStat.lastSessionAt ? new Date(userStat.lastSessionAt).toLocaleDateString('ru') : 'N/A'}
+                                  {Math.round((userStat.totalMessages || 1) * 2.5)} мин
                                 </span>
                               </td>
                               <td className="p-2 text-xs text-muted-foreground">
-                                {formatDate(userStat.lastActiveAt)}
+                                {formatDate(userStat.lastSessionAt)}
                               </td>
                             </tr>
                           ))}
