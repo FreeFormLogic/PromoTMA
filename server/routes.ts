@@ -332,7 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin API для управления вайт-листом
   app.get("/api/admin/whitelist", async (req, res) => {
     try {
-      const whitelist = storage.getWhitelist();
+      const whitelist = await storage.getWhitelist();
       res.json(whitelist);
     } catch (error) {
       console.error("Error fetching whitelist:", error);
@@ -342,13 +342,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/whitelist", async (req, res) => {
     try {
-      const { userId } = req.body;
+      const { telegramId, userData } = req.body;
       
-      if (!userId || !/^\d+$/.test(userId)) {
+      if (!telegramId || !/^\d+$/.test(telegramId)) {
         return res.status(400).json({ message: "Некорректный Telegram ID" });
       }
 
-      const result = storage.addToWhitelist(userId);
+      const result = await storage.addToWhitelist(telegramId, userData);
       if (result.success) {
         res.json({ message: "Пользователь добавлен в вайт-лист" });
       } else {
@@ -368,10 +368,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Список пользователей не может быть пустым" });
       }
 
-      const results = storage.bulkAddToWhitelist(userIds);
+      let added = 0;
+      let skipped = 0;
+
+      for (const telegramId of userIds) {
+        if (!/^\d+$/.test(telegramId)) {
+          skipped++;
+          continue;
+        }
+
+        const result = await storage.addToWhitelist(telegramId);
+        if (result.success) {
+          added++;
+        } else {
+          skipped++;
+        }
+      }
+
       res.json({ 
-        message: `Добавлено ${results.added} пользователей, пропущено ${results.skipped}`,
-        results 
+        message: `Добавлено ${added} пользователей, пропущено ${skipped}`,
+        added, 
+        skipped 
       });
     } catch (error) {
       console.error("Error bulk adding to whitelist:", error);
@@ -379,15 +396,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/whitelist/:userId", async (req, res) => {
+  app.delete("/api/admin/whitelist/:telegramId", async (req, res) => {
     try {
-      const { userId } = req.params;
+      const { telegramId } = req.params;
       
-      if (!userId || !/^\d+$/.test(userId)) {
+      if (!telegramId || !/^\d+$/.test(telegramId)) {
         return res.status(400).json({ message: "Некорректный Telegram ID" });
       }
 
-      const result = storage.removeFromWhitelist(userId);
+      const result = await storage.removeFromWhitelist(telegramId);
       if (result.success) {
         res.json({ message: "Пользователь удален из вайт-листа" });
       } else {
@@ -396,6 +413,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error removing from whitelist:", error);
       res.status(500).json({ message: "Ошибка удаления пользователя" });
+    }
+  });
+
+  // User permissions management
+  app.put("/api/admin/whitelist/:telegramId/permissions", async (req, res) => {
+    try {
+      const { telegramId } = req.params;
+      const permissions = req.body;
+      
+      if (!telegramId || !/^\d+$/.test(telegramId)) {
+        return res.status(400).json({ message: "Некорректный Telegram ID" });
+      }
+
+      const result = await storage.updateUserPermissions(telegramId, permissions);
+      if (result.success) {
+        res.json({ message: "Разрешения пользователя обновлены" });
+      } else {
+        res.status(400).json({ message: result.message });
+      }
+    } catch (error) {
+      console.error("Error updating user permissions:", error);
+      res.status(500).json({ message: "Ошибка обновления разрешений" });
+    }
+  });
+
+  app.get("/api/admin/whitelist/:telegramId", async (req, res) => {
+    try {
+      const { telegramId } = req.params;
+      
+      if (!telegramId || !/^\d+$/.test(telegramId)) {
+        return res.status(400).json({ message: "Некорректный Telegram ID" });
+      }
+
+      const user = await storage.getUserPermissions(telegramId);
+      if (user) {
+        res.json(user);
+      } else {
+        res.status(404).json({ message: "Пользователь не найден" });
+      }
+    } catch (error) {
+      console.error("Error getting user permissions:", error);
+      res.status(500).json({ message: "Ошибка получения данных пользователя" });
+    }
+  });
+
+  // Authorization check endpoint
+  app.get("/api/auth/check/:telegramId", async (req, res) => {
+    try {
+      const { telegramId } = req.params;
+      
+      if (!telegramId || !/^\d+$/.test(telegramId)) {
+        return res.status(400).json({ message: "Некорректный Telegram ID" });
+      }
+
+      const isAuthorized = await storage.isUserAuthorized(telegramId);
+      const permissions = await storage.getUserPermissions(telegramId);
+      
+      res.json({ 
+        isAuthorized,
+        permissions: permissions || null
+      });
+    } catch (error) {
+      console.error("Error checking authorization:", error);
+      res.status(500).json({ message: "Ошибка проверки авторизации" });
+    }
+  });
+
+  // Page access check endpoint
+  app.get("/api/auth/page-access/:telegramId/:page", async (req, res) => {
+    try {
+      const { telegramId, page } = req.params;
+      
+      if (!telegramId || !/^\d+$/.test(telegramId)) {
+        return res.status(400).json({ message: "Некорректный Telegram ID" });
+      }
+
+      const canAccess = await storage.canUserAccessPage(telegramId, page);
+      res.json({ canAccess });
+    } catch (error) {
+      console.error("Error checking page access:", error);
+      res.status(500).json({ message: "Ошибка проверки доступа к странице" });
     }
   });
 

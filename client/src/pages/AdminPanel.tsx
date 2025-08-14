@@ -11,11 +11,21 @@ import { Trash2, Plus, Users, Shield, Settings, BarChart3, MessageSquare, Clock,
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface WhitelistUser {
-  id: string;
+  id: number;
+  telegramId: string;
   firstName?: string;
   lastName?: string;
   username?: string;
+  realName?: string;
   addedAt: string;
+  isActive: boolean;
+  accessHome: boolean;
+  accessModules: boolean;
+  accessIndustries: boolean;
+  accessAiConstructor: boolean;
+  accessMyApp: boolean;
+  accessAdvantages: boolean;
+  accessPartners: boolean;
 }
 
 interface AiChatStats {
@@ -76,11 +86,11 @@ export default function AdminPanel() {
 
   // Добавление пользователя в вайт-лист
   const addUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
+    mutationFn: async (telegramId: string) => {
       const response = await fetch("/api/admin/whitelist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ telegramId }),
       });
       if (!response.ok) throw new Error("Ошибка добавления");
       return response.json();
@@ -132,8 +142,8 @@ export default function AdminPanel() {
 
   // Удаление пользователя из вайт-листа
   const removeUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      const response = await fetch(`/api/admin/whitelist/${userId}`, {
+    mutationFn: async (telegramId: string) => {
+      const response = await fetch(`/api/admin/whitelist/${telegramId}`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Ошибка удаления");
@@ -192,13 +202,17 @@ export default function AdminPanel() {
     bulkAddMutation.mutate(userIds);
   };
 
-  const handleRemoveUser = (userId: string) => {
-    removeUserMutation.mutate(userId);
+  const handleRemoveUser = (telegramId: string) => {
+    removeUserMutation.mutate(telegramId);
   };
 
   const formatUserName = (user: WhitelistUser) => {
+    if (user.realName) {
+      return user.realName;
+    }
+    
     const parts = [user.firstName, user.lastName].filter(Boolean);
-    const displayName = parts.length > 0 ? parts.join(" ") : `User ${user.id}`;
+    const displayName = parts.length > 0 ? parts.join(" ") : `User ${user.telegramId}`;
     
     if (user.username) {
       return `${displayName} (@${user.username})`;
@@ -402,32 +416,43 @@ export default function AdminPanel() {
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                         <span className="text-white font-semibold text-sm">
-                          {user.firstName?.[0] || user.username?.[0] || user.id[0]}
+                          {user.firstName?.[0] || user.username?.[0] || user.telegramId[0]}
                         </span>
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <div className="font-medium text-gray-900 dark:text-gray-100">
                           {formatUserName(user)}
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
                           <Badge variant="outline" className="text-xs">
-                            ID: {user.id}
+                            ID: {user.telegramId}
                           </Badge>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
                             Добавлен: {new Date(user.addedAt).toLocaleDateString('ru-RU')}
                           </span>
                         </div>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {user.accessHome && <Badge variant="secondary" className="text-xs">Главная</Badge>}
+                          {user.accessModules && <Badge variant="secondary" className="text-xs">Модули</Badge>}
+                          {user.accessIndustries && <Badge variant="secondary" className="text-xs">Отрасли</Badge>}
+                          {user.accessAiConstructor && <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">AI-конструктор</Badge>}
+                          {user.accessMyApp && <Badge variant="secondary" className="text-xs">Мое приложение</Badge>}
+                          {user.accessAdvantages && <Badge variant="secondary" className="text-xs">Преимущества</Badge>}
+                          {user.accessPartners && <Badge variant="secondary" className="text-xs">Партнерам</Badge>}
+                        </div>
                       </div>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleRemoveUser(user.id)}
-                      disabled={removeUserMutation.isPending}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRemoveUser(user.telegramId)}
+                        disabled={removeUserMutation.isPending}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>

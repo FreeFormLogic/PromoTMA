@@ -58,9 +58,18 @@ export const authorizedUsers = pgTable("authorized_users", {
   username: varchar("username", { length: 255 }),
   firstName: varchar("first_name", { length: 255 }),
   lastName: varchar("last_name", { length: 255 }),
+  realName: varchar("real_name", { length: 255 }), // Редактируемое реальное имя
   addedAt: timestamp("added_at").defaultNow(),
   addedBy: varchar("added_by", { length: 255 }),
   isActive: boolean("is_active").default(true),
+  // Разрешения доступа к страницам
+  accessHome: boolean("access_home").default(true),
+  accessModules: boolean("access_modules").default(true),
+  accessIndustries: boolean("access_industries").default(true),
+  accessAiConstructor: boolean("access_ai_constructor").default(true),
+  accessMyApp: boolean("access_my_app").default(true),
+  accessAdvantages: boolean("access_advantages").default(true),
+  accessPartners: boolean("access_partners").default(true),
 });
 
 // Functionality access users table (second whitelist - module access)
@@ -144,6 +153,13 @@ export const insertAuthorizedUserSchema = createInsertSchema(authorizedUsers).om
   addedAt: true,
 });
 
+export const updateAuthorizedUserSchema = createInsertSchema(authorizedUsers).omit({
+  id: true,
+  telegramId: true,
+  addedAt: true,
+  addedBy: true,
+}).partial();
+
 export const insertFunctionalityUserSchema = createInsertSchema(functionalityUsers).omit({
   id: true,
   addedAt: true,
@@ -175,6 +191,7 @@ export type Objection = typeof objections.$inferSelect;
 export type AuthorizedUser = typeof authorizedUsers.$inferSelect;
 export type FunctionalityUser = typeof functionalityUsers.$inferSelect;
 export type InsertAuthorizedUser = z.infer<typeof insertAuthorizedUserSchema>;
+export type UpdateAuthorizedUser = z.infer<typeof updateAuthorizedUserSchema>;
 export type InsertFunctionalityUser = z.infer<typeof insertFunctionalityUserSchema>;
 export type AiChatSession = typeof aiChatSessions.$inferSelect;
 export type AiChatMessage = typeof aiChatMessages.$inferSelect;

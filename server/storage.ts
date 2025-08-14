@@ -1,7 +1,18 @@
-import { type User, type InsertUser, type Module, type Industry, type USP, type Objection } from "@shared/schema";
+import { 
+  type User, type InsertUser, type Module, type Industry, type USP, type Objection,
+  type AuthorizedUser, type InsertAuthorizedUser, type UpdateAuthorizedUser,
+  type AiChatSession, type AiChatMessage, type AiChatUserStats,
+  type InsertAiChatSession, type InsertAiChatMessage, type InsertAiChatUserStats
+} from "@shared/schema";
 import { randomUUID } from "crypto";
 import { allModulesData } from "./seedModules";
 import { allIndustriesData } from "./seedIndustries";
+import { db } from "./db";
+import { 
+  users, authorizedUsers, modules, industries, usps, objections,
+  aiChatSessions, aiChatMessages, aiChatUserStats
+} from "@shared/schema";
+import { eq, desc, asc, sql, and } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -24,56 +35,51 @@ export interface IStorage {
   getAllObjections(): Promise<Objection[]>;
   getObjectionsByCategory(category: string): Promise<Objection[]>;
   
-  // Методы для управления вайт-листом
-  getWhitelist(): any[];
-  addToWhitelist(userId: string): { success: boolean; message: string };
-  bulkAddToWhitelist(userIds: string[]): { added: number; skipped: number };
-  removeFromWhitelist(userId: string): { success: boolean; message: string };
+  // Методы для управления вайт-листом и разрешениями
+  getWhitelist(): Promise<AuthorizedUser[]>;
+  addToWhitelist(telegramId: string, userData?: Partial<InsertAuthorizedUser>): Promise<{ success: boolean; message: string }>;
+  updateUserPermissions(telegramId: string, permissions: UpdateAuthorizedUser): Promise<{ success: boolean; message: string }>;
+  removeFromWhitelist(telegramId: string): Promise<{ success: boolean; message: string }>;
+  isUserAuthorized(telegramId: string): Promise<boolean>;
+  getUserPermissions(telegramId: string): Promise<AuthorizedUser | null>;
+  canUserAccessPage(telegramId: string, page: string): Promise<boolean>;
 
   // AI Chat Statistics methods
   createChatSession(telegramId: string, userAgent?: string, ipAddress?: string): Promise<string>;
   endChatSession(sessionId: string): Promise<void>;
   saveChatMessage(sessionId: string, telegramId: string, role: 'user' | 'assistant', content: string, tokensUsed: number, cost: number, model?: string, metadata?: any): Promise<void>;
   updateUserStats(telegramId: string): Promise<void>;
-  getUserStats(telegramId: string): Promise<any>;
+  getUserStats(telegramId: string): Promise<AiChatUserStats | null>;
   getAllUserStats(): Promise<any[]>;
   getUserChatHistory(telegramId: string, limit?: number, offset?: number): Promise<any[]>;
-  getSessionMessages(sessionId: string): Promise<any[]>;
+  getSessionMessages(sessionId: string): Promise<AiChatMessage[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private telegramIdToUserId: Map<string, string>; // Map telegram ID to user ID
-  private modules: Map<string, Module>;
-  private industries: Map<string, Industry>;
-  private usps: Map<string, USP>;
-  private objections: Map<string, Objection>;
-  private whitelist: Set<string>; // Хранилище разрешенных Telegram ID
-
+export class DatabaseStorage implements IStorage {
   constructor() {
-    this.users = new Map();
-    this.telegramIdToUserId = new Map();
-    this.modules = new Map();
-    this.industries = new Map();
-    this.usps = new Map();
-    this.objections = new Map();
-    this.whitelist = new Set();
-    
+    // Инициализируем данные при создании
     this.initializeData();
   }
 
-  private initializeData() {
-    // Initialize with empty user storage - all users will be created dynamically
-
-    // Initialize modules data
-    this.initializeModules();
-    this.initializeIndustries();
-    this.initializeUSPs();
-    this.initializeObjections();
-    this.initializeWhitelist();
+  private async initializeData() {
+    try {
+      // Проверяем есть ли данные в базе, если нет - заполняем
+      const moduleCount = await db.select({ count: sql<number>`count(*)` }).from(modules);
+      if (moduleCount[0]?.count === 0) {
+        await this.initializeModules();
+        await this.initializeIndustries();  
+        await this.initializeUSPs();
+        await this.initializeObjections();
+      }
+      
+      // Инициализируем начальный whitelist
+      await this.initializeWhitelist();
+    } catch (error) {
+      console.log('Data initialization will be done on first request');
+    }
   }
 
-  private initializeWhitelist() {
+  private async initializeWhitelist() {
     // Добавляем первоначальный список разрешенных пользователей
     const initialWhitelist = [
       "7418405560",
@@ -86,44 +92,71 @@ export class MemStorage implements IStorage {
       "666024781"
     ];
     
-    initialWhitelist.forEach(id => this.whitelist.add(id));
+    for (const telegramId of initialWhitelist) {
+      try {
+        await db.insert(authorizedUsers).values({
+          telegramId,
+          username: `user_${telegramId}`,
+          firstName: 'User',
+          isActive: true,
+          // Все разрешения по умолчанию включены
+          accessHome: true,
+          accessModules: true,
+          accessIndustries: true,
+          accessAiConstructor: true,
+          accessMyApp: true,
+          accessAdvantages: true,
+          accessPartners: true
+        }).onConflictDoNothing();
+      } catch (error) {
+        // Игнорируем ошибки дубликатов
+      }
+    }
   }
 
-  private initializeModules() {
-    // Загружаем все модули из файла seedModules.ts
-    allModulesData.forEach(module => {
-      this.modules.set(module.id, module);
-    });
+  private async initializeModules() {
+    // Загружаем все модули из файла seedModules.ts в базу данных
+    try {
+      await db.insert(modules).values(allModulesData).onConflictDoNothing();
+    } catch (error) {
+      console.error('Error initializing modules:', error);
+    }
   }
 
-  private initializeIndustries() {
-    // Загружаем все отрасли из файла seedIndustries.ts
-    allIndustriesData.forEach(industry => {
-      this.industries.set(industry.id, industry);
-    });
+  private async initializeIndustries() {
+    // Загружаем все отрасли из файла seedIndustries.ts в базу данных
+    try {
+      await db.insert(industries).values(allIndustriesData).onConflictDoNothing();
+    } catch (error) {
+      console.error('Error initializing industries:', error);
+    }
   }
 
-  private initializeUSPs() {
+  private async initializeUSPs() {
     const uspsData = [
       {
+        id: randomUUID(),
         title: "Запуск за 1 день вместо месяцев",
         description: "Готовые модули позволяют создать приложение за 1-5 дней",
         category: "Скорость",
         icon: "Rocket"
       },
       {
+        id: randomUUID(),
         title: "$300 вместо $25,000-$75,000",
         description: "Экономия до 99% на разработке благодаря готовым решениям",
         category: "Экономия",
         icon: "DollarSign"
       },
       {
+        id: randomUUID(),
         title: "900+ млн пользователей Telegram",
         description: "Ваши клиенты уже в Telegram, не нужно их переучивать",
         category: "Аудитория",
         icon: "Users"
       },
       {
+        id: randomUUID(),
         title: "Telegram Stars (0% комиссии)",
         description: "Встроенные платежи без комиссий через Telegram Stars",
         category: "Платежи",
@@ -131,236 +164,371 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    uspsData.forEach(uspData => {
-      const usp: USP = {
-        id: randomUUID(),
-        title: uspData.title,
-        description: uspData.description,
-        category: uspData.category,
-        icon: uspData.icon
-      };
-      this.usps.set(usp.id, usp);
-    });
+    try {
+      await db.insert(usps).values(uspsData).onConflictDoNothing();
+    } catch (error) {
+      console.error('Error initializing USPs:', error);
+    }
   }
 
-  private initializeObjections() {
+  private async initializeObjections() {
     const objectionsData = [
       {
+        id: randomUUID(),
         question: "У нас уже есть сайт/мобильное приложение",
         answer: "Mini App не заменяет, а дополняет экосистему. Это новый канал для аудитории, которая предпочитает мессенджеры и ценит удобство.",
         category: "Конкуренция"
       },
       {
+        id: randomUUID(),
         question: "Это слишком дорого для нашего бизнеса",
         answer: "$300 + $15/месяц против $25,000+ традиционной разработки. Инвестиции окупаются с первых заказов.",
         category: "Цена"
       },
       {
+        id: randomUUID(),
         question: "Наши клиенты не пользуются Telegram",
         answer: "900+ млн активных пользователей по всему миру. Ваши клиенты уже там, просто вы еще не представлены в этом канале.",
         category: "Аудитория"
       }
     ];
 
-    objectionsData.forEach(objectionData => {
-      const objection: Objection = {
-        id: randomUUID(),
-        question: objectionData.question,
-        answer: objectionData.answer,
-        category: objectionData.category
-      };
-      this.objections.set(objection.id, objection);
-    });
+    try {
+      await db.insert(objections).values(objectionsData).onConflictDoNothing();
+    } catch (error) {
+      console.error('Error initializing objections:', error);
+    }
   }
 
+  // User methods - простая реализация для совместимости
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    try {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user;
+    } catch {
+      return undefined;
+    }
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    try {
+      const [user] = await db.select().from(users).where(eq(users.username, username));
+      return user;
+    } catch {
+      return undefined;
+    }
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
-      id, 
-      isAuthorized: insertUser.isAuthorized ?? false,
-      telegramUsername: insertUser.telegramUsername ?? null 
-    };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async getUserByTelegramId(telegramId: string): Promise<User | undefined> {
-    const userId = this.telegramIdToUserId.get(telegramId);
-    if (userId) {
-      return this.users.get(userId);
-    }
+    // Для совместимости - не используется в новой системе
     return undefined;
   }
 
   async linkTelegramId(userId: string, telegramId: string): Promise<void> {
-    this.telegramIdToUserId.set(telegramId, userId);
+    // Для совместимости - не используется в новой системе
   }
 
   async authenticateTelegramUser(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username || user.telegramUsername === `@${username}`,
-    );
+    // Для совместимости - не используется в новой системе
+    return undefined;
   }
 
+  // Module methods
   async getAllModules(): Promise<Module[]> {
-    return Array.from(this.modules.values());
+    return await db.select().from(modules);
   }
 
   async getModulesByCategory(category: string): Promise<Module[]> {
-    return Array.from(this.modules.values()).filter(
-      (module) => module.category === category,
-    );
+    return await db.select().from(modules).where(eq(modules.category, category));
   }
 
   async getModule(id: string): Promise<Module | undefined> {
-    return this.modules.get(id);
+    const [module] = await db.select().from(modules).where(eq(modules.id, id));
+    return module;
   }
 
+  // Industry methods
   async getAllIndustries(): Promise<Industry[]> {
-    return Array.from(this.industries.values());
+    return await db.select().from(industries);
   }
 
   async getIndustry(id: string): Promise<Industry | undefined> {
-    return this.industries.get(id);
+    const [industry] = await db.select().from(industries).where(eq(industries.id, id));
+    return industry;
   }
 
+  // USP methods
   async getAllUSPs(): Promise<USP[]> {
-    return Array.from(this.usps.values());
+    return await db.select().from(usps);
   }
 
   async getUSPsByCategory(category: string): Promise<USP[]> {
-    return Array.from(this.usps.values()).filter(
-      (usp) => usp.category === category,
-    );
+    return await db.select().from(usps).where(eq(usps.category, category));
   }
 
+  // Objection methods
   async getAllObjections(): Promise<Objection[]> {
-    return Array.from(this.objections.values());
+    return await db.select().from(objections);
   }
 
   async getObjectionsByCategory(category: string): Promise<Objection[]> {
-    return Array.from(this.objections.values()).filter(
-      (objection) => objection.category === category,
-    );
+    return await db.select().from(objections).where(eq(objections.category, category));
   }
 
-  // Методы для управления вайт-листом
-  getWhitelist(): any[] {
-    return Array.from(this.whitelist).map(id => ({
-      id,
-      firstName: `User`,
-      lastName: id.slice(-4),
-      username: `user_${id.slice(-4)}`,
-      addedAt: new Date().toISOString()
-    }));
+  // Whitelist и permissions methods
+  async getWhitelist(): Promise<AuthorizedUser[]> {
+    return await db.select().from(authorizedUsers).where(eq(authorizedUsers.isActive, true));
   }
 
-  addToWhitelist(userId: string): { success: boolean; message: string } {
-    if (this.whitelist.has(userId)) {
-      return { success: false, message: "Пользователь уже в вайт-листе" };
+  async addToWhitelist(telegramId: string, userData?: Partial<InsertAuthorizedUser>): Promise<{ success: boolean; message: string }> {
+    try {
+      const newUser: InsertAuthorizedUser = {
+        telegramId,
+        username: userData?.username || `user_${telegramId}`,
+        firstName: userData?.firstName || 'User',
+        lastName: userData?.lastName,
+        realName: userData?.realName,
+        isActive: true,
+        // Все разрешения по умолчанию включены
+        accessHome: userData?.accessHome ?? true,
+        accessModules: userData?.accessModules ?? true,
+        accessIndustries: userData?.accessIndustries ?? true,
+        accessAiConstructor: userData?.accessAiConstructor ?? true,
+        accessMyApp: userData?.accessMyApp ?? true,
+        accessAdvantages: userData?.accessAdvantages ?? true,
+        accessPartners: userData?.accessPartners ?? true
+      };
+
+      await db.insert(authorizedUsers).values(newUser);
+      return { success: true, message: `Пользователь ${telegramId} добавлен в whitelist` };
+    } catch (error) {
+      return { success: false, message: `Ошибка добавления пользователя: ${error}` };
     }
-    
-    this.whitelist.add(userId);
-    return { success: true, message: "Пользователь добавлен в вайт-лист" };
   }
 
-  bulkAddToWhitelist(userIds: string[]): { added: number; skipped: number } {
-    let added = 0;
-    let skipped = 0;
-    
-    userIds.forEach(userId => {
-      if (this.whitelist.has(userId)) {
-        skipped++;
-      } else {
-        this.whitelist.add(userId);
-        added++;
+  async updateUserPermissions(telegramId: string, permissions: UpdateAuthorizedUser): Promise<{ success: boolean; message: string }> {
+    try {
+      await db.update(authorizedUsers)
+        .set(permissions)
+        .where(eq(authorizedUsers.telegramId, telegramId));
+      return { success: true, message: `Разрешения пользователя ${telegramId} обновлены` };
+    } catch (error) {
+      return { success: false, message: `Ошибка обновления разрешений: ${error}` };
+    }
+  }
+
+  async removeFromWhitelist(telegramId: string): Promise<{ success: boolean; message: string }> {
+    try {
+      await db.update(authorizedUsers)
+        .set({ isActive: false })
+        .where(eq(authorizedUsers.telegramId, telegramId));
+      return { success: true, message: `Пользователь ${telegramId} удален из whitelist` };
+    } catch (error) {
+      return { success: false, message: `Ошибка удаления пользователя: ${error}` };
+    }
+  }
+
+  async isUserAuthorized(telegramId: string): Promise<boolean> {
+    try {
+      const [user] = await db.select()
+        .from(authorizedUsers)
+        .where(and(eq(authorizedUsers.telegramId, telegramId), eq(authorizedUsers.isActive, true)));
+      return !!user;
+    } catch {
+      return false;
+    }
+  }
+
+  async getUserPermissions(telegramId: string): Promise<AuthorizedUser | null> {
+    try {
+      const [user] = await db.select()
+        .from(authorizedUsers)
+        .where(eq(authorizedUsers.telegramId, telegramId));
+      return user || null;
+    } catch {
+      return null;
+    }
+  }
+
+  async canUserAccessPage(telegramId: string, page: string): Promise<boolean> {
+    try {
+      const user = await this.getUserPermissions(telegramId);
+      if (!user || !user.isActive) return false;
+
+      switch (page) {
+        case 'home': return user.accessHome || false;
+        case 'modules': return user.accessModules || false;
+        case 'industries': return user.accessIndustries || false;
+        case 'ai-constructor': return user.accessAiConstructor || false;
+        case 'my-app': return user.accessMyApp || false;
+        case 'advantages': return user.accessAdvantages || false;
+        case 'partners': return user.accessPartners || false;
+        default: return false;
       }
-    });
-    
-    return { added, skipped };
-  }
-
-  removeFromWhitelist(userId: string): { success: boolean; message: string } {
-    if (!this.whitelist.has(userId)) {
-      return { success: false, message: "Пользователь не найден в вайт-листе" };
+    } catch {
+      return false;
     }
-    
-    this.whitelist.delete(userId);
-    return { success: true, message: "Пользователь удален из вайт-листа" };
   }
 
-  // AI Chat Statistics methods implementation
+  // AI Chat Statistics methods
   async createChatSession(telegramId: string, userAgent?: string, ipAddress?: string): Promise<string> {
-    const sessionId = randomUUID();
-    // В реальной реализации это должно быть сохранено в БД
-    // Для демонстрации возвращаем sessionId
-    return sessionId;
+    const sessionData: InsertAiChatSession = {
+      telegramId,
+      userAgent,
+      ipAddress
+    };
+
+    const [session] = await db.insert(aiChatSessions).values(sessionData).returning();
+    return session.id;
   }
 
   async endChatSession(sessionId: string): Promise<void> {
-    // В реальной реализации обновляем endedAt в БД
-    console.log(`Ending session: ${sessionId}`);
+    await db.update(aiChatSessions)
+      .set({ endedAt: new Date() })
+      .where(eq(aiChatSessions.id, sessionId));
+    
+    // Обновляем статистику пользователя
+    const [session] = await db.select().from(aiChatSessions).where(eq(aiChatSessions.id, sessionId));
+    if (session) {
+      await this.updateUserStats(session.telegramId);
+    }
   }
 
-  async saveChatMessage(sessionId: string, telegramId: string, role: 'user' | 'assistant', content: string, tokensUsed: number, cost: number, model?: string, metadata?: any): Promise<void> {
-    // В реальной реализации сохраняем в БД
-    console.log(`Saving message for session ${sessionId}: ${role} - ${tokensUsed} tokens, $${cost}`);
+  async saveChatMessage(
+    sessionId: string, 
+    telegramId: string, 
+    role: 'user' | 'assistant', 
+    content: string, 
+    tokensUsed: number, 
+    cost: number, 
+    model?: string, 
+    metadata?: any
+  ): Promise<void> {
+    const messageData: InsertAiChatMessage = {
+      sessionId,
+      telegramId,
+      role,
+      content,
+      tokensUsed,
+      cost: cost.toString(),
+      model: model || 'claude-sonnet-4-20250514',
+      metadata
+    };
+
+    await db.insert(aiChatMessages).values(messageData);
+
+    // Обновляем счетчики в сессии
+    await db.update(aiChatSessions)
+      .set({
+        totalMessages: sql`total_messages + 1`,
+        totalTokensUsed: sql`total_tokens_used + ${tokensUsed}`,
+        totalCost: sql`total_cost + ${cost}`
+      })
+      .where(eq(aiChatSessions.id, sessionId));
+
+    // Обновляем статистику пользователя
+    await this.updateUserStats(telegramId);
   }
 
   async updateUserStats(telegramId: string): Promise<void> {
-    // В реальной реализации обновляем статистику пользователя
-    console.log(`Updating stats for user: ${telegramId}`);
+    // Получаем агрегированную статистику из сессий
+    const [stats] = await db.select({
+      totalSessions: sql<number>`count(distinct ${aiChatSessions.id})`,
+      totalMessages: sql<number>`coalesce(sum(${aiChatSessions.totalMessages}), 0)`,
+      totalTokensUsed: sql<number>`coalesce(sum(${aiChatSessions.totalTokensUsed}), 0)`,
+      totalCost: sql<string>`coalesce(sum(${aiChatSessions.totalCost}), 0)`,
+      lastActiveAt: sql<Date>`max(${aiChatSessions.startedAt})`,
+      firstActiveAt: sql<Date>`min(${aiChatSessions.startedAt})`,
+      averageSessionLength: sql<string>`coalesce(avg(extract(epoch from (coalesce(${aiChatSessions.endedAt}, now()) - ${aiChatSessions.startedAt})) / 60), 0)`
+    }).from(aiChatSessions).where(eq(aiChatSessions.telegramId, telegramId));
+
+    const userStatsData: InsertAiChatUserStats = {
+      telegramId,
+      totalSessions: stats.totalSessions,
+      totalMessages: stats.totalMessages,
+      totalTokensUsed: stats.totalTokensUsed,
+      totalCost: stats.totalCost,
+      lastActiveAt: stats.lastActiveAt,
+      firstActiveAt: stats.firstActiveAt,
+      averageSessionLength: stats.averageSessionLength
+    };
+
+    await db.insert(aiChatUserStats)
+      .values(userStatsData)
+      .onConflictDoUpdate({
+        target: aiChatUserStats.telegramId,
+        set: {
+          ...userStatsData,
+          updatedAt: new Date()
+        }
+      });
   }
 
-  async getUserStats(telegramId: string): Promise<any> {
-    // В реальной реализации получаем статистику из БД
-    return {
-      telegramId,
-      totalSessions: 0,
-      totalMessages: 0,
-      totalTokensUsed: 0,
-      totalCost: 0,
-      averageSessionLength: 0,
-      lastActiveAt: null,
-      firstActiveAt: new Date()
-    };
+  async getUserStats(telegramId: string): Promise<AiChatUserStats | null> {
+    try {
+      const [stats] = await db.select()
+        .from(aiChatUserStats)
+        .where(eq(aiChatUserStats.telegramId, telegramId));
+      return stats || null;
+    } catch {
+      return null;
+    }
   }
 
   async getAllUserStats(): Promise<any[]> {
-    // Возвращаем статистику всех пользователей для админ панели
-    const whitelistArray = Array.from(this.whitelist);
-    return whitelistArray.map(telegramId => ({
-      telegramId,
-      totalSessions: Math.floor(Math.random() * 50) + 1,
-      totalMessages: Math.floor(Math.random() * 200) + 10,
-      totalTokensUsed: Math.floor(Math.random() * 50000) + 1000,
-      totalCost: (Math.random() * 50 + 1).toFixed(4),
-      averageSessionLength: (Math.random() * 30 + 5).toFixed(2),
-      lastActiveAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-      firstActiveAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
-    }));
+    // Объединяем статистику с данными пользователей из whitelist
+    const stats = await db.select({
+      telegramId: aiChatUserStats.telegramId,
+      totalSessions: aiChatUserStats.totalSessions,
+      totalMessages: aiChatUserStats.totalMessages,
+      totalTokensUsed: aiChatUserStats.totalTokensUsed,
+      totalCost: aiChatUserStats.totalCost,
+      averageSessionLength: aiChatUserStats.averageSessionLength,
+      lastActiveAt: aiChatUserStats.lastActiveAt,
+      firstActiveAt: aiChatUserStats.firstActiveAt,
+      username: authorizedUsers.username,
+      firstName: authorizedUsers.firstName,
+      realName: authorizedUsers.realName
+    })
+    .from(aiChatUserStats)
+    .leftJoin(authorizedUsers, eq(aiChatUserStats.telegramId, authorizedUsers.telegramId))
+    .orderBy(desc(aiChatUserStats.lastActiveAt));
+
+    return stats;
   }
 
-  async getUserChatHistory(telegramId: string, limit = 50, offset = 0): Promise<any[]> {
-    // В реальной реализации получаем историю из БД
-    return [];
+  async getUserChatHistory(telegramId: string, limit: number = 50, offset: number = 0): Promise<any[]> {
+    const messages = await db.select({
+      id: aiChatMessages.id,
+      sessionId: aiChatMessages.sessionId,
+      role: aiChatMessages.role,
+      content: aiChatMessages.content,
+      tokensUsed: aiChatMessages.tokensUsed,
+      cost: aiChatMessages.cost,
+      model: aiChatMessages.model,
+      timestamp: aiChatMessages.timestamp,
+      metadata: aiChatMessages.metadata
+    })
+    .from(aiChatMessages)
+    .where(eq(aiChatMessages.telegramId, telegramId))
+    .orderBy(desc(aiChatMessages.timestamp))
+    .limit(limit)
+    .offset(offset);
+
+    return messages;
   }
 
-  async getSessionMessages(sessionId: string): Promise<any[]> {
-    // В реальной реализации получаем сообщения сессии из БД
-    return [];
+  async getSessionMessages(sessionId: string): Promise<AiChatMessage[]> {
+    return await db.select()
+      .from(aiChatMessages)
+      .where(eq(aiChatMessages.sessionId, sessionId))
+      .orderBy(asc(aiChatMessages.timestamp));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
