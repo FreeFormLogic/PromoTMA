@@ -328,7 +328,7 @@ export default function Modules() {
       // Проверяем, является ли выбранная категория группой
       const selectedGroup = Object.entries(categoryTree).find(([groupName]) => groupName === selectedCategory);
       if (selectedGroup) {
-        const [, groupCategories] = selectedGroup;
+        const [, groupCategories] = selectedGroup as [string, string[]];
         return groupCategories.includes(module.category);
       }
       
@@ -365,7 +365,7 @@ export default function Modules() {
     if (selectedCategory !== "ВСЕ МОДУЛИ") {
       const selectedGroup = Object.entries(categoryTree).find(([groupName]) => groupName === selectedCategory);
       if (selectedGroup) {
-        const [, groupCategories] = selectedGroup;
+        const [, groupCategories] = selectedGroup as [string, string[]];
         matchesCategory = groupCategories.includes(module.category);
       } else {
         matchesCategory = module.category === selectedCategory;
