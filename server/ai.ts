@@ -195,7 +195,7 @@ CRITICAL RULES:
       const recommendedModules: number[] = [];
       
       if (moduleNumberMatches) {
-        const uniqueMatches = [...new Set(moduleNumberMatches)]; // Remove duplicates from response
+        const uniqueMatches = Array.from(new Set(moduleNumberMatches)); // Remove duplicates from response
         uniqueMatches.forEach(match => {
           const numberMatch = match.match(/\[MODULE:(\d+)\]/i);
           if (numberMatch) {

@@ -1,78 +1,206 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { ArrowRight, Bot, Building2, Check, Rocket, MessageSquare } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { Separator } from '@/components/ui/separator';
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { 
+  MessageSquare, 
+  Rocket, 
+  DollarSign, 
+  Users, 
+  Star,
+  Check,
+  ArrowRight,
+  Clock,
+  Shield,
+  Zap,
+  X,
+  Phone,
+  Mail,
+  Building2,
+  Puzzle,
+  Bot,
+  Sparkles,
+  TrendingUp,
+  Target,
+  Eye,
+  Smartphone
+} from "lucide-react";
+import { Link } from "wouter";
+import { type Module, type Industry, type USP } from "@shared/schema";
+import { PainPointsSection } from "@/components/PainPointsSection";
+// AIChat removed from Home page - only accessible via /ai-chat route
+import { motion, AnimatePresence } from "framer-motion";
+
+interface BusinessAnalysis {
+  industry: string;
+  size: string;
+  challenges: string[];
+  goals: string[];
+  relevantCategories: string[];
+  keywords: string[];
+  persona: string;
+}
+
+// Personalized AI explanation generator for modules
+function getPersonalizedExplanation(module: Module, analysis: BusinessAnalysis | null): string {
+  if (!analysis) {
+    return `Решает ключевые задачи категории ${module.category}`;
+  }
+
+  // Create personalized explanations based on business analysis
+  const businessType = analysis.industry.toLowerCase();
+  const moduleCategory = module.category;
+  const moduleName = module.name.toLowerCase();
+  
+  // Specific explanations for different business types and modules
+  if (businessType.includes('курс') || businessType.includes('обучен') || businessType.includes('образован')) {
+    if (moduleCategory === 'ОБРАЗОВАНИЕ') {
+      if (moduleName.includes('платформа курсов')) return 'Создаст структурированную систему обучения с отслеживанием прогресса ваших учеников';
+      if (moduleName.includes('социальное обучение')) return 'Построит активное сообщество учеников для взаимной поддержки и мотивации';
+      if (moduleName.includes('тест')) return 'Поможет оценивать знания и повысить вовлеченность учеников';
+    }
+    if (moduleCategory === 'ВОВЛЕЧЕНИЕ') {
+      return 'Повысит мотивацию учеников завершать курсы до конца через игровые механики';
+    }
+    if (moduleCategory === 'E-COMMERCE') {
+      return 'Позволит продавать курсы и дополнительные материалы прямо в Telegram';
+    }
+  }
+  
+  if (businessType.includes('магазин') || businessType.includes('товар') || businessType.includes('продаж')) {
+    if (moduleCategory === 'E-COMMERCE') {
+      if (moduleName.includes('корзин')) return 'Создаст удобный процесс покупки с высокой конверсией';
+      if (moduleName.includes('предзаказ')) return 'Поможет управлять дефицитными товарами и планировать закупки';
+      if (moduleName.includes('сравнение')) return 'Поможет покупателям быстрее выбрать нужный товар из ассортимента';
+    }
+  }
+  
+  if (businessType.includes('услуг') || businessType.includes('запись') || businessType.includes('консультац')) {
+    if (moduleCategory === 'БРОНИРОВАНИЕ') {
+      return 'Автоматизирует записи клиентов и сократит количество пропусков на 70%';
+    }
+  }
+
+  // Default personalized explanation
+  const categoryExplanations: Record<string, string> = {
+    'E-COMMERCE': 'Увеличит продажи и упростит процесс покупки для ваших клиентов',
+    'МАРКЕТИНГ': 'Привлечет больше клиентов в вашу нишу и повысит конверсию',
+    'ОБРАЗОВАНИЕ': 'Создаст эффективную систему обучения для вашей аудитории',
+    'ВОВЛЕЧЕНИЕ': 'Повысит активность и лояльность ваших пользователей',
+    'CRM': 'Автоматизирует работу с клиентами и увеличит повторные продажи',
+    'БРОНИРОВАНИЕ': 'Упростит процесс записи и снизит административную нагрузку',
+    'ФИНТЕХ': 'Обеспечит безопасные и удобные платежи для ваших клиентов'
+  };
+  
+  return categoryExplanations[moduleCategory] || `Решит ключевые задачи для ${businessType} бизнеса`;
+}
 
 export default function Home() {
+  console.log('Home component rendering');
+  const [businessAnalysis, setBusinessAnalysis] = useState<BusinessAnalysis | null>(null);
+  const [aiRecommendedModules, setAiRecommendedModules] = useState<Module[]>([]);
+  // AI Chat state removed - chat is now on dedicated page
+
+  const { data: modules = [], isLoading: modulesLoading } = useQuery<Module[]>({
+    queryKey: ["/api/modules"],
+  });
+
+  const { data: industries = [], isLoading: industriesLoading } = useQuery<Industry[]>({
+    queryKey: ["/api/industries"],
+  });
+
+  const { data: usps = [], isLoading: uspsLoading } = useQuery<USP[]>({
+    queryKey: ["/api/usps"],
+  });
+
+  // Use AI-recommended modules if available, otherwise use all modules
+  const displayModules = aiRecommendedModules.length > 0 ? aiRecommendedModules : modules;
+
+  const moduleCategories = displayModules.reduce((acc, module) => {
+    if (!acc[module.category]) {
+      acc[module.category] = [];
+    }
+    acc[module.category].push(module);
+    return acc;
+  }, {} as Record<string, Module[]>);
+
+  const uspCategories = usps.reduce((acc, usp) => {
+    if (!acc[usp.category]) {
+      acc[usp.category] = [];
+    }
+    acc[usp.category].push(usp);
+    return acc;
+  }, {} as Record<string, USP[]>);
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Убрали строку авторизации */}
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Single Hero Section - Clean, No Duplicates */}
-        <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16 md:py-20 mb-12 rounded-2xl">
+
+
+
+
+
+
+        {/* Hero Section with AI Chat Button */}
+        <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16 md:py-20">
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-4xl mx-auto">
-              <Badge className="mb-6 bg-green-600 text-white px-6 py-2 text-lg font-semibold shadow-2xl">
-                ТРЕНД 2025!
-              </Badge>
-              
               <h1 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
-                Создайте{" "}
-                <span className="bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
-                  Telegram Mini App
-                </span>{" "}
-                за 1-5 дней
+                Создайте Telegram Mini App за 1-5 дней
               </h1>
-              
-              <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-                260+ готовых модулей для быстрого запуска вашего бизнеса в Telegram. От $300 вместо $10,000 за традиционную разработку.
+              <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+                260+ готовых модулей для быстрого запуска вашего бизнеса в Telegram. 
+                От $300 вместо $10,000 за традиционную разработку.
               </p>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-2xl mx-auto">
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                  <div className="text-2xl font-bold text-white">1-5</div>
-                  <div className="text-sm text-blue-100">дней до запуска</div>
-                </div>
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                  <div className="text-2xl font-bold text-white">260+</div>
-                  <div className="text-sm text-blue-100">модулей</div>
-                </div>
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                  <div className="text-2xl font-bold text-white">900+</div>
-                  <div className="text-sm text-blue-100">млн пользователей</div>
-                </div>
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                  <div className="text-2xl font-bold text-white">24/7</div>
-                  <div className="text-sm text-blue-100">поддержка</div>
-                </div>
-              </div>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  onClick={() => window.location.href = '/ai-chat'}
-                  size="lg"
-                  className="bg-white text-blue-900 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-full shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
-                >
-                  <Bot className="mr-2 w-5 h-5" />
-                  AI-конструктор APP
-                </Button>
-                <Button
-                  onClick={() => window.location.href = '/modules'}
-                  size="lg"
-                  variant="outline"
-                  className="border-2 border-white text-white hover:bg-white hover:text-blue-900 px-8 py-4 text-lg font-semibold rounded-full shadow-2xl transition-all transform hover:scale-105"
-                >
-                  Готовые решения для бизнеса
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-6 mb-8">
+                <h3 className="font-semibold mb-4 text-lg">Ключевые преимущества:</h3>
+                <ul className="space-y-2 text-blue-100 max-w-xl mx-auto">
+                  <li className="flex items-center justify-center">
+                    <Check className="w-4 h-4 text-blue-300 mr-2" />
+                    260+ готовых модулей
+                  </li>
+                  <li className="flex items-center justify-center">
+                    <Check className="w-4 h-4 text-blue-300 mr-2" />
+                    Интеграция популярных платежей
+                  </li>
+                  <li className="flex items-center justify-center">
+                    <Check className="w-4 h-4 text-blue-300 mr-2" />
+                    900+ млн пользователей Telegram
+                  </li>
+                </ul>
               </div>
+
+              <Button
+                onClick={() => window.location.href = '/ai-chat'}
+                size="lg"
+                className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all animate-[pulse-scale_2s_ease-in-out_infinite]"
+              >
+                <Bot className="w-6 h-6 mr-3" />
+                AI-конструктор APP
+              </Button>
             </div>
           </div>
         </section>
 
-        {/* Cost Comparison Section */}
+        {/* AI Chat removed from Home page - only accessible via /ai-chat route */}
+
+
+
+{/* Recommended Modules section removed - modules now displayed directly in AI chat */}
+
+
+
+
+
+
+
+
+
+        {/* Cost Comparison Section - Complete Redesign */}
         <section className="mb-12 py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4">
             <motion.div
@@ -158,7 +286,7 @@ export default function Home() {
                       <Rocket className="w-8 h-8 text-white" />
                     </div>
                     <h3 className="text-2xl font-bold text-blue-900 mb-2">Telegram Mini Apps</h3>
-                    <div className="text-4xl font-bold text-blue-700 mb-1">$300</div>
+                    <div className="text-4xl font-bold text-blue-700 mb-1">1-5 дней</div>
                     <p className="text-blue-700">Решения под ключ</p>
                   </div>
                   
@@ -166,7 +294,7 @@ export default function Home() {
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
                       <div>
-                        <p className="font-semibold text-blue-900">1-5 дней до запуска</p>
+                        <p className="font-semibold text-blue-900">2-5 дней до запуска</p>
                         <p className="text-blue-700 text-sm">Мгновенный результат с готовыми модулями</p>
                       </div>
                     </div>
@@ -221,7 +349,6 @@ export default function Home() {
           </div>
         </section>
       </main>
-      
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-8">
         <div className="container mx-auto px-4">
@@ -250,6 +377,7 @@ export default function Home() {
               <h4 className="font-semibold mb-4">Преимущества</h4>
               <ul className="space-y-1 text-gray-400 text-sm">
                 <li>✓ 260+ модулей</li>
+
                 <li>✓ Запуск за 1-5 дней</li>
                 <li>✓ От $300 вместо $10,000</li>
               </ul>

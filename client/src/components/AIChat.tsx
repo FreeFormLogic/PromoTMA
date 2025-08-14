@@ -308,12 +308,22 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       persistentMessages = finalMessages;
       localStorage.setItem('aiChatMessages', JSON.stringify(finalMessages));
 
-      // If AI recommended specific modules, get them and add to chat display
+      // If AI recommended specific modules, get them and add to chat display (prevent duplicates)
       if (responseData.recommendedModules && responseData.recommendedModules.length > 0 && allModules) {
         const recommendedModuleDetails = allModules.filter(module => 
           responseData.recommendedModules.includes(module.number)
         );
-        setChatModules(prev => [...prev, ...recommendedModuleDetails]);
+        
+        // Prevent duplicates by checking what's already shown
+        const newModules = recommendedModuleDetails.filter(module => 
+          !currentlyDisplayedModules.some(displayed => displayed.id === module.id) &&
+          !chatModules.some(chatModule => chatModule.id === module.id)
+        );
+        
+        if (newModules.length > 0) {
+          setChatModules(prev => [...prev, ...newModules]);
+          onModulesUpdate([...currentlyDisplayedModules, ...newModules]);
+        }
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -907,7 +917,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 <Checkbox 
                   id="reset-modules"
                   checked={resetModulesToo}
-                  onCheckedChange={setResetModulesToo}
+                  onCheckedChange={(checked) => setResetModulesToo(checked === true)}
                 />
                 <label 
                   htmlFor="reset-modules"
@@ -928,7 +938,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
               <Button 
                 variant="destructive"
                 onClick={() => {
-                  trackUserInteraction('reset_chat_confirmed', { resetModules: resetModulesToo });
+                  trackUserInteraction('reset_chat_confirmed', resetModulesToo ? 'with_modules' : 'only_chat');
                   
                   // Reset chat
                   const welcomeMessage = {
