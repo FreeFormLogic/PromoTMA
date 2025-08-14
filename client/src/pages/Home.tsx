@@ -383,7 +383,7 @@ export default function Home() {
                 <div className="bg-blue-50 rounded-2xl p-8 border-2 border-blue-200 relative overflow-hidden shadow-xl">
                   <div className="absolute top-4 right-4 z-10">
                     <Badge className="bg-green-600 text-white px-3 py-1 text-sm font-semibold shadow-lg">
-                      ЛУЧШАЯ ЦЕНА
+                      ТРЕНД 2025!
                     </Badge>
                   </div>
                   

@@ -36,33 +36,55 @@ const iconMap: { [key: string]: any } = {
   Bell, CalendarCheck, Smartphone
 };
 
-// Список всех доступных категорий
+// Древовидная группировка категорий
+const categoryTree = {
+  "ВСЕ МОДУЛИ": [],
+  "💰 ПРОДАЖИ": [
+    "E-COMMERCE",
+    "МАРКЕТИНГ", 
+    "СОЦИАЛЬНАЯ КОММЕРЦИЯ",
+    "WEB3 & DEFI"
+  ],
+  "👥 ПОЛЬЗОВАТЕЛИ": [
+    "ВОВЛЕЧЕНИЕ",
+    "CRM",
+    "КОММУНИКАЦИИ"
+  ],
+  "🎓 КОНТЕНТ": [
+    "ОБРАЗОВАНИЕ",
+    "КОНТЕНТ И МЕДИА",
+    "ИГРЫ"
+  ],
+  "💳 ФИНАНСЫ": [
+    "ФИНТЕХ",
+    "БРОНИРОВАНИЕ"
+  ],
+  "🏢 БИЗНЕС": [
+    "B2B",
+    "ОТРАСЛЕВЫЕ РЕШЕНИЯ",
+    "ЛОКАЛЬНЫЕ СЕРВИСЫ"
+  ],
+  "🤖 ТЕХНОЛОГИИ": [
+    "AI И АВТОМАТИЗАЦИЯ",
+    "AI-АВАТАРЫ",
+    "АВТОМАТИЗАЦИЯ",
+    "ПАРСИНГ TELEGRAM",
+    "ИНТЕГРАЦИИ"
+  ],
+  "📊 АНАЛИТИКА": [
+    "АНАЛИТИКА",
+    "БЕЗОПАСНОСТЬ"
+  ],
+  "🛠️ СЕРВИСЫ": [
+    "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ",
+    "ИНДОНЕЗИЯ"
+  ]
+};
+
+// Плоский список всех категорий для совместимости
 const categories = [
   "ВСЕ МОДУЛИ",
-  "E-COMMERCE",
-  "МАРКЕТИНГ", 
-  "ВОВЛЕЧЕНИЕ",
-  "ОБРАЗОВАНИЕ",
-  "ФИНТЕХ",
-  "CRM",
-  "B2B",
-  "БРОНИРОВАНИЕ",
-  "КОНТЕНТ И МЕДИА",
-  "ИНТЕГРАЦИИ",
-  "ИНДОНЕЗИЯ",
-  "ИГРЫ",
-  "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ",
-  "АВТОМАТИЗАЦИЯ",
-  "ОТРАСЛЕВЫЕ РЕШЕНИЯ",
-  "АНАЛИТИКА",
-  "БЕЗОПАСНОСТЬ",
-  "КОММУНИКАЦИИ",
-  "СОЦИАЛЬНАЯ КОММЕРЦИЯ",
-  "AI И АВТОМАТИЗАЦИЯ",
-  "AI-АВАТАРЫ",
-  "ПАРСИНГ TELEGRAM",
-  "WEB3 & DEFI",
-  "ЛОКАЛЬНЫЕ СЕРВИСЫ"
+  ...Object.values(categoryTree).flat().filter(cat => cat !== "ВСЕ МОДУЛИ")
 ];
 
 // Иконки для категорий
@@ -298,8 +320,20 @@ export default function Modules() {
 
   const filteredModules = modules?.filter(module => {
     if (!searchTerm.trim()) {
-      const matchesCategory = selectedCategory === "ВСЕ МОДУЛИ" || module.category === selectedCategory;
-      return matchesCategory;
+      // Проверяем категорию или группу категорий
+      if (selectedCategory === "ВСЕ МОДУЛИ") {
+        return true;
+      }
+      
+      // Проверяем, является ли выбранная категория группой
+      const selectedGroup = Object.entries(categoryTree).find(([groupName]) => groupName === selectedCategory);
+      if (selectedGroup) {
+        const [, groupCategories] = selectedGroup;
+        return groupCategories.includes(module.category);
+      }
+      
+      // Иначе проверяем точное совпадение категории
+      return module.category === selectedCategory;
     }
 
     const searchLower = searchTerm.toLowerCase();
@@ -325,7 +359,18 @@ export default function Modules() {
     }
     
     const matchesSearch = matchesNameOrDescription || matchesBenefits || matchesFeatures;
-    const matchesCategory = selectedCategory === "ВСЕ МОДУЛИ" || module.category === selectedCategory;
+    
+    // Применяем фильтр по категории для результатов поиска
+    let matchesCategory = true;
+    if (selectedCategory !== "ВСЕ МОДУЛИ") {
+      const selectedGroup = Object.entries(categoryTree).find(([groupName]) => groupName === selectedCategory);
+      if (selectedGroup) {
+        const [, groupCategories] = selectedGroup;
+        matchesCategory = groupCategories.includes(module.category);
+      } else {
+        matchesCategory = module.category === selectedCategory;
+      }
+    }
     
     return matchesSearch && matchesCategory;
   }) || [];
@@ -372,32 +417,62 @@ export default function Modules() {
             </div>
           </div>
           
-          {/* Фильтры категорий - Супер компактная версия */}
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-8 gap-1.5">
-              {categories.map((category) => {
-                const IconComponent = categoryIcons[category] || Settings;
-                const isActive = selectedCategory === category;
-                return (
-                  <Button
-                    key={category}
-                    variant={isActive ? "secondary" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedCategory(category)}
-                    className={`flex flex-col items-center gap-0.5 text-[9px] font-medium transition-all duration-200 px-1.5 py-1.5 h-12 ${
-                      isActive
-                        ? "bg-white text-blue-700 hover:bg-blue-50 shadow-lg border-2 border-blue-200"
-                        : "bg-white/10 text-white border-white/30 hover:bg-white/20 hover:border-white/50"
-                    }`}
-                    title={category === "ВСЕ МОДУЛИ" ? `Все модули (${totalModules})` : category}
-                  >
-                    <IconComponent className="w-3 h-3 flex-shrink-0" />
-                    <span className="text-center leading-tight line-clamp-2 text-[9px]">
-                      {category === "ВСЕ МОДУЛИ" ? `ВСЕ` : category}
-                    </span>
-                  </Button>
-                );
-              })}
+          {/* Древовидная навигация по категориям */}
+          <div className="max-w-7xl mx-auto">
+            <div className="space-y-4">
+              {Object.entries(categoryTree).map(([groupName, groupCategories]) => (
+                <div key={groupName} className="space-y-2">
+                  {/* Группа категорий */}
+                  <div className="text-center">
+                    <Button
+                      variant={selectedCategory === groupName ? "secondary" : "outline"}
+                      onClick={() => setSelectedCategory(groupName)}
+                      className={`text-sm font-semibold px-4 py-2 ${
+                        selectedCategory === groupName
+                          ? "bg-white text-blue-700 hover:bg-blue-50 shadow-lg border-2 border-blue-200"
+                          : "bg-white/10 text-white border-white/30 hover:bg-white/20"
+                      }`}
+                      title={groupName === "ВСЕ МОДУЛИ" ? `Все модули (${totalModules})` : groupName}
+                    >
+                      {groupName === "ВСЕ МОДУЛИ" ? `Все модули (${totalModules})` : groupName}
+                    </Button>
+                  </div>
+                  
+                  {/* Подкategории */}
+                  {groupCategories.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 max-w-4xl mx-auto">
+                      {groupCategories.map((category) => {
+                        const IconComponent = categoryIcons[category] || Settings;
+                        const isActive = selectedCategory === category;
+                        const categoryModulesCount = modules?.filter(m => m.category === category).length || 0;
+                        
+                        return (
+                          <Button
+                            key={category}
+                            variant={isActive ? "secondary" : "outline"}
+                            size="sm"
+                            onClick={() => setSelectedCategory(category)}
+                            className={`flex flex-col items-center gap-1 text-[10px] font-medium transition-all duration-200 px-2 py-2 h-16 ${
+                              isActive
+                                ? "bg-white text-blue-700 hover:bg-blue-50 shadow-lg border-2 border-blue-200"
+                                : "bg-white/10 text-white border-white/30 hover:bg-white/20 hover:border-white/50"
+                            }`}
+                            title={`${category} (${categoryModulesCount} модулей)`}
+                          >
+                            <IconComponent className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-center leading-tight line-clamp-2 text-[10px] hyphens-auto break-words">
+                              {category}
+                            </span>
+                            <span className="text-[8px] opacity-70">
+                              {categoryModulesCount}
+                            </span>
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>

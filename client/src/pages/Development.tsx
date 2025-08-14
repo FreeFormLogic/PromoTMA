@@ -416,7 +416,7 @@ export default function Development() {
                     { value: '900 млн', label: 'Потенциальная аудитория' },
                     { value: '0%', label: 'Комиссия в Telegram Stars' },
                     { value: 'до 70%', label: 'Снижение CAC' },
-                    { value: '95%', label: 'Доставляемость Push' },
+                    { value: '95%', label: 'Push-уведомления' },
                     { value: 'x5', label: 'Рост LTV клиента' },
                     { value: '2-4 нед.', label: 'Срок запуска MVP' },
                     { value: 'до 80%', label: 'Экономия времени команды' },
