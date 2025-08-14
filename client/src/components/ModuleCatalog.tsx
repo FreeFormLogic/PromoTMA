@@ -1,0 +1,304 @@
+import { useState, useMemo } from 'react';
+import { Module } from '@shared/schema';
+import { ChevronDown, ChevronUp, Search, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
+// Компонент карточки модуля
+interface ModuleCardProps {
+  module: Module;
+}
+
+const ModuleCard = ({ module }: ModuleCardProps) => {
+  // Получаем иконку из строки (для совместимости)
+  const getIconComponent = (iconName: string) => {
+    // Если iconName это React компонент, возвращаем его
+    if (typeof iconName === 'string') {
+      return <div className="text-white text-lg">{iconName.charAt(0).toUpperCase()}</div>;
+    }
+    return iconName;
+  };
+
+  return (
+    <Card className="hover:shadow-lg transition-shadow duration-200 bg-white border border-gray-200">
+      <CardContent className="p-4">
+        <div className="flex items-start space-x-4">
+          {/* Левая часть - иконка */}
+          <div className="flex-shrink-0">
+            <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+              {getIconComponent(module.icon)}
+            </div>
+          </div>
+          
+          {/* Правая часть - контент */}
+          <div className="flex-1 min-w-0">
+            {/* Название модуля */}
+            <h3 className="text-lg font-bold text-gray-900 mb-1 leading-tight">
+              {module.name}
+            </h3>
+            
+            {/* Категория */}
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              {module.category}
+            </p>
+            
+            {/* Описание */}
+            <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+              {module.description}
+            </p>
+            
+            {/* Преимущества */}
+            <p className="text-sm text-blue-600 font-medium">
+              {module.benefits}
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Основной компонент каталога модулей
+interface ModuleCatalogProps {
+  allModulesData: Module[];
+}
+
+const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBusinessGoals, setSelectedBusinessGoals] = useState<string[]>([]);
+  const [openCategories, setOpenCategories] = useState<string[]>([]);
+
+  // Извлекаем бизнес-цели из преимуществ модулей
+  const businessGoals = useMemo(() => {
+    const goals = new Set<string>();
+    
+    allModulesData.forEach(module => {
+      const benefits = module.benefits?.toLowerCase() || '';
+      
+      // Ключевые слова для определения бизнес-целей
+      if (benefits.includes('продаж') || benefits.includes('прибыл')) {
+        goals.add('Увеличение продаж');
+      }
+      if (benefits.includes('автоматизац') || benefits.includes('автомат')) {
+        goals.add('Автоматизация');
+      }
+      if (benefits.includes('лояльност') || benefits.includes('удержан')) {
+        goals.add('Повышение лояльности');
+      }
+      if (benefits.includes('затрат') || benefits.includes('экономи') || benefits.includes('снижен')) {
+        goals.add('Снижение затрат');
+      }
+      if (benefits.includes('клиент') || benefits.includes('пользовател')) {
+        goals.add('Улучшение клиентского опыта');
+      }
+      if (benefits.includes('скорост') || benefits.includes('быстр') || benefits.includes('эффективност')) {
+        goals.add('Повышение эффективности');
+      }
+      if (benefits.includes('аналитик') || benefits.includes('данн') || benefits.includes('отчет')) {
+        goals.add('Аналитика и отчетность');
+      }
+    });
+
+    return Array.from(goals);
+  }, [allModulesData]);
+
+  // Фильтрация модулей
+  const filteredModules = useMemo(() => {
+    let filtered = allModulesData;
+
+    // Поиск по тексту
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(module => {
+        const searchText = [
+          module.name,
+          module.description,
+          module.keyFeatures,
+          module.benefits,
+          module.category
+        ].join(' ').toLowerCase();
+        
+        return searchText.includes(query);
+      });
+    }
+
+    // Фильтрация по бизнес-целям
+    if (selectedBusinessGoals.length > 0) {
+      filtered = filtered.filter(module => {
+        const benefits = module.benefits?.toLowerCase() || '';
+        return selectedBusinessGoals.some(goal => {
+          switch (goal) {
+            case 'Увеличение продаж':
+              return benefits.includes('продаж') || benefits.includes('прибыл');
+            case 'Автоматизация':
+              return benefits.includes('автоматизац') || benefits.includes('автомат');
+            case 'Повышение лояльности':
+              return benefits.includes('лояльност') || benefits.includes('удержан');
+            case 'Снижение затрат':
+              return benefits.includes('затрат') || benefits.includes('экономи') || benefits.includes('снижен');
+            case 'Улучшение клиентского опыта':
+              return benefits.includes('клиент') || benefits.includes('пользовател');
+            case 'Повышение эффективности':
+              return benefits.includes('скорост') || benefits.includes('быстр') || benefits.includes('эффективност');
+            case 'Аналитика и отчетность':
+              return benefits.includes('аналитик') || benefits.includes('данн') || benefits.includes('отчет');
+            default:
+              return false;
+          }
+        });
+      });
+    }
+
+    return filtered;
+  }, [allModulesData, searchQuery, selectedBusinessGoals]);
+
+  // Группировка по категориям
+  const groupedModules = useMemo(() => {
+    const groups: { [key: string]: Module[] } = {};
+    
+    filteredModules.forEach(module => {
+      const category = module.category || 'Без категории';
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(module);
+    });
+
+    return groups;
+  }, [filteredModules]);
+
+  // Переключение категории
+  const toggleCategory = (category: string) => {
+    setOpenCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  // Переключение бизнес-цели
+  const toggleBusinessGoal = (goal: string) => {
+    setSelectedBusinessGoals(prev => 
+      prev.includes(goal)
+        ? prev.filter(g => g !== goal)
+        : [...prev, goal]
+    );
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
+      {/* Поисковая строка */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <Input
+          type="text"
+          placeholder="Поиск по названию, описанию, функциям или преимуществам..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 pr-10 py-3 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+
+      {/* Теги бизнес-целей */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium text-gray-700">Фильтр по бизнес-целям:</h3>
+        <div className="flex flex-wrap gap-2">
+          {businessGoals.map(goal => (
+            <Badge
+              key={goal}
+              variant={selectedBusinessGoals.includes(goal) ? "default" : "outline"}
+              className={`cursor-pointer transition-colors ${
+                selectedBusinessGoals.includes(goal)
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'hover:bg-blue-50 hover:border-blue-300'
+              }`}
+              onClick={() => toggleBusinessGoal(goal)}
+            >
+              {goal}
+            </Badge>
+          ))}
+          {selectedBusinessGoals.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedBusinessGoals([])}
+              className="text-gray-500 hover:text-gray-700 h-6 px-2 text-xs"
+            >
+              Очистить
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Результаты поиска */}
+      {(searchQuery || selectedBusinessGoals.length > 0) && (
+        <div className="text-sm text-gray-600">
+          Найдено модулей: {filteredModules.length} из {allModulesData.length}
+        </div>
+      )}
+
+      {/* Аккордеон категорий */}
+      <div className="space-y-4">
+        {Object.entries(groupedModules).map(([category, modules]) => (
+          <Collapsible
+            key={category}
+            open={openCategories.includes(category)}
+            onOpenChange={() => toggleCategory(category)}
+          >
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="ghost"
+                className="w-full justify-between p-4 h-auto text-left hover:bg-gray-50 border border-gray-200 rounded-lg"
+              >
+                <div className="flex items-center space-x-2">
+                  <span className="text-lg font-semibold text-gray-900">
+                    {category}
+                  </span>
+                  <Badge variant="secondary" className="bg-gray-100 text-gray-700">
+                    {modules.length} модул{modules.length === 1 ? 'ь' : modules.length < 5 ? 'я' : 'ей'}
+                  </Badge>
+                </div>
+                {openCategories.includes(category) ? (
+                  <ChevronUp className="w-5 h-5 text-gray-500" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-gray-500" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent className="space-y-4 mt-4">
+              <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+                {modules.map(module => (
+                  <ModuleCard key={module.id} module={module} />
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        ))}
+      </div>
+
+      {/* Сообщение о пустых результатах */}
+      {Object.keys(groupedModules).length === 0 && (
+        <div className="text-center py-12">
+          <div className="text-gray-500 text-lg mb-2">Модули не найдены</div>
+          <div className="text-gray-400 text-sm">
+            Попробуйте изменить поисковый запрос или фильтры
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ModuleCatalog;

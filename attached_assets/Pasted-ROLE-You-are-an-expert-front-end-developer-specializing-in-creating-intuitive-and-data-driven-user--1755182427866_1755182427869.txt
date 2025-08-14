@@ -1,0 +1,73 @@
+ROLE: You are an expert front-end developer specializing in creating intuitive and data-driven user interfaces with React and TypeScript.
+
+CONTEXT:
+You are provided with a TypeScript file that exports a constant named allModulesData. This constant is an array of Module objects. Each object represents a software module with properties like name, category, description, benefits, and icon.
+
+PRIMARY GOAL:
+Your task is to build the surrounding structure for a module catalog. The design of the individual module cards is already finalized and must not be altered. Your focus is on creating a user-friendly, interactive, and compact structure around these cards to help users navigate the large list of modules and find solutions to their business problems.
+
+DETAILED INSTRUCTIONS:
+
+1. Create the <ModuleCard> Component
+
+First, create a reusable React component named ModuleCard. It takes a single module object as a prop.
+
+The visual appearance of this component must exactly replicate the design shown in the provided user image (image_d525b1.png).
+
+Layout specifics:
+
+The card is a white container with rounded corners and a soft shadow.
+
+On the left: a colored circular container holding a white icon (use the module.icon property).
+
+On the right, arrange the text content vertically:
+
+Title: module.name in a bold, larger font.
+
+Category: module.category directly below the title, in uppercase, smaller, grey text.
+
+Description: module.description below the category, in regular, grey text.
+
+Benefit: module.benefits at the bottom, in a distinct blue color.
+
+2. Implement the Catalog's Overall Structure
+
+The main catalog component will use the <ModuleCard> components you just created.
+
+Group all modules from allModulesData by their category.
+
+Render these categories using a collapsible "accordion" layout.
+
+Collapsed State (Default): Each accordion item should only display the category name and the total count of modules within it (e.g., "Маркетинг (13 модулей)").
+
+Expanded State: When a user clicks a category, it should smoothly expand to display a list of the corresponding <ModuleCard> components.
+
+3. Implement Top-Level Interactive Controls
+Place these two controls at the top of the catalog, above the accordion list.
+
+Smart Search Bar:
+
+Add a real-time search input field.
+
+The search must filter the modules displayed. It should match the query against the text in the module's name, description, keyFeatures, and benefits. This allows users to search by the problem they want to solve (e.g., "снижение затрат", "удержание клиентов").
+
+Business Goal Tags:
+
+Analyze the benefits strings of all modules to identify common business outcomes (e.g., "Увеличение продаж", "Автоматизация", "Повышение лояльности").
+
+Create a set of clickable filter tags from these outcomes.
+
+When a tag is clicked, the catalog should filter to show only the modules that help achieve that specific goal, across all categories.
+
+TECHNICAL SPECIFICATIONS:
+
+Stack: Use React and TypeScript.
+
+Styling: Use Tailwind CSS for styling.
+
+Responsiveness: The entire catalog structure must be fully responsive.
+
+Code Quality: The code should be clean and well-structured.
+
+DELIVERABLE:
+A single, self-contained React component named ModuleCatalog that takes allModulesData as a prop and renders the complete interactive catalog as described, using the pre-defined <ModuleCard> design.

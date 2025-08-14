@@ -23,15 +23,6 @@ export function Navigation() {
 
   // Убрали функцию logout - нет авторизации
 
-  const handlePartnersClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    toast({
-      title: "Раздел в разработке",
-      description: "Раздел 'Партнерам' еще находится в разработке. Скоро будет доступен!",
-      variant: "default",
-    });
-  };
-
   const navItems = [
     { path: "/", label: "Главная", icon: Home },
     { path: "/modules", label: "Модули", icon: Puzzle },
@@ -60,17 +51,7 @@ export function Navigation() {
                 const isActive = location === item.path;
                 const isPartnersItem = item.path === "/partners";
                 
-                if (isPartnersItem) {
-                  return (
-                    <div 
-                      key={item.path}
-                      className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer text-gray-700 hover:text-telegram hover:bg-telegram/10`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span className="text-sm font-medium">{item.label}</span>
-                    </div>
-                  );
-                }
+
                 
                 return (
                   <Link key={item.path} href={item.path}>
@@ -127,17 +108,19 @@ export function Navigation() {
               
               if (isPartnersItem) {
                 return (
-                  <div 
-                    key={item.path}
-                    className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors cursor-pointer text-gray-700 hover:text-telegram hover:bg-telegram/10`}
-                    onClick={(e) => {
-                      handlePartnersClick(e);
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium">{item.label}</span>
-                  </div>
+                  <Link key={item.path} href={item.path}>
+                    <div 
+                      className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors cursor-pointer ${
+                        isActive 
+                          ? 'bg-blue-600 text-white' 
+                          : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                      }`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="font-medium">{item.label}</span>
+                    </div>
+                  </Link>
                 );
               }
               
@@ -145,10 +128,12 @@ export function Navigation() {
                 <Link key={item.path} href={item.path}>
                   <div 
                     className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors cursor-pointer ${
-                      isActive 
-                        ? 'bg-blue-600 text-white' 
+                      isActive && item.path === '/ai-chat'
+                        ? 'bg-green-600 text-white' 
+                        : isActive 
+                        ? 'bg-blue-600 text-white'
                         : item.path === '/ai-chat'
-                        ? 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
+                        ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
                         : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}

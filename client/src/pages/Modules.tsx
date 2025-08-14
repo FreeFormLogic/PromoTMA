@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import ModuleCatalog from "@/components/ModuleCatalog";
 import { 
   Search, Filter, ArrowRight, ShoppingCart, BarChart3, Gift,
   GraduationCap, Calendar, DollarSign, Users, Star, Trophy,
@@ -325,6 +326,7 @@ function ModuleCardSkeleton() {
 export default function Modules() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ВСЕ МОДУЛИ");
+  const [viewMode, setViewMode] = useState<"compact" | "catalog">("compact");
 
   const { data: modules, isLoading, error } = useQuery<Module[]>({
     queryKey: ['/api/modules'],
@@ -427,10 +429,41 @@ export default function Modules() {
                 className="pl-12 pr-4 py-4 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-blue-200 focus:bg-white/20 focus:border-white/40"
               />
             </div>
+            
+            {/* Переключатель вида */}
+            <div className="mt-6 flex justify-center">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-1 flex">
+                <Button
+                  variant={viewMode === "compact" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("compact")}
+                  className={`px-4 py-2 text-sm ${
+                    viewMode === "compact"
+                      ? "bg-white text-blue-700 hover:bg-blue-50"
+                      : "text-white hover:bg-white/20"
+                  }`}
+                >
+                  Компактный вид
+                </Button>
+                <Button
+                  variant={viewMode === "catalog" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("catalog")}
+                  className={`px-4 py-2 text-sm ${
+                    viewMode === "catalog"
+                      ? "bg-white text-blue-700 hover:bg-blue-50"
+                      : "text-white hover:bg-white/20"
+                  }`}
+                >
+                  Каталог
+                </Button>
+              </div>
+            </div>
           </div>
           
-          {/* Древовидная навигация по категориям */}
-          <div className="max-w-7xl mx-auto">
+          {/* Древовидная навигация по категориям - только для компактного вида */}
+          {viewMode === "compact" && (
+            <div className="max-w-7xl mx-auto">
             <div className="space-y-4">
               {Object.entries(categoryTree).map(([groupName, groupCategories]) => (
                 <div key={groupName} className="space-y-2">
@@ -486,47 +519,54 @@ export default function Modules() {
                 </div>
               ))}
             </div>
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Модули */}
-      <div className="container mx-auto px-4 py-8">
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {Array.from({ length: 12 }).map((_, index) => (
-              <ModuleCardSkeleton key={index} />
-            ))}
-          </div>
-        ) : filteredModules.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-              <Search className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              Модули не найдены
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Попробуйте изменить критерии поиска или выбрать другую категорию
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Найдено {filteredModules.length} модулей
-                {selectedCategory !== "ВСЕ МОДУЛИ" && ` в категории "${selectedCategory}"`}
-              </p>
-            </div>
-            
+      {/* Отображение модулей */}
+      {viewMode === "catalog" ? (
+        <div className="bg-gray-50 dark:bg-gray-900">
+          <ModuleCatalog allModulesData={modules || []} />
+        </div>
+      ) : (
+        <div className="container mx-auto px-4 py-8">
+          {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredModules.map((module) => (
-                <CompactModuleCard key={module.id} module={module} />
+              {Array.from({ length: 12 }).map((_, index) => (
+                <ModuleCardSkeleton key={index} />
               ))}
             </div>
-          </>
-        )}
-      </div>
+          ) : filteredModules.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                <Search className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Модули не найдены
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Попробуйте изменить критерии поиска или выбрать другую категорию
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-6">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Найдено {filteredModules.length} модулей
+                  {selectedCategory !== "ВСЕ МОДУЛИ" && ` в категории "${selectedCategory}"`}
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredModules.map((module) => (
+                  <CompactModuleCard key={module.id} module={module} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

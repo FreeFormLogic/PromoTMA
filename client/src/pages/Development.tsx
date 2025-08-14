@@ -119,7 +119,7 @@ export default function Development() {
                               <strong className="text-white">0% Комиссия на платежи:</strong> Забудьте о 2-5% комиссии с каждой транзакции при использовании Telegram Stars. При обороте в 20 млн ₽ это до 600 000 ₽ чистой экономии ежемесячно, которые можно реинвестировать.
                             </li>
                             <li>
-                              <strong className="text-white">В 5-10 раз дешевле нативных приложений:</strong> Разработка под iOS и Android стоит 2-5 млн ₽. Полнофункциональный TMA — от 300 тыс. ₽. Вы получаете тот же результат за меньшие деньги и в более короткие сроки.
+                              <strong className="text-white">В 5-10 раз дешевле нативных приложений:</strong> Разработка под iOS и Android стоит 2-5 млн ₽. Полнофункциональный TMA — от $300 до $2000. Вы получаете тот же результат за меньшие деньги и в более короткие сроки.
                             </li>
                             <li>
                               <strong className="text-white">Отказ от дорогих подписок:</strong> Замените GetCourse, Tilda, CRM и другие сервисы единой экосистемой. Это прямая экономия до 2 млн ₽ в год на операционных расходах.
@@ -226,7 +226,7 @@ export default function Development() {
                         >
                           <ul className="space-y-3 text-gray-300 mt-4 border-t border-gray-700 pt-4">
                             <li>
-                              <strong className="text-white">Запуск за 2-4 недели, а не за полгода.</strong> Пока конкуренты проходят долгие согласования в App Store и Google Play, вы уже получаете прибыль и собираете базу лояльных клиентов.
+                              <strong className="text-white">Запуск за 1-5 дней, а не за полгода.</strong> Пока конкуренты проходят долгие согласования в App Store и Google Play, вы уже получаете прибыль и собираете базу лояльных клиентов.
                             </li>
                             <li>
                               <strong className="text-white">Мгновенные обновления.</strong> Вносите изменения, тестируйте гипотезы и добавляйте новый функционал хоть каждый день, без ожидания ревью и согласований от Apple и Google.
@@ -418,7 +418,7 @@ export default function Development() {
                     { value: 'до 70%', label: 'Снижение CAC' },
                     { value: '95%', label: 'Push-уведомления' },
                     { value: 'x5', label: 'Рост LTV клиента' },
-                    { value: '2-4 нед.', label: 'Срок запуска MVP' },
+                    { value: '1-5 дней', label: 'Срок запуска MVP' },
                     { value: 'до 80%', label: 'Экономия времени команды' },
                     { value: 'x10', label: 'Потенциал вирусного роста' }
                   ].map((stat, index) => (
@@ -444,7 +444,7 @@ export default function Development() {
                   {[
                     {
                       id: 1,
-                      question: 'Возражение 1: "Это дорого. 300 тыс. ₽ — это много."',
+                      question: 'Возражение 1: "Это дорого. От $300 — это много."',
                       answer: 'Давайте сравним. Нативное приложение стоит 2-5 млн ₽, и это только разработка. Добавьте сюда зарплату команды поддержки, плату за продвижение в App Store (от 500 тыс. ₽ в год), комиссии платформ. Наш TMA заменяет все это и окупается за 3-4 месяца только на экономии. Это не расход, это самая выгодная инвестиция в вашу инфраструктуру на сегодня. ROI в первый год составляет 300-500%.'
                     },
                     {
@@ -527,13 +527,13 @@ export default function Development() {
                       {[
                         {
                           metric: 'Стоимость разработки',
-                          tma: '300 тыс. - 800 тыс. ₽',
+                          tma: 'От $300 до $2000',
                           native: '2 млн - 5 млн ₽',
                           web: '500 тыс. - 1.5 млн ₽'
                         },
                         {
                           metric: 'Срок запуска',
-                          tma: '2-4 недели (MVP)',
+                          tma: '1-5 дней (MVP)',
                           native: '4-8 месяцев',
                           web: '2-3 месяца'
                         },
@@ -647,19 +647,21 @@ export default function Development() {
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
             Начните трансформацию своего бизнеса с Telegram Mini Apps уже сегодня
           </p>
-          <Button
-            size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-base max-w-xs sm:max-w-none"
-            onClick={() => {
-              const message = encodeURIComponent(
-                "Привет! Изучил ваши материалы по Telegram Mini Apps. Впечатляющие цифры и преимущества! Хочу обсудить возможности для моего бизнеса. Когда можем созвониться?"
-              );
-              window.open(`https://t.me/balilegend?text=${message}`, '_blank');
-            }}
-          >
-            Получить консультацию
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
+          <div className="flex justify-center">
+            <Button
+              size="lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-base"
+              onClick={() => {
+                const message = encodeURIComponent(
+                  "Привет! Изучил ваши материалы по Telegram Mini Apps. Впечатляющие цифры и преимущества! Хочу обсудить возможности для моего бизнеса. Когда можем созвониться?"
+                );
+                window.open(`https://t.me/balilegend?text=${message}`, '_blank');
+              }}
+            >
+              Получить консультацию
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
         </section>
       </div>
     </div>
