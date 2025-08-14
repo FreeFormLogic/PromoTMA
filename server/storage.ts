@@ -387,20 +387,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   // AI Chat Statistics methods
-  async createChatSession(telegramId: string, userAgent?: string, ipAddress?: string): Promise<string> {
-    const sessionData: InsertAiChatSession = {
-      telegramId,
-      userAgent,
-      ipAddress
+  async createAiChatSession(telegramId: string): Promise<string> {
+    const sessionId = `session_${telegramId}_${Date.now()}`;
+    const sessionData = {
+      id: sessionId,
+      telegramId: telegramId
     };
 
-    const [session] = await db.insert(aiChatSessions).values(sessionData).returning();
-    return session.id;
+    await db.insert(aiChatSessions).values(sessionData);
+    return sessionId;
   }
 
-  async endChatSession(sessionId: string): Promise<void> {
+  async endAiChatSession(sessionId: string): Promise<void> {
     await db.update(aiChatSessions)
-      .set({ endedAt: new Date() })
+      .set({ endedAt: new Date(), isActive: false })
       .where(eq(aiChatSessions.id, sessionId));
     
     // Обновляем статистику пользователя
@@ -410,25 +410,25 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async saveChatMessage(
+  async logAiChatMessage(
     sessionId: string, 
     telegramId: string, 
     role: 'user' | 'assistant', 
     content: string, 
-    tokensUsed: number, 
+    tokensInput: number, 
+    tokensOutput: number, 
     cost: number, 
-    model?: string, 
     metadata?: any
   ): Promise<void> {
-    const messageData: InsertAiChatMessage = {
+    const messageData = {
       sessionId,
       telegramId,
       role,
       content,
-      tokensUsed,
-      cost: cost.toString(),
-      model: model || 'claude-sonnet-4-20250514',
-      metadata
+      tokensInput: role === 'user' ? tokensInput : 0,
+      tokensOutput: role === 'assistant' ? tokensOutput : 0,
+      costUsd: cost.toString(),
+      metadata: metadata || {}
     };
 
     await db.insert(aiChatMessages).values(messageData);
@@ -436,9 +436,10 @@ export class DatabaseStorage implements IStorage {
     // Обновляем счетчики в сессии
     await db.update(aiChatSessions)
       .set({
-        totalMessages: sql`total_messages + 1`,
-        totalTokensUsed: sql`total_tokens_used + ${tokensUsed}`,
-        totalCost: sql`total_cost + ${cost}`
+        messagesCount: sql`messages_count + 1`,
+        tokensInput: sql`tokens_input + ${role === 'user' ? tokensInput : 0}`,
+        tokensOutput: sql`tokens_output + ${role === 'assistant' ? tokensOutput : 0}`,
+        costUsd: sql`cost_usd + ${cost}`
       })
       .where(eq(aiChatSessions.id, sessionId));
 
@@ -450,23 +451,23 @@ export class DatabaseStorage implements IStorage {
     // Получаем агрегированную статистику из сессий
     const [stats] = await db.select({
       totalSessions: sql<number>`count(distinct ${aiChatSessions.id})`,
-      totalMessages: sql<number>`coalesce(sum(${aiChatSessions.totalMessages}), 0)`,
-      totalTokensUsed: sql<number>`coalesce(sum(${aiChatSessions.totalTokensUsed}), 0)`,
-      totalCost: sql<string>`coalesce(sum(${aiChatSessions.totalCost}), 0)`,
+      totalMessages: sql<number>`coalesce(sum(${aiChatSessions.messagesCount}), 0)`,
+      totalTokensInput: sql<number>`coalesce(sum(${aiChatSessions.tokensInput}), 0)`,
+      totalTokensOutput: sql<number>`coalesce(sum(${aiChatSessions.tokensOutput}), 0)`,
+      totalCost: sql<string>`coalesce(sum(${aiChatSessions.costUsd}), 0)`,
       lastActiveAt: sql<Date>`max(${aiChatSessions.startedAt})`,
-      firstActiveAt: sql<Date>`min(${aiChatSessions.startedAt})`,
-      averageSessionLength: sql<string>`coalesce(avg(extract(epoch from (coalesce(${aiChatSessions.endedAt}, now()) - ${aiChatSessions.startedAt})) / 60), 0)`
+      firstActiveAt: sql<Date>`min(${aiChatSessions.startedAt})`
     }).from(aiChatSessions).where(eq(aiChatSessions.telegramId, telegramId));
 
-    const userStatsData: InsertAiChatUserStats = {
+    const userStatsData = {
       telegramId,
       totalSessions: stats.totalSessions,
       totalMessages: stats.totalMessages,
-      totalTokensUsed: stats.totalTokensUsed,
-      totalCost: stats.totalCost,
-      lastActiveAt: stats.lastActiveAt,
-      firstActiveAt: stats.firstActiveAt,
-      averageSessionLength: stats.averageSessionLength
+      totalTokensInput: stats.totalTokensInput,
+      totalTokensOutput: stats.totalTokensOutput,
+      totalCostUsd: stats.totalCost,
+      lastSessionAt: stats.lastActiveAt,
+      firstSessionAt: stats.firstActiveAt
     };
 
     await db.insert(aiChatUserStats)
@@ -497,18 +498,18 @@ export class DatabaseStorage implements IStorage {
       telegramId: aiChatUserStats.telegramId,
       totalSessions: aiChatUserStats.totalSessions,
       totalMessages: aiChatUserStats.totalMessages,
-      totalTokensUsed: aiChatUserStats.totalTokensUsed,
-      totalCost: aiChatUserStats.totalCost,
-      averageSessionLength: aiChatUserStats.averageSessionLength,
-      lastActiveAt: aiChatUserStats.lastActiveAt,
-      firstActiveAt: aiChatUserStats.firstActiveAt,
+      totalTokensInput: aiChatUserStats.totalTokensInput,
+      totalTokensOutput: aiChatUserStats.totalTokensOutput,
+      totalCostUsd: aiChatUserStats.totalCostUsd,
+      lastSessionAt: aiChatUserStats.lastSessionAt,
+      firstSessionAt: aiChatUserStats.firstSessionAt,
       username: authorizedUsers.username,
       firstName: authorizedUsers.firstName,
       realName: authorizedUsers.realName
     })
     .from(aiChatUserStats)
     .leftJoin(authorizedUsers, eq(aiChatUserStats.telegramId, authorizedUsers.telegramId))
-    .orderBy(desc(aiChatUserStats.lastActiveAt));
+    .orderBy(desc(aiChatUserStats.lastSessionAt));
 
     return stats;
   }
@@ -519,9 +520,9 @@ export class DatabaseStorage implements IStorage {
       sessionId: aiChatMessages.sessionId,
       role: aiChatMessages.role,
       content: aiChatMessages.content,
-      tokensUsed: aiChatMessages.tokensUsed,
-      cost: aiChatMessages.cost,
-      model: aiChatMessages.model,
+      tokensInput: aiChatMessages.tokensInput,
+      tokensOutput: aiChatMessages.tokensOutput,
+      costUsd: aiChatMessages.costUsd,
       timestamp: aiChatMessages.timestamp,
       metadata: aiChatMessages.metadata
     })
@@ -539,6 +540,39 @@ export class DatabaseStorage implements IStorage {
       .from(aiChatMessages)
       .where(eq(aiChatMessages.sessionId, sessionId))
       .orderBy(asc(aiChatMessages.timestamp));
+  }
+
+  // Missing methods for routes compatibility  
+  async getUserByTelegramId(telegramId: string): Promise<any | null> {
+    try {
+      const [user] = await db.select()
+        .from(authorizedUsers)
+        .where(eq(authorizedUsers.telegramId, telegramId));
+      return user || null;
+    } catch {
+      return null;
+    }
+  }
+
+  async createUser(userData: any): Promise<any> {
+    try {
+      const [user] = await db.insert(authorizedUsers)
+        .values({
+          telegramId: userData.telegramId || Date.now().toString(),
+          username: userData.username,
+          firstName: userData.firstName || 'User',
+          isActive: userData.isAuthorized || false
+        })
+        .returning();
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async linkTelegramId(userId: number, telegramId: string): Promise<void> {
+    // This method is not needed with current schema but adding for compatibility
+    return;
   }
 
   // Referral system methods

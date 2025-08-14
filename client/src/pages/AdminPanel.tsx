@@ -35,11 +35,14 @@ interface AiChatStats {
   telegramId: string;
   totalSessions: number;
   totalMessages: number;
-  totalTokensUsed: number;
-  totalCost: string;
-  averageSessionLength: string;
-  lastActiveAt: string | null;
-  firstActiveAt: string;
+  totalTokensInput: number;
+  totalTokensOutput: number;
+  totalCostUsd: string;
+  lastSessionAt: string | null;
+  firstSessionAt: string;
+  username?: string;
+  firstName?: string;
+  realName?: string;
 }
 
 export default function AdminPanel() {

@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { AuthGuard } from "@/components/AuthGuard";
-import { useQuery as useAuthQuery } from "@tanstack/react-query";
 import { 
   Share2, 
   Users, 
@@ -54,9 +53,27 @@ export default function Partners() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Получаем данные пользователя из localStorage
-  const user = JSON.parse(localStorage.getItem("promobotUser") || "null") as User | null;
-  const isAuthLoading = false;
+  // Проверяем авторизацию
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const storedUser = localStorage.getItem("promobotUser");
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
+      } finally {
+        setIsAuthLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
   
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [registerData, setRegisterData] = useState<RegisterData>({
@@ -124,7 +141,26 @@ export default function Partners() {
     );
   }
 
-  if (!user) return null;
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-gray-600 dark:text-gray-400">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+        <div className="text-center space-y-4">
+          <p className="text-gray-600 dark:text-gray-400">Необходима авторизация для доступа к партнерской программе</p>
+        </div>
+      </div>
+    );
+  }
 
   const referralLink = referralInfo?.referralCode 
     ? `https://t.me/PromotmaBot?start=ref_${referralInfo.referralCode}`

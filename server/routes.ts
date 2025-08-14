@@ -631,6 +631,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Chat Statistics API
+  app.get("/api/admin/ai-stats", async (req, res) => {
+    try {
+      const stats = await storage.getAllUserStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching AI stats:", error);
+      res.status(500).json({ message: "Ошибка получения AI-статистики" });
+    }
+  });
+
+  app.get("/api/admin/ai-stats/:telegramId", async (req, res) => {
+    try {
+      const { telegramId } = req.params;
+      const userStats = await storage.getUserStats(telegramId);
+      const chatHistory = await storage.getUserChatHistory(telegramId, 100);
+      
+      res.json({
+        userStats,
+        chatHistory
+      });
+    } catch (error) {
+      console.error("Error fetching user AI stats:", error);
+      res.status(500).json({ message: "Ошибка получения статистики пользователя" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

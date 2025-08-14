@@ -164,8 +164,8 @@ Always speak Russian and be extremely specific about how each module solves thei
 Пиши обычный текст, а вместо описания модуля ставь только [MODULE:НОМЕР].
 Пример: "Для вашего салона красоты рекомендую [MODULE:112] который поможет автоматизировать запись клиентов."
 
-УЖЕ ПОКАЗАННЫЕ МОДУЛИ: ${alreadyShownModules.join(', ')}
-НЕ рекомендуй эти модули повторно!
+КРИТИЧЕСКИ ВАЖНО - УЖЕ ПОКАЗАННЫЕ МОДУЛИ: [${alreadyShownModules.join(', ')}]
+НЕ рекомендуй эти модули повторно! Если все подходящие модули уже показаны, предложи другие категории или спроси о дополнительных потребностях!
 
 Категории модулей: E-COMMERCE, МАРКЕТИНГ, ВОВЛЕЧЕНИЕ, ОБРАЗОВАНИЕ, ФИНТЕХ, CRM, B2B, БРОНИРОВАНИЕ, КОНТЕНТ И МЕДИА, ИНТЕГРАЦИИ, ИНДОНЕЗИЯ, ИГРЫ, ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ, АВТОМАТИЗАЦИЯ, ОТРАСЛЕВЫЕ РЕШЕНИЯ, АНАЛИТИКА, БЕЗОПАСНОСТЬ, КОММУНИКАЦИИ, СОЦИАЛЬНАЯ КОММЕРЦИЯ, AI И АВТОМАТИЗАЦИЯ, WEB3 & DEFI, ЛОКАЛЬНЫЕ СЕРВИСЫ, AI-АВАТАРЫ, ПАРСИНГ TELEGRAM.`,
       messages: messages,
@@ -180,11 +180,12 @@ Always speak Russian and be extremely specific about how each module solves thei
       const recommendedModules: number[] = [];
       
       if (moduleNumberMatches) {
-        moduleNumberMatches.forEach(match => {
+        const uniqueMatches = [...new Set(moduleNumberMatches)]; // Remove duplicates from response
+        uniqueMatches.forEach(match => {
           const numberMatch = match.match(/\[MODULE:(\d+)\]/i);
           if (numberMatch) {
             const moduleNumber = parseInt(numberMatch[1]);
-            // Only add if not already recommended and not already shown to user
+            // Only add if not already recommended in this response and not already shown to user
             if (!recommendedModules.includes(moduleNumber) && !alreadyShownModules.includes(moduleNumber)) {
               recommendedModules.push(moduleNumber);
             }
