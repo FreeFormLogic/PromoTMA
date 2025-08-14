@@ -393,31 +393,7 @@ export default function Modules() {
                   >
                     <IconComponent className="w-3 h-3 flex-shrink-0" />
                     <span className="text-center leading-tight line-clamp-2 text-[9px]">
-                      {category === "ВСЕ МОДУЛИ" ? `ВСЕ` : 
-                       category === "E-COMMERCE" ? "E-COM" :
-                       category === "МАРКЕТИНГ" ? "МАРК" :
-                       category === "ВОВЛЕЧЕНИЕ" ? "ВОВ" :
-                       category === "ОБРАЗОВАНИЕ" ? "ОБР" :
-                       category === "ФИНТЕХ" ? "ФИН" :
-                       category === "БРОНИРОВАНИЕ" ? "БРОН" :
-                       category === "КОНТЕНТ И МЕДИА" ? "КОНТ" :
-                       category === "ИНТЕГРАЦИИ" ? "ИНТЕ" :
-                       category === "ИНДОНЕЗИЯ" ? "ИНД" :
-                       category === "ИГРЫ" ? "ИГРЫ" :
-                       category === "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ" ? "ДОП" :
-                       category === "АВТОМАТИЗАЦИЯ" ? "АВТО" :
-                       category === "ОТРАСЛЕВЫЕ РЕШЕНИЯ" ? "ОТРАС" :
-                       category === "АНАЛИТИКА" ? "АНАЛ" :
-                       category === "БЕЗОПАСНОСТЬ" ? "БЕЗ" :
-                       category === "КОММУНИКАЦИИ" ? "КОМ" :
-                       category === "СОЦИАЛЬНАЯ КОММЕРЦИЯ" ? "СОЦ" :
-                       category === "AI И АВТОМАТИЗАЦИЯ" ? "AI" :
-                       category === "AI-АВАТАРЫ" ? "АВАТА" :
-                       category === "ПАРСИНГ TELEGRAM" ? "ПАРС" :
-                       category === "WEB3 & DEFI" ? "WEB3" :
-                       category === "ЛОКАЛЬНЫЕ СЕРВИСЫ" ? "ЛОК" :
-                       category.slice(0, 4)
-                      }
+                      {category === "ВСЕ МОДУЛИ" ? `ВСЕ` : category}
                     </span>
                   </Button>
                 );

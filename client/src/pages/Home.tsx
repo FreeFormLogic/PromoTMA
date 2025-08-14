@@ -334,7 +334,7 @@ export default function Home() {
                       <Building2 className="w-8 h-8 text-white" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">Традиционная разработка</h3>
-                    <div className="text-4xl font-bold text-gray-700 mb-1">$25,000</div>
+                    <div className="text-4xl font-bold text-gray-700 mb-1">$10,000</div>
                     <p className="text-gray-600">Высокие затраты на разработку</p>
                   </div>
                   
@@ -381,18 +381,18 @@ export default function Home() {
                 viewport={{ once: true }}
               >
                 <div className="bg-blue-50 rounded-2xl p-8 border-2 border-blue-200 relative overflow-hidden shadow-xl">
-                  <div className="absolute top-4 right-4">
-                    <Badge className="bg-blue-600 text-white px-3 py-1 text-sm font-semibold">
+                  <div className="absolute top-4 right-4 z-10">
+                    <Badge className="bg-green-600 text-white px-3 py-1 text-sm font-semibold shadow-lg">
                       ЭКОНОМИЯ 60%
                     </Badge>
                   </div>
                   
                   <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 relative z-0">
                       <Rocket className="w-8 h-8 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-blue-900 mb-2">Модульные Telegram Mini Apps</h3>
-                    <div className="text-4xl font-bold text-blue-700 mb-1">$10,000</div>
+                    <h3 className="text-2xl font-bold text-blue-900 mb-2">Telegram Mini Apps</h3>
+                    <div className="text-4xl font-bold text-blue-700 mb-1">от $300</div>
                     <p className="text-blue-700">Готовые решения под ключ</p>
                   </div>
                   
@@ -449,7 +449,7 @@ export default function Home() {
                   window.open(`https://t.me/balilegend?text=${message}`, '_blank');
                 }}
                 size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all"
               >
                 Начать экономить прямо сейчас
               </Button>
