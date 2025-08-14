@@ -223,7 +223,7 @@ export default function Home() {
               <Button
                 onClick={() => window.location.href = '/ai-chat'}
                 size="lg"
-                className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all animate-pulse hover:animate-none"
+                className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all animate-[pulse-scale_2s_ease-in-out_infinite]"
               >
                 <Bot className="w-6 h-6 mr-3" />
                 AI-конструктор APP

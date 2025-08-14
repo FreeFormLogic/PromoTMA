@@ -10,7 +10,8 @@ import {
   Menu,
   X,
   Settings,
-  Bot
+  Bot,
+  Home
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -32,7 +33,7 @@ export function Navigation() {
   };
 
   const navItems = [
-    { path: "/home", label: "Главная", icon: MessageSquare },
+    { path: "/home", label: "Главная", icon: Home },
     { path: "/modules", label: "Функционал", icon: Puzzle },
     { path: "/industries", label: "Отрасли", icon: Building2 },
     { path: "/ai-chat", label: "AI-конструктор", icon: Bot },
