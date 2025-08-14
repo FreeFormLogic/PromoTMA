@@ -477,7 +477,7 @@ export default function AdminPanel() {
                   <MessageSquare className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{totalTokensUsed.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">{totalTokensUsed?.toLocaleString() || 0}</div>
                   <p className="text-xs text-muted-foreground">Использовано</p>
                 </CardContent>
               </Card>
@@ -488,7 +488,7 @@ export default function AdminPanel() {
                   <DollarSign className="h-4 w-4 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${totalCost.toFixed(4)}</div>
+                  <div className="text-2xl font-bold">${totalCost?.toFixed(4) || '0.0000'}</div>
                   <p className="text-xs text-muted-foreground">На AI запросы</p>
                 </CardContent>
               </Card>
@@ -564,17 +564,17 @@ export default function AdminPanel() {
                               </td>
                               <td className="p-2">
                                 <span className="font-mono text-blue-600">
-                                  {userStat.totalTokensUsed.toLocaleString()}
+                                  {(userStat.totalTokensInput + userStat.totalTokensOutput).toLocaleString()}
                                 </span>
                               </td>
                               <td className="p-2">
                                 <span className="font-mono text-green-600">
-                                  ${userStat.totalCost}
+                                  ${parseFloat(userStat.totalCostUsd).toFixed(4)}
                                 </span>
                               </td>
                               <td className="p-2">
                                 <span className="text-muted-foreground">
-                                  {userStat.averageSessionLength} мин
+                                  {userStat.lastSessionAt ? new Date(userStat.lastSessionAt).toLocaleDateString('ru') : 'N/A'}
                                 </span>
                               </td>
                               <td className="p-2 text-xs text-muted-foreground">
