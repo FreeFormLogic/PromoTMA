@@ -9,6 +9,8 @@ This project is a full-stack web application serving as a Telegram Mini Apps dir
 - ✅ **Enhanced AI Chat Analytics**: Complete tracking of all chat interactions, module selections, and user behaviors
 - ✅ **Complete "Ваше преимущество" Redesign**: Full rebuild based on detailed specifications - dark theme (bg-gray-900), dual-tab structure ("Преимущества для Клиента" + "Аргументы для Продавца"), expandable cards with detailed ROI data, accordion objection handling, comparison table, target verticals, and persuasive sales content with specific financial figures
 - ✅ **AI Chat Statistics System**: Complete AI usage tracking with token counting, cost calculation, and session management. New database tables (aiChatSessions, aiChatMessages, aiChatUserStats) for storing detailed chat history. Admin panel enhanced with AI statistics dashboard showing per-user token usage, costs, session data. Automatic cost calculation based on Claude Sonnet 4.0 pricing model ($3/$15 per 1M tokens)
+- ✅ **Fixed Category Grouping**: Reorganized module categories into logical groups - E-commerce, Marketing, Finance, Education, Entertainment, Booking, Business, AI & Automation, Integrations, Communications, Analytics, Security, Local services, and Additional services
+- ✅ **Updated AI Constructor Menu**: Enhanced floating menu in AI chat with complete navigation including all main sections: Home, Modules, Industries, My Telegram Mini App, Your Advantage, Partners
 
 # User Preferences
 

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import AIChat from '@/components/AIChat';
 import { Card } from '@/components/ui/card';
-import { X, Menu, Home, Package, Users, FileText, MessageSquare } from 'lucide-react';
+import { X, Menu, Home, Package, Users, FileText, MessageSquare, Building2, Settings, Rocket, Handshake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { trackAIChat } from '@/lib/analytics';
@@ -66,8 +66,8 @@ export default function AIChatPage() {
       {/* Floating Menu */}
       {isMenuOpen && (
         <div className="fixed bottom-36 right-4 z-40">
-          <Card className="bg-white/95 backdrop-blur-sm shadow-xl rounded-xl p-3 min-w-[160px]">
-            <div className="space-y-2">
+          <Card className="bg-white/95 backdrop-blur-sm shadow-xl rounded-xl p-3 min-w-[200px]">
+            <div className="space-y-1">
               <Button
                 variant="ghost"
                 className="w-full justify-start text-sm hover:bg-gray-100"
@@ -94,26 +94,45 @@ export default function AIChatPage() {
                 variant="ghost"
                 className="w-full justify-start text-sm hover:bg-gray-100"
                 onClick={() => {
+                  setLocation('/industries');
+                  setIsMenuOpen(false);
+                }}
+              >
+                <Building2 className="w-4 h-4 mr-2" />
+                Отрасли
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-sm hover:bg-gray-100"
+                onClick={() => {
+                  setLocation('/my-app');
+                  setIsMenuOpen(false);
+                }}
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Мое Telegram Mini App
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-sm hover:bg-gray-100"
+                onClick={() => {
                   setLocation('/development');
                   setIsMenuOpen(false);
                 }}
               >
-                <FileText className="w-4 h-4 mr-2" />
+                <Rocket className="w-4 h-4 mr-2" />
                 Ваше преимущество
               </Button>
-              {selectedModules.length > 0 && (
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-sm hover:bg-gray-100"
-                  onClick={() => {
-                    setLocation('/my-app');
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Мое App ({selectedModules.length})
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-sm hover:bg-gray-100 opacity-60"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                }}
+              >
+                <Handshake className="w-4 h-4 mr-2" />
+                Партнерам
+              </Button>
             </div>
           </Card>
         </div>

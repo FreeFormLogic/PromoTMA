@@ -33,11 +33,11 @@ export function Navigation() {
   };
 
   const navItems = [
-    { path: "/home", label: "Главная", icon: Home },
-    { path: "/modules", label: "Функционал", icon: Puzzle },
+    { path: "/", label: "Главная", icon: Home },
+    { path: "/modules", label: "Модули", icon: Puzzle },
     { path: "/industries", label: "Отрасли", icon: Building2 },
     { path: "/ai-chat", label: "AI-конструктор", icon: Bot },
-    { path: "/my-app", label: "Мое App", icon: Settings },
+    { path: "/my-app", label: "Мое Telegram Mini App", icon: Settings },
     { path: "/development", label: "Ваше преимущество", icon: Rocket },
     { path: "/partners", label: "Партнерам", icon: Handshake },
   ];
