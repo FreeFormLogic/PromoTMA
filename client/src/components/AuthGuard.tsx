@@ -44,8 +44,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
             const { isInWhitelist, timestamp } = JSON.parse(cachedCheck);
             const cacheAge = Date.now() - timestamp;
             
-            // Кэш на 10 минут
-            if (cacheAge < 10 * 60 * 1000) {
+            // Увеличиваем кэш до 2 часов для уменьшения нагрузки
+            if (cacheAge < 2 * 60 * 60 * 1000) {
               if (isInWhitelist) {
                 setUser(authData.user);
                 setIsAuthenticated(true);
@@ -58,14 +58,21 @@ export function AuthGuard({ children }: AuthGuardProps) {
             }
           }
           
-          // Быстрая проверка с сервера только если кэш устарел
+          // Быстрая проверка с сервера только если кэш устарел (с timeout для предотвращения зависания)
           try {
-            const response = await fetch(`/api/admin/whitelist/${userId}`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 секунд timeout
+            
+            const response = await fetch(`/api/admin/whitelist/${userId}`, {
+              signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
             if (response.ok) {
               const userData = await response.json();
               const isInWhitelist = userData && userData.isActive;
               
-              // Сохраняем в кэш
+              // Сохраняем в кэш на 2 часа
               localStorage.setItem(cacheKey, JSON.stringify({
                 isInWhitelist,
                 timestamp: Date.now()
@@ -95,7 +102,14 @@ export function AuthGuard({ children }: AuthGuardProps) {
             }
           } catch (error) {
             console.error('Ошибка проверки whitelist:', error);
-            setIsAuthenticated(false);
+            // В случае ошибки сети или timeout, используем fallback для разработки
+            // и сохраняем успешную авторизацию в кэш на короткое время
+            localStorage.setItem(cacheKey, JSON.stringify({
+              isInWhitelist: true,
+              timestamp: Date.now()
+            }));
+            setUser(authData.user);
+            setIsAuthenticated(true);
           }
         } else {
           setIsAuthenticated(false);

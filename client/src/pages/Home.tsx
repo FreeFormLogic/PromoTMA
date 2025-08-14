@@ -49,7 +49,7 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex justify-center">
                 <Button
                   onClick={() => window.location.href = '/ai-chat'}
                   size="lg"
@@ -57,15 +57,6 @@ export default function Home() {
                 >
                   <Bot className="mr-2 w-5 h-5" />
                   AI-конструктор APP
-                </Button>
-                <Button
-                  onClick={() => window.location.href = '/modules'}
-                  size="lg"
-                  variant="outline"
-                  className="border-2 border-white text-white hover:bg-white hover:text-blue-900 px-8 py-4 text-lg font-semibold rounded-full shadow-2xl transition-all transform hover:scale-105"
-                >
-                  Готовые решения для бизнеса
-                  <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </div>
             </div>
