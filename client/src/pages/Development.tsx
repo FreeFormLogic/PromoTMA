@@ -26,7 +26,7 @@ export default function Development() {
   };
 
   return (
-    <div className="bg-gray-900 text-gray-200 min-h-screen p-4 sm:p-6 lg:p-8">
+    <div className="bg-gray-900 text-gray-200 min-h-screen p-4 sm:p-6 lg:p-8 overflow-x-hidden">
       <div className="max-w-7xl mx-auto">
         {/* Заголовок */}
         <div className="text-center mb-12">
@@ -649,7 +649,7 @@ export default function Development() {
           </p>
           <Button
             size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-base max-w-xs sm:max-w-none"
             onClick={() => {
               const message = encodeURIComponent(
                 "Привет! Изучил ваши материалы по Telegram Mini Apps. Впечатляющие цифры и преимущества! Хочу обсудить возможности для моего бизнеса. Когда можем созвониться?"
@@ -658,7 +658,7 @@ export default function Development() {
             }}
           >
             Получить консультацию
-            <ArrowRight className="w-5 h-5 ml-2" />
+            <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </section>
       </div>

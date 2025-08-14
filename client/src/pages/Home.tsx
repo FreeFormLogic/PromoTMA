@@ -150,12 +150,12 @@ export default function Home() {
                 
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-                    <div className="text-2xl font-bold">$300</div>
-                    <div className="text-sm text-blue-100">вместо $10,000</div>
+                    <div className="text-2xl font-bold">1&nbsp;день</div>
+                    <div className="text-sm text-blue-100">время запуска</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-                    <div className="text-2xl font-bold">1&nbsp;день</div>
-                    <div className="text-sm text-blue-100">вместо месяцев</div>
+                    <div className="text-2xl font-bold">260+</div>
+                    <div className="text-sm text-blue-100">модулей</div>
                   </div>
                 </div>
                 
@@ -170,7 +170,7 @@ export default function Home() {
                 <ul className="space-y-2 text-blue-100">
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-blue-300 mr-2" />
-                    260+ готовых модулей
+                    260+ модулей
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-blue-300 mr-2" />
@@ -244,8 +244,8 @@ export default function Home() {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Готовые решения для бизнеса</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto">
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 p-4 rounded-lg text-center border border-blue-200">
-                <div className="text-2xl font-bold mb-1">От $300</div>
-                <div className="text-xs opacity-70">Стартовая цена</div>
+                <div className="text-2xl font-bold mb-1">1-5 дней</div>
+                <div className="text-xs opacity-70">Время запуска</div>
               </div>
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 p-4 rounded-lg text-center border border-blue-200">
                 <div className="text-2xl font-bold mb-1">260+</div>
@@ -287,12 +287,12 @@ export default function Home() {
             
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
               <div className="bg-white/15 rounded-lg p-4">
-                <div className="text-lg font-bold text-white">От $300</div>
-                <div className="text-xs text-blue-100">Стартовая<br/>цена</div>
+                <div className="text-lg font-bold text-white">1-5 дней</div>
+                <div className="text-xs text-blue-100">Время<br/>запуска</div>
               </div>
               <div className="bg-white/15 rounded-lg p-4">
                 <div className="text-lg font-bold text-white">260+</div>
-                <div className="text-xs text-blue-100">Готовых<br/>модулей</div>
+                <div className="text-xs text-blue-100">Модулей</div>
               </div>
               <div className="bg-white/15 rounded-lg p-4">
                 <div className="text-lg font-bold text-white">1-5</div>
@@ -383,7 +383,7 @@ export default function Home() {
                 <div className="bg-blue-50 rounded-2xl p-8 border-2 border-blue-200 relative overflow-hidden shadow-xl">
                   <div className="absolute top-4 right-4 z-10">
                     <Badge className="bg-green-600 text-white px-3 py-1 text-sm font-semibold shadow-lg">
-                      ЭКОНОМИЯ 60%
+                      ЛУЧШАЯ ЦЕНА
                     </Badge>
                   </div>
                   
@@ -392,8 +392,8 @@ export default function Home() {
                       <Rocket className="w-8 h-8 text-white" />
                     </div>
                     <h3 className="text-2xl font-bold text-blue-900 mb-2">Telegram Mini Apps</h3>
-                    <div className="text-4xl font-bold text-blue-700 mb-1">от $300</div>
-                    <p className="text-blue-700">Готовые решения под ключ</p>
+                    <div className="text-4xl font-bold text-blue-700 mb-1">1-5 дней</div>
+                    <p className="text-blue-700">Решения под ключ</p>
                   </div>
                   
                   <div className="space-y-4">
@@ -416,7 +416,7 @@ export default function Home() {
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
                       <div>
-                        <p className="font-semibold text-blue-900">900+ млн готовых пользователей</p>
+                        <p className="font-semibold text-blue-900">900+ млн пользователей</p>
                         <p className="text-blue-700 text-sm">Огромная аудитория уже в Telegram</p>
                       </div>
                     </div>
@@ -424,7 +424,7 @@ export default function Home() {
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
                       <div>
-                        <p className="font-semibold text-blue-900">260+ готовых модулей</p>
+                        <p className="font-semibold text-blue-900">260+ модулей</p>
                         <p className="text-blue-700 text-sm">Проверенные решения для любого бизнеса</p>
                       </div>
                     </div>
@@ -482,7 +482,7 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4">Преимущества</h4>
               <ul className="space-y-1 text-gray-400 text-sm">
-                <li>✓ 260+ готовых модулей</li>
+                <li>✓ 260+ модулей</li>
 
                 <li>✓ Запуск за 1-5 дней</li>
                 <li>✓ От $300 вместо $10,000</li>

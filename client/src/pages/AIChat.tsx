@@ -43,6 +43,16 @@ export default function AIChatPage() {
         />
       </div>
 
+      {/* Compact Menu Button for AI Chat - positioned to not interfere with send button */}
+      <div className="fixed bottom-20 right-4 z-40">
+        <Button
+          onClick={() => setLocation('/')}
+          className="w-6 h-6 p-0 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg"
+          title="Меню"
+        >
+          <Menu className="w-3 h-3" />
+        </Button>
+      </div>
 
     </div>
   );

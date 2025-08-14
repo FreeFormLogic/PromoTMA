@@ -896,18 +896,20 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="reset-modules"
-                checked={resetModulesToo}
-                onCheckedChange={setResetModulesToo}
-              />
-              <label 
-                htmlFor="reset-modules"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-              >
-                Также сбросить выбранные модули?
-              </label>
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2">
+              <div className="flex items-center space-x-2 mb-4 sm:mb-0 order-last sm:order-first">
+                <Checkbox 
+                  id="reset-modules"
+                  checked={resetModulesToo}
+                  onCheckedChange={setResetModulesToo}
+                />
+                <label 
+                  htmlFor="reset-modules"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Начать новое приложение
+                </label>
+              </div>
             </div>
             
             <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2">
