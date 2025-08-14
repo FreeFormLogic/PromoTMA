@@ -450,9 +450,7 @@ export default function Home() {
                 }}
                 size="lg"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all"
-              >
-                Начать экономить прямо сейчас
-              </Button>
+              >Создать приложение</Button>
             </motion.div>
           </div>
         </section>
@@ -499,8 +497,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-
-
     </div>
   );
 }
