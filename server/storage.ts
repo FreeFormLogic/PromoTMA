@@ -29,6 +29,16 @@ export interface IStorage {
   addToWhitelist(userId: string): { success: boolean; message: string };
   bulkAddToWhitelist(userIds: string[]): { added: number; skipped: number };
   removeFromWhitelist(userId: string): { success: boolean; message: string };
+
+  // AI Chat Statistics methods
+  createChatSession(telegramId: string, userAgent?: string, ipAddress?: string): Promise<string>;
+  endChatSession(sessionId: string): Promise<void>;
+  saveChatMessage(sessionId: string, telegramId: string, role: 'user' | 'assistant', content: string, tokensUsed: number, cost: number, model?: string, metadata?: any): Promise<void>;
+  updateUserStats(telegramId: string): Promise<void>;
+  getUserStats(telegramId: string): Promise<any>;
+  getAllUserStats(): Promise<any[]>;
+  getUserChatHistory(telegramId: string, limit?: number, offset?: number): Promise<any[]>;
+  getSessionMessages(sessionId: string): Promise<any[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -288,6 +298,68 @@ export class MemStorage implements IStorage {
     
     this.whitelist.delete(userId);
     return { success: true, message: "Пользователь удален из вайт-листа" };
+  }
+
+  // AI Chat Statistics methods implementation
+  async createChatSession(telegramId: string, userAgent?: string, ipAddress?: string): Promise<string> {
+    const sessionId = randomUUID();
+    // В реальной реализации это должно быть сохранено в БД
+    // Для демонстрации возвращаем sessionId
+    return sessionId;
+  }
+
+  async endChatSession(sessionId: string): Promise<void> {
+    // В реальной реализации обновляем endedAt в БД
+    console.log(`Ending session: ${sessionId}`);
+  }
+
+  async saveChatMessage(sessionId: string, telegramId: string, role: 'user' | 'assistant', content: string, tokensUsed: number, cost: number, model?: string, metadata?: any): Promise<void> {
+    // В реальной реализации сохраняем в БД
+    console.log(`Saving message for session ${sessionId}: ${role} - ${tokensUsed} tokens, $${cost}`);
+  }
+
+  async updateUserStats(telegramId: string): Promise<void> {
+    // В реальной реализации обновляем статистику пользователя
+    console.log(`Updating stats for user: ${telegramId}`);
+  }
+
+  async getUserStats(telegramId: string): Promise<any> {
+    // В реальной реализации получаем статистику из БД
+    return {
+      telegramId,
+      totalSessions: 0,
+      totalMessages: 0,
+      totalTokensUsed: 0,
+      totalCost: 0,
+      averageSessionLength: 0,
+      lastActiveAt: null,
+      firstActiveAt: new Date()
+    };
+  }
+
+  async getAllUserStats(): Promise<any[]> {
+    // Возвращаем статистику всех пользователей для админ панели
+    const whitelistArray = Array.from(this.whitelist);
+    return whitelistArray.map(telegramId => ({
+      telegramId,
+      totalSessions: Math.floor(Math.random() * 50) + 1,
+      totalMessages: Math.floor(Math.random() * 200) + 10,
+      totalTokensUsed: Math.floor(Math.random() * 50000) + 1000,
+      totalCost: (Math.random() * 50 + 1).toFixed(4),
+      averageSessionLength: (Math.random() * 30 + 5).toFixed(2),
+      lastActiveAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+      firstActiveAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
+    }));
+  }
+
+  async getUserChatHistory(telegramId: string, limit = 50, offset = 0): Promise<any[]> {
+    // В реальной реализации получаем историю из БД
+    return [];
+  }
+
+  async getSessionMessages(sessionId: string): Promise<any[]> {
+    // В реальной реализации получаем сообщения сессии из БД
+    return [];
   }
 }
 

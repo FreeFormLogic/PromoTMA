@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Plus, Users, Shield, Settings } from "lucide-react";
+import { Trash2, Plus, Users, Shield, Settings, BarChart3, MessageSquare, Clock, DollarSign } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface WhitelistUser {
   id: string;
@@ -15,6 +16,17 @@ interface WhitelistUser {
   lastName?: string;
   username?: string;
   addedAt: string;
+}
+
+interface AiChatStats {
+  telegramId: string;
+  totalSessions: number;
+  totalMessages: number;
+  totalTokensUsed: number;
+  totalCost: string;
+  averageSessionLength: string;
+  lastActiveAt: string | null;
+  firstActiveAt: string;
 }
 
 export default function AdminPanel() {
@@ -49,6 +61,17 @@ export default function AdminPanel() {
       if (!response.ok) throw new Error("Ошибка загрузки");
       return response.json();
     }
+  });
+
+  // Получение AI статистики
+  const { data: aiStats = [], isLoading: isLoadingAiStats } = useQuery({
+    queryKey: ["/api/admin/ai-stats"],
+    queryFn: async () => {
+      const response = await fetch("/api/admin/ai-stats");
+      if (!response.ok) throw new Error("Ошибка загрузки статистики AI");
+      return response.json();
+    },
+    enabled: isAuthenticated
   });
 
   // Добавление пользователя в вайт-лист
@@ -219,9 +242,25 @@ export default function AdminPanel() {
     );
   }
 
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "Нет данных";
+    return new Date(dateString).toLocaleDateString("ru-RU", {
+      day: "2-digit",
+      month: "2-digit", 
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  };
+
+  const totalTokensUsed = aiStats.reduce((sum: number, user: AiChatStats) => sum + user.totalTokensUsed, 0);
+  const totalCost = aiStats.reduce((sum: number, user: AiChatStats) => sum + parseFloat(user.totalCost || "0"), 0);
+  const totalSessions = aiStats.reduce((sum: number, user: AiChatStats) => sum + user.totalSessions, 0);
+  const totalMessages = aiStats.reduce((sum: number, user: AiChatStats) => sum + user.totalMessages, 0);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Заголовок */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -233,7 +272,7 @@ export default function AdminPanel() {
                 Панель администратора
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                Управление доступом к Telegram Mini App
+                Управление доступом и мониторинг AI статистики
               </p>
             </div>
           </div>
@@ -246,10 +285,25 @@ export default function AdminPanel() {
           </Button>
         </div>
 
-        {/* Статистика */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+        {/* Основной контент с вкладками */}
+        <Tabs defaultValue="whitelist" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="whitelist" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Вайт-лист ({whitelist.length})
+            </TabsTrigger>
+            <TabsTrigger value="ai-stats" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              AI Статистика
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Вкладка Вайт-лист */}
+          <TabsContent value="whitelist" className="mt-6 space-y-6">
+            {/* Статистика вайт-листа */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Авторизованные пользователи</CardTitle>
               <Users className="w-4 h-4 text-blue-600" />
             </CardHeader>
@@ -380,6 +434,132 @@ export default function AdminPanel() {
             )}
           </CardContent>
         </Card>
+          </TabsContent>
+
+          {/* Вкладка AI Статистика */}
+          <TabsContent value="ai-stats" className="mt-6 space-y-6">
+            {/* Общая статистика AI */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Всего токенов</CardTitle>
+                  <MessageSquare className="h-4 w-4 text-blue-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{totalTokensUsed.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground">Использовано</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Общие расходы</CardTitle>
+                  <DollarSign className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">${totalCost.toFixed(4)}</div>
+                  <p className="text-xs text-muted-foreground">На AI запросы</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Сессии</CardTitle>
+                  <Clock className="h-4 w-4 text-purple-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{totalSessions}</div>
+                  <p className="text-xs text-muted-foreground">Всего сессий</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Сообщения</CardTitle>
+                  <MessageSquare className="h-4 w-4 text-orange-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{totalMessages}</div>
+                  <p className="text-xs text-muted-foreground">Всего сообщений</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Детальная статистика по пользователям */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Статистика AI чата по пользователям</CardTitle>
+                <CardDescription>
+                  Подробная статистика использования AI каждым пользователем
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoadingAiStats ? (
+                  <div className="text-center py-8">Загрузка статистики...</div>
+                ) : aiStats.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Нет данных о использовании AI чата
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left p-2">Telegram ID</th>
+                            <th className="text-left p-2">Сессий</th>
+                            <th className="text-left p-2">Сообщений</th>
+                            <th className="text-left p-2">Токенов</th>
+                            <th className="text-left p-2">Расходы</th>
+                            <th className="text-left p-2">Средняя длина сессии</th>
+                            <th className="text-left p-2">Последняя активность</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {aiStats.map((userStat: AiChatStats) => (
+                            <tr key={userStat.telegramId} className="border-b hover:bg-muted/50">
+                              <td className="p-2 font-mono">
+                                {userStat.telegramId}
+                              </td>
+                              <td className="p-2">
+                                <Badge variant="secondary">
+                                  {userStat.totalSessions}
+                                </Badge>
+                              </td>
+                              <td className="p-2">
+                                <Badge variant="outline">
+                                  {userStat.totalMessages}
+                                </Badge>
+                              </td>
+                              <td className="p-2">
+                                <span className="font-mono text-blue-600">
+                                  {userStat.totalTokensUsed.toLocaleString()}
+                                </span>
+                              </td>
+                              <td className="p-2">
+                                <span className="font-mono text-green-600">
+                                  ${userStat.totalCost}
+                                </span>
+                              </td>
+                              <td className="p-2">
+                                <span className="text-muted-foreground">
+                                  {userStat.averageSessionLength} мин
+                                </span>
+                              </td>
+                              <td className="p-2 text-xs text-muted-foreground">
+                                {formatDate(userStat.lastActiveAt)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

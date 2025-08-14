@@ -399,6 +399,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Chat Statistics routes
+  app.get('/api/admin/ai-stats', async (req, res) => {
+    try {
+      const stats = await storage.getAllUserStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get AI chat statistics' });
+    }
+  });
+
+  app.get('/api/admin/ai-stats/:telegramId', async (req, res) => {
+    try {
+      const { telegramId } = req.params;
+      const stats = await storage.getUserStats(telegramId);
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get user AI statistics' });
+    }
+  });
+
+  app.get('/api/admin/ai-history/:telegramId', async (req, res) => {
+    try {
+      const { telegramId } = req.params;
+      const { limit = '50', offset = '0' } = req.query;
+      const history = await storage.getUserChatHistory(telegramId, parseInt(limit as string), parseInt(offset as string));
+      res.json(history);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get user chat history' });
+    }
+  });
+
+  // AI Chat session management routes
+  app.post('/api/ai-chat/session', async (req, res) => {
+    try {
+      const { telegramId, userAgent, ipAddress } = req.body;
+      const sessionId = await storage.createChatSession(telegramId, userAgent, ipAddress);
+      res.json({ sessionId });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to create chat session' });
+    }
+  });
+
+  app.post('/api/ai-chat/message', async (req, res) => {
+    try {
+      const { sessionId, telegramId, role, content, tokensUsed, cost, model, metadata } = req.body;
+      await storage.saveChatMessage(sessionId, telegramId, role, content, tokensUsed, cost, model, metadata);
+      await storage.updateUserStats(telegramId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to save chat message' });
+    }
+  });
+
+  app.post('/api/ai-chat/session/:sessionId/end', async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      await storage.endChatSession(sessionId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to end chat session' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

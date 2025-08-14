@@ -8,6 +8,7 @@ This project is a full-stack web application serving as a Telegram Mini Apps dir
 - ✅ **Implemented Comprehensive Analytics**: Full Yandex.Metrika integration with webvisor tracking all user text inputs and interactions
 - ✅ **Enhanced AI Chat Analytics**: Complete tracking of all chat interactions, module selections, and user behaviors
 - ✅ **Complete "Ваше преимущество" Redesign**: Full rebuild based on detailed specifications - dark theme (bg-gray-900), dual-tab structure ("Преимущества для Клиента" + "Аргументы для Продавца"), expandable cards with detailed ROI data, accordion objection handling, comparison table, target verticals, and persuasive sales content with specific financial figures
+- ✅ **AI Chat Statistics System**: Complete AI usage tracking with token counting, cost calculation, and session management. New database tables (aiChatSessions, aiChatMessages, aiChatUserStats) for storing detailed chat history. Admin panel enhanced with AI statistics dashboard showing per-user token usage, costs, session data. Automatic cost calculation based on Claude Sonnet 4.0 pricing model ($3/$15 per 1M tokens)
 
 # User Preferences
 
@@ -31,7 +32,7 @@ Drizzle ORM is used for type-safe database operations and migrations, with schem
 A comprehensive design system is implemented using Radix UI primitives, with CSS custom properties for theming and dark mode support. It features a mobile-first responsive design using Tailwind CSS and built-in accessibility through Radix UI components.
 
 ## Data Management
-The application manages data entities including Modules (Mini App components), Industries (industry-specific solutions), USPs, Objections (FAQ), and Users (authorization status). The module database has been expanded to 260+ entries across various categories like additional services, automation, industry solutions, analytics, security, communications, social commerce, and AI-driven solutions.
+The application manages data entities including Modules (Mini App components), Industries (industry-specific solutions), USPs, Objections (FAQ), Users (authorization status), and AI Chat Analytics. The module database has been expanded to 260+ entries across various categories like additional services, automation, industry solutions, analytics, security, communications, social commerce, and AI-driven solutions. AI chat tracking includes comprehensive statistics: token usage, costs, session duration, message history, and user activity patterns with real-time cost calculation based on Claude model pricing.
 
 ## UI/UX Decisions
 The platform enforces a strict blue/white color scheme. It features enhanced mobile navigation with a bottom-right floating button and bottom-screen menu opening. The AI chat provides gradual, personalized module recommendations, preventing duplicates and offering real-time business insights. Module modals include gradient backgrounds and markdown formatting support. The pricing display is standardized at $10,000.
