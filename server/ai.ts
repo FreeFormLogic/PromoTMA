@@ -157,13 +157,19 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     });
 
     if (!apiResponse.ok) {
-      throw new Error(`API failed: ${apiResponse.status}`);
+      const errorText = await apiResponse.text();
+      console.error('Gemini API Error:', apiResponse.status, errorText);
+      throw new Error(`API failed: ${apiResponse.status} - ${errorText}`);
     }
 
     const apiData = await apiResponse.json();
+    console.log('Full API Response:', JSON.stringify(apiData, null, 2));
+    
     const aiContent = apiData.candidates?.[0]?.content?.parts?.[0]?.text;
     
     if (!aiContent) {
+      console.error('No AI content found in response:', apiData);
+      console.error('Candidates:', apiData.candidates);
       throw new Error('No AI response content');
     }
     
