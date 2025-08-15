@@ -229,29 +229,32 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
   };
 
   const handleModuleLike = (module: Module) => {
-    const isAlreadySelected = selectedModules.find(m => m.id === module.id);
+    // Use a single source of truth - localStorage first, then update state
+    const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+    const isAlreadySelected = savedModules.find((m: Module) => m.id === module.id);
+    
+    let updatedModules;
     if (isAlreadySelected) {
       trackModule('remove_from_selection', module.id, module.name);
-      setSelectedModules(prev => prev.filter(m => m.id !== module.id));
-      // Remove from localStorage
-      const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-      const updatedModules = savedModules.filter((m: Module) => m.id !== module.id);
-      localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+      updatedModules = savedModules.filter((m: Module) => m.id !== module.id);
     } else {
-      // Prevent duplicates by double-checking
-      const alreadyExists = selectedModules.find(m => m.id === module.id);
-      if (!alreadyExists) {
-        trackModule('add_to_selection', module.id, module.name);
-        setSelectedModules(prev => [...prev, module]);
-        // Save to localStorage for "Мое App" section
-        const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-        const moduleExists = savedModules.find((m: Module) => m.id === module.id);
-        if (!moduleExists) {
-          const updatedModules = [...savedModules, module];
-          localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
-        }
-      }
+      trackModule('add_to_selection', module.id, module.name);
+      updatedModules = [...savedModules, module];
     }
+    
+    // Update localStorage first
+    localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+    
+    // Then update state to trigger re-renders
+    setSelectedModules(updatedModules);
+    
+    // Force re-render of the component to immediately show changes
+    setTimeout(() => {
+      const event = new CustomEvent('moduleSelectionChanged', { 
+        detail: { modules: updatedModules } 
+      });
+      window.dispatchEvent(event);
+    }, 0);
   };
 
   const sendMessage = async () => {
@@ -392,8 +395,36 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
 
   const ModuleCard = ({ module }: { module: Module }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const isSelected = selectedModules.find(m => m.id === module.id);
+    // Force re-read from localStorage to ensure consistency
+    const [localSelectedModules, setLocalSelectedModules] = useState<Module[]>(() => {
+      const saved = localStorage.getItem('selectedModules');
+      return saved ? JSON.parse(saved) : [];
+    });
+    
+    const isSelected = localSelectedModules.find(m => m.id === module.id) || selectedModules.find(m => m.id === module.id);
     const IconComponent = Sparkles; // Use sparkles icon for now
+    
+    // Listen for storage changes to keep in sync
+    useEffect(() => {
+      const handleStorageChange = () => {
+        const saved = localStorage.getItem('selectedModules');
+        const modules = saved ? JSON.parse(saved) : [];
+        setLocalSelectedModules(modules);
+        setSelectedModules(modules);
+      };
+      
+      const handleModuleSelectionChange = (event: CustomEvent) => {
+        setLocalSelectedModules(event.detail.modules);
+      };
+      
+      window.addEventListener('storage', handleStorageChange);
+      window.addEventListener('moduleSelectionChanged', handleModuleSelectionChange as EventListener);
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('moduleSelectionChanged', handleModuleSelectionChange as EventListener);
+      };
+    }, [setSelectedModules]);
     
     return (
       <>
@@ -407,7 +438,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         >
           <div className="p-4">
             {/* Icon and header */}
-            <div className="flex items-start gap-3 mb-2">
+            <div className="flex items-start gap-3 mb-1">
               <div className={`w-10 h-10 rounded-lg ${isSelected ? 'bg-gradient-to-br from-green-500 to-blue-600 ring-2 ring-green-200' : 'bg-gradient-to-br from-blue-500 to-purple-600'} flex items-center justify-center flex-shrink-0 relative`}>
                 <IconComponent className="w-5 h-5 text-white" />
                 {isSelected && (
@@ -420,14 +451,17 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 leading-tight break-words hyphens-auto">
                   {module.name.replace(/\*\*/g, '')}
                 </h3>
-                <div className="text-[10px] mt-1 font-normal text-gray-500 uppercase">
+                <div className="text-[10px] mt-0.5 font-normal text-gray-500 uppercase">
                   {module.category}
                 </div>
-                {/* Description right under the title */}
-                <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
-                  {module.description.replace(/\*\*/g, '')}
-                </p>
               </div>
+            </div>
+            
+            {/* Description closer to title */}
+            <div className="mb-2">
+              <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                {module.description.replace(/\*\*/g, '')}
+              </p>
             </div>
             
             {/* Benefit and arrow */}
@@ -535,11 +569,6 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           return (
             <div key={index} className="mb-4">
               <ModuleCard module={module} />
-              {description && (
-                <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 px-3">
-                  {description}
-                </div>
-              )}
             </div>
           );
         }

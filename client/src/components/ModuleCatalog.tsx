@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Module } from '@shared/schema';
 import { ChevronDown, ChevronUp, Sparkles, Plus, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,21 +20,47 @@ const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
     return saved ? JSON.parse(saved) : [];
   });
   
+  // Listen for module selection changes from other components
+  useEffect(() => {
+    const handleModuleSelectionChange = (event: CustomEvent) => {
+      setSelectedModules(event.detail.modules);
+    };
+    
+    window.addEventListener('moduleSelectionChanged', handleModuleSelectionChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('moduleSelectionChanged', handleModuleSelectionChange as EventListener);
+    };
+  }, []);
+  
   const isSelected = selectedModules.find(m => m.id === module.id);
   
   const handleModuleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     
+    // Use single source of truth - localStorage
+    const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+    const isCurrentlySelected = savedModules.find((m: Module) => m.id === module.id);
+    
     let updatedModules;
-    if (isSelected) {
-      updatedModules = selectedModules.filter(m => m.id !== module.id);
+    if (isCurrentlySelected) {
+      updatedModules = savedModules.filter((m: Module) => m.id !== module.id);
     } else {
-      updatedModules = [...selectedModules, module];
+      updatedModules = [...savedModules, module];
     }
     
-    setSelectedModules(updatedModules);
+    // Update localStorage
     localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+    
+    // Update local state
+    setSelectedModules(updatedModules);
+    
+    // Notify other components
+    const event = new CustomEvent('moduleSelectionChanged', { 
+      detail: { modules: updatedModules } 
+    });
+    window.dispatchEvent(event);
   };
   
   return (
