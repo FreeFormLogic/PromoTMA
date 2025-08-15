@@ -1,5 +1,5 @@
 // Используем Gemini 2.5 Pro через прямые HTTP запросы
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent";
 const GEMINI_API_KEY = process.env.GOOGLE_API_KEY;
 
 export interface BusinessAnalysis {
@@ -121,6 +121,8 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
 - БАЛИ/ИНДОНЕЗИЯ: модули 120, 123, 125 (локальные платежи)
 - E-COMMERCE: модули 1-50 (товары, корзина, платежи)
 - CRM: модули 78, 111 (клиентская база, интеграции)
+- ТУРАГЕНТСТВО: модули 13 (лояльность), 78 (клиентская база), 111 (интеграции), 66 (push-уведомления)
+- САЛОН КРАСОТЫ: модули 147 (бронирование), 13 (лояльность), 156 (управление расписанием)
 
 ФОРМАТ ОТВЕТА:
 [MODULE:НОМЕР] Краткое объяснение без повтора названия.

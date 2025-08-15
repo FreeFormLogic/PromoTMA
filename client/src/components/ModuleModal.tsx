@@ -203,7 +203,7 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
                 {details.features.map((feature: string, index: number) => (
                   <li key={index} className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700">{feature.replace(/^\*\*|\*\*$/g, '')}</span>
+                    <span className="text-gray-700">{feature.replace(/\*\*/g, '').replace(/^:\s*/, '')}</span>
                   </li>
                 ))}
               </ul>
