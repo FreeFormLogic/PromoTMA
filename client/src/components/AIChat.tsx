@@ -479,17 +479,17 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       console.log('Module added:', module.name);
                     }
                     
-                    // Save and update state immediately
+                    // Save and update state immediately  
                     localStorage.setItem('selectedModules', JSON.stringify(newModules));
-                    setSelectedModules(newModules);
-                    setLocalSelectedModules(newModules);
                     
-                    // Force component re-render
-                    setTimeout(() => {
-                      window.dispatchEvent(new CustomEvent('moduleSelectionChanged', { 
-                        detail: { modules: newModules } 
-                      }));
-                    }, 0);
+                    // Force immediate state update
+                    setSelectedModules([...newModules]);
+                    setLocalSelectedModules([...newModules]);
+                    
+                    // Trigger global state sync
+                    window.dispatchEvent(new CustomEvent('moduleSelectionChanged', { 
+                      detail: { modules: newModules } 
+                    }));
                   }}
                   className={`w-8 h-8 p-0 rounded-full ${
                     isSelected 
@@ -554,51 +554,74 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       console.log('🔍 First few modules:', allModules?.slice(0, 3).map(m => `${m.number}: ${m.name}`));
     }
     
-    // Separate text and modules for proper rendering
-    const textParts: string[] = [];
-    const moduleParts: any[] = [];
+    // Find all modules first
+    const moduleMatches = content.match(/\[MODULE:\d+\]/g) || [];
+    const foundModules = moduleMatches.map(match => {
+      const moduleNumber = parseInt(match.match(/\d+/)?.[0] || '0');
+      return allModules.find(m => m.number === moduleNumber);
+    }).filter(Boolean);
     
-    parts.forEach((part, index) => {
-      const moduleMatch = part.match(/\[MODULE:(\d+)\]/);
-      if (moduleMatch) {
-        const moduleNumber = parseInt(moduleMatch[1]);
-        const module = allModules.find(m => m.number === moduleNumber);
-        
-        console.log(`🔍 Looking for module ${moduleNumber}, found:`, !!module);
-        if (module) {
-          console.log(`🔍 Module ${moduleNumber} details:`, { id: module.id, name: module.name });
-          moduleParts.push(module);
-        }
-      } else if (typeof part === 'string' && part.trim()) {
-        textParts.push(part.trim());
+    console.log('Found modules:', foundModules.map(m => m?.name));
+    
+    if (foundModules.length === 0) {
+      // No modules, just format text normally
+      return formatText(content);
+    }
+    
+    // Split content into lines for processing
+    const lines = content.replace(/\[MODULE:\d+\]/g, '').split('\n').filter(line => line.trim());
+    
+    // Find introduction (everything before first description)
+    const introLines: string[] = [];
+    const descriptionLines: string[] = [];
+    
+    let foundDescriptions = false;
+    lines.forEach(line => {
+      if (line.includes('Позволит') || line.includes('Поможет') || line.includes('Обеспечит') || 
+          line.includes('Даст') || line.includes('Создаст') || line.includes('Упростит') ||
+          line.toLowerCase().includes('возможность') || line.toLowerCase().includes('система')) {
+        foundDescriptions = true;
+        descriptionLines.push(line.trim());
+      } else if (!foundDescriptions) {
+        introLines.push(line.trim());
       }
     });
     
     const renderedParts: any[] = [];
     
-    // Add text first
-    if (textParts.length > 0) {
+    // Add introduction
+    if (introLines.length > 0) {
       renderedParts.push(
-        <div key="text-content" className="mb-4">
-          {formatText(textParts.join('\n\n'))}
+        <div key="intro" className="mb-6">
+          {formatText(introLines.join('\n\n'))}
         </div>
       );
     }
     
-    // Add modules after text
-    if (moduleParts.length > 0) {
-      moduleParts.forEach((module, index) => {
-        renderedParts.push(
-          <div key={`module-${index}`} className="mb-4">
+    // Add each module with its description
+    foundModules.forEach((module, index) => {
+      const description = descriptionLines[index] || '';
+      
+      renderedParts.push(
+        <div key={`module-pair-${index}`} className="mb-6">
+          {/* Module card */}
+          <div className="mb-2">
             <ModuleCard module={module} />
           </div>
-        );
-      });
-    }
+          
+          {/* Description right under module */}
+          {description && (
+            <div className="text-sm text-gray-600 ml-4 mb-4">
+              {description}
+            </div>
+          )}
+        </div>
+      );
+    });
 
     // Add clickable text at the end if this message has modules
-    const shouldShowActions = isAssistant && (moduleParts.length > 0 || hasDisplayedModules);
-    console.log('🔍 Should show actions:', shouldShowActions, { hasModules: moduleParts.length > 0, hasDisplayedModules, currentlyDisplayedModules: currentlyDisplayedModules?.length });
+    const shouldShowActions = isAssistant && (foundModules.length > 0 || hasDisplayedModules);
+    console.log('🔍 Should show actions:', shouldShowActions, { hasModules: foundModules.length > 0, hasDisplayedModules, currentlyDisplayedModules: currentlyDisplayedModules?.length });
     
     if (shouldShowActions) {
       renderedParts.push(
