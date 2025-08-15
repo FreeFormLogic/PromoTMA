@@ -450,7 +450,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         
         {/* Use shared ModuleModal for consistent UI */}
         <ModuleModal 
-          module={module} 
+          module={{ ...module, isPopular: module.isPopular ?? false }} 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
         />
@@ -511,14 +511,26 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         
         if (module) {
           return (
-            <div key={index} className="my-2">
+            <div key={index} className="my-3">
               <ModuleCard module={module} />
             </div>
           );
         }
         return <span key={index} className="text-red-500">Модуль {moduleNumber} не найден</span>;
       }
-      return <span key={index}>{formatText(part)}</span>;
+      
+      // Clean up the text part - remove leading spaces
+      let cleanedPart = part;
+      if (typeof part === 'string') {
+        // Remove leading whitespace from the beginning of each description
+        cleanedPart = part.replace(/^\s+/, '');
+        // Ensure proper spacing between descriptions
+        if (cleanedPart && index > 0 && !cleanedPart.startsWith('\n')) {
+          cleanedPart = '\n\n' + cleanedPart;
+        }
+      }
+      
+      return <div key={index} className="mb-3">{formatText(cleanedPart)}</div>;
     });
 
     // Add clickable text at the end if this message has modules or if modules are currently displayed
