@@ -228,34 +228,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     }
   };
 
-  const handleModuleLike = (module: Module) => {
-    // Use a single source of truth - localStorage first, then update state
-    const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-    const isAlreadySelected = savedModules.find((m: Module) => m.id === module.id);
-    
-    let updatedModules;
-    if (isAlreadySelected) {
-      trackModule('remove_from_selection', module.id, module.name);
-      updatedModules = savedModules.filter((m: Module) => m.id !== module.id);
-    } else {
-      trackModule('add_to_selection', module.id, module.name);
-      updatedModules = [...savedModules, module];
-    }
-    
-    // Update localStorage first
-    localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
-    
-    // Then update state to trigger re-renders
-    setSelectedModules(updatedModules);
-    
-    // Force re-render of the component to immediately show changes
-    setTimeout(() => {
-      const event = new CustomEvent('moduleSelectionChanged', { 
-        detail: { modules: updatedModules } 
-      });
-      window.dispatchEvent(event);
-    }, 0);
-  };
+
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -458,8 +431,12 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             </div>
             
             {/* Description closer to title */}
-            <div className="mb-2">
-              <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
+            <div className="mb-3">
+              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed overflow-hidden" style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical' as const
+              }}>
                 {module.description.replace(/\*\*/g, '')}
               </p>
             </div>
@@ -479,15 +456,38 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    handleModuleLike(module);
+                    
+                    // Immediately handle the module toggle with proper state management
+                    const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+                    const isCurrentlySelected = savedModules.find((m: Module) => m.id === module.id);
+                    
+                    let updatedModules;
+                    if (isCurrentlySelected) {
+                      updatedModules = savedModules.filter((m: Module) => m.id !== module.id);
+                    } else {
+                      updatedModules = [...savedModules, module];
+                    }
+                    
+                    // Update localStorage first
+                    localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+                    
+                    // Update parent state
+                    setSelectedModules(updatedModules);
+                    setLocalSelectedModules(updatedModules);
+                    
+                    // Emit event for cross-component synchronization
+                    const event = new CustomEvent('moduleSelectionChanged', { 
+                      detail: { modules: updatedModules } 
+                    });
+                    window.dispatchEvent(event);
                   }}
-                  className={`w-6 h-6 p-0 ${
+                  className={`w-8 h-8 p-0 rounded-full ${
                     isSelected 
-                      ? 'text-blue-600 hover:text-blue-700' 
-                      : 'text-gray-400 hover:text-blue-600'
+                      ? 'bg-green-100 text-green-600 hover:bg-green-200 border border-green-300' 
+                      : 'bg-gray-100 text-gray-400 hover:bg-blue-100 hover:text-blue-600 border border-gray-300'
                   }`}
                 >
-                  {isSelected ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                  {isSelected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                 </Button>
               </div>
             </div>
