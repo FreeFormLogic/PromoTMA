@@ -46,9 +46,9 @@ export interface IStorage {
   canUserAccessPage(telegramId: string, page: string): Promise<boolean>;
 
   // AI Chat Statistics methods
-  createChatSession(telegramId: string, userAgent?: string, ipAddress?: string): Promise<string>;
-  endChatSession(sessionId: string): Promise<void>;
-  saveChatMessage(sessionId: string, telegramId: string, role: 'user' | 'assistant', content: string, tokensUsed: number, cost: number, model?: string, metadata?: any): Promise<void>;
+  createAiChatSession(telegramId: string): Promise<string>;
+  endAiChatSession(sessionId: string): Promise<void>;
+  logAiChatMessage(sessionId: string, telegramId: string, role: 'user' | 'assistant', content: string, tokensInput: number, tokensOutput: number, cost: number, metadata?: any): Promise<void>;
   updateUserStats(telegramId: string): Promise<void>;
   getUserStats(telegramId: string): Promise<AiChatUserStats | null>;
   getAllUserStats(): Promise<any[]>;
@@ -261,6 +261,13 @@ export class DatabaseStorage implements IStorage {
   async getModule(id: string): Promise<Module | undefined> {
     const [module] = await db.select().from(modules).where(eq(modules.id, id));
     return module;
+  }
+
+  async resetModules(): Promise<void> {
+    // Очищаем таблицу модулей
+    await db.delete(modules);
+    // Переинициализируем с новыми данными
+    await this.initializeModules();
   }
 
   // Industry methods
@@ -542,47 +549,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(asc(aiChatMessages.timestamp));
   }
 
-  // Missing methods for routes compatibility  
-  async getUserByTelegramId(telegramId: string): Promise<any | null> {
-    try {
-      const [user] = await db.select()
-        .from(authorizedUsers)
-        .where(eq(authorizedUsers.telegramId, telegramId));
-      return user || null;
-    } catch {
-      return null;
-    }
-  }
 
-  async getAllModules(): Promise<Module[]> {
-    try {
-      const allModules = await db.select().from(modules).orderBy(modules.number);
-      return allModules;
-    } catch {
-      return [];
-    }
-  }
-
-  async createUser(userData: any): Promise<any> {
-    try {
-      const [user] = await db.insert(authorizedUsers)
-        .values({
-          telegramId: userData.telegramId || Date.now().toString(),
-          username: userData.username,
-          firstName: userData.firstName || 'User',
-          isActive: userData.isAuthorized || false
-        })
-        .returning();
-      return user;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async linkTelegramId(userId: number, telegramId: string): Promise<void> {
-    // This method is not needed with current schema but adding for compatibility
-    return;
-  }
 
   // Referral system methods
   async generateReferralCode(telegramId: string): Promise<string> {

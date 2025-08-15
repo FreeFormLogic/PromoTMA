@@ -178,6 +178,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reset modules endpoint for development
+  app.delete("/api/modules/reset", async (req, res) => {
+    try {
+      await storage.resetModules();
+      return res.json({ message: "Модули сброшены и переинициализированы" });
+    } catch (error) {
+      console.error("Error resetting modules:", error);
+      return res.status(500).json({ message: "Ошибка сброса модулей" });
+    }
+  });
+
   // Industries routes
   app.get("/api/industries", async (req, res) => {
     try {
