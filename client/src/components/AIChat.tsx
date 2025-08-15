@@ -453,31 +453,43 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     e.stopPropagation();
                     e.preventDefault();
                     
-                    // Fixed module connection logic
+                    // Immediate module toggle with proper tracking
                     const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-                    const isCurrentlySelected = savedModules.find((m: any) => m.id === module.id);
+                    const moduleExists = savedModules.find((m: any) => m.id === module.id);
                     
-                    let updatedModules;
-                    if (isCurrentlySelected) {
-                      updatedModules = savedModules.filter((m: any) => m.id !== module.id);
+                    let newModules;
+                    if (moduleExists) {
+                      // Remove module
+                      newModules = savedModules.filter((m: any) => m.id !== module.id);
+                      console.log('Module removed:', module.name);
                     } else {
-                      updatedModules = [...savedModules, {
-                        ...module,
-                        isPopular: module.isPopular || false
-                      }];
+                      // Add module with required fields
+                      const moduleToAdd = {
+                        id: module.id,
+                        number: module.number,
+                        name: module.name,
+                        description: module.description,
+                        category: module.category,
+                        icon: module.icon,
+                        keyFeatures: module.keyFeatures,
+                        benefits: module.benefits,
+                        isPopular: (module as any).isPopular || false
+                      };
+                      newModules = [...savedModules, moduleToAdd];
+                      console.log('Module added:', module.name);
                     }
                     
-                    // Update localStorage
-                    localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+                    // Save and update state immediately
+                    localStorage.setItem('selectedModules', JSON.stringify(newModules));
+                    setSelectedModules(newModules);
+                    setLocalSelectedModules(newModules);
                     
-                    // Update state 
-                    setSelectedModules(updatedModules);
-                    setLocalSelectedModules(updatedModules);
-                    
-                    // Force re-render
-                    window.dispatchEvent(new CustomEvent('moduleSelectionChanged', { 
-                      detail: { modules: updatedModules } 
-                    }));
+                    // Force component re-render
+                    setTimeout(() => {
+                      window.dispatchEvent(new CustomEvent('moduleSelectionChanged', { 
+                        detail: { modules: newModules } 
+                      }));
+                    }, 0);
                   }}
                   className={`w-8 h-8 p-0 rounded-full ${
                     isSelected 
@@ -494,7 +506,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         
         {/* Use shared ModuleModal for consistent UI */}
         <ModuleModal 
-          module={module} 
+          module={{...module, isPopular: (module as any).isPopular || false}} 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
         />
@@ -542,7 +554,11 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       console.log('🔍 First few modules:', allModules?.slice(0, 3).map(m => `${m.number}: ${m.name}`));
     }
     
-    const renderedParts = parts.map((part, index) => {
+    // Separate text and modules for proper rendering
+    const textParts: string[] = [];
+    const moduleParts: any[] = [];
+    
+    parts.forEach((part, index) => {
       const moduleMatch = part.match(/\[MODULE:(\d+)\]/);
       if (moduleMatch) {
         const moduleNumber = parseInt(moduleMatch[1]);
@@ -551,32 +567,38 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         console.log(`🔍 Looking for module ${moduleNumber}, found:`, !!module);
         if (module) {
           console.log(`🔍 Module ${moduleNumber} details:`, { id: module.id, name: module.name });
+          moduleParts.push(module);
         }
-        
-        if (module) {
-          return (
-            <div key={index} className="mb-4">
-              <ModuleCard module={module} />
-            </div>
-          );
-        }
-        return <span key={index} className="text-red-500">Модуль {moduleNumber} не найден</span>;
+      } else if (typeof part === 'string' && part.trim()) {
+        textParts.push(part.trim());
       }
-      
-      // Don't skip text parts - show all text content normally
-      
-      // Clean up the text part for standalone text (not module descriptions)
-      let cleanedPart = part;
-      if (typeof part === 'string') {
-        cleanedPart = part.replace(/^(\s+)/gm, '').trim();
-      }
-      
-      return cleanedPart ? <span key={index}>{formatText(cleanedPart)}</span> : null;
-    }).filter(Boolean);
+    });
+    
+    const renderedParts: any[] = [];
+    
+    // Add text first
+    if (textParts.length > 0) {
+      renderedParts.push(
+        <div key="text-content" className="mb-4">
+          {formatText(textParts.join('\n\n'))}
+        </div>
+      );
+    }
+    
+    // Add modules after text
+    if (moduleParts.length > 0) {
+      moduleParts.forEach((module, index) => {
+        renderedParts.push(
+          <div key={`module-${index}`} className="mb-4">
+            <ModuleCard module={module} />
+          </div>
+        );
+      });
+    }
 
-    // Add clickable text at the end if this message has modules or if modules are currently displayed
-    const shouldShowActions = isAssistant && (hasModules || hasDisplayedModules || (currentlyDisplayedModules && currentlyDisplayedModules.length > 0));
-    console.log('🔍 Should show actions:', shouldShowActions, { hasModules, hasDisplayedModules, currentlyDisplayedModules: currentlyDisplayedModules?.length });
+    // Add clickable text at the end if this message has modules
+    const shouldShowActions = isAssistant && (moduleParts.length > 0 || hasDisplayedModules);
+    console.log('🔍 Should show actions:', shouldShowActions, { hasModules: moduleParts.length > 0, hasDisplayedModules, currentlyDisplayedModules: currentlyDisplayedModules?.length });
     
     if (shouldShowActions) {
       renderedParts.push(
