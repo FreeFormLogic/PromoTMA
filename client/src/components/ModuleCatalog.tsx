@@ -78,6 +78,7 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
   const [selectedBusinessGoals, setSelectedBusinessGoals] = useState<string[]>([]);
   const [openCategories, setOpenCategories] = useState<string[]>([]);
   const [selectedModule, setSelectedModule] = useState<Module | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Извлекаем бизнес-цели из преимуществ модулей
   const businessGoals = useMemo(() => {
@@ -257,7 +258,10 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
                   <ModuleCard 
                     key={module.id} 
                     module={module} 
-                    onClick={() => setSelectedModule(module)}
+                    onClick={() => {
+                      setSelectedModule(module);
+                      setIsModalOpen(true);
+                    }}
                   />
                 ))}
               </div>
@@ -280,8 +284,11 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
       {selectedModule && (
         <ModuleModal
           module={selectedModule}
-          isOpen={!!selectedModule}
-          onClose={() => setSelectedModule(null)}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setSelectedModule(null);
+            setIsModalOpen(false);
+          }}
         />
       )}
     </div>
