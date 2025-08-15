@@ -1,5 +1,5 @@
 // Используем Gemini 2.5 Pro через прямые HTTP запросы
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-latest:generateContent";
 const GEMINI_API_KEY = process.env.GOOGLE_API_KEY;
 
 export interface BusinessAnalysis {
@@ -192,7 +192,11 @@ ${modulesList}
 [MODULE:НОМЕР] автоматически показывает карточку модуля с названием, описанием и функциями.
 Твоя задача - только объяснить ПОЧЕМУ этот модуль подходит, БЕЗ повтора названия и БЕЗ лишних символов ** - .
 
-Пиши просто: "[MODULE:1] Идеально подойдет для..." (без лишних символов).
+ВАЖНО ПО ФОРМАТИРОВАНИЮ:
+- НЕ начинай описание с пробела
+- Первая буква описания должна быть ЗАГЛАВНОЙ  
+- ПРАВИЛЬНО: "[MODULE:1] Поможет создать каталог товаров..."
+- НЕПРАВИЛЬНО: "[MODULE:1] поможет создать каталог товаров..."
 
 Отвечай только на русском языке, будь экспертом и дружелюбным.`;
 

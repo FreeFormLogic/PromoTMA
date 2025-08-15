@@ -140,15 +140,31 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
   // Используем реальные данные модуля из базы данных (как в AI чате)
   const details = {
     description: module?.description || "Описание модуля доступно в базе данных",
-    features: Array.isArray(module?.keyFeatures) 
-      ? module.keyFeatures 
-      : (typeof module?.keyFeatures === 'string' 
-        ? module.keyFeatures.split('\n').filter((f: string) => f.trim())
-        : module?.features?.slice(0, 5) || [
-          "Основные возможности модуля",
-          "Быстрое внедрение в ваш проект", 
-          "Техническая поддержка при настройке"
-        ]),
+    features: (() => {
+      if (Array.isArray(module?.keyFeatures)) {
+        return module.keyFeatures;
+      }
+      if (typeof module?.keyFeatures === 'string') {
+        try {
+          // Пытаемся парсить JSON массив
+          const parsed = JSON.parse(module.keyFeatures);
+          if (Array.isArray(parsed)) {
+            return parsed;
+          }
+          // Если не JSON массив, разбиваем по строкам
+          return module.keyFeatures.split('\n').filter((f: string) => f.trim());
+        } catch {
+          // Если парсинг не удался, разбиваем по строкам
+          return module.keyFeatures.split('\n').filter((f: string) => f.trim());
+        }
+      }
+      // Fallback на основные возможности
+      return [
+        "Основные возможности модуля",
+        "Быстрое внедрение в ваш проект", 
+        "Техническая поддержка при настройке"
+      ];
+    })(),
     impact: module?.benefits || "Преимущества для вашего бизнеса"
   };
 
