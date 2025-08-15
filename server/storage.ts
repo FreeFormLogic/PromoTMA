@@ -554,6 +554,15 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getAllModules(): Promise<Module[]> {
+    try {
+      const allModules = await db.select().from(modules).orderBy(modules.number);
+      return allModules;
+    } catch {
+      return [];
+    }
+  }
+
   async createUser(userData: any): Promise<any> {
     try {
       const [user] = await db.insert(authorizedUsers)
