@@ -108,57 +108,32 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     const allModules = await storage.getAllModules();
     console.log(`🔍 AI processing ${allModules.length} modules`)
     
-    const modulesList = allModules.map((module: any) => {
-      let features = 'Основные возможности модуля';
-      const benefits = module.benefits || 'Повышение эффективности бизнеса';
-      
-      try {
-        const keyFeatures = module.keyFeatures || module.key_features;
-        if (typeof keyFeatures === 'string') {
-          try {
-            const parsed = JSON.parse(keyFeatures);
-            if (Array.isArray(parsed)) {
-              features = parsed.map(f => f.replace(/\*\*/g, '')).join(', ');
-            } else {
-              features = keyFeatures.replace(/\*\*/g, '').replace(/["\[\]]/g, '');
-            }
-          } catch {
-            features = keyFeatures.replace(/\*\*/g, '').replace(/["\[\]]/g, '');
-          }
-        } else if (Array.isArray(keyFeatures)) {
-          features = keyFeatures.map(f => f.replace(/\*\*/g, '')).join(', ');
-        }
-      } catch (e) {
-        // features остается дефолтным
-      }
-      
-      return `Модуль ${module.number}: ${module.name}
-Описание: ${module.description}
-Категория: ${module.category}
-Ключевые возможности: ${features}
-Преимущества: ${benefits}
----`;
-    }).join('\n');
+    // Не передаем полный список модулей для уменьшения размера запроса
 
-    const systemPrompt = `Ты - эксперт по Telegram Mini Apps. У тебя есть ПОЛНАЯ база данных всех модулей.
+    const systemPrompt = `Ты эксперт по Telegram Mini Apps. У тебя 242 модуля для разных бизнес-задач.
 
-ПОЛНАЯ БАЗА ДАННЫХ МОДУЛЕЙ:
-${modulesList}
+АНАЛИЗИРУЙ бизнес пользователя и рекомендуй 3-4 подходящих модуля из доступных.
 
-ПРАВИЛА:
-1. Анализируй бизнес пользователя
-2. Изучай ВСЕ модули в базе данных
-3. Выбирай 3-4 НАИБОЛЕЕ подходящих модуля
-4. Объясняй ПОЧЕМУ этот модуль подходит
+УЖЕ ПОКАЗАННЫЕ: [${alreadyShownModules.join(', ')}] - НЕ повторяй!
 
-УЖЕ ПОКАЗАННЫЕ: [${alreadyShownModules.join(', ')}] - НЕ рекомендуй их повторно!
+СПЕЦИАЛЬНЫЕ ПРАВИЛА:
+- ПИЦЦЕРИЯ/РЕСТОРАН: модуль 165 (управление рестораном) первым
+- БАЛИ/ИНДОНЕЗИЯ: модули 120, 123, 125 (локальные платежи)
+- E-COMMERCE: модули 1-50 (товары, корзина, платежи)
+- CRM: модули 78, 111 (клиентская база, интеграции)
 
-БАЛИ/ИНДОНЕЗИЯ: обязательно включай модули 120, 123, 125
+ФОРМАТ ОТВЕТА:
+[MODULE:НОМЕР] Краткое объяснение без повтора названия.
 
-ФОРМАТ: Используй [MODULE:НОМЕР] для рекомендаций
-Пример: "Для турагентства рекомендую [MODULE:120] Поможет принимать платежи через GoPay."
+СТРОГО ЗАПРЕЩЕНО:
+- Повторять названия модулей после [MODULE:X]
+- Использовать **, * , ** - символы
+- Начинать с маленькой буквы
 
-Отвечай на русском языке.`;
+ПРАВИЛЬНО: "[MODULE:120] Поможет принимать платежи через GoPay."
+НЕПРАВИЛЬНО: "**[MODULE:120] Название** - описание"
+
+Отвечай четко на русском.`;
 
     const apiResponse = await fetch(GEMINI_API_URL, {
       method: 'POST',
@@ -174,7 +149,7 @@ ${modulesList}
         }],
         generationConfig: {
           maxOutputTokens: 2048,
-          temperature: 0.3
+          temperature: 0.1
         }
       })
     });
@@ -192,7 +167,16 @@ ${modulesList}
     
     console.log('AI Response Preview:', aiContent.substring(0, 100));
     
-    const moduleMatches = aiContent.match(/\[MODULE:(\d+)\]/gi) || [];
+    // Дополнительная очистка форматирования для устранения проблем
+    let cleanedContent = aiContent
+      .replace(/\*\*\s*\[MODULE:(\d+)\]\s*([^*]+)\*\*\s*[:-]/gi, '[MODULE:$1]') // Убираем **[MODULE:X] Название** -
+      .replace(/\*\s*\*\*\s*/g, '') // Убираем * **
+      .replace(/\*\*\s*-\s*/g, '') // Убираем ** - 
+      .replace(/\*\*([^*]+)\*\*:/g, '$1:') // Заменяем **Текст**: на Текст:
+      .replace(/\n\*\s*\*\*/g, '\n') // Убираем переносы с * **
+      .trim();
+    
+    const moduleMatches = cleanedContent.match(/\[MODULE:(\d+)\]/gi) || [];
     const recommendedModules: number[] = [];
     
     for (const match of moduleMatches) {
@@ -206,7 +190,7 @@ ${modulesList}
     }
     
     return {
-      response: aiContent,
+      response: cleanedContent,
       recommendedModules: Array.from(new Set(recommendedModules)).sort((a, b) => a - b)
     };
   } catch (error) {
@@ -625,17 +609,17 @@ ${messages.map(msg => `${msg.role === 'user' ? 'Пользователь' : 'А�
 
     // Extract recommended module numbers from [MODULE:NUMBER] tags
     const moduleMatches = responseText.match(/\[MODULE:(\d+)\]/g) || [];
-    const recommendedModuleNumbers = moduleMatches.map(match => {
+    const recommendedModuleNumbers = moduleMatches.map((match: string) => {
       const num = match.match(/\[MODULE:(\d+)\]/);
       return num ? parseInt(num[1]) : null;
-    }).filter(num => num !== null);
+    }).filter((num: number | null): num is number => num !== null);
 
     // Also extract additional module numbers mentioned in text (e.g., "модуля 104:", "модуля 146:")
     const additionalMatches = responseText.match(/модуля (\d+):/g) || [];
-    const additionalModuleNumbers = additionalMatches.map(match => {
+    const additionalModuleNumbers = additionalMatches.map((match: string) => {
       const num = match.match(/модуля (\d+):/);
       return num ? parseInt(num[1]) : null;
-    }).filter((num): num is number => num !== null && !recommendedModuleNumbers.includes(num));
+    }).filter((num: number | null): num is number => num !== null && !recommendedModuleNumbers.includes(num));
 
     // Combine both lists
     const allRecommendedNumbers = [...recommendedModuleNumbers, ...additionalModuleNumbers];
