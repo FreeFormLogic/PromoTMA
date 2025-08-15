@@ -53,6 +53,8 @@ export default function AdminPanel() {
   const [adminPassword, setAdminPassword] = useState("");
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<WhitelistUser>>({});
+  const [viewingChats, setViewingChats] = useState<string | null>(null);
+  const [userChats, setUserChats] = useState<any[]>([]);
   
   // Простая проверка админ-доступа
   const handleAdminLogin = () => {
@@ -273,13 +275,36 @@ export default function AdminPanel() {
     setEditForm({});
   };
 
+  const handleViewUserChats = async (telegramId: string) => {
+    try {
+      const response = await fetch(`/api/admin/ai-history/${telegramId}`);
+      if (response.ok) {
+        const chats = await response.json();
+        setUserChats(chats);
+        setViewingChats(telegramId);
+      } else {
+        toast({
+          title: "Ошибка",
+          description: "Не удалось загрузить чаты пользователя",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Ошибка при загрузке чатов",
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatUserName = (user: WhitelistUser) => {
     if (user.realName) {
       return user.realName;
     }
     
     const parts = [user.firstName, user.lastName].filter(Boolean);
-    const displayName = parts.length > 0 ? parts.join(" ") : `User ${user.telegramId}`;
+    const displayName = parts.length > 0 ? parts.join(" ") : `@${user.telegramId}`;
     
     if (user.username) {
       return `${displayName} (@${user.username})`;
@@ -528,13 +553,107 @@ export default function AdminPanel() {
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
+
+                    {/* Форма редактирования (отображается инлайн при editingUser === user.telegramId) */}
+                    {editingUser === user.telegramId && (
+                        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                          <h3 className="text-lg font-semibold mb-4">Редактирование пользователя</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-1">Настоящее имя</label>
+                              <Input
+                                value={editForm.realName || ''}
+                                onChange={(e) => setEditForm({...editForm, realName: e.target.value})}
+                                placeholder="Введите настоящее имя"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="block text-sm font-medium">Доступ к разделам</label>
+                              <div className="grid grid-cols-2 gap-2">
+                                <label className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={editForm.accessHome || false}
+                                    onChange={(e) => setEditForm({...editForm, accessHome: e.target.checked})}
+                                  />
+                                  <span className="text-sm">Главная</span>
+                                </label>
+                                <label className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={editForm.accessModules || false}
+                                    onChange={(e) => setEditForm({...editForm, accessModules: e.target.checked})}
+                                  />
+                                  <span className="text-sm">Модули</span>
+                                </label>
+                                <label className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={editForm.accessIndustries || false}
+                                    onChange={(e) => setEditForm({...editForm, accessIndustries: e.target.checked})}
+                                  />
+                                  <span className="text-sm">Отрасли</span>
+                                </label>
+                                <label className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={editForm.accessAiConstructor || false}
+                                    onChange={(e) => setEditForm({...editForm, accessAiConstructor: e.target.checked})}
+                                  />
+                                  <span className="text-sm">AI-конструктор</span>
+                                </label>
+                                <label className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={editForm.accessMyApp || false}
+                                    onChange={(e) => setEditForm({...editForm, accessMyApp: e.target.checked})}
+                                  />
+                                  <span className="text-sm">Мое приложение</span>
+                                </label>
+                                <label className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={editForm.accessAdvantages || false}
+                                    onChange={(e) => setEditForm({...editForm, accessAdvantages: e.target.checked})}
+                                  />
+                                  <span className="text-sm">Преимущества</span>
+                                </label>
+                                <label className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={editForm.accessPartners || false}
+                                    onChange={(e) => setEditForm({...editForm, accessPartners: e.target.checked})}
+                                  />
+                                  <span className="text-sm">Партнерам</span>
+                                </label>
+                                <label className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={editForm.isActive || false}
+                                    onChange={(e) => setEditForm({...editForm, isActive: e.target.checked})}
+                                  />
+                                  <span className="text-sm">Активен</span>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 mt-4">
+                            <Button onClick={handleSaveUser} disabled={updateUserMutation.isPending}>
+                              Сохранить
+                            </Button>
+                            <Button variant="outline" onClick={handleCancelEdit}>
+                              Отмена
+                            </Button>
+                          </div>
+                        </div>
+                    )}
                   </div>
                 ))}
               </div>
             )}
           </CardContent>
         </Card>
-          </TabsContent>
+      </TabsContent>
 
           {/* Вкладка AI Статистика */}
           <TabsContent value="ai-stats" className="mt-6 space-y-6">
@@ -606,20 +725,27 @@ export default function AdminPanel() {
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="border-b">
-                            <th className="text-left p-2">Telegram ID</th>
+                            <th className="text-left p-2">Пользователь</th>
                             <th className="text-left p-2">Сессий</th>
                             <th className="text-left p-2">Сообщений</th>
                             <th className="text-left p-2">Токенов</th>
                             <th className="text-left p-2">Расходы</th>
-                            <th className="text-left p-2">Средняя длина сессии</th>
                             <th className="text-left p-2">Последняя активность</th>
+                            <th className="text-left p-2">Действия</th>
                           </tr>
                         </thead>
                         <tbody>
                           {aiStats.map((userStat: AiChatStats) => (
                             <tr key={userStat.telegramId} className="border-b hover:bg-muted/50">
-                              <td className="p-2 font-mono">
-                                {userStat.telegramId}
+                              <td className="p-2">
+                                <div>
+                                  <div className="font-medium">
+                                    {userStat.realName || userStat.firstName || userStat.username || `@${userStat.telegramId}`}
+                                  </div>
+                                  <div className="text-xs text-gray-500 font-mono">
+                                    ID: {userStat.telegramId}
+                                  </div>
+                                </div>
                               </td>
                               <td className="p-2">
                                 <Badge variant="secondary">
@@ -641,13 +767,18 @@ export default function AdminPanel() {
                                   ${parseFloat(userStat.totalCostUsd).toFixed(4)}
                                 </span>
                               </td>
-                              <td className="p-2">
-                                <span className="text-muted-foreground">
-                                  {Math.round((userStat.totalMessages || 1) * 2.5)} мин
-                                </span>
-                              </td>
                               <td className="p-2 text-xs text-muted-foreground">
                                 {formatDate(userStat.lastSessionAt)}
+                              </td>
+                              <td className="p-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleViewUserChats(userStat.telegramId)}
+                                  className="text-xs"
+                                >
+                                  Просмотр чатов
+                                </Button>
                               </td>
                             </tr>
                           ))}
@@ -661,6 +792,60 @@ export default function AdminPanel() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Модальное окно для просмотра чатов пользователя */}
+      {viewingChats && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Чаты пользователя {viewingChats}</h2>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setViewingChats(null);
+                  setUserChats([]);
+                }}
+              >
+                Закрыть
+              </Button>
+            </div>
+            
+            {userChats.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Нет сообщений в чате
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {userChats.map((message: any, index: number) => (
+                  <div key={index} className={`p-4 rounded-lg ${
+                    message.role === 'user' 
+                      ? 'bg-blue-50 dark:bg-blue-900/20 ml-8' 
+                      : 'bg-gray-50 dark:bg-gray-800 mr-8'
+                  }`}>
+                    <div className="flex justify-between items-start mb-2">
+                      <Badge variant={message.role === 'user' ? 'default' : 'secondary'}>
+                        {message.role === 'user' ? 'Пользователь' : 'AI'}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(message.timestamp).toLocaleString('ru-RU')}
+                      </span>
+                    </div>
+                    <div className="whitespace-pre-wrap text-sm">
+                      {message.content}
+                    </div>
+                    {message.tokensInput && (
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        Токенов: {message.tokensInput + message.tokensOutput} | 
+                        Стоимость: ${parseFloat(message.cost || '0').toFixed(6)}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

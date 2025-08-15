@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -137,24 +138,39 @@ const categoryImages: Record<string, string> = {
 };
 
 export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
-  // Проверяем, выбран ли модуль
-  const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-  const isSelected = savedModules.some((m: any) => m.id === module.id);
+  const [isSelected, setIsSelected] = useState(() => {
+    const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+    return savedModules.some((m: any) => m.id === module?.id);
+  });
+
+  // Обновляем состояние при изменении модуля или открытии модального окна
+  useEffect(() => {
+    if (module) {
+      const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+      setIsSelected(savedModules.some((m: any) => m.id === module.id));
+    }
+  }, [module, isOpen]);
 
   const handleConnectModule = () => {
-    if (isSelected) {
+    if (!module) return;
+    
+    const currentModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+    const currentlySelected = currentModules.some((m: any) => m.id === module.id);
+    
+    if (currentlySelected) {
       // Удаляем модуль если уже выбран
-      const updatedModules = savedModules.filter((m: any) => m.id !== module.id);
+      const updatedModules = currentModules.filter((m: any) => m.id !== module.id);
       localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+      setIsSelected(false);
     } else {
       // Добавляем модуль в выбранные
-      const updatedModules = [...savedModules, module];
+      const updatedModules = [...currentModules, module];
       localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+      setIsSelected(true);
     }
     
     // Обновляем интерфейс
     window.dispatchEvent(new Event('selectedModulesChanged'));
-    onClose();
   };
   // Используем реальные данные модуля из базы данных (как в AI чате)
   const details = {
