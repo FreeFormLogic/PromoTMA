@@ -457,7 +457,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         
         {/* Use shared ModuleModal for consistent UI */}
         <ModuleModal 
-          module={{ ...module, isPopular: module.isPopular ?? false }} 
+          module={module} 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
         />
@@ -526,13 +526,18 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         return <span key={index} className="text-red-500">Модуль {moduleNumber} не найден</span>;
       }
       
-      // Clean up the text part - remove leading spaces from descriptions only
+      // Clean up the text part and add proper spacing
       let cleanedPart = part;
       if (typeof part === 'string') {
         // Remove leading whitespace only from description lines, not module headers
-        // Also remove excessive spacing between modules
-        cleanedPart = part.replace(/^(\s+)(?!Модуль \d+:)/gm, '')
-          .replace(/(\n\s*){3,}/g, '\n\n'); // Replace 3+ consecutive newlines with just 2
+        cleanedPart = part.replace(/^(\s+)(?!Модуль \d+:)/gm, '');
+        
+        // Add proper spacing: larger gap between different modules, smaller gap within modules
+        // Pattern: After module description (ending with .), before next "Модуль" - add bigger gap
+        cleanedPart = cleanedPart
+          .replace(/\.\s*\n\s*(?=Модуль \d+:)/g, '.\n\n\n') // Bigger gap between modules
+          .replace(/(?:Модуль \d+:.*)\n(?!\n)/g, (match) => match + '\n') // Smaller gap after module title
+          .replace(/(\n\s*){4,}/g, '\n\n\n'); // Normalize to max 3 newlines
       }
       
       return <span key={index}>{formatText(cleanedPart)}</span>;
@@ -648,8 +653,27 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     return (
       <>
         {lines.map((line, lineIndex) => {
-          // Skip empty lines that were cleaned
+          // Handle empty lines with proper spacing
           if (!line.trim()) {
+            // Count consecutive empty lines to apply proper spacing
+            const nextLine = lines[lineIndex + 1];
+            const prevLine = lines[lineIndex - 1];
+            
+            // If this is space between modules (prev line ends with period, next line starts with "Модуль")
+            if (prevLine && nextLine && 
+                prevLine.trim().endsWith('.') && 
+                nextLine.trim().startsWith('Модуль ')) {
+              return <div key={lineIndex} className="mb-4"></div>; // Bigger gap between modules
+            }
+            
+            // If this is space within a module (after module title)
+            if (prevLine && nextLine && 
+                prevLine.trim().startsWith('Модуль ') && 
+                !nextLine.trim().startsWith('Модуль ')) {
+              return <div key={lineIndex} className="mb-2"></div>; // Smaller gap after module title
+            }
+            
+            // Default spacing for other empty lines
             return lineIndex < lines.length - 1 ? <br key={lineIndex} /> : null;
           }
           
