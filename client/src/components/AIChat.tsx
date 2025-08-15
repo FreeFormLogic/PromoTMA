@@ -368,36 +368,25 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
 
   const ModuleCard = ({ module }: { module: Module }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    // Force re-read from localStorage to ensure consistency
-    const [localSelectedModules, setLocalSelectedModules] = useState<Module[]>(() => {
-      const saved = localStorage.getItem('selectedModules');
-      return saved ? JSON.parse(saved) : [];
-    });
+    const [renderKey, setRenderKey] = useState(0);
     
-    const isSelected = localSelectedModules.find(m => m.id === module.id) || selectedModules.find(m => m.id === module.id);
+    // Always get fresh state from localStorage 
+    const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+    const isSelected = !!savedModules.find((m: any) => m.id === module.id);
     const IconComponent = Sparkles; // Use sparkles icon for now
     
-    // Listen for storage changes to keep in sync
+    // Force re-render on module selection changes
     useEffect(() => {
-      const handleStorageChange = () => {
-        const saved = localStorage.getItem('selectedModules');
-        const modules = saved ? JSON.parse(saved) : [];
-        setLocalSelectedModules(modules);
-        setSelectedModules(modules);
+      const handleModuleSelectionChange = () => {
+        setRenderKey(prev => prev + 1);
       };
       
-      const handleModuleSelectionChange = (event: CustomEvent) => {
-        setLocalSelectedModules(event.detail.modules);
-      };
-      
-      window.addEventListener('storage', handleStorageChange);
-      window.addEventListener('moduleSelectionChanged', handleModuleSelectionChange as EventListener);
+      window.addEventListener('moduleSelectionChanged', handleModuleSelectionChange);
       
       return () => {
-        window.removeEventListener('storage', handleStorageChange);
-        window.removeEventListener('moduleSelectionChanged', handleModuleSelectionChange as EventListener);
+        window.removeEventListener('moduleSelectionChanged', handleModuleSelectionChange);
       };
-    }, [setSelectedModules]);
+    }, []);
     
     return (
       <>
@@ -453,18 +442,15 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     e.stopPropagation();
                     e.preventDefault();
                     
-                    // Immediate module toggle with proper tracking
+                    // Simplified module toggle with immediate visual feedback
                     const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
                     const moduleExists = savedModules.find((m: any) => m.id === module.id);
                     
                     let newModules;
                     if (moduleExists) {
-                      // Remove module
                       newModules = savedModules.filter((m: any) => m.id !== module.id);
-                      console.log('Module removed:', module.name);
                     } else {
-                      // Add module with required fields
-                      const moduleToAdd = {
+                      newModules = [...savedModules, {
                         id: module.id,
                         number: module.number,
                         name: module.name,
@@ -474,22 +460,19 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                         keyFeatures: module.keyFeatures,
                         benefits: module.benefits,
                         isPopular: (module as any).isPopular || false
-                      };
-                      newModules = [...savedModules, moduleToAdd];
-                      console.log('Module added:', module.name);
+                      }];
                     }
                     
-                    // Save and update state immediately  
+                    // Save immediately and update state
                     localStorage.setItem('selectedModules', JSON.stringify(newModules));
+                    setSelectedModules(newModules);
+                    setLocalSelectedModules(newModules);
                     
-                    // Force immediate state update
-                    setSelectedModules([...newModules]);
-                    setLocalSelectedModules([...newModules]);
+                    // Force immediate re-render of this component
+                    setRenderKey(prev => prev + 1);
                     
-                    // Trigger global state sync
-                    window.dispatchEvent(new CustomEvent('moduleSelectionChanged', { 
-                      detail: { modules: newModules } 
-                    }));
+                    // Notify other components
+                    window.dispatchEvent(new CustomEvent('moduleSelectionChanged'));
                   }}
                   className={`w-8 h-8 p-0 rounded-full ${
                     isSelected 
@@ -600,6 +583,8 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     
     // Add each module with its description
     foundModules.forEach((module, index) => {
+      if (!module) return; // Skip undefined modules
+      
       const description = descriptionLines[index] || '';
       
       renderedParts.push(
