@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
-import { ModuleModal } from './ModuleModal';
+
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { apiRequest } from '@/lib/queryClient';
@@ -447,12 +447,79 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           </div>
         </Card>
         
-        {/* Module details modal - using the same ModuleModal as catalog */}
-        <ModuleModal
-          module={module}
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
+        {/* Module details modal - custom Dialog for AI chat */}
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold">{module.name}</DialogTitle>
+              <DialogDescription className="sr-only">
+                Детальная информация о модуле {module.name}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
+                <p className="text-gray-700">{module.description}</p>
+              </div>
+              
+              {Array.isArray(module.keyFeatures) ? (
+                <div>
+                  <h3 className="font-semibold mb-2">Основные возможности:</h3>
+                  <ul className="space-y-1">
+                    {module.keyFeatures.map((feature: string, index: number) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-600">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <div>
+                  <h3 className="font-semibold mb-2">Функциональность:</h3>
+                  <p className="text-sm text-gray-600">{module.keyFeatures}</p>
+                </div>
+              )}
+              
+              {module.benefits && (
+                <div>
+                  <h3 className="font-semibold mb-2">Преимущества:</h3>
+                  <p className="text-sm text-gray-600">{module.benefits}</p>
+                </div>
+              )}
+              
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleModuleLike(module);
+                    setIsModalOpen(false);
+                  }}
+                  className={`flex-1 ${
+                    selectedModules.find(m => m.id === module.id)
+                      ? 'bg-green-600 hover:bg-green-700' 
+                      : 'bg-blue-600 hover:bg-blue-700'
+                  } text-white`}
+                >
+                  {selectedModules.find(m => m.id === module.id) ? (
+                    <>
+                      <Check className="w-4 h-4 mr-2" />
+                      Добавлен
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Добавить модуль
+                    </>
+                  )}
+                </Button>
+                <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+                  Закрыть
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </>
     );
   };
