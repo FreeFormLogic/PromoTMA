@@ -374,10 +374,12 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
     const isSelected = !!savedModules.find((m: any) => m.id === module.id);
     
-    // Update button state when selection changes
+    // Initialize button state on mount and changes
     useEffect(() => {
-      setButtonState(isSelected);
-    }, [isSelected]);
+      const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+      const currentState = !!savedModules.find((m: any) => m.id === module.id);
+      setButtonState(currentState);
+    }, [module.id]);
     const IconComponent = Sparkles; // Use sparkles icon for now
     
     // Listen for module selection changes globally
@@ -473,7 +475,6 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     // Save and update state immediately
                     localStorage.setItem('selectedModules', JSON.stringify(newModules));
                     setSelectedModules(newModules);
-                    setLocalSelectedModules(newModules);
                     
                     // Update button state immediately 
                     setButtonState(!moduleExists);

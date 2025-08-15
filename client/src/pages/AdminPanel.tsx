@@ -259,29 +259,18 @@ export default function AdminPanel() {
     });
   };
 
-  const handleSaveUser = async () => {
+  const handleSaveUser = () => {
     if (!editingUser) return;
     
-    try {
-      await updateUserMutation.mutateAsync({ 
-        telegramId: editingUser, 
-        updates: editForm 
-      });
-      
-      setEditingUser(null);
-      setEditForm({});
-      
-      toast({
-        title: "Успешно",
-        description: "Пользователь обновлен",
-      });
-    } catch (error) {
-      toast({
-        title: "Ошибка",
-        description: "Не удалось обновить пользователя",
-        variant: "destructive",
-      });
-    }
+    updateUserMutation.mutate({ 
+      telegramId: editingUser, 
+      updates: editForm 
+    }, {
+      onSuccess: () => {
+        setEditingUser(null);
+        setEditForm({});
+      }
+    });
   };
 
   const handleCancelEdit = () => {

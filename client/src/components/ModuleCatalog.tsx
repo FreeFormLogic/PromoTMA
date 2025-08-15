@@ -21,10 +21,12 @@ const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
   const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
   const isSelected = !!savedModules.find((m: any) => m.id === module.id);
   
-  // Update button state when selection changes
+  // Initialize and update button state
   useEffect(() => {
-    setButtonState(isSelected);
-  }, [isSelected]);
+    const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+    const currentState = !!savedModules.find((m: any) => m.id === module.id);
+    setButtonState(currentState);
+  }, [module.id]);
   
   // Listen for module selection changes from other components
   useEffect(() => {

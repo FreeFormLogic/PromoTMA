@@ -51,7 +51,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId } = req.params;
       const user = await storage.getUserByTelegramId(userId);
       
-      if (user && user.appAccess) {
+      if (user && user.isActive) {
         res.json({ 
           isActive: true,
           userId: user.id,
@@ -127,15 +127,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!user) {
         // Create new user with Telegram data
-        user = await storage.createUser({
-          username: authData.username || `user_${authData.id}`,
-          password: 'telegram_auth',
-          telegramUsername: authData.username ? `@${authData.username}` : `@user_${authData.id}`,
-          isAuthorized: true
+        user = await storage.addToWhitelist(authData.id.toString(), {
+          firstName: authData.first_name,
+          lastName: authData.last_name,
+          username: authData.username,
+          isActive: true
         });
-        
-        // Store telegram ID for future authentication
-        await storage.linkTelegramId(user.id, authData.id.toString());
       }
       
       return res.json({ user, message: "Авторизация успешна" });
@@ -666,7 +663,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ai-chat/session', async (req, res) => {
     try {
       const { telegramId, userAgent, ipAddress } = req.body;
-      const sessionId = await storage.createChatSession(telegramId, userAgent, ipAddress);
+      const sessionId = await storage.createAiChatSession(telegramId, userAgent, ipAddress);
       res.json({ sessionId });
     } catch (error) {
       res.status(500).json({ error: 'Failed to create chat session' });
@@ -676,7 +673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ai-chat/message', async (req, res) => {
     try {
       const { sessionId, telegramId, role, content, tokensUsed, cost, model, metadata } = req.body;
-      await storage.saveChatMessage(sessionId, telegramId, role, content, tokensUsed, cost, model, metadata);
+      await storage.saveAiChatMessage(sessionId, telegramId, role, content, tokensUsed, cost, model, metadata);
       await storage.updateUserStats(telegramId);
       res.json({ success: true });
     } catch (error) {
@@ -687,7 +684,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ai-chat/session/:sessionId/end', async (req, res) => {
     try {
       const { sessionId } = req.params;
-      await storage.endChatSession(sessionId);
+      await storage.endAiChatSession(sessionId);
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: 'Failed to end chat session' });
