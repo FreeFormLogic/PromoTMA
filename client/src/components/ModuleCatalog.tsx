@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Module } from '@shared/schema';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Sparkles, Plus, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,53 +14,57 @@ interface ModuleCardProps {
 }
 
 const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
-  // Получаем иконку из строки (для совместимости)
-  const getIconComponent = (iconName: string) => {
-    // Если iconName это React компонент, возвращаем его
-    if (typeof iconName === 'string') {
-      return <div className="text-white text-lg">{iconName.charAt(0).toUpperCase()}</div>;
-    }
-    return iconName;
-  };
-
+  const IconComponent = Sparkles; // Use sparkles icon like in AI chat
+  
   return (
     <Card 
-      className="hover:shadow-lg transition-shadow duration-200 bg-white border border-gray-200 cursor-pointer hover:border-blue-300"
+      className="group cursor-pointer transition-all duration-300 border mb-3 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-600 hover:-translate-y-1 hover:shadow-lg"
       onClick={onClick}
     >
-      <CardContent className="p-4">
-        <div className="flex items-start space-x-4">
-          {/* Левая часть - иконка */}
-          <div className="flex-shrink-0">
-            <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-              {getIconComponent(module.icon)}
+      <div className="p-4">
+        {/* Icon and header */}
+        <div className="flex items-start gap-3 mb-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+            <IconComponent className="w-5 h-5 text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 leading-tight break-words hyphens-auto">
+              {module.name.replace(/\*\*/g, '')}
+            </h3>
+            <div className="text-[10px] mt-1 font-normal text-gray-500 uppercase">
+              {module.category}
             </div>
           </div>
-          
-          {/* Правая часть - контент */}
-          <div className="flex-1 min-w-0">
-            {/* Название модуля */}
-            <h3 className="text-lg font-bold text-gray-900 mb-1 leading-tight">
-              {module.name}
-            </h3>
-            
-            {/* Категория */}
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-              {module.category}
-            </p>
-            
-            {/* Описание */}
-            <p className="text-sm text-gray-600 mb-3 leading-relaxed">
-              {module.description}
-            </p>
-            
-            {/* Преимущества */}
-            <p className="text-sm text-blue-600 font-medium">
-              {module.benefits}
-            </p>
+        </div>
+        
+        {/* Description */}
+        <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+          {module.description.replace(/\*\*/g, '')}
+        </p>
+        
+        {/* Benefit and arrow */}
+        <div className="flex items-center justify-between">
+          <div 
+            className="text-xs text-blue-600 dark:text-blue-400 font-medium flex-1"
+            dangerouslySetInnerHTML={{
+              __html: module.benefits.replace(/\.\.\..*/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            }}
+          />
+          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Note: Module selection functionality can be added here later
+              }}
+              className="w-6 h-6 p-0 text-gray-400 hover:text-blue-600"
+            >
+              <Plus className="w-3 h-3" />
+            </Button>
           </div>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 };
