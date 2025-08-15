@@ -186,68 +186,54 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
           </div>
         </DialogHeader>
 
-        {/* Module Header with Description */}
-        <div className="p-6 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
-          <p className="text-gray-700 text-lg leading-relaxed">
-            {details.description}
-          </p>
-        </div>
-
-        <div className="mt-6 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="w-5 h-5 text-telegram" />
-                Что умеет модуль
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {details.features.map((feature: string, index: number) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700">{feature.replace(/\*\*/g, '').replace(/^:\s*/, '')}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-
-          {/* Interactive Before/After Demo */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Play className="w-5 h-5 text-telegram" />
-                Интерактивная демонстрация
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <BeforeAfterDemo moduleName={module.name} />
-            </CardContent>
-          </Card>
-
-          {/* Interactive Pain Points Section */}
-          <ModulePainPoints moduleName={module.name} />
-
+        <div className="space-y-4">
+          {/* Blue description box matching AI chat design */}
+          <div className="p-4 rounded-lg bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200">
+            <div className="text-gray-700 text-base leading-relaxed">
+              {details.description}
+            </div>
+          </div>
+          
+          {/* Features section with proper formatting like AI chat */}
+          <div>
+            <h3 className="font-bold text-lg mb-3">Основные возможности:</h3>
+            <div className="space-y-3">
+              {details.features.map((feature: string, index: number) => (
+                <div key={index} className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <div 
+                    className="text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: feature.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/^:\s*/, '')
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Benefits section like AI chat */}
           {details.impact && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-green-600" />
-                  Преимущества для бизнеса
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700">{details.impact}</p>
-              </CardContent>
-            </Card>
+            <div>
+              <h3 className="font-bold text-lg mb-3">Преимущества:</h3>
+              <div 
+                className="text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: details.impact.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                }}
+              />
+            </div>
           )}
 
-          <div className="flex gap-4">
-            <Button className="flex-1 bg-telegram hover:bg-telegram/90 text-white">
+          <div className="flex gap-3 pt-6">
+            <Button className="flex-1 h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
               Подключить модуль
             </Button>
-            <Button variant="outline" onClick={onClose}>
+            <Button 
+              variant="outline" 
+              onClick={onClose}
+              className="px-6 h-12 text-base rounded-lg"
+            >
               Закрыть
             </Button>
           </div>
