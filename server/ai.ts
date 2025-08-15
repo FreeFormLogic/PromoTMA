@@ -81,13 +81,11 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     const { storage } = await import('./storage');
     const allModules = await storage.getAllModules();
     
-    // Формируем полный список модулей для AI
-    const modulesList = allModules.map((module: any) => 
+    // Формируем полный список модулей для AI - только основные данные для ускорения
+    const modulesList = allModules.slice(0, 50).map((module: any) => 
       `Модуль ${module.number}: ${module.name}
 Описание: ${module.description}
 Категория: ${module.category}
-Ключевые возможности: ${JSON.parse(module.keyFeatures as string).join(', ')}
-Преимущества: ${module.benefits}
 ---`
     ).join('\n');
 

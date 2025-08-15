@@ -264,14 +264,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Messages array is required" });
       }
       
-
-      
       console.log('AI Chat Debug:');
-      console.log('- Total modules in database:', allModules.length);
       console.log('- Messages received:', messages.length);
       console.log('- Already shown modules:', alreadyShownModules.length);
-      
-      // Convert message objects to proper format for AI
       console.log('- Raw messages format:', messages.map(m => `${m.role}: "${m.content}"`));
       
       // Use generateAIResponse with already shown modules tracking
@@ -279,7 +274,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('- AI recommended module numbers:', result.recommendedModules);
       
-      // Get recommended module details with validation
+      // Get recommended module details with validation  
+      const allModules = await storage.getAllModules();
       const recommendedModules = result.recommendedModules
         .map(number => {
           const module = allModules.find(m => m.number === number);
