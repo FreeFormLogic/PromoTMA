@@ -1,5 +1,5 @@
 // Используем Gemini 2.5 Pro через прямые HTTP запросы
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-latest:generateContent";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 const GEMINI_API_KEY = process.env.GOOGLE_API_KEY;
 
 export interface BusinessAnalysis {
@@ -104,23 +104,17 @@ ${messages.join('\n')}
 
 export async function generateAIResponse(messages: { role: 'user' | 'assistant'; content: string }[], alreadyShownModules: number[] = []): Promise<{ response: string; recommendedModules: number[] }> {
   try {
-    // Получаем все модули из базы данных
     const { storage } = await import('./storage');
     const allModules = await storage.getAllModules();
-    
-    // Processing all modules from database
     console.log(`🔍 AI processing ${allModules.length} modules`)
     
-    // Формируем полный список модулей для AI со всеми данными
     const modulesList = allModules.map((module: any) => {
-      let features = '';
-      let benefits = module.benefits || 'Повышение эффективности бизнеса';
+      let features = 'Основные возможности модуля';
+      const benefits = module.benefits || 'Повышение эффективности бизнеса';
       
-      // Безопасное извлечение ключевых функций
       try {
         const keyFeatures = module.keyFeatures || module.key_features;
         if (typeof keyFeatures === 'string') {
-          // Пытаемся парсить JSON, если не получается - используем как строку
           try {
             const parsed = JSON.parse(keyFeatures);
             if (Array.isArray(parsed)) {
@@ -133,11 +127,9 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
           }
         } else if (Array.isArray(keyFeatures)) {
           features = keyFeatures.map(f => f.replace(/\*\*/g, '')).join(', ');
-        } else {
-          features = 'Основные возможности модуля';
         }
       } catch (e) {
-        features = 'Основные возможности модуля';
+        // features остается дефолтным
       }
       
       return `Модуль ${module.number}: ${module.name}
@@ -148,59 +140,27 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
 ---`;
     }).join('\n');
 
-    const systemPrompt = `You are an expert Telegram Mini Apps consultant. You have access to the COMPLETE database of all available modules. Use this information to make intelligent recommendations based on business needs.
+    const systemPrompt = `Ты - эксперт по Telegram Mini Apps. У тебя есть ПОЛНАЯ база данных всех модулей.
 
 ПОЛНАЯ БАЗА ДАННЫХ МОДУЛЕЙ:
 ${modulesList}
 
-ПРАВИЛА РАБОТЫ:
-1. Анализируй бизнес пользователя и его потребности
-2. Изучай ВСУЮ базу данных модулей со всеми описаниями, функциями и преимуществами
-3. Выбирай НАИБОЛЕЕ ПОДХОДЯЩИЕ модули, учитывая ВСЕ детали контекста
-4. Рекомендуй 3-4 модуля за раз, начиная с самых важных для данного бизнеса
-5. Объясняй, ПОЧЕМУ именно этот модуль подходит, ссылаясь на конкретные функции
+ПРАВИЛА:
+1. Анализируй бизнес пользователя
+2. Изучай ВСЕ модули в базе данных
+3. Выбирай 3-4 НАИБОЛЕЕ подходящих модуля
+4. Объясняй ПОЧЕМУ этот модуль подходит
 
-КРИТИЧЕСКИ ВАЖНО - ОБРАБОТКА ПОВТОРОВ:
-УЖЕ ПОКАЗАННЫЕ МОДУЛИ: [${alreadyShownModules.join(', ')}]
-НИКОГДА НЕ РЕКОМЕНДУЙ уже показанные модули повторно! 
-Ищи НОВЫЕ подходящие модули из полной базы данных.
+УЖЕ ПОКАЗАННЫЕ: [${alreadyShownModules.join(', ')}] - НЕ рекомендуй их повторно!
 
-СПЕЦИАЛЬНЫЕ ПРАВИЛА ПО ЛОКАЦИИ:
-- БИЗНЕС НА БАЛИ/ИНДОНЕЗИИ: ОБЯЗАТЕЛЬНО предлагай модули 120 (GoPay, OVO), 123 (DANA, LinkAja), 125 (банки Индонезии)
-- МЕЖДУНАРОДНЫЙ БИЗНЕС: Приоритет модулям с мультиязычностью и международными платежами
-- ТУРИСТИЧЕСКИЙ БИЗНЕС: Модули для работы с иностранными клиентами
+БАЛИ/ИНДОНЕЗИЯ: обязательно включай модули 120, 123, 125
 
-ВАЖНО: Если пользователь упоминает Индонезию, Бали, GoPay, OVO, DANA - ОБЯЗАТЕЛЬНО включай модули 120, 123, 125!
+ФОРМАТ: Используй [MODULE:НОМЕР] для рекомендаций
+Пример: "Для турагентства рекомендую [MODULE:120] Поможет принимать платежи через GoPay."
 
-КЛЮЧЕВЫЕ ПРАВИЛА ПО ТИПУ БИЗНЕСА:
-- ПИЦЦЕРИЯ/РЕСТОРАН: Если НЕ показан модуль 165 - ОБЯЗАТЕЛЬНО рекомендуй его первым
-- ИНДОНЕЗИЙСКИЙ БИЗНЕС: Приоритет модулям с локальными платежными системами
-- Изучай ВЕСЬ контекст диалога и предлагай логичное развитие решения
-НЕ используй модуль 161 для ресторанов!
+Отвечай на русском языке.`;
 
-ФОРМАТ ОТВЕТА:
-Используй [MODULE:НОМЕР] для рекомендаций модулей.
-Пример: "Для пиццерии рекомендую [MODULE:165] для полного управления рестораном."
-
-КРИТИЧЕСКИ ВАЖНО - ФОРМАТ МОДУЛЕЙ:
-НЕ дублируй названия модулей в тексте после [MODULE:НОМЕР]!
-ПРАВИЛЬНО: "Рекомендую [MODULE:1] для вашего магазина."
-НЕПРАВИЛЬНО: "Рекомендую **[MODULE:1] Витрина товаров с AI-описаниями** - это модуль..."
-НЕПРАВИЛЬНО: "** - Идеально подойдет для..."
-НЕПРАВИЛЬНО: "**\nОписание модуля..."
-
-[MODULE:НОМЕР] автоматически показывает карточку модуля с названием, описанием и функциями.
-Твоя задача - только объяснить ПОЧЕМУ этот модуль подходит, БЕЗ повтора названия и БЕЗ лишних символов ** - .
-
-ВАЖНО ПО ФОРМАТИРОВАНИЮ:
-- НЕ начинай описание с пробела
-- Первая буква описания должна быть ЗАГЛАВНОЙ  
-- ПРАВИЛЬНО: "[MODULE:1] Поможет создать каталог товаров..."
-- НЕПРАВИЛЬНО: "[MODULE:1] поможет создать каталог товаров..."
-
-Отвечай только на русском языке, будь экспертом и дружелюбным.`;
-
-    const response = await fetch(GEMINI_API_URL, {
+    const apiResponse = await fetch(GEMINI_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -219,43 +179,38 @@ ${modulesList}
       })
     });
 
-    const data = await response.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (content) {
-      const responseText = content;
-      
-      // Extract module numbers from the response text using new [MODULE:NUMBER] format
-      const moduleNumberMatches = responseText.match(/\[MODULE:(\d+)\]/gi);
-      const recommendedModules: number[] = [];
-      
-      if (moduleNumberMatches) {
-        const uniqueMatches = Array.from(new Set(moduleNumberMatches)); // Remove duplicates from response
-        uniqueMatches.forEach(match => {
-          const numberMatch = match.match(/\[MODULE:(\d+)\]/i);
-          if (numberMatch) {
-            const moduleNumber = parseInt(numberMatch[1]);
-            
+    if (!apiResponse.ok) {
+      throw new Error(`API failed: ${apiResponse.status}`);
+    }
 
-            
-            // Only add if not already shown to user (including previous messages)
-            if (!alreadyShownModules.includes(moduleNumber)) {
-              recommendedModules.push(moduleNumber);
-            } else {
-              console.log(`🔄 Skipping already shown module ${moduleNumber}`);
-            }
-          }
-        });
-      }
-      
-      return {
-        response: responseText,
-        recommendedModules: recommendedModules.sort((a, b) => a - b)
-      };
+    const apiData = await apiResponse.json();
+    const aiContent = apiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!aiContent) {
+      throw new Error('No AI response content');
     }
     
-    throw new Error('Invalid response format');
+    console.log('AI Response Preview:', aiContent.substring(0, 100));
+    
+    const moduleMatches = aiContent.match(/\[MODULE:(\d+)\]/gi) || [];
+    const recommendedModules: number[] = [];
+    
+    for (const match of moduleMatches) {
+      const numberMatch = match.match(/\[MODULE:(\d+)\]/i);
+      if (numberMatch) {
+        const moduleNumber = parseInt(numberMatch[1]);
+        if (!alreadyShownModules.includes(moduleNumber)) {
+          recommendedModules.push(moduleNumber);
+        }
+      }
+    }
+    
+    return {
+      response: aiContent,
+      recommendedModules: Array.from(new Set(recommendedModules)).sort((a, b) => a - b)
+    };
   } catch (error) {
-    console.error('Error generating AI response:', error);
+    console.error('AI Error:', error);
     return {
       response: 'Извините, произошла ошибка при генерации ответа.',
       recommendedModules: []
