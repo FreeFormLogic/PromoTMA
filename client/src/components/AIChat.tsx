@@ -400,16 +400,21 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         <Card 
           className={`group cursor-pointer transition-all duration-300 border mb-3 ${
             isSelected 
-              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-200 dark:ring-blue-800' 
               : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-600'
           } hover:-translate-y-1 hover:shadow-lg`}
           onClick={() => setIsModalOpen(true)}
         >
           <div className="p-4">
             {/* Icon and header */}
-            <div className="flex items-start gap-3 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+            <div className="flex items-start gap-3 mb-2">
+              <div className={`w-10 h-10 rounded-lg ${isSelected ? 'bg-gradient-to-br from-green-500 to-blue-600 ring-2 ring-green-200' : 'bg-gradient-to-br from-blue-500 to-purple-600'} flex items-center justify-center flex-shrink-0 relative`}>
                 <IconComponent className="w-5 h-5 text-white" />
+                {isSelected && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full">
+                    <Check className="w-2 h-2 text-white absolute top-[-1px] left-[-1px]" />
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 leading-tight break-words hyphens-auto">
@@ -418,13 +423,12 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 <div className="text-[10px] mt-1 font-normal text-gray-500 uppercase">
                   {module.category}
                 </div>
+                {/* Description right under the title */}
+                <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
+                  {module.description.replace(/\*\*/g, '')}
+                </p>
               </div>
             </div>
-            
-            {/* Description */}
-            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
-              {module.description.replace(/\*\*/g, '')}
-            </p>
             
             {/* Benefit and arrow */}
             <div className="flex items-center justify-between">
@@ -440,6 +444,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     handleModuleLike(module);
                   }}
                   className={`w-6 h-6 p-0 ${

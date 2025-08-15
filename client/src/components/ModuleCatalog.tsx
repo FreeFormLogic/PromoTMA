@@ -15,17 +15,47 @@ interface ModuleCardProps {
 
 const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
   const IconComponent = Sparkles; // Use sparkles icon like in AI chat
+  const [selectedModules, setSelectedModules] = useState<Module[]>(() => {
+    const saved = localStorage.getItem('selectedModules');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const isSelected = selectedModules.find(m => m.id === module.id);
+  
+  const handleModuleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    let updatedModules;
+    if (isSelected) {
+      updatedModules = selectedModules.filter(m => m.id !== module.id);
+    } else {
+      updatedModules = [...selectedModules, module];
+    }
+    
+    setSelectedModules(updatedModules);
+    localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+  };
   
   return (
     <Card 
-      className="group cursor-pointer transition-all duration-300 border mb-3 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-600 hover:-translate-y-1 hover:shadow-lg"
+      className={`group cursor-pointer transition-all duration-300 border mb-3 ${
+        isSelected 
+          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-200 dark:ring-blue-800' 
+          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-600'
+      } hover:-translate-y-1 hover:shadow-lg`}
       onClick={onClick}
     >
       <div className="p-4">
         {/* Icon and header */}
         <div className="flex items-start gap-3 mb-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+          <div className={`w-10 h-10 rounded-lg ${isSelected ? 'bg-gradient-to-br from-green-500 to-blue-600 ring-2 ring-green-200' : 'bg-gradient-to-br from-blue-500 to-purple-600'} flex items-center justify-center flex-shrink-0 relative`}>
             <IconComponent className="w-5 h-5 text-white" />
+            {isSelected && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full">
+                <Check className="w-2 h-2 text-white absolute top-[-1px] left-[-1px]" />
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 leading-tight break-words hyphens-auto">
@@ -54,13 +84,15 @@ const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Note: Module selection functionality can be added here later
-              }}
-              className="w-6 h-6 p-0 text-gray-400 hover:text-blue-600"
+              onClick={handleModuleToggle}
+              className={`w-6 h-6 p-0 ${
+                isSelected 
+                  ? 'text-green-600 hover:text-green-700' 
+                  : 'text-gray-400 hover:text-blue-600'
+              }`}
+              title={isSelected ? 'Отключить модуль' : 'Подключить модуль'}
             >
-              <Plus className="w-3 h-3" />
+              {isSelected ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
             </Button>
           </div>
         </div>

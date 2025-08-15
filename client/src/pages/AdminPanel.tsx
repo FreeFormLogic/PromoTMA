@@ -258,16 +258,29 @@ export default function AdminPanel() {
     });
   };
 
-  const handleSaveUser = () => {
+  const handleSaveUser = async () => {
     if (!editingUser) return;
     
-    updateUserMutation.mutate({ 
-      telegramId: editingUser, 
-      updates: editForm 
-    });
-    
-    setEditingUser(null);
-    setEditForm({});
+    try {
+      await updateUserMutation.mutateAsync({ 
+        telegramId: editingUser, 
+        updates: editForm 
+      });
+      
+      setEditingUser(null);
+      setEditForm({});
+      
+      toast({
+        title: "Успешно",
+        description: "Пользователь обновлен",
+      });
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось обновить пользователя",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCancelEdit = () => {
@@ -277,10 +290,11 @@ export default function AdminPanel() {
 
   const handleViewUserChats = async (telegramId: string) => {
     try {
+      setUserChats([]); // Clear previous chats
       const response = await fetch(`/api/admin/ai-history/${telegramId}`);
       if (response.ok) {
         const chats = await response.json();
-        setUserChats(chats);
+        setUserChats(chats || []);
         setViewingChats(telegramId);
       } else {
         toast({
@@ -290,12 +304,18 @@ export default function AdminPanel() {
         });
       }
     } catch (error) {
+      console.error('Error loading chats:', error);
       toast({
         title: "Ошибка",
         description: "Ошибка при загрузке чатов",
         variant: "destructive",
       });
     }
+  };
+
+  const handleCloseChatModal = () => {
+    setViewingChats(null);
+    setUserChats([]);
   };
 
   const formatUserName = (user: WhitelistUser) => {
@@ -795,16 +815,23 @@ export default function AdminPanel() {
 
       {/* Модальное окно для просмотра чатов пользователя */}
       {viewingChats && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto mx-4">
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              handleCloseChatModal();
+            }
+          }}
+        >
+          <div 
+            className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Чаты пользователя {viewingChats}</h2>
               <Button 
                 variant="outline" 
-                onClick={() => {
-                  setViewingChats(null);
-                  setUserChats([]);
-                }}
+                onClick={handleCloseChatModal}
               >
                 Закрыть
               </Button>

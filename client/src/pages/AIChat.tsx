@@ -88,7 +88,7 @@ export default function AIChatPage() {
                 }}
               >
                 <Package className="w-4 h-4 mr-2" />
-                Модули
+                Функционал
               </Button>
               <Button
                 variant="ghost"

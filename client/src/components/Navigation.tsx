@@ -25,7 +25,7 @@ export function Navigation() {
 
   const navItems = [
     { path: "/", label: "Главная", icon: Home },
-    { path: "/modules", label: "Каталог функций", icon: Puzzle },
+    { path: "/modules", label: "Функционал", icon: Puzzle },
     { path: "/industries", label: "Отрасли", icon: Building2 },
     { path: "/ai-chat", label: "AI-конструктор", icon: Bot },
     { path: "/my-app", label: "Мое Telegram Mini App", icon: Settings },

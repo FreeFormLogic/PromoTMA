@@ -63,7 +63,7 @@ export default function Home() {
                   className="w-full bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-900 px-8 py-4 text-lg font-semibold rounded-full transition-all"
                 >
                   <Package className="mr-2 w-5 h-5" />
-                  Каталог модулей
+                  Функционал
                 </Button>
               </div>
             </div>
