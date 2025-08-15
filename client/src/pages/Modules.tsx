@@ -262,7 +262,6 @@ function ModuleCardSkeleton() {
 export default function Modules() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ВСЕ МОДУЛИ");
-  const [viewMode, setViewMode] = useState<"compact" | "catalog">("compact");
 
   const { data: modules, isLoading, error } = useQuery<Module[]>({
     queryKey: ['/api/modules'],
@@ -366,81 +365,51 @@ export default function Modules() {
               />
             </div>
             
-            {/* Переключатель вида */}
-            <div className="mt-6 flex justify-center">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-1 flex">
-                <Button
-                  variant={viewMode === "compact" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("compact")}
-                  className={`px-4 py-2 text-sm ${
-                    viewMode === "compact"
-                      ? "bg-white text-blue-700 hover:bg-blue-50"
-                      : "text-white hover:bg-white/20"
-                  }`}
-                >
-                  Компактный вид
-                </Button>
-                <Button
-                  variant={viewMode === "catalog" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("catalog")}
-                  className={`px-4 py-2 text-sm ${
-                    viewMode === "catalog"
-                      ? "bg-white text-blue-700 hover:bg-blue-50"
-                      : "text-white hover:bg-white/20"
-                  }`}
-                >
-                  Каталог
-                </Button>
-              </div>
-            </div>
+
           </div>
           
-          {/* Компактная навигация по категориям */}
-          {viewMode === "compact" && (
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-4">
-                <Button
-                  variant={selectedCategory === "ВСЕ МОДУЛИ" ? "secondary" : "outline"}
-                  onClick={() => setSelectedCategory("ВСЕ МОДУЛИ")}
-                  className={`text-sm font-semibold px-6 py-2 mr-4 mb-2 ${
-                    selectedCategory === "ВСЕ МОДУЛИ" 
-                      ? "bg-white text-blue-700 hover:bg-blue-50" 
-                      : "bg-white/10 text-white border-white/30 hover:bg-white/20"
-                  }`}
-                >
-                  Все модули
-                </Button>
-              </div>
-              
-              {/* Сетка категорий */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {Object.entries(categoryTree).filter(([name]) => name !== "ВСЕ МОДУЛИ").map(([categoryName, categoryGroups]) => {
-                  const categoryCount = modules?.filter(m => (categoryGroups as string[]).includes(m.category)).length || 0;
-                  const IconComponent = categoryIcons[categoryName] || Component;
-                  
-                  return (
-                    <Button
-                      key={categoryName}
-                      variant={selectedCategory === categoryName ? "secondary" : "outline"}
-                      onClick={() => setSelectedCategory(categoryName)}
-                      className={`p-2 h-auto flex flex-col items-center justify-center gap-1 text-xs min-h-[60px] ${
-                        selectedCategory === categoryName 
-                          ? "bg-white text-blue-700 hover:bg-blue-50" 
-                          : "bg-white/10 text-white border-white/30 hover:bg-white/20"
-                      }`}
-                    >
-                      <IconComponent className="w-5 h-5 flex-shrink-0" />
-                      <div className="text-center min-w-0">
-                        <div className="font-semibold leading-tight text-xs break-words">{categoryName}</div>
-                      </div>
-                    </Button>
-                  );
-                })}
-              </div>
+          {/* Навигация по категориям */}
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-4">
+              <Button
+                variant={selectedCategory === "ВСЕ МОДУЛИ" ? "secondary" : "outline"}
+                onClick={() => setSelectedCategory("ВСЕ МОДУЛИ")}
+                className={`text-sm font-semibold px-6 py-2 mr-4 mb-2 ${
+                  selectedCategory === "ВСЕ МОДУЛИ" 
+                    ? "bg-white text-blue-700 hover:bg-blue-50" 
+                    : "bg-white/10 text-white border-white/30 hover:bg-white/20"
+                }`}
+              >
+                Все модули
+              </Button>
             </div>
-          )}
+            
+            {/* Сетка категорий */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {Object.entries(categoryTree).filter(([name]) => name !== "ВСЕ МОДУЛИ").map(([categoryName, categoryGroups]) => {
+                const categoryCount = modules?.filter(m => (categoryGroups as string[]).includes(m.category)).length || 0;
+                const IconComponent = categoryIcons[categoryName] || Component;
+                
+                return (
+                  <Button
+                    key={categoryName}
+                    variant={selectedCategory === categoryName ? "secondary" : "outline"}
+                    onClick={() => setSelectedCategory(categoryName)}
+                    className={`p-2 h-auto flex flex-col items-center justify-center gap-1 text-xs min-h-[60px] ${
+                      selectedCategory === categoryName 
+                        ? "bg-white text-blue-700 hover:bg-blue-50" 
+                        : "bg-white/10 text-white border-white/30 hover:bg-white/20"
+                    }`}
+                  >
+                    <IconComponent className="w-5 h-5 flex-shrink-0" />
+                    <div className="text-center min-w-0">
+                      <div className="font-semibold leading-tight text-xs break-words">{categoryName}</div>
+                    </div>
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -469,51 +438,11 @@ export default function Modules() {
           )}
         </div>
 
-        {/* Контент в зависимости от режима просмотра */}
-        {viewMode === "catalog" ? (
-          <div className="space-y-6 pb-20 overflow-hidden">
-            {/* Используем новый компонент ModuleCatalog */}
-            <ModuleCatalog allModulesData={modules || []} />
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Загрузка */}
-            {isLoading && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(9)].map((_, i) => (
-                  <ModuleCardSkeleton key={i} />
-                ))}
-              </div>
-            )}
-
-            {/* Результаты поиска или категории */}
-            {!isLoading && filteredModules.length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-12 h-12 text-gray-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  Ничего не найдено
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                  {searchTerm 
-                    ? `По запросу "${searchTerm}" модули не найдены. Попробуйте изменить запрос.`
-                    : `В категории "${selectedCategory}" пока нет модулей.`
-                  }
-                </p>
-              </div>
-            )}
-
-            {/* Сетка модулей */}
-            {!isLoading && filteredModules.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredModules.map((module) => (
-                  <ModuleCard key={module.id} module={module} />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        {/* Отображение каталога модулей */}
+        <div className="space-y-6 pb-20 overflow-hidden">
+          {/* Используем компонент ModuleCatalog */}
+          <ModuleCatalog allModulesData={modules || []} />
+        </div>
       </div>
     </div>
   );

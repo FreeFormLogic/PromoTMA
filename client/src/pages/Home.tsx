@@ -47,11 +47,11 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="flex justify-center space-x-4">
+              <div className="flex flex-col items-center space-y-4 max-w-md mx-auto">
                 <Button
                   onClick={() => window.location.href = '/ai-chat'}
                   size="lg"
-                  className="bg-white text-blue-900 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-full shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
+                  className="w-full bg-white text-blue-900 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-full shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
                 >
                   <Bot className="mr-2 w-5 h-5" />
                   AI-конструктор
@@ -60,7 +60,7 @@ export default function Home() {
                   onClick={() => window.location.href = '/modules'}
                   variant="outline"
                   size="lg"
-                  className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-900 px-8 py-4 text-lg font-semibold rounded-full transition-all"
+                  className="w-full bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-900 px-8 py-4 text-lg font-semibold rounded-full transition-all"
                 >
                   <Package className="mr-2 w-5 h-5" />
                   Каталог модулей
@@ -70,55 +70,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Quick Features Section */}
-        <section className="mb-12">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="grid md:grid-cols-3 gap-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-center"
-              >
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Rocket className="w-8 h-8 text-blue-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Быстрый запуск</h3>
-                <p className="text-gray-600">Готовые модули позволяют запустить приложение за 1-5 дней</p>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="text-center"
-              >
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Package className="w-8 h-8 text-blue-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">260+ модулей</h3>
-                <p className="text-gray-600">Проверенные решения для любого типа бизнеса</p>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-                className="text-center"
-              >
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MessageSquare className="w-8 h-8 text-blue-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">В Telegram</h3>
-                <p className="text-gray-600">900+ млн пользователей уже имеют доступ к вашему приложению</p>
-              </motion.div>
-            </div>
-            
 
-          </div>
-        </section>
 
       </main>
       
