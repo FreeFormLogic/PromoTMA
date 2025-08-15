@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Module } from '@shared/schema';
-import { ChevronDown, ChevronUp, Search, X } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -72,7 +71,6 @@ interface ModuleCatalogProps {
 }
 
 const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedBusinessGoals, setSelectedBusinessGoals] = useState<string[]>([]);
   const [openCategories, setOpenCategories] = useState<string[]>([]);
   const [selectedModule, setSelectedModule] = useState<Module | null>(null);
@@ -111,25 +109,9 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
     return Array.from(goals);
   }, [allModulesData]);
 
-  // Фильтрация модулей
+  // Фильтрация модулей по бизнес-целям
   const filteredModules = useMemo(() => {
     let filtered = allModulesData;
-
-    // Поиск по тексту
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      filtered = filtered.filter(module => {
-        const searchText = [
-          module.name,
-          module.description,
-          module.keyFeatures,
-          module.benefits,
-          module.category
-        ].join(' ').toLowerCase();
-        
-        return searchText.includes(query);
-      });
-    }
 
     // Фильтрация по бизнес-целям
     if (selectedBusinessGoals.length > 0) {
@@ -159,7 +141,7 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
     }
 
     return filtered;
-  }, [allModulesData, searchQuery, selectedBusinessGoals]);
+  }, [allModulesData, selectedBusinessGoals]);
 
   // Группировка по категориям
   const groupedModules = useMemo(() => {
@@ -195,60 +177,42 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      {/* Поисковая строка */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-        <Input
-          type="text"
-          placeholder="Поиск по названию, описанию, функциям или преимуществам..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 pr-10 py-3 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-        />
-        {searchQuery && (
-          <button
-            onClick={() => setSearchQuery('')}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        )}
-      </div>
-
+    <div className="max-w-6xl mx-auto space-y-6">
       {/* Теги бизнес-целей */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-medium text-gray-700">Фильтр по бизнес-целям:</h3>
-        <div className="flex flex-wrap gap-2">
-          {businessGoals.map(goal => (
-            <Badge
-              key={goal}
-              variant={selectedBusinessGoals.includes(goal) ? "default" : "outline"}
-              className={`cursor-pointer transition-colors ${
-                selectedBusinessGoals.includes(goal)
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                  : 'hover:bg-blue-50 hover:border-blue-300'
-              }`}
-              onClick={() => toggleBusinessGoal(goal)}
-            >
-              {goal}
-            </Badge>
-          ))}
-          {selectedBusinessGoals.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedBusinessGoals([])}
-              className="text-gray-500 hover:text-gray-700 h-6 px-2 text-xs"
-            >
-              Очистить
-            </Button>
-          )}
+      {businessGoals.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-gray-700">Фильтр по бизнес-целям:</h3>
+          <div className="flex flex-wrap gap-2">
+            {businessGoals.map(goal => (
+              <Badge
+                key={goal}
+                variant={selectedBusinessGoals.includes(goal) ? "default" : "outline"}
+                className={`cursor-pointer transition-colors ${
+                  selectedBusinessGoals.includes(goal)
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'hover:bg-blue-50 hover:border-blue-300'
+                }`}
+                onClick={() => toggleBusinessGoal(goal)}
+              >
+                {goal}
+              </Badge>
+            ))}
+            {selectedBusinessGoals.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedBusinessGoals([])}
+                className="text-gray-500 hover:text-gray-700 h-6 px-2 text-xs"
+              >
+                Очистить
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Результаты поиска */}
-      {(searchQuery || selectedBusinessGoals.length > 0) && (
+      {/* Результаты фильтрации */}
+      {selectedBusinessGoals.length > 0 && (
         <div className="text-sm text-gray-600">
           Найдено модулей: {filteredModules.length} из {allModulesData.length}
         </div>

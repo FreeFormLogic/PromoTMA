@@ -399,8 +399,8 @@ export default function Modules() {
 
         {/* Отображение каталога модулей */}
         <div className="space-y-6 pb-20 overflow-hidden">
-          {/* Используем компонент ModuleCatalog */}
-          <ModuleCatalog allModulesData={modules || []} />
+          {/* Используем компонент ModuleCatalog с отфильтрованными модулями */}
+          <ModuleCatalog allModulesData={filteredModules || []} />
         </div>
       </div>
     </div>
