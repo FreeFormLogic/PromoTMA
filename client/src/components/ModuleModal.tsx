@@ -175,6 +175,9 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">{module.name}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Детальная информация о модуле {module.name}
+          </DialogDescription>
           
           <div className="flex items-center gap-2 mt-2">
             {module.isPopular && (
