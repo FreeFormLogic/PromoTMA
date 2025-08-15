@@ -16,6 +16,7 @@ This project is a full-stack web application serving as a Telegram Mini Apps dir
 - ✅ **Indonesian Payment Integration**: AI now correctly identifies and suggests Indonesia-specific modules (120: GoPay/OVO, 123: DANA/LinkAja, 125: BCA/Mandiri banks) for Bali/Indonesia business contexts
 - ✅ **FIXED Module Display Issues**: Eliminated duplicate module names ending with ** and removed extra symbols (** - ) appearing before module descriptions. Enhanced AI prompt to prevent formatting issues and added client-side text cleaning for legacy compatibility
 - ✅ **Streamlined UI Design**: Removed "Компактный вид" toggle from modules page, now displays catalog view by default. Stacked AI-конструктор and Каталог модулей buttons vertically on main page. Removed duplicate "Быстрый запуск" content block for cleaner interface
+- ✅ **Fixed Module Clickability**: Removed blue category navigation from modules header, added click functionality to all module cards in catalog view with proper modal display integration
 
 # User Preferences
 

@@ -6,13 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ModuleModal } from './ModuleModal';
 
 // Компонент карточки модуля
 interface ModuleCardProps {
   module: Module;
+  onClick: () => void;
 }
 
-const ModuleCard = ({ module }: ModuleCardProps) => {
+const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
   // Получаем иконку из строки (для совместимости)
   const getIconComponent = (iconName: string) => {
     // Если iconName это React компонент, возвращаем его
@@ -23,7 +25,10 @@ const ModuleCard = ({ module }: ModuleCardProps) => {
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow duration-200 bg-white border border-gray-200">
+    <Card 
+      className="hover:shadow-lg transition-shadow duration-200 bg-white border border-gray-200 cursor-pointer hover:border-blue-300"
+      onClick={onClick}
+    >
       <CardContent className="p-4">
         <div className="flex items-start space-x-4">
           {/* Левая часть - иконка */}
@@ -70,6 +75,7 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBusinessGoals, setSelectedBusinessGoals] = useState<string[]>([]);
   const [openCategories, setOpenCategories] = useState<string[]>([]);
+  const [selectedModule, setSelectedModule] = useState<Module | null>(null);
 
   // Извлекаем бизнес-цели из преимуществ модулей
   const businessGoals = useMemo(() => {
@@ -280,7 +286,11 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
             <CollapsibleContent className="space-y-4 mt-4">
               <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
                 {modules.map(module => (
-                  <ModuleCard key={module.id} module={module} />
+                  <ModuleCard 
+                    key={module.id} 
+                    module={module} 
+                    onClick={() => setSelectedModule(module)}
+                  />
                 ))}
               </div>
             </CollapsibleContent>
@@ -296,6 +306,15 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
             Попробуйте изменить поисковый запрос или фильтры
           </div>
         </div>
+      )}
+
+      {/* Modal for selected module */}
+      {selectedModule && (
+        <ModuleModal
+          module={selectedModule}
+          isOpen={!!selectedModule}
+          onClose={() => setSelectedModule(null)}
+        />
       )}
     </div>
   );

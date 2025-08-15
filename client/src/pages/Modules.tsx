@@ -368,48 +368,7 @@ export default function Modules() {
 
           </div>
           
-          {/* Навигация по категориям */}
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-4">
-              <Button
-                variant={selectedCategory === "ВСЕ МОДУЛИ" ? "secondary" : "outline"}
-                onClick={() => setSelectedCategory("ВСЕ МОДУЛИ")}
-                className={`text-sm font-semibold px-6 py-2 mr-4 mb-2 ${
-                  selectedCategory === "ВСЕ МОДУЛИ" 
-                    ? "bg-white text-blue-700 hover:bg-blue-50" 
-                    : "bg-white/10 text-white border-white/30 hover:bg-white/20"
-                }`}
-              >
-                Все модули
-              </Button>
-            </div>
-            
-            {/* Сетка категорий */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {Object.entries(categoryTree).filter(([name]) => name !== "ВСЕ МОДУЛИ").map(([categoryName, categoryGroups]) => {
-                const categoryCount = modules?.filter(m => (categoryGroups as string[]).includes(m.category)).length || 0;
-                const IconComponent = categoryIcons[categoryName] || Component;
-                
-                return (
-                  <Button
-                    key={categoryName}
-                    variant={selectedCategory === categoryName ? "secondary" : "outline"}
-                    onClick={() => setSelectedCategory(categoryName)}
-                    className={`p-2 h-auto flex flex-col items-center justify-center gap-1 text-xs min-h-[60px] ${
-                      selectedCategory === categoryName 
-                        ? "bg-white text-blue-700 hover:bg-blue-50" 
-                        : "bg-white/10 text-white border-white/30 hover:bg-white/20"
-                    }`}
-                  >
-                    <IconComponent className="w-5 h-5 flex-shrink-0" />
-                    <div className="text-center min-w-0">
-                      <div className="font-semibold leading-tight text-xs break-words">{categoryName}</div>
-                    </div>
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
+
         </div>
       </div>
 
