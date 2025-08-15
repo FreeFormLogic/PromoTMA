@@ -73,14 +73,15 @@ export default function AdminPanel() {
     }
   };
 
-  // Получение списка разрешенных пользователей
+  // Получение списка разрешенных пользователей только если авторизован
   const { data: whitelist = [], isLoading } = useQuery({
     queryKey: ["/api/admin/whitelist"],
     queryFn: async () => {
       const response = await fetch("/api/admin/whitelist");
       if (!response.ok) throw new Error("Ошибка загрузки");
       return response.json();
-    }
+    },
+    enabled: isAuthenticated
   });
 
   // Получение AI статистики

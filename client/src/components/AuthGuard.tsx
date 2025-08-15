@@ -36,7 +36,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
         if (authData.user && authData.user.isAuthorized) {
           const userId = authData.user.id;
           
-          // Кэшированная проверка whitelist для ускорения
+          // Кэшированная проверка whitelist для ускорения - увеличиваем время кэша
           const cacheKey = `whitelist_check_${userId}`;
           const cachedCheck = localStorage.getItem(cacheKey);
           
@@ -44,8 +44,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
             const { isInWhitelist, timestamp } = JSON.parse(cachedCheck);
             const cacheAge = Date.now() - timestamp;
             
-            // Увеличиваем кэш до 2 часов для уменьшения нагрузки
-            if (cacheAge < 2 * 60 * 60 * 1000) {
+            // Увеличиваем кэш до 6 часов для уменьшения нагрузки на сервер
+            if (cacheAge < 6 * 60 * 60 * 1000) {
               if (isInWhitelist) {
                 setUser(authData.user);
                 setIsAuthenticated(true);

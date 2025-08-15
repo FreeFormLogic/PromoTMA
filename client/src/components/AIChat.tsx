@@ -432,12 +432,8 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             
             {/* Description closer to title */}
             <div className="mb-3">
-              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed overflow-hidden" style={{
-                display: '-webkit-box',
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: 'vertical' as const
-              }}>
-                {module.description.replace(/\*\*/g, '')}
+              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                {module.description.replace(/\*\*/g, '').trim()}
               </p>
             </div>
             
@@ -457,29 +453,31 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     e.stopPropagation();
                     e.preventDefault();
                     
-                    // Immediately handle the module toggle with proper state management
+                    // Fixed module connection logic
                     const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-                    const isCurrentlySelected = savedModules.find((m: Module) => m.id === module.id);
+                    const isCurrentlySelected = savedModules.find((m: any) => m.id === module.id);
                     
                     let updatedModules;
                     if (isCurrentlySelected) {
-                      updatedModules = savedModules.filter((m: Module) => m.id !== module.id);
+                      updatedModules = savedModules.filter((m: any) => m.id !== module.id);
                     } else {
-                      updatedModules = [...savedModules, module];
+                      updatedModules = [...savedModules, {
+                        ...module,
+                        isPopular: module.isPopular || false
+                      }];
                     }
                     
-                    // Update localStorage first
+                    // Update localStorage
                     localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
                     
-                    // Update parent state
+                    // Update state 
                     setSelectedModules(updatedModules);
                     setLocalSelectedModules(updatedModules);
                     
-                    // Emit event for cross-component synchronization
-                    const event = new CustomEvent('moduleSelectionChanged', { 
+                    // Force re-render
+                    window.dispatchEvent(new CustomEvent('moduleSelectionChanged', { 
                       detail: { modules: updatedModules } 
-                    });
-                    window.dispatchEvent(event);
+                    }));
                   }}
                   className={`w-8 h-8 p-0 rounded-full ${
                     isSelected 
@@ -556,16 +554,6 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         }
         
         if (module) {
-          // Look for the description in the next part
-          const nextPart = parts[index + 1];
-          let description = '';
-          
-          if (nextPart && typeof nextPart === 'string') {
-            // Extract the first sentence as description for this module
-            const sentences = nextPart.trim().split(/\n/);
-            description = sentences[0]?.trim() || '';
-          }
-          
           return (
             <div key={index} className="mb-4">
               <ModuleCard module={module} />
@@ -575,10 +563,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         return <span key={index} className="text-red-500">Модуль {moduleNumber} не найден</span>;
       }
       
-      // Check if this text part follows a module and should be skipped (already used as description)
-      if (index > 0 && parts[index - 1]?.match(/\[MODULE:\d+\]/)) {
-        return null; // Skip this part as it's already used as module description
-      }
+      // Don't skip text parts - show all text content normally
       
       // Clean up the text part for standalone text (not module descriptions)
       let cleanedPart = part;

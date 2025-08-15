@@ -39,15 +39,18 @@ const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
     e.stopPropagation();
     e.preventDefault();
     
-    // Use single source of truth - localStorage
+    // Fixed module connection logic with proper type handling
     const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-    const isCurrentlySelected = savedModules.find((m: Module) => m.id === module.id);
+    const isCurrentlySelected = savedModules.find((m: any) => m.id === module.id);
     
     let updatedModules;
     if (isCurrentlySelected) {
-      updatedModules = savedModules.filter((m: Module) => m.id !== module.id);
+      updatedModules = savedModules.filter((m: any) => m.id !== module.id);
     } else {
-      updatedModules = [...savedModules, module];
+      updatedModules = [...savedModules, {
+        ...module,
+        isPopular: module.isPopular || false
+      }];
     }
     
     // Update localStorage
@@ -56,11 +59,10 @@ const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
     // Update local state
     setSelectedModules(updatedModules);
     
-    // Notify other components
-    const event = new CustomEvent('moduleSelectionChanged', { 
+    // Force re-render and notify other components
+    window.dispatchEvent(new CustomEvent('moduleSelectionChanged', { 
       detail: { modules: updatedModules } 
-    });
-    window.dispatchEvent(event);
+    }));
   };
   
   return (
