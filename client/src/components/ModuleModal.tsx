@@ -172,8 +172,8 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
     // Обновляем интерфейс
     window.dispatchEvent(new CustomEvent('moduleSelectionChanged'));
     
-    // Закрыть модальное окно после выбора
-    setTimeout(() => onClose(), 300);
+    // Закрыть модальное окно после выбора без задержки
+    onClose();
   };
   // Используем реальные данные модуля из базы данных (как в AI чате)
   const details = {

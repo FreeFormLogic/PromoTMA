@@ -51,8 +51,7 @@ export default function AdminPanel() {
   const [bulkUserIds, setBulkUserIds] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
-  const [editingUser, setEditingUser] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<Partial<WhitelistUser>>({});
+  // Removed editingUser and editForm - now using direct status editing
   const [viewingChats, setViewingChats] = useState<string | null>(null);
   const [userChats, setUserChats] = useState<any[]>([]);
   
@@ -244,44 +243,12 @@ export default function AdminPanel() {
     removeUserMutation.mutate(telegramId);
   };
 
-  const handleEditUser = (user: WhitelistUser) => {
-    setEditingUser(user.telegramId);
-    setEditForm({
-      realName: user.realName || '',
-      accessHome: user.accessHome,
-      accessModules: user.accessModules,
-      accessIndustries: user.accessIndustries,
-      accessAiConstructor: user.accessAiConstructor,
-      accessMyApp: user.accessMyApp,
-      accessAdvantages: user.accessAdvantages,
-      accessPartners: user.accessPartners,
-      isActive: user.isActive
-    });
-  };
 
-  const handleSaveUser = () => {
-    if (!editingUser) return;
-    
-    updateUserMutation.mutate({ 
-      telegramId: editingUser, 
-      updates: editForm 
-    }, {
-      onSuccess: () => {
-        setEditingUser(null);
-        setEditForm({});
-      }
-    });
-  };
-
-  const handleCancelEdit = () => {
-    setEditingUser(null);
-    setEditForm({});
-  };
 
   const handleViewUserChats = async (telegramId: string) => {
     try {
       setUserChats([]); // Clear previous chats
-      const response = await fetch(`/api/admin/ai-history/${telegramId}`);
+      const response = await fetch(`/api/admin/ai-history/${telegramId}?limit=100&offset=0`);
       if (response.ok) {
         const chats = await response.json();
         setUserChats(chats || []);
@@ -306,6 +273,20 @@ export default function AdminPanel() {
   const handleCloseChatModal = () => {
     setViewingChats(null);
     setUserChats([]);
+  };
+
+  // Toggle user access to specific sections
+  const toggleUserAccess = (telegramId: string, accessField: keyof WhitelistUser) => {
+    const user = whitelist?.find((u: WhitelistUser) => u.telegramId === telegramId);
+    if (!user) return;
+
+    const currentValue = user[accessField] as boolean;
+    const updates = { [accessField]: !currentValue };
+
+    updateUserMutation.mutate({ 
+      telegramId, 
+      updates 
+    });
   };
 
   const formatUserName = (user: WhitelistUser) => {
@@ -534,25 +515,87 @@ export default function AdminPanel() {
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-1 mt-2">
-                          {user.accessHome && <Badge variant="secondary" className="text-xs">Главная</Badge>}
-                          {user.accessModules && <Badge variant="secondary" className="text-xs">Модули</Badge>}
-                          {user.accessIndustries && <Badge variant="secondary" className="text-xs">Отрасли</Badge>}
-                          {user.accessAiConstructor && <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">AI-конструктор</Badge>}
-                          {user.accessMyApp && <Badge variant="secondary" className="text-xs">Мое приложение</Badge>}
-                          {user.accessAdvantages && <Badge variant="secondary" className="text-xs">Преимущества</Badge>}
-                          {user.accessPartners && <Badge variant="secondary" className="text-xs">Партнерам</Badge>}
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs cursor-pointer transition-colors ${
+                              user.accessHome 
+                                ? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200' 
+                                : 'bg-gray-100 text-gray-500 border-gray-300 hover:bg-blue-100 hover:text-blue-600'
+                            }`}
+                            onClick={() => toggleUserAccess(user.telegramId, 'accessHome')}
+                          >
+                            Главная
+                          </Badge>
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs cursor-pointer transition-colors ${
+                              user.accessModules 
+                                ? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200' 
+                                : 'bg-gray-100 text-gray-500 border-gray-300 hover:bg-blue-100 hover:text-blue-600'
+                            }`}
+                            onClick={() => toggleUserAccess(user.telegramId, 'accessModules')}
+                          >
+                            Модули
+                          </Badge>
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs cursor-pointer transition-colors ${
+                              user.accessIndustries 
+                                ? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200' 
+                                : 'bg-gray-100 text-gray-500 border-gray-300 hover:bg-blue-100 hover:text-blue-600'
+                            }`}
+                            onClick={() => toggleUserAccess(user.telegramId, 'accessIndustries')}
+                          >
+                            Отрасли
+                          </Badge>
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs cursor-pointer transition-colors ${
+                              user.accessAiConstructor 
+                                ? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200' 
+                                : 'bg-gray-100 text-gray-500 border-gray-300 hover:bg-blue-100 hover:text-blue-600'
+                            }`}
+                            onClick={() => toggleUserAccess(user.telegramId, 'accessAiConstructor')}
+                          >
+                            AI-конструктор
+                          </Badge>
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs cursor-pointer transition-colors ${
+                              user.accessMyApp 
+                                ? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200' 
+                                : 'bg-gray-100 text-gray-500 border-gray-300 hover:bg-blue-100 hover:text-blue-600'
+                            }`}
+                            onClick={() => toggleUserAccess(user.telegramId, 'accessMyApp')}
+                          >
+                            Мое приложение
+                          </Badge>
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs cursor-pointer transition-colors ${
+                              user.accessAdvantages 
+                                ? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200' 
+                                : 'bg-gray-100 text-gray-500 border-gray-300 hover:bg-blue-100 hover:text-blue-600'
+                            }`}
+                            onClick={() => toggleUserAccess(user.telegramId, 'accessAdvantages')}
+                          >
+                            Преимущества
+                          </Badge>
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs cursor-pointer transition-colors ${
+                              user.accessPartners 
+                                ? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200' 
+                                : 'bg-gray-100 text-gray-500 border-gray-300 hover:bg-blue-100 hover:text-blue-600'
+                            }`}
+                            onClick={() => toggleUserAccess(user.telegramId, 'accessPartners')}
+                          >
+                            Партнерам
+                          </Badge>
                         </div>
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditUser(user)}
-                        className="text-blue-600 hover:text-blue-700"
-                      >
-                        Редактировать
-                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
@@ -563,100 +606,6 @@ export default function AdminPanel() {
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-
-                    {/* Форма редактирования (отображается инлайн при editingUser === user.telegramId) */}
-                    {editingUser === user.telegramId && (
-                        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border">
-                          <h3 className="text-lg font-semibold mb-4">Редактирование пользователя</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium mb-1">Настоящее имя</label>
-                              <Input
-                                value={editForm.realName || ''}
-                                onChange={(e) => setEditForm({...editForm, realName: e.target.value})}
-                                placeholder="Введите настоящее имя"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium">Доступ к разделам</label>
-                              <div className="grid grid-cols-2 gap-2">
-                                <label className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={editForm.accessHome || false}
-                                    onChange={(e) => setEditForm({...editForm, accessHome: e.target.checked})}
-                                  />
-                                  <span className="text-sm">Главная</span>
-                                </label>
-                                <label className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={editForm.accessModules || false}
-                                    onChange={(e) => setEditForm({...editForm, accessModules: e.target.checked})}
-                                  />
-                                  <span className="text-sm">Модули</span>
-                                </label>
-                                <label className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={editForm.accessIndustries || false}
-                                    onChange={(e) => setEditForm({...editForm, accessIndustries: e.target.checked})}
-                                  />
-                                  <span className="text-sm">Отрасли</span>
-                                </label>
-                                <label className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={editForm.accessAiConstructor || false}
-                                    onChange={(e) => setEditForm({...editForm, accessAiConstructor: e.target.checked})}
-                                  />
-                                  <span className="text-sm">AI-конструктор</span>
-                                </label>
-                                <label className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={editForm.accessMyApp || false}
-                                    onChange={(e) => setEditForm({...editForm, accessMyApp: e.target.checked})}
-                                  />
-                                  <span className="text-sm">Мое приложение</span>
-                                </label>
-                                <label className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={editForm.accessAdvantages || false}
-                                    onChange={(e) => setEditForm({...editForm, accessAdvantages: e.target.checked})}
-                                  />
-                                  <span className="text-sm">Преимущества</span>
-                                </label>
-                                <label className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={editForm.accessPartners || false}
-                                    onChange={(e) => setEditForm({...editForm, accessPartners: e.target.checked})}
-                                  />
-                                  <span className="text-sm">Партнерам</span>
-                                </label>
-                                <label className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={editForm.isActive || false}
-                                    onChange={(e) => setEditForm({...editForm, isActive: e.target.checked})}
-                                  />
-                                  <span className="text-sm">Активен</span>
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex gap-2 mt-4">
-                            <Button onClick={handleSaveUser} disabled={updateUserMutation.isPending}>
-                              Сохранить
-                            </Button>
-                            <Button variant="outline" onClick={handleCancelEdit}>
-                              Отмена
-                            </Button>
-                          </div>
-                        </div>
-                    )}
                   </div>
                 ))}
               </div>

@@ -32,7 +32,6 @@ const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
   
   const handleModuleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-    e.preventDefault();
     
     // Get current state from localStorage
     const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');

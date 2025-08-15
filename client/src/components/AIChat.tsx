@@ -432,10 +432,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    
+                  onClick={() => {
                     // Simplified module toggle with immediate visual feedback
                     const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
                     const moduleExists = savedModules.find((m: any) => m.id === module.id);
