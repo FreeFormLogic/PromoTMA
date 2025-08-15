@@ -533,11 +533,11 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         cleanedPart = part.replace(/^(\s+)(?!Модуль \d+:)/gm, '');
         
         // Add proper spacing: larger gap between different modules, smaller gap within modules
-        // Pattern: After module description (ending with .), before next "Модуль" - add bigger gap
+        // Pattern: After module description (ending with .), before next "Модуль" - add much bigger gap
         cleanedPart = cleanedPart
-          .replace(/\.\s*\n\s*(?=Модуль \d+:)/g, '.\n\n\n') // Bigger gap between modules
-          .replace(/(?:Модуль \d+:.*)\n(?!\n)/g, (match) => match + '\n') // Smaller gap after module title
-          .replace(/(\n\s*){4,}/g, '\n\n\n'); // Normalize to max 3 newlines
+          .replace(/\.\s*\n\s*(?=Модуль \d+:)/g, '.\n\n\n\n\n') // Much bigger gap between modules (5 newlines)
+          .replace(/(?:Модуль \d+:.*)\n(?!\n)/g, (match) => match + '\n') // Small gap after module title (1 newline)
+          .replace(/(\n\s*){6,}/g, '\n\n\n\n\n'); // Normalize to max 5 newlines
       }
       
       return <span key={index}>{formatText(cleanedPart)}</span>;
@@ -659,18 +659,18 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             const nextLine = lines[lineIndex + 1];
             const prevLine = lines[lineIndex - 1];
             
-            // If this is space between modules (prev line ends with period, next line starts with "Модуль")
-            if (prevLine && nextLine && 
-                prevLine.trim().endsWith('.') && 
-                nextLine.trim().startsWith('Модуль ')) {
-              return <div key={lineIndex} className="mb-4"></div>; // Bigger gap between modules
-            }
-            
             // If this is space within a module (after module title)
             if (prevLine && nextLine && 
                 prevLine.trim().startsWith('Модуль ') && 
                 !nextLine.trim().startsWith('Модуль ')) {
-              return <div key={lineIndex} className="mb-2"></div>; // Smaller gap after module title
+              return <div key={lineIndex} className="mb-1"></div>; // Small gap after module title
+            }
+            
+            // If this is space between modules (prev line ends with period, next line starts with "Модуль")
+            if (prevLine && nextLine && 
+                prevLine.trim().endsWith('.') && 
+                nextLine.trim().startsWith('Модуль ')) {
+              return <div key={lineIndex} className="mb-6"></div>; // Much bigger gap between modules
             }
             
             // Default spacing for other empty lines
