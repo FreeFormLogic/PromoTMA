@@ -593,11 +593,23 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     const parts = content.split(/(\[MODULE:\d+\])/g);
     const hasModules = parts.some(part => part.match(/\[MODULE:\d+\]/));
     
+    // Debug logging
+    if (hasModules) {
+      console.log('🔍 Found modules in message:', parts.filter(p => p.match(/\[MODULE:\d+\]/)));
+      console.log('🔍 Available modules count:', allModules?.length);
+      console.log('🔍 First few modules:', allModules?.slice(0, 3).map(m => `${m.number}: ${m.name}`));
+    }
+    
     const renderedParts = parts.map((part, index) => {
       const moduleMatch = part.match(/\[MODULE:(\d+)\]/);
       if (moduleMatch) {
         const moduleNumber = parseInt(moduleMatch[1]);
         const module = allModules.find(m => m.number === moduleNumber);
+        
+        console.log(`🔍 Looking for module ${moduleNumber}, found:`, !!module);
+        if (module) {
+          console.log(`🔍 Module ${moduleNumber} details:`, { id: module.id, name: module.name });
+        }
         
         if (module) {
           return (
@@ -612,8 +624,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     });
 
     // Add clickable text at the end if this message has modules or if modules are currently displayed
-    // Debug: Always show for assistant messages that follow module recommendations
-    if (isAssistant && (hasModules || hasDisplayedModules || (currentlyDisplayedModules && currentlyDisplayedModules.length > 0))) {
+    const shouldShowActions = isAssistant && (hasModules || hasDisplayedModules || (currentlyDisplayedModules && currentlyDisplayedModules.length > 0));
+    console.log('🔍 Should show actions:', shouldShowActions, { hasModules, hasDisplayedModules, currentlyDisplayedModules: currentlyDisplayedModules?.length });
+    
+    if (shouldShowActions) {
       renderedParts.push(
         <div key="actions" className="mt-4 pt-3 border-t border-gray-200">
           <div className="flex flex-wrap gap-4 text-xs">
@@ -641,8 +655,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     
                     const data = await response.json();
                     
-                    if (data.recommendedModules) {
+                    if (data.recommendedModules && data.recommendedModules.length > 0) {
+                      console.log('🔍 Updating modules:', data.recommendedModules);
                       onModulesUpdate(data.recommendedModules);
+                      setChatModules(data.recommendedModules);
                     }
                     
                     const botMessage: Message = {
