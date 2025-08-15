@@ -368,17 +368,24 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
 
   const ModuleCard = ({ module }: { module: Module }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [renderKey, setRenderKey] = useState(0);
+    const [buttonState, setButtonState] = useState(false);
     
-    // Always get fresh state from localStorage 
+    // Check selection status
     const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
     const isSelected = !!savedModules.find((m: any) => m.id === module.id);
+    
+    // Update button state when selection changes
+    useEffect(() => {
+      setButtonState(isSelected);
+    }, [isSelected]);
     const IconComponent = Sparkles; // Use sparkles icon for now
     
-    // Force re-render on module selection changes
+    // Listen for module selection changes globally
     useEffect(() => {
       const handleModuleSelectionChange = () => {
-        setRenderKey(prev => prev + 1);
+        const updatedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+        const newState = !!updatedModules.find((m: any) => m.id === module.id);
+        setButtonState(newState);
       };
       
       window.addEventListener('moduleSelectionChanged', handleModuleSelectionChange);
@@ -386,7 +393,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       return () => {
         window.removeEventListener('moduleSelectionChanged', handleModuleSelectionChange);
       };
-    }, []);
+    }, [module.id]);
     
     return (
       <>
@@ -401,9 +408,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           <div className="p-4">
             {/* Icon and header */}
             <div className="flex items-start gap-3 mb-1">
-              <div className={`w-10 h-10 rounded-lg ${isSelected ? 'bg-gradient-to-br from-green-500 to-blue-600 ring-2 ring-green-200' : 'bg-gradient-to-br from-blue-500 to-purple-600'} flex items-center justify-center flex-shrink-0 relative`}>
+              <div className={`w-10 h-10 rounded-lg ${buttonState ? 'bg-gradient-to-br from-green-500 to-blue-600 ring-2 ring-green-200' : 'bg-gradient-to-br from-blue-500 to-purple-600'} flex items-center justify-center flex-shrink-0 relative`}>
                 <IconComponent className="w-5 h-5 text-white" />
-                {isSelected && (
+                {buttonState && (
                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full">
                     <Check className="w-2 h-2 text-white absolute top-[-1px] left-[-1px]" />
                   </div>
@@ -463,24 +470,26 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       }];
                     }
                     
-                    // Save immediately and update state
+                    // Save and update state immediately
                     localStorage.setItem('selectedModules', JSON.stringify(newModules));
                     setSelectedModules(newModules);
                     setLocalSelectedModules(newModules);
                     
-                    // Force immediate re-render of this component
-                    setRenderKey(prev => prev + 1);
+                    // Update button state immediately 
+                    setButtonState(!moduleExists);
                     
                     // Notify other components
                     window.dispatchEvent(new CustomEvent('moduleSelectionChanged'));
+                    
+                    // Close modal after selection (handled by ModuleModal now)
                   }}
                   className={`w-8 h-8 p-0 rounded-full ${
-                    isSelected 
+                    buttonState
                       ? 'bg-green-100 text-green-600 hover:bg-green-200 border border-green-300' 
                       : 'bg-gray-100 text-gray-400 hover:bg-blue-100 hover:text-blue-600 border border-gray-300'
                   }`}
                 >
-                  {isSelected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  {buttonState ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                 </Button>
               </div>
             </div>

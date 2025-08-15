@@ -15,60 +15,64 @@ interface ModuleCardProps {
 
 const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
   const IconComponent = Sparkles; // Use sparkles icon like in AI chat
-  const [selectedModules, setSelectedModules] = useState<Module[]>(() => {
-    const saved = localStorage.getItem('selectedModules');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [buttonState, setButtonState] = useState(false);
+  
+  // Check if module is selected
+  const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+  const isSelected = !!savedModules.find((m: any) => m.id === module.id);
+  
+  // Update button state when selection changes
+  useEffect(() => {
+    setButtonState(isSelected);
+  }, [isSelected]);
   
   // Listen for module selection changes from other components
   useEffect(() => {
-    const handleModuleSelectionChange = (event: CustomEvent) => {
-      setSelectedModules(event.detail.modules);
+    const handleModuleSelectionChange = () => {
+      const updatedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+      const newState = !!updatedModules.find((m: any) => m.id === module.id);
+      setButtonState(newState);
     };
     
-    window.addEventListener('moduleSelectionChanged', handleModuleSelectionChange as EventListener);
+    window.addEventListener('moduleSelectionChanged', handleModuleSelectionChange);
     
     return () => {
-      window.removeEventListener('moduleSelectionChanged', handleModuleSelectionChange as EventListener);
+      window.removeEventListener('moduleSelectionChanged', handleModuleSelectionChange);
     };
-  }, []);
-  
-  const isSelected = selectedModules.find(m => m.id === module.id);
+  }, [module.id]);
   
   const handleModuleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     
-    // Fixed module connection logic with proper type handling
+    // Get current state from localStorage
     const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-    const isCurrentlySelected = savedModules.find((m: any) => m.id === module.id);
+    const moduleExists = savedModules.find((m: any) => m.id === module.id);
     
-    let updatedModules;
-    if (isCurrentlySelected) {
-      updatedModules = savedModules.filter((m: any) => m.id !== module.id);
+    let newModules;
+    if (moduleExists) {
+      newModules = savedModules.filter((m: any) => m.id !== module.id);
     } else {
-      updatedModules = [...savedModules, {
+      newModules = [...savedModules, {
         ...module,
-        isPopular: module.isPopular || false
+        isPopular: (module as any).isPopular || false
       }];
     }
     
-    // Update localStorage
-    localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+    // Save and update immediately
+    localStorage.setItem('selectedModules', JSON.stringify(newModules));
     
-    // Update local state
-    setSelectedModules(updatedModules);
+    // Update button state immediately 
+    setButtonState(!moduleExists);
     
-    // Force re-render and notify other components
-    window.dispatchEvent(new CustomEvent('moduleSelectionChanged', { 
-      detail: { modules: updatedModules } 
-    }));
+    // Notify other components
+    window.dispatchEvent(new CustomEvent('moduleSelectionChanged'));
   };
   
   return (
     <Card 
       className={`group cursor-pointer transition-all duration-300 border mb-3 ${
-        isSelected 
+        buttonState 
           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-200 dark:ring-blue-800' 
           : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-600'
       } hover:-translate-y-1 hover:shadow-lg`}
@@ -77,9 +81,9 @@ const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
       <div className="p-4">
         {/* Icon and header */}
         <div className="flex items-start gap-3 mb-3">
-          <div className={`w-10 h-10 rounded-lg ${isSelected ? 'bg-gradient-to-br from-green-500 to-blue-600 ring-2 ring-green-200' : 'bg-gradient-to-br from-blue-500 to-purple-600'} flex items-center justify-center flex-shrink-0 relative`}>
+          <div className={`w-10 h-10 rounded-lg ${buttonState ? 'bg-gradient-to-br from-green-500 to-blue-600 ring-2 ring-green-200' : 'bg-gradient-to-br from-blue-500 to-purple-600'} flex items-center justify-center flex-shrink-0 relative`}>
             <IconComponent className="w-5 h-5 text-white" />
-            {isSelected && (
+            {buttonState && (
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full">
                 <Check className="w-2 h-2 text-white absolute top-[-1px] left-[-1px]" />
               </div>
@@ -114,13 +118,13 @@ const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
               size="sm"
               onClick={handleModuleToggle}
               className={`w-6 h-6 p-0 ${
-                isSelected 
+                buttonState 
                   ? 'text-green-600 hover:text-green-700' 
                   : 'text-gray-400 hover:text-blue-600'
               }`}
-              title={isSelected ? 'Отключить модуль' : 'Подключить модуль'}
+              title={buttonState ? 'Отключить модуль' : 'Подключить модуль'}
             >
-              {isSelected ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+              {buttonState ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
             </Button>
           </div>
         </div>
