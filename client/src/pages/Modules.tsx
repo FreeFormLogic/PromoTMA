@@ -200,7 +200,7 @@ function ModuleCard({ module }: ModuleCardProps) {
                   <div key={index} className="flex items-start gap-3">
                     <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
                     <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed break-words hyphens-auto">
-                      {formatFeatureText(feature)}
+                      {formatFeatureText(feature).replace(/^\*\*|\*\*$/g, '').replace(/\*\*/g, '')}
                     </p>
                   </div>
                 ))}

@@ -109,14 +109,14 @@ export function ModuleCard({ module }: ModuleCardProps) {
               ? (module.keyFeatures as string[]).slice(0, 3).map((feature, index) => (
                   <li key={index} className="text-xs text-gray-600 flex items-start">
                     <div className="w-1 h-1 bg-success rounded-full mt-1.5 mr-2 flex-shrink-0"></div>
-                    <span className="line-clamp-1">{feature}</span>
+                    <span className="line-clamp-1">{feature.replace(/^\*\*|\*\*$/g, '').replace(/\*\*/g, '')}</span>
                   </li>
                 ))
               : typeof module.keyFeatures === 'string' 
                 ? [module.keyFeatures].map((feature, index) => (
                     <li key={index} className="text-xs text-gray-600 flex items-start">
                       <div className="w-1 h-1 bg-success rounded-full mt-1.5 mr-2 flex-shrink-0"></div>
-                      <span className="line-clamp-1">{feature}</span>
+                      <span className="line-clamp-1">{feature.replace(/^\*\*|\*\*$/g, '').replace(/\*\*/g, '')}</span>
                     </li>
                   ))
                 : []
