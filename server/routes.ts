@@ -285,6 +285,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('- AI recommended module numbers:', result.recommendedModules);
       
+      // Расчет токенов для Claude 4.0 (примерно 4 символа = 1 токен)
+      const userMessage = messages[messages.length - 1]?.content || '';
+      const inputTokens = Math.ceil(userMessage.length / 4);
+      const outputTokens = Math.ceil(result.response.length / 4);
+      
+      // Цены для Claude Sonnet 4.0: $3/1M input tokens, $15/1M output tokens  
+      const inputCost = (inputTokens / 1000000) * 3;
+      const outputCost = (outputTokens / 1000000) * 15;
+      const totalCost = inputCost + outputCost;
+      
+      // Создаем сессию для AI чата если ее нет
+      const telegramId = req.headers['x-telegram-user-id'] as string || 'unknown';
+      let sessionId = req.headers['x-session-id'] as string;
+      if (!sessionId) {
+        sessionId = await storage.createAiChatSession(telegramId);
+      }
+      
+      // Сохраняем сообщение пользователя
+      await storage.saveAiChatMessage(sessionId, {
+        role: 'user',
+        content: userMessage,
+        tokensInput: inputTokens,
+        tokensOutput: 0,
+        costUsd: inputCost
+      });
+      
+      // Сохраняем ответ AI
+      await storage.saveAiChatMessage(sessionId, {
+        role: 'assistant', 
+        content: result.response,
+        tokensInput: 0,
+        tokensOutput: outputTokens,
+        costUsd: outputCost
+      });
+      
       // Get recommended module details with validation  
       const allModules = await storage.getAllModules();
       const recommendedModules = result.recommendedModules
@@ -442,6 +477,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error removing from whitelist:", error);
       res.status(500).json({ message: "Ошибка удаления пользователя" });
+    }
+  });
+
+  // Update user endpoint (PATCH)
+  app.patch("/api/admin/whitelist/:telegramId", async (req, res) => {
+    try {
+      const { telegramId } = req.params;
+      const updates = req.body;
+      
+      if (!telegramId || !/^\d+$/.test(telegramId)) {
+        return res.status(400).json({ message: "Некорректный Telegram ID" });
+      }
+
+      const result = await storage.updateWhitelistUser(telegramId, updates);
+      if (result.success) {
+        res.json({ message: "Пользователь обновлен", user: result.user });
+      } else {
+        res.status(404).json({ message: result.message });
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Ошибка обновления пользователя" });
     }
   });
 

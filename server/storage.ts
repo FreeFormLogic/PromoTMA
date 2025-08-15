@@ -41,12 +41,14 @@ export interface IStorage {
   addToWhitelist(telegramId: string, userData?: Partial<InsertAuthorizedUser>): Promise<{ success: boolean; message: string }>;
   updateUserPermissions(telegramId: string, permissions: UpdateAuthorizedUser): Promise<{ success: boolean; message: string }>;
   removeFromWhitelist(telegramId: string): Promise<{ success: boolean; message: string }>;
+  updateWhitelistUser(telegramId: string, updates: Partial<AuthorizedUser>): Promise<{ success: boolean; message: string; user?: AuthorizedUser }>;
   isUserAuthorized(telegramId: string): Promise<boolean>;
   getUserPermissions(telegramId: string): Promise<AuthorizedUser | null>;
   canUserAccessPage(telegramId: string, page: string): Promise<boolean>;
 
   // AI Chat Statistics methods
   createAiChatSession(telegramId: string): Promise<string>;
+  saveAiChatMessage(sessionId: string, messageData: { role: 'user' | 'assistant'; content: string; tokensInput: number; tokensOutput: number; costUsd: number }): Promise<void>;
   endAiChatSession(sessionId: string): Promise<void>;
   logAiChatMessage(sessionId: string, telegramId: string, role: 'user' | 'assistant', content: string, tokensInput: number, tokensOutput: number, cost: number, metadata?: any): Promise<void>;
   updateUserStats(telegramId: string): Promise<void>;
@@ -351,6 +353,32 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async updateWhitelistUser(telegramId: string, updates: Partial<AuthorizedUser>): Promise<{ success: boolean; message: string; user?: AuthorizedUser }> {
+    try {
+      // Исключаем поля, которые нельзя обновлять через этот метод
+      const { id, telegramId: _, addedAt, ...allowedUpdates } = updates;
+      
+      const result = await db
+        .update(authorizedUsers)
+        .set(allowedUpdates)
+        .where(eq(authorizedUsers.telegramId, telegramId))
+        .returning();
+
+      if (result.length === 0) {
+        return { success: false, message: "Пользователь не найден в вайт-листе" };
+      }
+
+      return { 
+        success: true, 
+        message: "Пользователь успешно обновлен",
+        user: result[0]
+      };
+    } catch (error) {
+      console.error("Error updating whitelist user:", error);
+      return { success: false, message: "Ошибка обновления пользователя" };
+    }
+  }
+
   async isUserAuthorized(telegramId: string): Promise<boolean> {
     try {
       const [user] = await db.select()
@@ -403,6 +431,46 @@ export class DatabaseStorage implements IStorage {
 
     await db.insert(aiChatSessions).values(sessionData);
     return sessionId;
+  }
+
+  async saveAiChatMessage(sessionId: string, messageData: { 
+    role: 'user' | 'assistant'; 
+    content: string; 
+    tokensInput: number; 
+    tokensOutput: number; 
+    costUsd: number 
+  }): Promise<void> {
+    // Получаем telegramId из сессии
+    const [session] = await db.select({ telegramId: aiChatSessions.telegramId })
+      .from(aiChatSessions)
+      .where(eq(aiChatSessions.id, sessionId));
+    
+    if (!session) {
+      throw new Error(`Session ${sessionId} not found`);
+    }
+
+    const insertData = {
+      sessionId,
+      telegramId: session.telegramId,
+      role: messageData.role,
+      content: messageData.content,
+      tokensInput: messageData.tokensInput,
+      tokensOutput: messageData.tokensOutput,
+      costUsd: messageData.costUsd.toString(),
+      metadata: {}
+    };
+
+    await db.insert(aiChatMessages).values(insertData);
+
+    // Обновляем счетчики в сессии
+    await db.update(aiChatSessions)
+      .set({
+        messagesCount: sql`messages_count + 1`,
+        tokensInput: sql`tokens_input + ${messageData.tokensInput}`,
+        tokensOutput: sql`tokens_output + ${messageData.tokensOutput}`,
+        totalCostUsd: sql`total_cost_usd + ${messageData.costUsd}`
+      })
+      .where(eq(aiChatSessions.id, sessionId));
   }
 
   async endAiChatSession(sessionId: string): Promise<void> {

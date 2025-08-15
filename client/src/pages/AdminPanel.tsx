@@ -51,6 +51,8 @@ export default function AdminPanel() {
   const [bulkUserIds, setBulkUserIds] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
+  const [editingUser, setEditingUser] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<WhitelistUser>>({});
   
   // Простая проверка админ-доступа
   const handleAdminLogin = () => {
@@ -171,6 +173,33 @@ export default function AdminPanel() {
     },
   });
 
+  // Обновление пользователя
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ telegramId, updates }: { telegramId: string, updates: Partial<WhitelistUser> }) => {
+      const response = await fetch(`/api/admin/whitelist/${telegramId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      if (!response.ok) throw new Error("Ошибка обновления");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/whitelist"] });
+      toast({
+        title: "Пользователь обновлен",
+        description: "Данные пользователя успешно обновлены",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Ошибка",
+        description: error.message || "Не удалось обновить пользователя",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleAddUser = () => {
     if (!newUserId.trim()) return;
     
@@ -210,6 +239,38 @@ export default function AdminPanel() {
 
   const handleRemoveUser = (telegramId: string) => {
     removeUserMutation.mutate(telegramId);
+  };
+
+  const handleEditUser = (user: WhitelistUser) => {
+    setEditingUser(user.telegramId);
+    setEditForm({
+      realName: user.realName || '',
+      accessHome: user.accessHome,
+      accessModules: user.accessModules,
+      accessIndustries: user.accessIndustries,
+      accessAiConstructor: user.accessAiConstructor,
+      accessMyApp: user.accessMyApp,
+      accessAdvantages: user.accessAdvantages,
+      accessPartners: user.accessPartners,
+      isActive: user.isActive
+    });
+  };
+
+  const handleSaveUser = () => {
+    if (!editingUser) return;
+    
+    updateUserMutation.mutate({ 
+      telegramId: editingUser, 
+      updates: editForm 
+    });
+    
+    setEditingUser(null);
+    setEditForm({});
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUser(null);
+    setEditForm({});
   };
 
   const formatUserName = (user: WhitelistUser) => {
@@ -449,6 +510,14 @@ export default function AdminPanel() {
                       </div>
                     </div>
                     <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditUser(user)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        Редактировать
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"

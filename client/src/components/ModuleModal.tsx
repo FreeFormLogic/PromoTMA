@@ -137,6 +137,25 @@ const categoryImages: Record<string, string> = {
 };
 
 export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
+  // Проверяем, выбран ли модуль
+  const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+  const isSelected = savedModules.some((m: any) => m.id === module.id);
+
+  const handleConnectModule = () => {
+    if (isSelected) {
+      // Удаляем модуль если уже выбран
+      const updatedModules = savedModules.filter((m: any) => m.id !== module.id);
+      localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+    } else {
+      // Добавляем модуль в выбранные
+      const updatedModules = [...savedModules, module];
+      localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+    }
+    
+    // Обновляем интерфейс
+    window.dispatchEvent(new Event('selectedModulesChanged'));
+    onClose();
+  };
   // Используем реальные данные модуля из базы данных (как в AI чате)
   const details = {
     description: module?.description || "Описание модуля доступно в базе данных",
@@ -226,8 +245,15 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
           )}
 
           <div className="flex gap-3 pt-6">
-            <Button className="flex-1 h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
-              Подключить модуль
+            <Button 
+              onClick={handleConnectModule}
+              className={`flex-1 h-12 text-base font-medium rounded-lg ${
+                isSelected 
+                  ? 'bg-red-600 hover:bg-red-700 text-white' 
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+            >
+              {isSelected ? 'Отключить модуль' : 'Подключить модуль'}
             </Button>
             <Button 
               variant="outline" 

@@ -283,12 +283,19 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       await analyzeAndUpdateModules(messageHistory);
       
       // Get AI response with recommended modules
-      const response = await apiRequest('POST', '/api/ai/chat', {
-        messages: [...messages, userMessage].map(m => ({
-          role: m.role,
-          content: m.content
-        })),
-        alreadyShownModules: currentlyDisplayedModules.map(m => m.number)
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-telegram-user-id': window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || 'unknown'
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage].map(m => ({
+            role: m.role,
+            content: m.content
+          })),
+          alreadyShownModules: currentlyDisplayedModules.map(m => m.number)
+        })
       });
       const responseData = await response.json();
 
@@ -511,7 +518,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         
         if (module) {
           return (
-            <div key={index} className="my-3">
+            <div key={index} className="mb-1">
               <ModuleCard module={module} />
             </div>
           );
@@ -519,18 +526,16 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         return <span key={index} className="text-red-500">Модуль {moduleNumber} не найден</span>;
       }
       
-      // Clean up the text part - remove leading spaces
+      // Clean up the text part - remove leading spaces from descriptions only
       let cleanedPart = part;
       if (typeof part === 'string') {
-        // Remove leading whitespace from the beginning of each description
-        cleanedPart = part.replace(/^\s+/, '');
-        // Ensure proper spacing between descriptions
-        if (cleanedPart && index > 0 && !cleanedPart.startsWith('\n')) {
-          cleanedPart = '\n\n' + cleanedPart;
-        }
+        // Remove leading whitespace only from description lines, not module headers
+        // Also remove excessive spacing between modules
+        cleanedPart = part.replace(/^(\s+)(?!Модуль \d+:)/gm, '')
+          .replace(/(\n\s*){3,}/g, '\n\n'); // Replace 3+ consecutive newlines with just 2
       }
       
-      return <div key={index} className="mb-3">{formatText(cleanedPart)}</div>;
+      return <span key={index}>{formatText(cleanedPart)}</span>;
     });
 
     // Add clickable text at the end if this message has modules or if modules are currently displayed
@@ -556,7 +561,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                   try {
                     const response = await fetch('/api/ai/chat', {
                       method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
+                      headers: { 
+                        'Content-Type': 'application/json',
+                        'x-telegram-user-id': window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || 'unknown'
+                      },
                       body: JSON.stringify({
                         messages: [...messages, userMessage],
                         alreadyShownModules: currentlyDisplayedModules || []
