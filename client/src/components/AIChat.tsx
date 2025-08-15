@@ -404,7 +404,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 leading-tight break-words hyphens-auto">
-                  {module.name}
+                  {module.name.replace(/\*\*/g, '')}
                 </h3>
                 <div className="text-[10px] mt-1 font-normal text-gray-500 uppercase">
                   {module.category}
@@ -414,7 +414,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             
             {/* Description */}
             <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
-              {module.description}
+              {module.description.replace(/\*\*/g, '')}
             </p>
             
             {/* Benefit and arrow */}
@@ -452,7 +452,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             <DialogHeader>
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {module.name}
+                  {module.name.replace(/\*\*/g, '')}
                 </DialogTitle>
               </div>
 
@@ -470,7 +470,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                   </div>
                   <div className="flex-1">
                     <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                      {module.description}
+                      {module.description.replace(/\*\*/g, '')}
                     </p>
                     <div className="mt-3 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 rounded-lg border border-blue-200 dark:border-blue-800">
                       <div 
