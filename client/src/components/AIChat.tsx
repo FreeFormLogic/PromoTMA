@@ -718,6 +718,12 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     // Also remove pattern like "**[MODULE:X] Module Name**" that creates duplicates
     cleanedText = cleanedText.replace(/\*\*\[MODULE:\d+\]\s*([^\*]+)\*\*/g, '');
     
+    // Remove pattern "** - " that appears before module descriptions
+    cleanedText = cleanedText.replace(/^\*\* - /gm, '');
+    
+    // Remove standalone "**" at the beginning of lines
+    cleanedText = cleanedText.replace(/^\*\*$/gm, '');
+    
     // First handle headers (## text) and bold (**text**)
     const lines = cleanedText.split('\n');
     
