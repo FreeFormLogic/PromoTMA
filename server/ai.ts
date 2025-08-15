@@ -117,7 +117,11 @@ ${modulesList}
 - Пиццерия = модуль 165 ПЕРВЫМ
 - Ресторан = модуль 165 ПЕРВЫМ  
 - Кафе = модуль 165 ПЕРВЫМ
-- НЕ ИСПОЛЬЗУЙ модуль 161!
+- ЗАПРЕЩЕНО использовать модуль 161 для ресторанов!
+
+КРИТИЧЕСКИ ВАЖНО: 
+- Модуль 165 называется "Управление рестораном" 
+- Модуль 161 называется "Система бизнес-правил" - НЕ ДЛЯ РЕСТОРАНОВ!
 
 ФОРМАТ ОТВЕТА:
 Используй [MODULE:НОМЕР] для рекомендаций модулей.
@@ -146,6 +150,24 @@ ${modulesList}
           const numberMatch = match.match(/\[MODULE:(\d+)\]/i);
           if (numberMatch) {
             const moduleNumber = parseInt(numberMatch[1]);
+            
+            // CRITICAL FIX: Block module 161 for restaurants/pizzerias
+            const userMessages = messages.filter((msg: any) => msg.role === 'user').map((msg: any) => msg.content.toLowerCase());
+            const allUserText = userMessages.join(' ');
+            const isRestaurantBusiness = allUserText.includes('пиццерия') || 
+                                       allUserText.includes('ресторан') || 
+                                       allUserText.includes('кафе') ||
+                                       allUserText.includes('еда') ||
+                                       allUserText.includes('доставка еды');
+            
+            if (isRestaurantBusiness && moduleNumber === 161) {
+              console.log('🚫 BLOCKING module 161 for restaurant business - using 165 instead');
+              if (!alreadyShownModules.includes(165) && !recommendedModules.includes(165)) {
+                recommendedModules.unshift(165); // Add 165 as first module
+              }
+              return; // Skip module 161
+            }
+            
             // Only add if not already shown to user (including previous messages)
             if (!alreadyShownModules.includes(moduleNumber)) {
               recommendedModules.push(moduleNumber);
