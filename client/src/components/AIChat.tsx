@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { ModuleModal } from './ModuleModal';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { apiRequest } from '@/lib/queryClient';
@@ -446,116 +447,12 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           </div>
         </Card>
         
-        {/* Module details modal */}
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden z-[9999]">
-            <DialogHeader>
-              <div className="flex items-center justify-between">
-                <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  {module.name.replace(/\*\*/g, '')}
-                </DialogTitle>
-              </div>
-
-              <DialogDescription className="sr-only">
-                Детальная информация о выбранном модуле
-              </DialogDescription>
-            </DialogHeader>
-            
-            <ScrollArea className="max-h-[70vh] pr-4">
-              <div className="space-y-6">
-                {/* Icon and description */}
-                <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                    <IconComponent className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                      {module.description.replace(/\*\*/g, '')}
-                    </p>
-                    <div className="mt-3 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                      <div 
-                        className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed text-left"
-                        dangerouslySetInnerHTML={{
-                          __html: module.benefits.replace(/\.\.\..*/, '').replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Key Features */}
-                {module.keyFeatures && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
-                      <Settings className="w-4 h-4 text-blue-600" />
-                      Ключевые возможности
-                    </h4>
-                    <div className="text-sm text-gray-700 dark:text-gray-300">
-                      {Array.isArray(module.keyFeatures) 
-                        ? module.keyFeatures.map((feature, index) => (
-                            <div key={index} className="mb-2">
-                              • {feature.split(/(\*\*.*?\*\*)/).map((part, partIndex) => {
-                                if (part.startsWith('**') && part.endsWith('**')) {
-                                  const boldText = part.slice(2, -2);
-                                  return (
-                                    <strong key={partIndex} className="font-semibold">
-                                      {boldText}
-                                    </strong>
-                                  );
-                                }
-                                return <span key={partIndex}>{part}</span>;
-                              })}
-                            </div>
-                          ))
-                        : <div>• {typeof module.keyFeatures === 'string' 
-                            ? module.keyFeatures.split(/(\*\*.*?\*\*)/).map((part, partIndex) => {
-                                if (part.startsWith('**') && part.endsWith('**')) {
-                                  const boldText = part.slice(2, -2);
-                                  return (
-                                    <strong key={partIndex} className="font-semibold">
-                                      {boldText}
-                                    </strong>
-                                  );
-                                }
-                                return <span key={partIndex}>{part}</span>;
-                              })
-                            : module.keyFeatures
-                          }</div>
-                      }
-                    </div>
-                  </div>
-                )}
-
-                {/* Add to app button */}
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <Button
-                    onClick={() => {
-                      handleModuleLike(module);
-                      setIsModalOpen(false);
-                    }}
-                    className={`w-full ${
-                      isSelected 
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                        : 'bg-blue-600 hover:bg-blue-700 text-white'
-                    }`}
-                  >
-                    {isSelected ? (
-                      <>
-                        <Check className="w-4 h-4 mr-2" />
-                        Убрать из приложения
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Добавить в приложение
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </ScrollArea>
-          </DialogContent>
-        </Dialog>
+        {/* Module details modal - using the same ModuleModal as catalog */}
+        <ModuleModal
+          module={module}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
       </>
     );
   };

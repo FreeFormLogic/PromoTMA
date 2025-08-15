@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from './server/db';
-import { modules, industries } from '@shared/schema';
+import { modules, industries } from './shared/schema';
 import { allIndustriesData } from './server/seedIndustries';
 import { allModulesData } from './server/seedModules';
 

@@ -2791,8 +2791,7 @@ export const allModulesData: Module[] = [
   ),
 
   createModule(
-
-
+    176,
     "Customer Data Platform (CDP)",
     "Единый профиль клиента из всех источников",
     "АНАЛИТИКА",
