@@ -517,31 +517,43 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         }
         
         if (module) {
+          // Look for the description in the next part
+          const nextPart = parts[index + 1];
+          let description = '';
+          
+          if (nextPart && typeof nextPart === 'string') {
+            // Extract the first sentence as description for this module
+            const sentences = nextPart.trim().split(/\n/);
+            description = sentences[0]?.trim() || '';
+          }
+          
           return (
-            <div key={index} className="mb-1">
+            <div key={index} className="mb-4">
               <ModuleCard module={module} />
+              {description && (
+                <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 px-3">
+                  {description}
+                </div>
+              )}
             </div>
           );
         }
         return <span key={index} className="text-red-500">Модуль {moduleNumber} не найден</span>;
       }
       
-      // Clean up the text part and add proper spacing
-      let cleanedPart = part;
-      if (typeof part === 'string') {
-        // Remove leading whitespace only from description lines, not module headers
-        cleanedPart = part.replace(/^(\s+)(?!Модуль \d+:)/gm, '');
-        
-        // Add proper spacing: larger gap between different modules, smaller gap within modules
-        // Pattern: After module description (ending with .), before next "Модуль" - add much bigger gap
-        cleanedPart = cleanedPart
-          .replace(/\.\s*\n\s*(?=Модуль \d+:)/g, '.\n\n\n\n\n') // Much bigger gap between modules (5 newlines)
-          .replace(/(?:Модуль \d+:.*)\n(?!\n)/g, (match) => match + '\n') // Small gap after module title (1 newline)
-          .replace(/(\n\s*){6,}/g, '\n\n\n\n\n'); // Normalize to max 5 newlines
+      // Check if this text part follows a module and should be skipped (already used as description)
+      if (index > 0 && parts[index - 1]?.match(/\[MODULE:\d+\]/)) {
+        return null; // Skip this part as it's already used as module description
       }
       
-      return <span key={index}>{formatText(cleanedPart)}</span>;
-    });
+      // Clean up the text part for standalone text (not module descriptions)
+      let cleanedPart = part;
+      if (typeof part === 'string') {
+        cleanedPart = part.replace(/^(\s+)/gm, '').trim();
+      }
+      
+      return cleanedPart ? <span key={index}>{formatText(cleanedPart)}</span> : null;
+    }).filter(Boolean);
 
     // Add clickable text at the end if this message has modules or if modules are currently displayed
     const shouldShowActions = isAssistant && (hasModules || hasDisplayedModules || (currentlyDisplayedModules && currentlyDisplayedModules.length > 0));
