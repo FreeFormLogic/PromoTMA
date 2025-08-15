@@ -116,20 +116,7 @@ export default function Home() {
               </motion.div>
             </div>
             
-            <div className="text-center mt-12">
-              <Button
-                onClick={() => {
-                  const message = encodeURIComponent(
-                    "Привет! Интересует разработка Telegram Mini App. Рассмотрел каталог модулей на вашей платформе. Можете рассказать подробнее о возможностях и стоимости?"
-                  );
-                  window.open(`https://t.me/balilegend?text=${message}`, '_blank');
-                }}
-                size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all"
-              >
-                Создать приложение
-              </Button>
-            </div>
+
           </div>
         </section>
 
