@@ -576,17 +576,19 @@ const moduleFeatures: Record<string, any> = {
 };
 
 export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
-  // Используем реальные данные модуля
+  // Используем реальные данные модуля из базы данных
   const details = {
-    description: module?.description || "",
-    features: (typeof module?.keyFeatures === 'string' 
-      ? module.keyFeatures.split('\n').filter((f: string) => f.trim()) 
-      : [
-        "Основные возможности модуля",
-        "Быстрое внедрение в ваш проект", 
-        "Техническая поддержка при настройке"
-      ]),
-    impact: module?.benefits || ""
+    description: module?.description || "Описание модуля доступно в базе данных",
+    features: Array.isArray(module?.keyFeatures) 
+      ? module.keyFeatures 
+      : (typeof module?.keyFeatures === 'string' 
+        ? module.keyFeatures.split('\n').filter((f: string) => f.trim())
+        : module?.features?.slice(0, 5) || [
+          "Основные возможности модуля",
+          "Быстрое внедрение в ваш проект", 
+          "Техническая поддержка при настройке"
+        ]),
+    impact: module?.benefits || "Преимущества для вашего бизнеса"
   };
 
   if (!module) return null;
