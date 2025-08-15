@@ -1,11 +1,6 @@
-import OpenAI from "openai";
-
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const DEFAULT_MODEL_STR = "gpt-4o";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Используем Gemini 2.5 Pro через прямые HTTP запросы
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const GEMINI_API_KEY = process.env.GOOGLE_API_KEY;
 
 export interface BusinessAnalysis {
   industry: string;
@@ -58,17 +53,27 @@ ${messages.join('\n')}
 
 Отвечай только валидным JSON без дополнительного текста.`;
 
-    const response = await openai.chat.completions.create({
-      model: DEFAULT_MODEL_STR,
-      max_tokens: 1200, // Увеличиваем для детального анализа
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: "Ты - эксперт по бизнес-анализу. Изучай любую нишу и отвечай только валидным JSON без дополнительного текста." },
-        { role: "user", content: prompt }
-      ],
+    const response = await fetch(GEMINI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-goog-api-key': GEMINI_API_KEY!
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `Ты - эксперт по бизнес-анализу. Изучай любую нишу и отвечай только валидным JSON без дополнительного текста.\n\n${prompt}`
+          }]
+        }],
+        generationConfig: {
+          maxOutputTokens: 1200,
+          temperature: 0.1
+        }
+      })
     });
 
-    const content = response.choices[0]?.message?.content;
+    const data = await response.json();
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (content) {
       let responseText = content.trim();
       
@@ -191,16 +196,27 @@ ${modulesList}
 
 Отвечай только на русском языке, будь экспертом и дружелюбным.`;
 
-    const response = await openai.chat.completions.create({
-      model: DEFAULT_MODEL_STR,
-      max_tokens: 2048,
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...messages
-      ],
+    const response = await fetch(GEMINI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-goog-api-key': GEMINI_API_KEY!
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\nДиалог:\n${messages.map(msg => `${msg.role === 'user' ? 'Пользователь' : 'Ассистент'}: ${msg.content}`).join('\n')}`
+          }]
+        }],
+        generationConfig: {
+          maxOutputTokens: 2048,
+          temperature: 0.3
+        }
+      })
     });
 
-    const content = response.choices[0]?.message?.content;
+    const data = await response.json();
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (content) {
       const responseText = content;
       
@@ -489,16 +505,26 @@ export async function generateChatResponse(messages: {role: string, content: str
   // ПОЛНЫЙ АНАЛИЗ ВСЕХ МОДУЛЕЙ ДЛЯ ИНТЕЛЛЕКТУАЛЬНОГО ПОДБОРА
   const availableModules = allModules.filter(m => !displayedModuleNumbers.includes(m.number));
   
-  // Создаем компактный контекст модулей для экономии токенов
+  // Создаем детальный контекст модулей с ПОЛНОЙ информацией для умного сопоставления
   const modulesByCategory = availableModules.reduce((acc: any, module: any) => {
     if (!acc[module.category]) acc[module.category] = [];
     
-    // Компактная запись: только номер, название и краткое описание
-    const shortDescription = module.description.length > 100 
-      ? module.description.substring(0, 100) + '...'
-      : module.description;
+    // Включаем ВСЕ детали модуля: название, описание, возможности, преимущества
+    const features = Array.isArray(module.keyFeatures) 
+      ? module.keyFeatures.slice(0, 4).join(' | ') 
+      : Array.isArray(module.features)
+      ? module.features.slice(0, 4).join(' | ')
+      : module.keyFeatures || 'Функционал доступен в базе';
     
-    acc[module.category].push(`#${module.number}: ${module.name} - ${shortDescription}`);
+    const benefits = module.benefits || 'Преимущества указаны в описании';
+    
+    // ДЕТАЛЬНАЯ ЗАПИСЬ для лучшего понимания ИИ
+    acc[module.category].push(
+      `#${module.number}: ${module.name}\n` +
+      `Описание: ${module.description}\n` +
+      `Возможности: ${features}\n` +
+      `Преимущества: ${benefits}`
+    );
     return acc;
   }, {});
   
@@ -524,11 +550,16 @@ export async function generateChatResponse(messages: {role: string, content: str
     
     while (retryCount < maxRetries) {
       try {
-        response = await openai.chat.completions.create({
-          model: "gpt-4o-mini", // Используем более доступную модель для экономии лимитов
-          max_tokens: 800, // Уменьшаем для экономии токенов
-          messages: [
-            { role: "system", content: `Ты — УНИВЕРСАЛЬНЫЙ ЭКСПЕРТ-АНАЛИТИК по автоматизации бизнеса. Твоя специализация — глубокий анализ ЛЮБОЙ ниши и интеллектуальное сопоставление с базой из 260+ модулей.
+        const geminiResponse = await fetch(GEMINI_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-goog-api-key': GEMINI_API_KEY!
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: `Ты — УНИВЕРСАЛЬНЫЙ ЭКСПЕРТ-АНАЛИТИК по автоматизации бизнеса. Твоя специализация — глубокий анализ ЛЮБОЙ ниши и интеллектуальное сопоставление с базой из 260+ модулей.
 
 🧠 ТВОЯ МЕТОДОЛОГИЯ - УНИВЕРСАЛЬНЫЙ АНАЛИЗ:
 
@@ -600,14 +631,21 @@ export async function generateChatResponse(messages: {role: string, content: str
 ВСЕ рекомендации в формате [MODULE:NUMBER] для корректного отображения!
 
 ДОСТУПНЫЕ МОДУЛИ:
-${moduleContext}`,
-            },
-            ...messages.map(msg => ({
-              role: msg.role as 'user' | 'assistant',
-              content: msg.content
-            }))
-          ]
+${moduleContext}
+
+Диалог с пользователем:
+${messages.map(msg => `${msg.role === 'user' ? 'Пользователь' : 'Ассистент'}: ${msg.content}`).join('\n')}`
+              }]
+            }],
+            generationConfig: {
+              maxOutputTokens: 2000,
+              temperature: 0.3
+            }
+          })
         });
+        
+        const geminiData = await geminiResponse.json();
+        response = geminiData;
         break; // Success, exit retry loop
       } catch (error: any) {
         if (error.status === 429 && retryCount < maxRetries - 1) {
@@ -624,7 +662,7 @@ ${moduleContext}`,
       throw new Error('Failed to get response after retries');
     }
 
-    const responseText = response.choices[0]?.message?.content || '';
+    const responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     // Extract recommended module numbers from [MODULE:NUMBER] tags
     const moduleMatches = responseText.match(/\[MODULE:(\d+)\]/g) || [];
