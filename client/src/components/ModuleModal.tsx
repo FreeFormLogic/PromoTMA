@@ -174,7 +174,7 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{module.name}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-center">{module.name}</DialogTitle>
           <DialogDescription className="sr-only">
             Детальная информация о модуле {module.name}
           </DialogDescription>
@@ -189,7 +189,7 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
         <div className="space-y-4">
           {/* Blue description box matching AI chat design */}
           <div className="p-4 rounded-lg bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200">
-            <div className="text-gray-700 text-base leading-relaxed">
+            <div className="text-gray-700 text-base leading-relaxed text-center">
               {details.description}
             </div>
           </div>
@@ -202,7 +202,7 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
                 <div key={index} className="flex items-start gap-3">
                   <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                   <div 
-                    className="text-gray-700 leading-relaxed"
+                    className="text-gray-700 leading-relaxed flex-1"
                     dangerouslySetInnerHTML={{
                       __html: feature.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/^:\s*/, '')
                     }}

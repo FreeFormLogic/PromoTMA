@@ -451,7 +451,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold">{module.name}</DialogTitle>
+              <DialogTitle className="text-xl font-bold text-center">{module.name}</DialogTitle>
               <DialogDescription className="sr-only">
                 Детальная информация о модуле {module.name}
               </DialogDescription>
@@ -460,7 +460,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             <div className="space-y-4">
               {/* Blue description box matching original design */}
               <div className="p-4 rounded-lg bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200">
-                <div className="text-gray-700 text-base leading-relaxed">
+                <div className="text-gray-700 text-base leading-relaxed text-center">
                   {module.description}
                 </div>
               </div>
@@ -474,7 +474,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       <div key={index} className="flex items-start gap-3">
                         <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                         <div 
-                          className="text-gray-700 leading-relaxed"
+                          className="text-gray-700 leading-relaxed flex-1"
                           dangerouslySetInnerHTML={{
                             __html: feature.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                           }}
@@ -483,12 +483,19 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     ))}
                   </div>
                 ) : (
-                  <div 
-                    className="text-gray-700 leading-relaxed"
-                    dangerouslySetInnerHTML={{
-                      __html: module.keyFeatures.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    }}
-                  />
+                  <div className="space-y-3">
+                    {module.keyFeatures.split(/[•\n]/).filter(f => f.trim()).map((feature: string, index: number) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <div 
+                          className="text-gray-700 leading-relaxed flex-1"
+                          dangerouslySetInnerHTML={{
+                            __html: feature.trim().replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
               
