@@ -711,12 +711,24 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
   const formatText = (text: string) => {
     if (!text) return text;
     
+    // Remove duplicate module names that end with ** (legacy issue fix)
+    // Pattern: Remove lines that are just module names ending with **
+    let cleanedText = text.replace(/^([А-Яа-я\s\-\d]+)\*\*$/gm, '');
+    
+    // Also remove pattern like "**[MODULE:X] Module Name**" that creates duplicates
+    cleanedText = cleanedText.replace(/\*\*\[MODULE:\d+\]\s*([^\*]+)\*\*/g, '');
+    
     // First handle headers (## text) and bold (**text**)
-    const lines = text.split('\n');
+    const lines = cleanedText.split('\n');
     
     return (
       <>
         {lines.map((line, lineIndex) => {
+          // Skip empty lines that were cleaned
+          if (!line.trim()) {
+            return lineIndex < lines.length - 1 ? <br key={lineIndex} /> : null;
+          }
+          
           // Handle headers
           if (line.startsWith('## ')) {
             const headerText = line.slice(3);
