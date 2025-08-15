@@ -17,6 +17,8 @@ This project is a full-stack web application serving as a Telegram Mini Apps dir
 - ✅ **FIXED Module Display Issues**: Eliminated duplicate module names ending with ** and removed extra symbols (** - ) appearing before module descriptions. Enhanced AI prompt to prevent formatting issues and added client-side text cleaning for legacy compatibility
 - ✅ **Streamlined UI Design**: Removed "Компактный вид" toggle from modules page, now displays catalog view by default. Stacked AI-конструктор and Каталог модулей buttons vertically on main page. Removed duplicate "Быстрый запуск" content block for cleaner interface
 - ✅ **Fixed Module Clickability**: Removed blue category navigation from modules header, added click functionality to all module cards in catalog view with proper modal display integration
+- ✅ **Fixed Business Goal Filtering**: Changed from OR-logic to AND-logic for business goal filters - now properly narrows down results instead of expanding them
+- ✅ **Fixed Module Modal Content**: Replaced old hardcoded module data with actual database content - modals now show current descriptions, features, and benefits instead of outdated content with images
 
 # User Preferences
 

@@ -579,11 +579,13 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
   // Используем реальные данные модуля
   const details = {
     description: module?.description || "",
-    features: module?.keyFeatures?.split('\n').filter(f => f.trim()) || [
-      "Основные возможности модуля",
-      "Быстрое внедрение в ваш проект", 
-      "Техническая поддержка при настройке"
-    ],
+    features: (typeof module?.keyFeatures === 'string' 
+      ? module.keyFeatures.split('\n').filter((f: string) => f.trim()) 
+      : [
+        "Основные возможности модуля",
+        "Быстрое внедрение в ваш проект", 
+        "Техническая поддержка при настройке"
+      ]),
     impact: module?.benefits || ""
   };
 
