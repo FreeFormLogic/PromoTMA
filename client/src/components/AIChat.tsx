@@ -370,38 +370,23 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [buttonState, setButtonState] = useState(false);
     
-    // Check selection status
-    const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-    const isSelected = !!savedModules.find((m: any) => m.id === module.id);
+    // Remove duplicate selection check - using buttonState instead
     
-    // Initialize button state on mount and changes
+    // Initialize button state on mount only
     useEffect(() => {
       const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
       const currentState = !!savedModules.find((m: any) => m.id === module.id);
       setButtonState(currentState);
-    }, [module.id]);
+    }, []);
     const IconComponent = Sparkles; // Use sparkles icon for now
     
-    // Listen for module selection changes globally
-    useEffect(() => {
-      const handleModuleSelectionChange = () => {
-        const updatedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-        const newState = !!updatedModules.find((m: any) => m.id === module.id);
-        setButtonState(newState);
-      };
-      
-      window.addEventListener('moduleSelectionChanged', handleModuleSelectionChange);
-      
-      return () => {
-        window.removeEventListener('moduleSelectionChanged', handleModuleSelectionChange);
-      };
-    }, [module.id]);
+    // Remove global listener - we update directly in click handler
     
     return (
       <>
         <Card 
           className={`group cursor-pointer transition-all duration-300 border mb-3 ${
-            isSelected 
+            buttonState 
               ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-200 dark:ring-blue-800' 
               : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-600'
           } hover:-translate-y-1 hover:shadow-lg`}

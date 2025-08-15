@@ -21,27 +21,14 @@ const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
   const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
   const isSelected = !!savedModules.find((m: any) => m.id === module.id);
   
-  // Initialize and update button state
+  // Initialize button state on mount only
   useEffect(() => {
     const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
     const currentState = !!savedModules.find((m: any) => m.id === module.id);
     setButtonState(currentState);
-  }, [module.id]);
+  }, []);
   
-  // Listen for module selection changes from other components
-  useEffect(() => {
-    const handleModuleSelectionChange = () => {
-      const updatedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-      const newState = !!updatedModules.find((m: any) => m.id === module.id);
-      setButtonState(newState);
-    };
-    
-    window.addEventListener('moduleSelectionChanged', handleModuleSelectionChange);
-    
-    return () => {
-      window.removeEventListener('moduleSelectionChanged', handleModuleSelectionChange);
-    };
-  }, [module.id]);
+  // Remove global listener - we update directly in click handler
   
   const handleModuleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();

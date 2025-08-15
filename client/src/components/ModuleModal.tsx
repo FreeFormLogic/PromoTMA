@@ -143,13 +143,13 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
     return savedModules.some((m: any) => m.id === module?.id);
   });
 
-  // Обновляем состояние при изменении модуля или открытии модального окна
+  // Обновляем состояние при открытии модального окна
   useEffect(() => {
-    if (module) {
+    if (module && isOpen) {
       const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
       setIsSelected(savedModules.some((m: any) => m.id === module.id));
     }
-  }, [module, isOpen]);
+  }, [isOpen]);
 
   const handleConnectModule = () => {
     if (!module) return;
