@@ -81,11 +81,8 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     const { storage } = await import('./storage');
     const allModules = await storage.getAllModules();
     
-    console.log('🔍 AI Debug Info:');
-    console.log('- Total modules loaded:', allModules.length);
-    console.log('- Module 120 exists:', allModules.some(m => m.number === 120));
-    console.log('- Module 123 exists:', allModules.some(m => m.number === 123));
-    console.log('- Module 125 exists:', allModules.some(m => m.number === 125));
+    // Processing all modules from database
+    console.log(`🔍 AI processing ${allModules.length} modules`)
     
     // Формируем полный список модулей для AI со всеми данными
     const modulesList = allModules.map((module: any) => {

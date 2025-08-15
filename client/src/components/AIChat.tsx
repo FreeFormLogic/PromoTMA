@@ -720,7 +720,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 if (part.startsWith('**') && part.endsWith('**')) {
                   const boldText = part.slice(2, -2);
                   return (
-                    <strong key={partIndex} className="font-semibold text-gray-900 dark:text-gray-100">
+                    <strong key={partIndex} className="font-bold text-gray-900 dark:text-gray-100">
                       {boldText}
                     </strong>
                   );
@@ -809,7 +809,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                           : 'bg-muted shadow-sm border border-border'
                       }`}
                     >
-                      <div className="text-xs whitespace-pre-wrap leading-relaxed">
+                      <div className={`whitespace-pre-wrap leading-relaxed ${
+                        message.role === 'user' ? 'text-xs' : 'text-sm'
+                      }`}>
                         {renderMessageWithModules(
                           message.content, 
                           message.role === 'assistant', 
