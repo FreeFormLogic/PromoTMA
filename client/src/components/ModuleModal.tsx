@@ -576,13 +576,15 @@ const moduleFeatures: Record<string, any> = {
 };
 
 export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
-  const moduleImage = moduleImages[module?.name] || categoryImages[module?.category] || ecommerceImage;
-  const details = moduleFeatures[module?.name] || {
-    features: module?.features || [
+  // Используем реальные данные модуля
+  const details = {
+    description: module?.description || "",
+    features: module?.keyFeatures?.split('\n').filter(f => f.trim()) || [
       "Основные возможности модуля",
-      "Быстрое внедрение в ваш проект",
+      "Быстрое внедрение в ваш проект", 
       "Техническая поддержка при настройке"
     ],
+    impact: module?.benefits || ""
   };
 
   if (!module) return null;
@@ -600,13 +602,11 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
           </div>
         </DialogHeader>
 
-        {/* Module Image */}
-        <div className="h-48 overflow-hidden rounded-lg bg-gradient-to-b from-telegram/10 to-transparent">
-          <img 
-            src={moduleImage} 
-            alt={module.name}
-            className="w-full h-full object-cover"
-          />
+        {/* Module Header with Description */}
+        <div className="p-6 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200">
+          <p className="text-gray-700 text-lg leading-relaxed">
+            {details.description}
+          </p>
         </div>
 
         <div className="mt-6 space-y-4">
@@ -654,8 +654,8 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-success" />
-                  Влияние на бизнес
+                  <TrendingUp className="w-5 h-5 text-green-600" />
+                  Преимущества для бизнеса
                 </CardTitle>
               </CardHeader>
               <CardContent>

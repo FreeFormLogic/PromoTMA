@@ -113,11 +113,11 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
   const filteredModules = useMemo(() => {
     let filtered = allModulesData;
 
-    // Фильтрация по бизнес-целям
+    // Фильтрация по бизнес-целям (И-логика: модуль должен соответствовать ВСЕМ выбранным целям)
     if (selectedBusinessGoals.length > 0) {
       filtered = filtered.filter(module => {
         const benefits = module.benefits?.toLowerCase() || '';
-        return selectedBusinessGoals.some(goal => {
+        return selectedBusinessGoals.every(goal => {
           switch (goal) {
             case 'Увеличение продаж':
               return benefits.includes('продаж') || benefits.includes('прибыл');
