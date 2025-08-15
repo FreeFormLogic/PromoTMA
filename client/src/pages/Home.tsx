@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { ArrowRight, Bot, Building2, Check, Rocket, MessageSquare } from 'lucide-react';
+import { ArrowRight, Bot, Building2, Check, Rocket, MessageSquare, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Separator } from '@/components/ui/separator';
 
@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Single Hero Section - Clean, No Duplicates */}
+        {/* Hero Section */}
         <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16 md:py-20 mb-12 rounded-2xl">
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-4xl mx-auto">
@@ -49,14 +49,23 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="flex justify-center">
+              <div className="flex justify-center space-x-4">
                 <Button
                   onClick={() => window.location.href = '/ai-chat'}
                   size="lg"
                   className="bg-white text-blue-900 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-full shadow-2xl hover:shadow-3xl transition-all transform hover:scale-105"
                 >
                   <Bot className="mr-2 w-5 h-5" />
-                  AI-конструктор APP
+                  AI-конструктор
+                </Button>
+                <Button
+                  onClick={() => window.location.href = '/modules'}
+                  variant="outline"
+                  size="lg"
+                  className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-900 px-8 py-4 text-lg font-semibold rounded-full transition-all"
+                >
+                  <Package className="mr-2 w-5 h-5" />
+                  Каталог модулей
                 </Button>
               </div>
             </div>

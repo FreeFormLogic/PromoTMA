@@ -141,8 +141,8 @@ ${modulesList}
           const numberMatch = match.match(/\[MODULE:(\d+)\]/i);
           if (numberMatch) {
             const moduleNumber = parseInt(numberMatch[1]);
-            // Only add if not already recommended in this response and not already shown to user
-            if (!recommendedModules.includes(moduleNumber) && !alreadyShownModules.includes(moduleNumber)) {
+            // Only add if not already shown to user (including previous messages)
+            if (!alreadyShownModules.includes(moduleNumber)) {
               recommendedModules.push(moduleNumber);
             }
           }
