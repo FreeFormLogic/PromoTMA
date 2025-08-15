@@ -174,7 +174,7 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center">{module.name}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">{module.name}</DialogTitle>
           <DialogDescription className="sr-only">
             Детальная информация о модуле {module.name}
           </DialogDescription>
@@ -189,7 +189,7 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
         <div className="space-y-4">
           {/* Blue description box matching AI chat design */}
           <div className="p-4 rounded-lg bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200">
-            <div className="text-gray-700 text-base leading-relaxed text-center">
+            <div className="text-gray-700 text-base leading-relaxed">
               {details.description}
             </div>
           </div>
