@@ -331,8 +331,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('- Found recommended modules:', recommendedModules.map(m => m ? `#${m.number}: ${m.name}` : 'undefined'));
       
+      // Add module tags to response for client-side rendering
+      let responseWithModules = result.response;
+      if (recommendedModules.length > 0) {
+        const moduleTags = recommendedModules.map(m => `[MODULE:${m.number}]`).join(' ');
+        responseWithModules += `\n\n${moduleTags}`;
+      }
+      
       res.json({
-        response: result.response,
+        response: responseWithModules,
         recommendedModules
       });
     } catch (error) {
