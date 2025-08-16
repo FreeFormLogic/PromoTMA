@@ -231,13 +231,17 @@ function calculateModuleRelevance(module: any, businessContext: any, businessTex
   if (moduleText.includes('уведомлени') || moduleText.includes('сообщени')) score += 15;
   if (moduleText.includes('автоматиз') || moduleText.includes('автомат')) score += 25;
   
-  // Business type specific scoring
+  // Business type specific scoring with STRICT filtering
   if (businessContext.type === 'food') {
-    // Супер-высокие оценки для ОТРАСЛЕВЫХ РЕШЕНИЙ
-    if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ') score += 200;
-    if (module.number === 238) score += 300; // Модуль для пиццерии
-    if (module.number === 236) score += 280; // Управление рестораном
-    if (module.number === 237) score += 260; // Доставка еды
+    // ТОЛЬКО пищевые отраслевые модули получают супер-высокие баллы
+    if (module.number === 238) score += 500; // Модуль для пиццерии
+    if (module.number === 236) score += 480; // Управление рестораном  
+    if (module.number === 237) score += 460; // Доставка еды
+    
+    // ШТРАФ для неподходящих отраслевых модулей
+    if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ' && ![236, 237, 238].includes(module.number)) {
+      score -= 1000; // Огромный штраф для салонов красоты, фитнеса и т.д.
+    }
     
     if (module.category === 'E-COMMERCE') score += 45;
     if (module.category === 'АВТОМАТИЧЕСКИЙ ПРИЕМ ПЛАТЕЖЕЙ') score += 40;
@@ -254,12 +258,19 @@ function calculateModuleRelevance(module: any, businessContext: any, businessTex
     if (module.category === 'БРОНИРОВАНИЕ') score += 40;
     if (module.category === 'CRM') score += 30;
     if (moduleText.includes('бронир') || moduleText.includes('календар')) score += 35;
+    
+    // Штраф для неподходящих отраслевых модулей
+    if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ') score -= 1000;
   }
   
   if (businessContext.type === 'beauty') {
-    // Супер-высокие оценки для отраслевых модулей красоты
-    if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ') score += 200;
-    if (module.number === 240) score += 300; // Управление салоном красоты
+    // ТОЛЬКО модули для салонов красоты получают высокие баллы
+    if (module.number === 240) score += 500; // Управление салоном красоты
+    
+    // ШТРАФ для других отраслевых модулей
+    if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ' && module.number !== 240) {
+      score -= 1000;
+    }
     
     if (module.category === 'БРОНИРОВАНИЕ') score += 40;
     if (module.category === 'CRM') score += 35;
@@ -267,15 +278,34 @@ function calculateModuleRelevance(module: any, businessContext: any, businessTex
   }
   
   if (businessContext.type === 'medical') {
-    // Супер-высокие оценки для медицинских модулей
-    if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ') score += 200;
-    if (module.number === 239) score += 300; // Управление медицинской клиникой
+    // ТОЛЬКО медицинские модули получают высокие баллы
+    if (module.number === 239) score += 500; // Управление медицинской клиникой
+    
+    // ШТРАФ для других отраслевых модулей
+    if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ' && module.number !== 239) {
+      score -= 1000;
+    }
     
     if (module.category === 'БРОНИРОВАНИЕ') score += 50;
     if (module.category === 'CRM') score += 40;
     if (moduleText.includes('запись') || moduleText.includes('календар')) score += 45;
     if (moduleText.includes('пациент') || moduleText.includes('врач')) score += 35;
     if (moduleText.includes('медицин') || moduleText.includes('клиник')) score += 30;
+  }
+  
+  if (businessContext.type === 'fitness') {
+    // ТОЛЬКО фитнес модули получают высокие баллы
+    if (module.number === 241) score += 500; // Управление фитнес-клубом (если есть)
+    
+    // ШТРАФ для других отраслевых модулей
+    if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ' && module.number !== 241) {
+      score -= 1000;
+    }
+  }
+  
+  // Общий штраф для неподходящих отраслевых модулей
+  if (businessContext.type === 'general' && module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ') {
+    score -= 500; // Средний штраф для общих запросов
   }
   
   // Universal high-value modules
