@@ -32,6 +32,7 @@ This project is a full-stack web application serving as a Telegram Mini Apps dir
 - ✅ **DOUBLE-CLICK ISSUES FIXED**: Resolved critical double-click problems throughout entire application. Added proper onClick handlers to ModuleCard component with hover effects and visual feedback. Fixed LSP errors in MyApp.tsx (Checkbox onCheckedChange type issue). ModuleCards now respond to single clicks with proper cursor and transition effects.
 - ✅ **UI IMPROVEMENTS**: Renamed "Отключить модуль" button to "Убрать модуль" in ModuleModal as requested. Added connection status display on module cards with blue "Подключен" badges and ring styling. Enhanced click responsiveness across all interactive elements.
 - ✅ **MODULE DATA UPDATES**: Updated critical analytics modules (176: CDP, 177: BI Dashboards, 178: ML Platform) with Russian terminology replacing English technical terms. Improved naming consistency and descriptions for better user comprehension.
+- ✅ **AI HOTEL RECOMMENDATION SYSTEM**: Fixed AI system to properly recommend hotel-specific modules (112: Smart booking, 113: Group bookings, 114: Restaurant reservations) instead of irrelevant modules like virtual conferences. Added comprehensive hotel business pattern recognition with specific keywords, processes, and pain points for accurate module matching.
 
 # User Preferences
 
