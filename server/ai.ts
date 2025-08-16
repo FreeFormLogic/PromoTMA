@@ -121,19 +121,31 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
       relevanceScore: calculateModuleRelevance(module, businessContext, lastUserMessage)
     }))
     .filter(m => !alreadyShownModules.includes(m.number))
-    .sort((a, b) => b.relevanceScore - a.relevanceScore)
-    .slice(0, 8); // Get top 8 most relevant
+    .sort((a, b) => b.relevanceScore - a.relevanceScore);
     
-    console.log(`🎯 Top relevant modules:`, scoredModules.map(m => `${m.number}: ${m.name} (score: ${m.relevanceScore})`));
+    // Remove duplicates by name early to get more diverse results
+    const uniqueModules = [];
+    const seenNames = new Set();
+    
+    for (const module of scoredModules) {
+      if (!seenNames.has(module.name)) {
+        seenNames.add(module.name);
+        uniqueModules.push(module);
+      }
+      // Stop when we have enough unique modules  
+      if (uniqueModules.length >= 8) break;
+    }
+    
+    console.log(`🎯 Top relevant modules:`, uniqueModules.slice(0, 8).map(m => `${m.number}: ${m.name} (score: ${m.relevanceScore})`));
     
     // Use intelligent scoring to select best modules directly (faster and more accurate than API)
-    const topModules = scoredModules.slice(0, 4);
+    const topModules = uniqueModules.slice(0, 4);
     
     if (topModules.length === 0) {
       throw new Error('No relevant modules found');
     }
     
-    console.log(`✅ Selected top ${topModules.length} modules using intelligent scoring:`);
+    console.log(`✅ Selected top ${topModules.length} unique modules using intelligent scoring:`);
     topModules.forEach(m => console.log(`  - ${m.number}: ${m.name} (score: ${m.relevanceScore})`));
     
     // Generate intelligent response based on business type and selected modules
@@ -145,7 +157,7 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     };
   } catch (error) {
     console.error('🚨 AI Error details:', error);
-    console.error('🚨 Error stack:', error.stack);
+    console.error('🚨 Error stack:', (error as Error).stack);
     
     // Fallback to manual recommendations based on business type
     const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content?.toLowerCase() || '';
@@ -211,11 +223,17 @@ function analyzeBusinessFromText(text: string) {
   if (text.includes('магазин') || text.includes('продаж') || text.includes('товар')) {
     return { type: 'retail', keywords: ['товар', 'оплата', 'каталог', 'скидк'] };
   }
-  if (text.includes('красота') || text.includes('салон') || text.includes('маникюр')) {
+  if (text.includes('красота') || text.includes('салон') || text.includes('маникюр') || text.includes('парикмахер')) {
     return { type: 'beauty', keywords: ['запись', 'услуг', 'мастер', 'время'] };
+  }
+  if (text.includes('туризм') || text.includes('турагент') || text.includes('тур') || text.includes('путешеств')) {
+    return { type: 'tourism', keywords: ['бронир', 'тур', 'путешеств', 'отель'] };
   }
   if (text.includes('фитнес') || text.includes('спорт') || text.includes('зал')) {
     return { type: 'fitness', keywords: ['тренировк', 'абонемент', 'запись'] };
+  }
+  if (text.includes('стоматолог') || text.includes('врач') || text.includes('клиник') || text.includes('медицин')) {
+    return { type: 'medical', keywords: ['запись', 'календар', 'пациент', 'врач', 'лечени'] };
   }
   
   return { type: 'general', keywords: keywords };
@@ -244,6 +262,14 @@ function calculateModuleRelevance(module: any, businessContext: any, businessTex
     if (module.category === 'БРОНИРОВАНИЕ') score += 40;
     if (module.category === 'CRM') score += 35;
     if (moduleText.includes('запись') || moduleText.includes('календар')) score += 30;
+  }
+  
+  if (businessContext.type === 'medical') {
+    if (module.category === 'БРОНИРОВАНИЕ') score += 50;
+    if (module.category === 'CRM') score += 40;
+    if (moduleText.includes('запись') || moduleText.includes('календар')) score += 45;
+    if (moduleText.includes('пациент') || moduleText.includes('врач')) score += 35;
+    if (moduleText.includes('медицин') || moduleText.includes('клиник')) score += 30;
   }
   
   // Universal high-value modules
@@ -278,6 +304,8 @@ function generateIntelligentResponse(businessText: string, businessType: string,
     intro = `Для ${businessName} рекомендую эти модули:`;
   } else if (businessType === 'fitness') {
     intro = `Для ${businessName} подойдут эти модули:`;
+  } else if (businessType === 'medical') {
+    intro = `Для ${businessName} рекомендую эти медицинские решения:`;
   } else {
     intro = `Для вашего бизнеса "${businessName}" рекомендую эти модули:`;
   }
@@ -309,6 +337,7 @@ function getBusinessSpecificBenefit(module: any, businessType: string, businessT
     if (businessType === 'beauty') return 'Онлайн-запись избавит от постоянных звонков и позволит клиентам записываться круглосуточно.';
     if (businessType === 'fitness') return 'Удобная запись на тренировки с выбором тренера и времени.';
     if (businessType === 'tourism') return 'Система бронирования туров с календарем доступности.';
+    if (businessType === 'medical') return 'Система записи к врачам с выбором специалиста и времени приема.';
     if (businessLower.includes('врач') || businessLower.includes('клиник')) return 'Система записи к врачам с выбором специалиста.';
     return 'Автоматизирует процесс записи и бронирования.';
   }
