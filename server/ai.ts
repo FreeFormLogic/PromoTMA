@@ -106,7 +106,8 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
   try {
     const { storage } = await import('./storage');
     const allModules = await storage.getAllModules();
-    console.log(`🔍 AI processing ALL ${allModules.length} modules with intelligent scoring system`)
+    console.log(`🔍 AI processing ALL ${allModules.length} modules with intelligent scoring system`);
+    console.log(`📋 Complete module analysis - processing every single module from database (${allModules.length} total)`);
     
     // Get last user message to understand business type
     const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content?.toLowerCase() || '';
@@ -224,14 +225,23 @@ function calculateModuleRelevance(module: any, businessContext: any, businessTex
   const moduleText = `${module.name} ${module.description} ${module.category}`.toLowerCase();
   const businessLower = businessText.toLowerCase();
   
+  // Universal scoring for all businesses
+  if (moduleText.includes('платеж') || moduleText.includes('оплат')) score += 30;
+  if (moduleText.includes('клиент') || moduleText.includes('пользовател')) score += 20;
+  if (moduleText.includes('уведомлени') || moduleText.includes('сообщени')) score += 15;
+  if (moduleText.includes('автоматиз') || moduleText.includes('автомат')) score += 25;
+  
   // Business type specific scoring
   if (businessContext.type === 'food') {
-    if (module.category === 'E-COMMERCE') score += 40;
-    if (module.category === 'АВТОМАТИЧЕСКИЙ ПРИЕМ ПЛАТЕЖЕЙ') score += 35;
-    if (moduleText.includes('витрина') || moduleText.includes('меню')) score += 30;
-    if (moduleText.includes('заказ') || moduleText.includes('доставка')) score += 25;
-    if (moduleText.includes('ресторан') || moduleText.includes('кафе') || moduleText.includes('пиццер')) score += 35;
-    if (moduleText.includes('управлени') && moduleText.includes('ресторан')) score += 40;
+    if (module.category === 'E-COMMERCE') score += 45;
+    if (module.category === 'АВТОМАТИЧЕСКИЙ ПРИЕМ ПЛАТЕЖЕЙ') score += 40;
+    if (moduleText.includes('витрина') || moduleText.includes('меню')) score += 35;
+    if (moduleText.includes('заказ') || moduleText.includes('доставка')) score += 30;
+    if (moduleText.includes('ресторан') || moduleText.includes('кафе') || moduleText.includes('пиццер')) score += 40;
+    if (moduleText.includes('управлени') && moduleText.includes('ресторан')) score += 45;
+    if (moduleText.includes('статус') && moduleText.includes('заказ')) score += 35;
+    if (moduleText.includes('повтор') && moduleText.includes('заказ')) score += 30;
+    if (moduleText.includes('предзаказ') || moduleText.includes('резерв')) score += 30;
   }
   
   if (businessContext.type === 'tourism') {
@@ -279,20 +289,22 @@ function generateIntelligentResponse(businessText: string, businessType: string,
   
   let intro = '';
   if (businessType === 'food') {
-    intro = `Отлично! Для ${businessName} я рекомендую эти ключевые модули:`;
+    intro = `🍕 Отлично! Для ${businessName} я проанализировал все 260 модулей и выбрал идеальные решения для ресторанного бизнеса:`;
   } else if (businessType === 'beauty') {
-    intro = `Для ${businessName} подойдут эти решения:`;
+    intro = `💄 Для ${businessName} я отобрал лучшие модули из всей базы для салонов красоты:`;
   } else if (businessType === 'tourism') {
-    intro = `Для ${businessName} рекомендую эти модули:`;
+    intro = `✈️ Для ${businessName} я подобрал оптимальные туристические решения из 260 модулей:`;
   } else if (businessType === 'fitness') {
-    intro = `Для ${businessName} подойдут эти модули:`;
+    intro = `💪 Для ${businessName} я выбрал специализированные фитнес-модули:`;
   } else if (businessType === 'medical') {
-    intro = `Для ${businessName} рекомендую эти медицинские решения:`;
+    intro = `🏥 Для ${businessName} я отобрал медицинские модули с максимальной эффективностью:`;
+  } else if (businessType === 'retail') {
+    intro = `🛍️ Для ${businessName} я подобрал торговые решения из всей базы:`;
   } else {
-    intro = `Для вашего бизнеса "${businessName}" рекомендую эти модули:`;
+    intro = `🚀 Для "${businessName}" я проанализировал все 260 модулей и нашел наиболее подходящие:`;
   }
   
-  // Return only intro text - module cards will be shown separately in the UI
+  // Return personalized intro text - module cards will be shown separately in the UI
   return intro;
 }
 
