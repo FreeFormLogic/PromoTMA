@@ -62,6 +62,9 @@ export interface IStorage {
   getUserReferralInfo(telegramId: string): Promise<{ referralCode: string; referrals: ReferralRegistration[] }>;
   registerViaReferral(referralCode: string, newUserName: string, newUserPhone: string): Promise<{ success: boolean; message: string }>;
   getReferralStats(): Promise<any[]>;
+
+  // Database maintenance methods
+  reseedModules(): Promise<{ deleted: number; added: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -711,6 +714,31 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error getting referral stats:", error);
       return [];
+    }
+  }
+
+  async reseedModules(): Promise<{ deleted: number; added: number }> {
+    try {
+      console.log("Начинаем ресидинг модулей...");
+      
+      // Удаляем все существующие модули
+      const deletedResult = await db.delete(modules);
+      const deletedCount = deletedResult.rowCount || 0;
+      console.log(`Удалено модулей: ${deletedCount}`);
+
+      // Вставляем новые модули
+      if (allModulesData.length > 0) {
+        await db.insert(modules).values(allModulesData);
+        console.log(`Добавлено новых модулей: ${allModulesData.length}`);
+      }
+
+      return { 
+        deleted: deletedCount, 
+        added: allModulesData.length 
+      };
+    } catch (error) {
+      console.error("Ошибка при ресидинге модулей:", error);
+      throw error;
     }
   }
 }

@@ -725,6 +725,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Специальный эндпоинт для принудительного ресидинга базы данных 
+  app.post('/api/admin/reseed', async (req, res) => {
+    try {
+      const result = await storage.reseedModules();
+      res.json({ 
+        success: true, 
+        message: `Перезагружено ${result.deleted} модулей, добавлено ${result.added} новых.`,
+        details: result
+      });
+    } catch (error) {
+      console.error('Ошибка ресидинга:', error);
+      res.status(500).json({ success: false, error: 'Ошибка ресидинга базы данных' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

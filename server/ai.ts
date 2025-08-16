@@ -175,8 +175,8 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
       fallbackModules = [8, 224, 15, 42]; 
       fallbackResponse = `Для медицинской клиники подойдут эти модули:`;
     } else if (lastUserMessage.includes('пицц') || lastUserMessage.includes('кафе') || lastUserMessage.includes('ресторан')) {
-      fallbackModules = [165, 225, 224, 230]; 
-      fallbackResponse = `Для вашего ресторана я рекомендую эти модули:`;
+      fallbackModules = [238, 236, 237, 225]; // Специальные модули для пиццерий/ресторанов
+      fallbackResponse = `🍕 Для пиццерии я рекомендую специализированные модули:`;
     } else {
       fallbackModules = [1, 224, 15, 13];
       fallbackResponse = `Для вашего бизнеса рекомендую эти модули:`;
@@ -233,6 +233,12 @@ function calculateModuleRelevance(module: any, businessContext: any, businessTex
   
   // Business type specific scoring
   if (businessContext.type === 'food') {
+    // Супер-высокие оценки для ОТРАСЛЕВЫХ РЕШЕНИЙ
+    if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ') score += 200;
+    if (module.number === 238) score += 300; // Модуль для пиццерии
+    if (module.number === 236) score += 280; // Управление рестораном
+    if (module.number === 237) score += 260; // Доставка еды
+    
     if (module.category === 'E-COMMERCE') score += 45;
     if (module.category === 'АВТОМАТИЧЕСКИЙ ПРИЕМ ПЛАТЕЖЕЙ') score += 40;
     if (moduleText.includes('витрина') || moduleText.includes('меню')) score += 35;
@@ -251,12 +257,20 @@ function calculateModuleRelevance(module: any, businessContext: any, businessTex
   }
   
   if (businessContext.type === 'beauty') {
+    // Супер-высокие оценки для отраслевых модулей красоты
+    if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ') score += 200;
+    if (module.number === 240) score += 300; // Управление салоном красоты
+    
     if (module.category === 'БРОНИРОВАНИЕ') score += 40;
     if (module.category === 'CRM') score += 35;
     if (moduleText.includes('запись') || moduleText.includes('календар')) score += 30;
   }
   
   if (businessContext.type === 'medical') {
+    // Супер-высокие оценки для медицинских модулей
+    if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ') score += 200;
+    if (module.number === 239) score += 300; // Управление медицинской клиникой
+    
     if (module.category === 'БРОНИРОВАНИЕ') score += 50;
     if (module.category === 'CRM') score += 40;
     if (moduleText.includes('запись') || moduleText.includes('календар')) score += 45;
