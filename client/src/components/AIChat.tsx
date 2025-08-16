@@ -378,6 +378,17 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       const currentState = !!savedModules.find((m: any) => m.id === module.id);
       setButtonState(currentState);
     }, []);
+
+    // Listen for module selection changes from other components
+    useEffect(() => {
+      const handleSelectionChange = () => {
+        const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+        setButtonState(!!savedModules.find((m: any) => m.id === module.id));
+      };
+
+      window.addEventListener('moduleSelectionChanged', handleSelectionChange);
+      return () => window.removeEventListener('moduleSelectionChanged', handleSelectionChange);
+    }, [module.id]);
     const IconComponent = Sparkles; // Use sparkles icon for now
     
     // Remove global listener - we update directly in click handler
@@ -577,7 +588,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     foundModules.forEach((module, index) => {
       if (!module) return; // Skip undefined modules
       
-      const description = descriptionLines[index] || '';
+      // Find the correct description for this specific module from the AI response
+      const modulePattern = `\\[MODULE:${module.number}\\]\\s*([^\\[]*?)(?=\\[MODULE:|$)`;
+      const match = content.match(new RegExp(modulePattern, 's'));
+      const aiDescription = match ? match[1].trim() : '';
       
       renderedParts.push(
         <div key={`module-pair-${index}`} className="mb-6">
@@ -586,10 +600,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             <ModuleCard module={module} />
           </div>
           
-          {/* Description right under module */}
-          {description && (
+          {/* AI-generated description right under module */}
+          {aiDescription && (
             <div className="text-sm text-gray-600 ml-4 mb-4">
-              {description}
+              {aiDescription}
             </div>
           )}
         </div>

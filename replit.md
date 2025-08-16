@@ -33,6 +33,9 @@ This project is a full-stack web application serving as a Telegram Mini Apps dir
 - ✅ **UI IMPROVEMENTS**: Renamed "Отключить модуль" button to "Убрать модуль" in ModuleModal as requested. Added connection status display on module cards with blue "Подключен" badges and ring styling. Enhanced click responsiveness across all interactive elements.
 - ✅ **MODULE DATA UPDATES**: Updated critical analytics modules (176: CDP, 177: BI Dashboards, 178: ML Platform) with Russian terminology replacing English technical terms. Improved naming consistency and descriptions for better user comprehension.
 - ✅ **AI INTELLIGENT MODULE RECOMMENDATION**: Completely redesigned AI system to leverage Gemini 2.5 Pro's intelligence. Removed hardcoded business rules and instead provide full module database to AI for intelligent analysis. System now analyzes business context and matches modules based on actual data rather than preset rules, enabling accurate recommendations for any business type.
+- ✅ **FIXED MODULE DESCRIPTIONS**: Fixed misaligned AI-generated descriptions in chat - each module now displays its correct AI explanation instead of generic descriptions. Implemented proper pattern matching to extract module-specific descriptions from AI responses.
+- ✅ **FIXED MODULE CONNECTION STATUS**: Module connection buttons now update correctly across all components (chat, modal, Functions section) with real-time visual feedback using localStorage sync and custom events.
+- ✅ **IMPROVED UI STYLING**: Added CSS to prevent unwanted scroll bars and improved overall interface polish with better overflow handling.
 
 # User Preferences
 

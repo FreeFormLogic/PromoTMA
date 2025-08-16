@@ -143,13 +143,26 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
     return savedModules.some((m: any) => m.id === module?.id);
   });
 
-  // Обновляем состояние при открытии модального окна
+  // Обновляем состояние при открытии модального окна и при изменениях localStorage
   useEffect(() => {
     if (module && isOpen) {
       const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
       setIsSelected(savedModules.some((m: any) => m.id === module.id));
     }
-  }, [isOpen]);
+  }, [module?.id, isOpen]);
+
+  // Слушаем изменения модулей из других компонентов
+  useEffect(() => {
+    const handleStorageChange = () => {
+      if (module) {
+        const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+        setIsSelected(savedModules.some((m: any) => m.id === module.id));
+      }
+    };
+
+    window.addEventListener('moduleSelectionChanged', handleStorageChange);
+    return () => window.removeEventListener('moduleSelectionChanged', handleStorageChange);
+  }, [module?.id]);
 
   const handleConnectModule = () => {
     if (!module) return;
