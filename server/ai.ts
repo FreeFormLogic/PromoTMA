@@ -150,6 +150,7 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     
     // Generate intelligent response based on business type and selected modules
     let intelligentResponse = generateIntelligentResponse(lastUserMessage, businessContext.type, topModules);
+    console.log(`🔍 Generated response: "${intelligentResponse}"`);
     
     return {
       response: intelligentResponse,
@@ -167,38 +168,17 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     let fallbackResponse = '';
     
     if (lastUserMessage.includes('салон') || lastUserMessage.includes('красота')) {
-      fallbackModules = [8, 224, 15, 13]; // Booking system for beauty salon
-      fallbackResponse = `Для салона красоты я рекомендую эти модули:
-
-[MODULE:8] Система онлайн-записи избавит от постоянных звонков и позволит клиентам записываться круглосуточно.
-
-[MODULE:224] Автоматический прием платежей упростит предоплату услуг и снизит количество пропусков.
-
-[MODULE:15] CRM система поможет отслеживать предпочтения клиентов и напоминать о процедурах.
-
-[MODULE:13] Программа лояльности увеличит количество постоянных клиентов.`;
+      fallbackModules = [8, 224, 15, 13]; 
+      fallbackResponse = `Для салона красоты я рекомендую эти модули:`;
     } else if (lastUserMessage.includes('медицин') || lastUserMessage.includes('клиник')) {
       fallbackModules = [8, 224, 15, 42]; 
-      fallbackResponse = `Для медицинской клиники подойдут эти модули:
-
-[MODULE:8] Система записи к врачам с выбором специалиста и времени.
-
-[MODULE:224] Безопасная оплата медицинских услуг.
-
-[MODULE:15] CRM для ведения карточек пациентов.
-
-[MODULE:42] Система уведомлений о приемах и результатах анализов.`;
+      fallbackResponse = `Для медицинской клиники подойдут эти модули:`;
+    } else if (lastUserMessage.includes('пицц') || lastUserMessage.includes('кафе') || lastUserMessage.includes('ресторан')) {
+      fallbackModules = [165, 225, 224, 230]; 
+      fallbackResponse = `Для вашего ресторана я рекомендую эти модули:`;
     } else {
       fallbackModules = [1, 224, 15, 13];
-      fallbackResponse = `Для вашего бизнеса рекомендую эти модули:
-
-[MODULE:1] Витрина товаров/услуг.
-
-[MODULE:224] Автоматический прием платежей.
-
-[MODULE:15] CRM система.
-
-[MODULE:13] Программа лояльности.`;
+      fallbackResponse = `Для вашего бизнеса рекомендую эти модули:`;
     }
     
     return {
@@ -250,6 +230,8 @@ function calculateModuleRelevance(module: any, businessContext: any, businessTex
     if (module.category === 'АВТОМАТИЧЕСКИЙ ПРИЕМ ПЛАТЕЖЕЙ') score += 35;
     if (moduleText.includes('витрина') || moduleText.includes('меню')) score += 30;
     if (moduleText.includes('заказ') || moduleText.includes('доставка')) score += 25;
+    if (moduleText.includes('ресторан') || moduleText.includes('кафе') || moduleText.includes('пиццер')) score += 35;
+    if (moduleText.includes('управлени') && moduleText.includes('ресторан')) score += 40;
   }
   
   if (businessContext.type === 'tourism') {
@@ -310,12 +292,8 @@ function generateIntelligentResponse(businessText: string, businessType: string,
     intro = `Для вашего бизнеса "${businessName}" рекомендую эти модули:`;
   }
   
-  let moduleDescriptions = topModules.map(module => {
-    let businessSpecificBenefit = getBusinessSpecificBenefit(module, businessType, businessText);
-    return `[MODULE:${module.number}] ${businessSpecificBenefit}`;
-  }).join('\n\n');
-  
-  return `${intro}\n\n${moduleDescriptions}`;
+  // Return only intro text - module cards will be shown separately in the UI
+  return intro;
 }
 
 // Get business-specific benefit for each module
