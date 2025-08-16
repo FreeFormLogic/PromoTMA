@@ -314,6 +314,7 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
                       setSelectedModule(module);
                       setIsModalOpen(true);
                     }}
+
                   />
                 ))}
               </div>

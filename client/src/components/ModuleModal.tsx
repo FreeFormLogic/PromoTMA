@@ -272,7 +272,7 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
                   : 'bg-blue-600 hover:bg-blue-700 text-white'
               }`}
             >
-              {isSelected ? 'Отключить модуль' : 'Подключить модуль'}
+              {isSelected ? 'Убрать модуль' : 'Подключить модуль'}
             </Button>
             <Button 
               variant="outline" 

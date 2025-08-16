@@ -2792,7 +2792,7 @@ export const allModulesData: Module[] = [
 
   createModule(
     176,
-    "Customer Data Platform (CDP)",
+    "Платформа клиентских данных (CDP)",
     "Единый профиль клиента из всех источников",
     "АНАЛИТИКА",
     [
@@ -2808,7 +2808,7 @@ export const allModulesData: Module[] = [
 
   createModule(
     177,
-    "Business Intelligence дашборды",
+    "Дашборды бизнес-аналитики (BI)",
     "Интерактивная визуализация бизнес-метрик",
     "АНАЛИТИКА",
     [
@@ -2824,7 +2824,7 @@ export const allModulesData: Module[] = [
 
   createModule(
     178,
-    "Machine Learning платформа",
+    "Платформа машинного обучения (ML)",
     "Инструменты для создания и развертывания ML-моделей",
     "АНАЛИТИКА",
     [
