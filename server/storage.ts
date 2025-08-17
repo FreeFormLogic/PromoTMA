@@ -406,6 +406,16 @@ export class DatabaseStorage implements IStorage {
 
   async canUserAccessPage(telegramId: string, page: string): Promise<boolean> {
     try {
+      // Суперадмины имеют доступ ко всему
+      if (['7418405560', '1318976229'].includes(telegramId)) {
+        return true;
+      }
+      
+      // Пользователи с полным доступом (кроме админки)
+      if (['5954190315', '7459692034'].includes(telegramId)) {
+        return page !== 'admin';
+      }
+      
       const user = await this.getUserPermissions(telegramId);
       if (!user || !user.isActive) return false;
 
