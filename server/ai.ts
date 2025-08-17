@@ -188,8 +188,11 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     
     const detailedResponse = `${response}\n\n${moduleExplanations.join('\n\n')}`;
     
+    // Убираем дублирующие строки с номерами модулей в конце ответа
+    const cleanResponse = detailedResponse.replace(/\n\n\[MODULE:\d+\]( \[MODULE:\d+\])*$/g, '');
+    
     return {
-      response: detailedResponse,
+      response: cleanResponse,
       recommendedModules
     };
     
@@ -240,8 +243,11 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     
     const detailedFallbackResponse = `${fallbackResponse}\n\n${fallbackExplanations.join('\n\n')}`;
     
+    // Убираем дублирующие строки с номерами модулей в конце ответа
+    const cleanFallbackResponse = detailedFallbackResponse.replace(/\n\n\[MODULE:\d+\]( \[MODULE:\d+\])*$/g, '');
+    
     return {
-      response: detailedFallbackResponse,
+      response: cleanFallbackResponse,
       recommendedModules: filteredModules
     };
   }

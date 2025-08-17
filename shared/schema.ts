@@ -69,7 +69,7 @@ export const authorizedUsers = pgTable("authorized_users", {
   accessAiConstructor: boolean("access_ai_constructor").default(true),
   accessMyApp: boolean("access_my_app").default(true),
   accessAdvantages: boolean("access_advantages").default(true),
-  accessPartners: boolean("access_partners").default(true),
+  accessPartners: boolean("access_partners").default(false),
   // Реферальная система
   referralCode: varchar("referral_code", { length: 50 }).unique(),
   referredBy: varchar("referred_by", { length: 255 }), // ID того, кто пригласил
