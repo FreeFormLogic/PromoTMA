@@ -217,12 +217,55 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     const { storage } = await import('./storage');
     const allModules = await storage.getAllModules();
     
-    const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content || '';
-    const analysis = await analyzeBusinessFromText(lastUserMessage);
+    const userText = messages.filter(m => m.role === 'user').map(m => m.content).join(' ');
     
-    console.log(`🎯 Анализ бизнеса: ${analysis.persona} (${analysis.industry})`);
+    // Полная информация о модулях для Gemini
+    const modulesList = allModules
+      .filter(m => !alreadyShownModules.includes(m.number))
+      .map(m => `#${m.number}: ${m.name} - ${m.description} (${m.category})`)
+      .join('\n');
     
-    // Фильтруем модули, которые уже показывали
+    const prompt = `Ты эксперт по рекомендации Telegram Mini App модулей для бизнеса.
+
+Запрос пользователя: "${userText}"
+
+Доступные модули в базе данных:
+${modulesList}
+
+Задача:
+1. Проанализируй тип бизнеса пользователя
+2. Выбери 4 самых подходящих модуля по номерам
+3. Ответь в формате: [MODULE:номер] для каждого модуля
+4. Добавь подходящий эмодзи и краткое объяснение
+
+Примеры эмодзи по типам бизнеса:
+🍽️ рестораны, 🚗 такси/транспорт, 💄 красота, 🏥 медицина, ✈️ туризм, 🧠 психология, ⚖️ юристы, 🧶 рукоделие, 🛍️ магазины
+
+Отвечай только номерами модулей в формате [MODULE:число] и кратким текстом с эмодзи.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash-exp",
+      contents: prompt,
+    });
+
+    const aiText = response.text || '';
+    
+    // Извлекаем номера модулей из ответа Gemini
+    const moduleMatches = aiText.match(/\[MODULE:(\d+)\]/g) || [];
+    const recommendedModuleNumbers = moduleMatches
+      .map(match => parseInt(match.match(/\d+/)?.[0] || '0'))
+      .filter(num => num > 0)
+      .slice(0, 4);
+
+    console.log(`🏆 Gemini recommended modules:`, recommendedModuleNumbers);
+    
+    return {
+      response: aiText,
+      recommendedModules: recommendedModuleNumbers
+    };
+  } catch (error) {
+    console.log('🚨 Ошибка Gemini:', error);
+    // Простой fallback без сложной логики
     const availableModules = allModules.filter(m => !alreadyShownModules.includes(m.number));
     
     // Подсчитываем релевантность каждого модуля
