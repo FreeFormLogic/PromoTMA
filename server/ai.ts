@@ -21,13 +21,19 @@ interface BusinessAnalysis {
 // AI-powered анализ бизнеса через Gemini
 async function analyzeBusinessFromText(text: string): Promise<BusinessAnalysis> {
   try {
-    const prompt = `Analyze this business type and return ONLY valid JSON:
+    const prompt = `You are analyzing a business type for a Telegram Mini App module recommendation system. 
 
 Business: "${text}"
 
-Return JSON format:
+Available industry-specific modules in our database:
+- Module 261: Tourism Agency Management (for travel/tourism)
+- Module 239: Medical Clinic Management (for healthcare/medical)
+- Module 240: Beauty Salon Management (for beauty/spa)
+- Universal modules: payments, CRM, booking systems, e-commerce, marketing
+
+Return ONLY valid JSON:
 {
-  "industry": "one of: tourism, restaurant, beauty, medical, services, professional, handmade, retail, nonprofit, universal",
+  "industry": "classification from list below",
   "size": "medium",
   "challenges": ["business challenges"],
   "goals": ["business goals"], 
@@ -36,15 +42,17 @@ Return JSON format:
   "persona": "brief business description"
 }
 
-Rules:
-- restaurants/cafes: industry="restaurant", relevantCategories=["ОТРАСЛЕВЫЕ РЕШЕНИЯ", "E-COMMERCE"]
-- tourism/travel: industry="tourism", relevantCategories=["ОТРАСЛЕВЫЕ РЕШЕНИЯ", "CRM"]
-- beauty/spa: industry="beauty", relevantCategories=["ОТРАСЛЕВЫЕ РЕШЕНИЯ", "CRM"]  
-- medical/clinic: industry="medical", relevantCategories=["ОТРАСЛЕВЫЕ РЕШЕНИЯ", "CRM"]
-- psychologists/coaches: industry="services", relevantCategories=["CRM", "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]
-- lawyers/consultants: industry="professional", relevantCategories=["CRM", "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]
-- handmade/crafts: industry="handmade", relevantCategories=["E-COMMERCE", "MARKETING"]
-- other: industry="universal", relevantCategories=["E-COMMERCE", "MARKETING", "CRM"]`;
+Industry classifications:
+- restaurant: ресторан, кафе, пицца, суши, доставка еды → relevantCategories=["ОТРАСЛЕВЫЕ РЕШЕНИЯ", "E-COMMERCE"]
+- tourism: туризм, турагентство, путешествия, отели → relevantCategories=["ОТРАСЛЕВЫЕ РЕШЕНИЯ", "CRM"]
+- beauty: салон красоты, барбершоп, спа, маникюр → relevantCategories=["ОТРАСЛЕВЫЕ РЕШЕНИЯ", "CRM"]
+- medical: клиника, врач, медицина, здоровье → relevantCategories=["ОТРАСЛЕВЫЕ РЕШЕНИЯ", "CRM"]
+- transport: такси, транспорт, логистика, доставка → relevantCategories=["CRM", "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]
+- services: психолог, коуч, консультации → relevantCategories=["CRM", "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]
+- professional: юрист, бухгалтер, адвокат → relevantCategories=["CRM", "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]
+- handmade: рукоделие, творчество, хендмейд → relevantCategories=["E-COMMERCE", "MARKETING"]
+- retail: магазин, товары, продажи → relevantCategories=["E-COMMERCE", "MARKETING", "CRM"]
+- universal: все остальные → relevantCategories=["E-COMMERCE", "MARKETING", "CRM"]`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash-exp",
