@@ -307,26 +307,54 @@ export class DatabaseStorage implements IStorage {
 
   async addToWhitelist(telegramId: string, userData?: Partial<InsertAuthorizedUser>): Promise<{ success: boolean; message: string }> {
     try {
-      const newUser: InsertAuthorizedUser = {
-        telegramId,
-        username: userData?.username || `user_${telegramId}`,
-        firstName: userData?.firstName || 'User',
-        lastName: userData?.lastName,
-        realName: userData?.realName,
-        isActive: true,
-        // Все разрешения по умолчанию включены
-        accessHome: userData?.accessHome ?? true,
-        accessModules: userData?.accessModules ?? true,
-        accessIndustries: userData?.accessIndustries ?? true,
-        accessAiConstructor: userData?.accessAiConstructor ?? true,
-        accessMyApp: userData?.accessMyApp ?? true,
-        accessAdvantages: userData?.accessAdvantages ?? true,
-        accessPartners: userData?.accessPartners ?? true
-      };
+      // Сначала проверяем, существует ли уже пользователь
+      const existingUser = await db.select()
+        .from(authorizedUsers)
+        .where(eq(authorizedUsers.telegramId, telegramId));
+      
+      if (existingUser.length > 0) {
+        // Пользователь существует - активируем его
+        await db.update(authorizedUsers)
+          .set({ 
+            isActive: true,
+            username: userData?.username || existingUser[0].username,
+            firstName: userData?.firstName || existingUser[0].firstName,
+            lastName: userData?.lastName || existingUser[0].lastName,
+            realName: userData?.realName || existingUser[0].realName,
+            accessHome: userData?.accessHome ?? true,
+            accessModules: userData?.accessModules ?? true,
+            accessIndustries: userData?.accessIndustries ?? true,
+            accessAiConstructor: userData?.accessAiConstructor ?? true,
+            accessMyApp: userData?.accessMyApp ?? true,
+            accessAdvantages: userData?.accessAdvantages ?? true,
+            accessPartners: userData?.accessPartners ?? true
+          })
+          .where(eq(authorizedUsers.telegramId, telegramId));
+        return { success: true, message: `Пользователь ${telegramId} активирован в whitelist` };
+      } else {
+        // Создаем нового пользователя
+        const newUser: InsertAuthorizedUser = {
+          telegramId,
+          username: userData?.username || `user_${telegramId}`,
+          firstName: userData?.firstName || 'User',
+          lastName: userData?.lastName,
+          realName: userData?.realName,
+          isActive: true,
+          // Все разрешения по умолчанию включены
+          accessHome: userData?.accessHome ?? true,
+          accessModules: userData?.accessModules ?? true,
+          accessIndustries: userData?.accessIndustries ?? true,
+          accessAiConstructor: userData?.accessAiConstructor ?? true,
+          accessMyApp: userData?.accessMyApp ?? true,
+          accessAdvantages: userData?.accessAdvantages ?? true,
+          accessPartners: userData?.accessPartners ?? true
+        };
 
-      await db.insert(authorizedUsers).values(newUser);
-      return { success: true, message: `Пользователь ${telegramId} добавлен в whitelist` };
+        await db.insert(authorizedUsers).values(newUser);
+        return { success: true, message: `Пользователь ${telegramId} добавлен в whitelist` };
+      }
     } catch (error) {
+      console.error('Error adding to whitelist:', error);
       return { success: false, message: `Ошибка добавления пользователя: ${error}` };
     }
   }
