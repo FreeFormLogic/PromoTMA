@@ -26,19 +26,8 @@ interface TelegramAuthProps {
   onAuth: (user: any) => void;
 }
 
-// Список разрешенных Telegram ID (обновлен с сервера)
-const ALLOWED_USER_IDS = [
-  7418405560,
-  5173994544, 
-  216463929,
-  6209116360,
-  893850026,
-  1577419391,
-  5201551014,
-  666024781,
-  7459692034,  // Добавлен новый пользователь
-  5954190315   // Добавлен новый пользователь
-];
+// Авторизация теперь полностью управляется через базу данных
+// Жесткий список больше не используется
 
 export function TelegramAuth({ onAuth }: TelegramAuthProps) {
   const [error, setError] = useState<string>("");
@@ -59,7 +48,7 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
       
       if (isPreview) {
         const testUser = {
-          id: ALLOWED_USER_IDS[0].toString(),
+          id: '7418405560', // Тестовый ID для preview режима
           username: 'dev_user',
           telegramUsername: '@dev_user',
           firstName: 'Dev',
@@ -95,7 +84,7 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
         // Check if we're in development and can use fallback
         if (isDevelopment) {
           const testUser = {
-            id: ALLOWED_USER_IDS[0].toString(),
+            id: '7418405560', // Тестовый ID для development режима
             username: 'dev_user',
             telegramUsername: '@dev_user',
             firstName: 'Dev',
@@ -118,14 +107,7 @@ export function TelegramAuth({ onAuth }: TelegramAuthProps) {
         return;
       }
 
-      // Проверяем, есть ли ID пользователя в списке разрешенных
-      if (!ALLOWED_USER_IDS.includes(currentUser.id)) {
-        setError(`Доступ запрещен. Ваш ID: ${currentUser.id}`);
-        setIsChecking(false);
-        return;
-      }
-
-      // Пользователь авторизован
+      // Создаем данные пользователя (проверку доступа делает AuthGuard через сервер)
       const userData = {
         id: currentUser.id.toString(),
         username: currentUser.username || `user_${currentUser.id}`,
