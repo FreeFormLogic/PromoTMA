@@ -451,7 +451,7 @@ export default function MyApp() {
               <Checkbox 
                 id="confirm-clear"
                 checked={confirmClear}
-                onCheckedChange={(checked) => setConfirmClear(checked === true)}
+                onCheckedChange={setConfirmClear}
               />
               <label 
                 htmlFor="confirm-clear"

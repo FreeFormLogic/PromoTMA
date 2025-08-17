@@ -101,23 +101,6 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    overflow-x: hidden; /* Prevent horizontal scrollbars */
-  }
-  
-  /* Hide scroll bars in specific components that don't need them */
-  .hide-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-  }
-  
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
-  }
-  
-  /* Improve dialog and modal scroll behavior */
-  .dialog-content {
-    max-height: 85vh;
-    overflow-y: auto;
   }
 }
 

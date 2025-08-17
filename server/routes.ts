@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import crypto from "crypto";
-import { generateAIResponse } from "./ai";
+import { analyzeBusinessContext, generateAIResponse, calculateModuleRelevance, generateChatResponse } from "./ai";
 
 const telegramAuthSchema = z.object({
   id: z.number(),
@@ -250,6 +250,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Chat endpoints
+  app.post("/api/ai/analyze", async (req, res) => {
+    try {
+      const { messages } = req.body;
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({ message: "Messages array is required" });
+      }
+      
+      const analysis = await analyzeBusinessContext(messages);
+      res.json(analysis);
+    } catch (error) {
+      console.error("Error analyzing business context:", error);
+      res.status(500).json({ message: "Ошибка анализа контекста" });
+    }
+  });
 
   app.post("/api/ai/chat", async (req, res) => {
     try {
@@ -701,21 +715,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user AI stats:", error);
       res.status(500).json({ message: "Ошибка получения статистики пользователя" });
-    }
-  });
-
-  // Специальный эндпоинт для принудительного ресидинга базы данных 
-  app.post('/api/admin/reseed', async (req, res) => {
-    try {
-      const result = await storage.reseedModules();
-      res.json({ 
-        success: true, 
-        message: `Перезагружено ${result.deleted} модулей, добавлено ${result.added} новых.`,
-        details: result
-      });
-    } catch (error) {
-      console.error('Ошибка ресидинга:', error);
-      res.status(500).json({ success: false, error: 'Ошибка ресидинга базы данных' });
     }
   });
 

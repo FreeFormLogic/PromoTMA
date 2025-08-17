@@ -18,8 +18,6 @@ import contentImage from "@assets/generated_images/Content_management_system_46f
 
 interface ModuleCardProps {
   module: Module;
-  onClick?: () => void;
-  showConnectionStatus?: boolean;
 }
 
 // Import all module images
@@ -72,20 +70,11 @@ const moduleImages: Record<string, string> = {
   "Интеграция с СДЭК, Boxberry, Почтой России": showcaseSystemImage
 };
 
-export function ModuleCard({ module, onClick, showConnectionStatus = false }: ModuleCardProps) {
+export function ModuleCard({ module }: ModuleCardProps) {
   const moduleImage = moduleImages[module.name] || showcaseSystemImage;
-  
-  // Check if module is connected (for status display)
-  const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-  const isConnected = savedModules.some((m: any) => m.id === module.id);
 
   return (
-    <Card 
-      className={`h-full hover:shadow-md transition-all duration-200 border border-gray-200 ${
-        onClick ? 'cursor-pointer hover:shadow-lg hover:scale-[1.02]' : ''
-      } ${isConnected && showConnectionStatus ? 'ring-2 ring-blue-500 border-blue-200' : ''}`}
-      onClick={onClick}
-    >
+    <Card className="h-full hover:shadow-md transition-shadow duration-200 border border-gray-200">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
@@ -96,18 +85,11 @@ export function ModuleCard({ module, onClick, showConnectionStatus = false }: Mo
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="flex gap-1">
-              {module.isPopular && (
-                <Badge variant="secondary" className="text-xs">
-                  Популярный
-                </Badge>
-              )}
-              {isConnected && showConnectionStatus && (
-                <Badge className="text-xs bg-blue-500 hover:bg-blue-600">
-                  Подключен
-                </Badge>
-              )}
-            </div>
+            {module.isPopular && (
+              <Badge variant="secondary" className="text-xs">
+                Популярный
+              </Badge>
+            )}
           </div>
         </div>
         <h3 className="font-semibold text-gray-900 text-sm leading-tight">

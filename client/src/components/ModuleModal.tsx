@@ -143,26 +143,13 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
     return savedModules.some((m: any) => m.id === module?.id);
   });
 
-  // Обновляем состояние при открытии модального окна и при изменениях localStorage
+  // Обновляем состояние при открытии модального окна
   useEffect(() => {
     if (module && isOpen) {
       const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
       setIsSelected(savedModules.some((m: any) => m.id === module.id));
     }
-  }, [module?.id, isOpen]);
-
-  // Слушаем изменения модулей из других компонентов
-  useEffect(() => {
-    const handleStorageChange = () => {
-      if (module) {
-        const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-        setIsSelected(savedModules.some((m: any) => m.id === module.id));
-      }
-    };
-
-    window.addEventListener('moduleSelectionChanged', handleStorageChange);
-    return () => window.removeEventListener('moduleSelectionChanged', handleStorageChange);
-  }, [module?.id]);
+  }, [isOpen]);
 
   const handleConnectModule = () => {
     if (!module) return;
@@ -285,7 +272,7 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
                   : 'bg-blue-600 hover:bg-blue-700 text-white'
               }`}
             >
-              {isSelected ? 'Убрать модуль' : 'Подключить модуль'}
+              {isSelected ? 'Отключить модуль' : 'Подключить модуль'}
             </Button>
             <Button 
               variant="outline" 

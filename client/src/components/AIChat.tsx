@@ -58,7 +58,7 @@ let persistentMessages: Message[] = [
   {
     id: '1',
     role: 'assistant',
-    content: '👋 Добро пожаловать в AI-конструктор Telegram Mini Apps!\n\n**Ваше приложение за 5-10 дней:**\n• Опишите ваш бизнес в нескольких словах\n• Я подберу из 260+ готовых модулей именно то, что нужно\n• Выберите модули кликом по **плюсику**\n• Получите персональный прототип и техническое задание\n\n**Стоимость разработки: ₽10,000** (фиксированная цена)\n\n🚀 **Расскажите о вашем бизнесе:** пиццерия, салон красоты, фитнес-клуб, магазин, клиника...',
+    content: 'Привет! Я помогу создать ваное собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
     timestamp: Date.now()
   }
 ];
@@ -213,14 +213,16 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
 
   const analyzeAndUpdateModules = async (messageHistory: string[]) => {
     try {
-      // Business analysis is temporarily disabled
-      // The AI chat already provides module recommendations
-      console.log('Business analysis skipped - using AI recommendations instead');
+      // Analyze business context
+      const analysisResponse = await apiRequest('POST', '/api/ai/analyze', { 
+        messages: messageHistory 
+      });
+      const analysisData = await analysisResponse.json();
       
-      // Reset analysis state
-      setAnalysis(null);
-      onAnalysisUpdate(null);
+      setAnalysis(analysisData);
+      onAnalysisUpdate(analysisData);
       
+      // Skip getting modules here since we'll get them from the AI chat response
     } catch (error) {
       console.error('Error analyzing business:', error);
     }
@@ -268,7 +270,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             role: m.role,
             content: m.content
           })),
-          alreadyShownModules: chatModules.map(m => m.number)
+          alreadyShownModules: currentlyDisplayedModules.map(m => m.number)
         })
       });
       const responseData = await response.json();
@@ -376,17 +378,6 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       const currentState = !!savedModules.find((m: any) => m.id === module.id);
       setButtonState(currentState);
     }, []);
-
-    // Listen for module selection changes from other components
-    useEffect(() => {
-      const handleSelectionChange = () => {
-        const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-        setButtonState(!!savedModules.find((m: any) => m.id === module.id));
-      };
-
-      window.addEventListener('moduleSelectionChanged', handleSelectionChange);
-      return () => window.removeEventListener('moduleSelectionChanged', handleSelectionChange);
-    }, [module.id]);
     const IconComponent = Sparkles; // Use sparkles icon for now
     
     // Remove global listener - we update directly in click handler
@@ -586,10 +577,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     foundModules.forEach((module, index) => {
       if (!module) return; // Skip undefined modules
       
-      // Find the correct description for this specific module from the AI response
-      const modulePattern = `\\[MODULE:${module.number}\\]\\s*([^\\[]*?)(?=\\[MODULE:|$)`;
-      const match = content.match(new RegExp(modulePattern, 's'));
-      const aiDescription = match ? match[1].trim() : '';
+      const description = descriptionLines[index] || '';
       
       renderedParts.push(
         <div key={`module-pair-${index}`} className="mb-6">
@@ -598,10 +586,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             <ModuleCard module={module} />
           </div>
           
-          {/* AI-generated description right under module */}
-          {aiDescription && (
+          {/* Description right under module */}
+          {description && (
             <div className="text-sm text-gray-600 ml-4 mb-4">
-              {aiDescription}
+              {description}
             </div>
           )}
         </div>
