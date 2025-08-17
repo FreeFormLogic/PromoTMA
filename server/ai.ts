@@ -14,32 +14,44 @@ interface BusinessAnalysis {
   persona: string;
 }
 
-// Простая система анализа бизнеса на основе ключевых слов
+// Универсальная система анализа бизнеса
 function analyzeBusinessFromText(text: string): BusinessAnalysis {
   const lowerText = text.toLowerCase();
   
-  // Определяем индустрию по ключевым словам
-  let industry = 'general';
-  let persona = 'general business';
-  let relevantCategories: string[] = [];
+  // Всегда анализируем весь текст для выявления ключевых слов
+  const keywords = text.split(/\s+/).filter(word => word.length > 2);
   
-  if (lowerText.includes('турагентство') || lowerText.includes('туризм') || lowerText.includes('тур')) {
+  // Определяем индустрию и релевантные категории
+  let industry = 'universal';
+  let persona = text.slice(0, 50); // Используем сам запрос как персону
+  let relevantCategories: string[] = ['E-COMMERCE', 'MARKETING', 'CRM', 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ'];
+  
+  // Добавляем отраслевые решения если обнаружены специфичные ключевые слова
+  if (lowerText.includes('турагентство') || lowerText.includes('туризм') || lowerText.includes('тур') ||
+      lowerText.includes('путешеств') || lowerText.includes('отел') || lowerText.includes('hotel')) {
     industry = 'tourism';
-    persona = 'турагентство';
-    relevantCategories = ['E-COMMERCE', 'CRM', 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ'];
+    relevantCategories.unshift('ОТРАСЛЕВЫЕ РЕШЕНИЯ');
   } else if (lowerText.includes('пицц') || lowerText.includes('ресторан') || lowerText.includes('кафе') || 
-             lowerText.includes('суши') || lowerText.includes('доставка еды') || lowerText.includes('еда')) {
+             lowerText.includes('суши') || lowerText.includes('доставка') || lowerText.includes('еда') ||
+             lowerText.includes('бар') || lowerText.includes('фастфуд') || lowerText.includes('столов')) {
     industry = 'restaurant';
-    persona = 'ресторан/пиццерия';
-    relevantCategories = ['ОТРАСЛЕВЫЕ РЕШЕНИЯ', 'E-COMMERCE'];
-  } else if (lowerText.includes('салон') || lowerText.includes('красота') || lowerText.includes('парикмахер')) {
+    relevantCategories.unshift('ОТРАСЛЕВЫЕ РЕШЕНИЯ');
+  } else if (lowerText.includes('салон') || lowerText.includes('красот') || lowerText.includes('парикмахер') ||
+             lowerText.includes('спа') || lowerText.includes('маникюр') || lowerText.includes('косметолог')) {
     industry = 'beauty';
-    persona = 'салон красоты';
-    relevantCategories = ['ОТРАСЛЕВЫЕ РЕШЕНИЯ', 'CRM'];
-  } else if (lowerText.includes('медицин') || lowerText.includes('клиник') || lowerText.includes('врач')) {
+    relevantCategories.unshift('ОТРАСЛЕВЫЕ РЕШЕНИЯ');
+  } else if (lowerText.includes('медицин') || lowerText.includes('клиник') || lowerText.includes('врач') ||
+             lowerText.includes('стоматолог') || lowerText.includes('больниц') || lowerText.includes('здоров')) {
     industry = 'medical';
-    persona = 'медицинская клиника';
-    relevantCategories = ['ОТРАСЛЕВЫЕ РЕШЕНИЯ', 'CRM'];
+    relevantCategories.unshift('ОТРАСЛЕВЫЕ РЕШЕНИЯ');
+  } else if (lowerText.includes('магазин') || lowerText.includes('shop') || lowerText.includes('бутик') ||
+             lowerText.includes('торгов') || lowerText.includes('продаж')) {
+    industry = 'retail';
+    relevantCategories = ['E-COMMERCE', 'MARKETING', 'CRM'];
+  } else if (lowerText.includes('приют') || lowerText.includes('благотвор') || lowerText.includes('фонд') ||
+             lowerText.includes('волонтер') || lowerText.includes('помо')) {
+    industry = 'nonprofit';
+    relevantCategories = ['CRM', 'MARKETING', 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ'];
   }
   
   return {
@@ -48,7 +60,7 @@ function analyzeBusinessFromText(text: string): BusinessAnalysis {
     challenges: [],
     goals: [],
     relevantCategories,
-    keywords: text.split(' '),
+    keywords,
     persona
   };
 }
@@ -57,70 +69,70 @@ function analyzeBusinessFromText(text: string): BusinessAnalysis {
 function calculateModuleRelevance(module: any, analysis: BusinessAnalysis, originalText: string): number {
   let score = 0;
   const userText = originalText.toLowerCase();
-  
-  // Универсальный семантический анализ по ключевым словам в названии и описании модуля
   const moduleText = `${module.name} ${module.description} ${module.benefits}`.toLowerCase();
   
-  // Проверяем релевантность через ключевые слова пользователя
-  const userKeywords = userText.split(' ').filter(word => word.length > 3);
-  userKeywords.forEach(keyword => {
-    if (moduleText.includes(keyword)) {
-      score += 50; // Базовая релевантность
+  // 1. Семантический анализ - проверяем совпадение ключевых слов
+  const userWords = userText.split(/\s+/).filter(word => word.length > 2);
+  userWords.forEach(word => {
+    if (moduleText.includes(word)) {
+      score += 30; // Базовые баллы за совпадение
+      // Двойные баллы если слово в названии модуля
+      if (module.name.toLowerCase().includes(word)) {
+        score += 30;
+      }
     }
   });
   
-  // Анализируем отраслевую принадлежность через универсальные паттерны
-  if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ') {
-    // Отраслевые модули получают высокий приоритет если они подходят
-    if (userText.includes('турагентство') || userText.includes('туризм') || userText.includes('тур')) {
-      if (module.number === 261) score += 300; // Управление турагентством
-    }
-    if (userText.includes('ресторан') || userText.includes('пицц') || userText.includes('кафе') || 
-        userText.includes('еда') || userText.includes('суши') || userText.includes('доставка')) {
-      if ([236, 237, 238].includes(module.number)) score += 200;
-    }
-    if (userText.includes('салон') || userText.includes('красот') || userText.includes('парикмахер')) {
-      if (module.number === 240) score += 200;
-    }
-    if (userText.includes('клиник') || userText.includes('медицин') || userText.includes('врач')) {
-      if (module.number === 239) score += 200;
-    }
-  }
-  
-  // Универсальные модули для любого бизнеса
-  if (module.category === 'E-COMMERCE') {
-    score += 40; // E-commerce модули полезны большинству бизнесов
-    
-    // Платежные системы критичны для любого бизнеса
-    if (module.number === 224) score += 60;
-    
-    // Для Бали особенно важны локальные платежи
-    if (userText.includes('бали') || userText.includes('индонези')) {
-      if (module.number === 197) score += 100; // GoPay/OVO
-    }
-  }
-  
-  // CRM и маркетинг полезны всем
-  if (module.category === 'MARKETING' || module.category === 'CRM') {
-    score += 35;
-  }
-  
-  // Программы лояльности универсальны
-  if (module.name.toLowerCase().includes('лояльност') || module.name.toLowerCase().includes('бонус')) {
-    score += 45;
-  }
-  
-  // Интеграции полезны для автоматизации
-  if (module.category === 'INTEGRATIONS' || module.name.toLowerCase().includes('интеграци')) {
-    score += 30;
-  }
-  
-  // Дополнительные баллы за соответствие категории
+  // 2. Приоритет категорий на основе анализа
   if (analysis.relevantCategories.includes(module.category)) {
-    score += 25;
+    // Высший приоритет для первой категории (обычно отраслевые решения)
+    const categoryIndex = analysis.relevantCategories.indexOf(module.category);
+    score += (100 - categoryIndex * 20);
   }
   
-  return score;
+  // 3. Специальные модули для конкретных индустрий
+  if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ') {
+    if (analysis.industry === 'tourism' && module.number === 261) {
+      score += 500; // Максимальный приоритет для туризма
+    } else if (analysis.industry === 'restaurant' && [236, 237, 238].includes(module.number)) {
+      score += 400; // Высокий приоритет для ресторанов
+    } else if (analysis.industry === 'beauty' && module.number === 240) {
+      score += 400; // Для салонов красоты
+    } else if (analysis.industry === 'medical' && module.number === 239) {
+      score += 400; // Для медицинских клиник
+    }
+  }
+  
+  // 4. Универсальные модули получают базовые баллы
+  const universalModules = [224, 225, 13, 15, 42, 8]; // Платежи, трекинг, лояльность, уведомления
+  if (universalModules.includes(module.number)) {
+    score += 50;
+  }
+  
+  // 5. Локальная специфика (Индонезия/Бали)
+  if (userText.includes('бали') || userText.includes('индонези')) {
+    if (module.number === 197) score += 200; // GoPay/OVO
+    if (module.number === 198) score += 150; // Dana
+    if (module.number === 199) score += 150; // LinkAja
+  }
+  
+  // 6. Анализ по типу бизнеса из контекста
+  if (userText.includes('доставк')) {
+    if (module.number === 237 || module.number === 225) score += 100; // Доставка и трекинг
+  }
+  if (userText.includes('онлайн') || userText.includes('интернет')) {
+    if (module.category === 'E-COMMERCE') score += 50;
+  }
+  if (userText.includes('клиент') || userText.includes('crm')) {
+    if (module.category === 'CRM') score += 60;
+  }
+  
+  // 7. Штраф за нерелевантные игровые модули для серьезного бизнеса
+  if (module.category === 'ИГРЫ' && !userText.includes('игр') && !userText.includes('развлеч')) {
+    score -= 100;
+  }
+  
+  return Math.max(0, score); // Не допускаем отрицательные баллы
 }
 
 export async function analyzeBusinessContext(messages: { role: 'user' | 'assistant'; content: string }[]): Promise<BusinessAnalysis> {
@@ -155,43 +167,25 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     
     console.log(`🏆 Топ-4 модуля для ${analysis.persona}:`, recommendedModules);
     
-    // Генерируем универсальный ответ на основе анализа
-    const response = `Проанализировал ваш запрос и подобрал оптимальные модули для ${analysis.persona}:`;
+    // Генерируем краткий ответ с модулями без описаний (они будут в карточках)
+    const moduleReferences = recommendedModules.map(num => `[MODULE:${num}]`).join(' ');
     
-    // Создаем универсальные объяснения на основе контекста и преимуществ модулей
-    const moduleExplanations = recommendedModules.map(moduleNum => {
-      const module = allModules.find(m => m.number === moduleNum);
-      if (!module) return '';
-      
-      // Генерируем релевантное объяснение на основе бизнес-контекста
-      const userText = analysis.persona.toLowerCase();
-      let explanation = '';
-      
-      // Извлекаем ключевое преимущество из benefits
-      const mainBenefit = module.benefits.replace(/\*\*/g, '').split(',')[0];
-      
-      // Адаптируем объяснение под контекст пользователя
-      if (module.category === 'ОТРАСЛЕВЫЕ РЕШЕНИЯ') {
-        // Для отраслевых модулей используем полное описание
-        explanation = module.description;
-      } else if (module.category === 'E-COMMERCE') {
-        // Для e-commerce модулей фокусируемся на продажах
-        explanation = `${module.description}. ${mainBenefit}`;
-      } else if (module.category === 'MARKETING' || module.category === 'CRM') {
-        // Для маркетинга и CRM фокусируемся на клиентах
-        explanation = `${module.description} для улучшения работы с клиентами`;
-      } else {
-        // Универсальное объяснение
-        explanation = `${module.description}. ${mainBenefit}`;
-      }
-      
-      return `[MODULE:${moduleNum}] ${explanation}`;
-    });
+    // Определяем тип бизнеса для персонализированного приветствия
+    let businessTypeEmoji = '';
+    if (lastUserMessage.toLowerCase().includes('ресторан') || lastUserMessage.toLowerCase().includes('суши') || 
+        lastUserMessage.toLowerCase().includes('пицц') || lastUserMessage.toLowerCase().includes('еда')) {
+      businessTypeEmoji = '🍕';
+    } else if (lastUserMessage.toLowerCase().includes('турагентство') || lastUserMessage.toLowerCase().includes('туризм')) {
+      businessTypeEmoji = '🌴';
+    } else if (lastUserMessage.toLowerCase().includes('салон') || lastUserMessage.toLowerCase().includes('красот')) {
+      businessTypeEmoji = '💄';
+    } else if (lastUserMessage.toLowerCase().includes('медицин') || lastUserMessage.toLowerCase().includes('клиник')) {
+      businessTypeEmoji = '🏥';
+    } else {
+      businessTypeEmoji = '🚀';
+    }
     
-    const detailedResponse = `${response}\n\n${moduleExplanations.join('\n\n')}`;
-    
-    // Убираем дублирующие строки с номерами модулей в конце ответа
-    const cleanResponse = detailedResponse.replace(/\n\n\[MODULE:\d+\]( \[MODULE:\d+\])*$/g, '');
+    const cleanResponse = `${businessTypeEmoji} Для вашего бизнеса рекомендую модули, которые помогут увеличить продажи и улучшить сервис:\n\n${moduleReferences}`;
     
     return {
       response: cleanResponse,
@@ -201,58 +195,17 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
   } catch (error) {
     console.error('🚨 Ошибка AI:', error);
     
-    // Простой fallback на основе ключевых слов
-    const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content?.toLowerCase() || '';
+    // Минимальный fallback - используем базовые модули
+    const basicModules = [224, 225, 15, 13]; // Платежи, трекинг, лояльность
     
-    let fallbackModules: number[] = [];
-    let fallbackResponse = '';
-    
-    if (lastUserMessage.includes('турагентство') || lastUserMessage.includes('туризм')) {
-      fallbackModules = [261, 13, 8, 42]; // Отраслевой модуль турагентства в приоритете
-      fallbackResponse = '🌴 Для турагентства рекомендую специализированные модули:';
-    } else if (lastUserMessage.includes('пицц') || lastUserMessage.includes('ресторан') || 
-               lastUserMessage.includes('суши') || lastUserMessage.includes('доставка еды')) {
-      fallbackModules = [236, 237, 238, 225];
-      fallbackResponse = '🍕 Для ресторана/доставки еды:';
-    } else if (lastUserMessage.includes('салон') || lastUserMessage.includes('красота')) {
-      fallbackModules = [240, 8, 224, 15];
-      fallbackResponse = '💄 Для салона красоты:';
-    } else if (lastUserMessage.includes('медицин') || lastUserMessage.includes('клиник')) {
-      fallbackModules = [239, 8, 224, 15];
-      fallbackResponse = '🏥 Для медицинской клиники:';
-    } else {
-      fallbackModules = [1, 224, 15, 13];
-      fallbackResponse = 'Для вашего бизнеса рекомендую:';
-    }
-    
-    // Добавляем объяснения для fallback модулей
-    const filteredModules = fallbackModules.filter(num => !alreadyShownModules.includes(num));
-    const fallbackExplanations = filteredModules.map(moduleNum => {
-      if (lastUserMessage.includes('турагентство')) {
-        if (moduleNum === 261) return `[MODULE:261] Комплексная система управления турагентством с интеграцией туроператоров.`;
-        if (moduleNum === 13) return `[MODULE:13] Позволит внедрить бонусные карты и кэшбэк для клиентов турагентства.`;
-        if (moduleNum === 8) return `[MODULE:8] Обеспечит интеграцию с системами бронирования туров.`;
-        if (moduleNum === 42) return `[MODULE:42] Отправка уведомлений о горящих турах и акциях.`;
-        if (moduleNum === 197) return `[MODULE:197] Прием платежей через GoPay для клиентов на Бали.`;
-      } else if (lastUserMessage.includes('ресторан') || lastUserMessage.includes('пицц') || 
-                 lastUserMessage.includes('суши') || lastUserMessage.includes('доставка еды')) {
-        if (moduleNum === 236) return `[MODULE:236] Полная автоматизация ресторана с передачей заказов на кухню.`;
-        if (moduleNum === 237) return `[MODULE:237] Система доставки с GPS-трекингом курьеров.`;
-        if (moduleNum === 238) return `[MODULE:238] Специализированное решение для пиццерий с конструктором.`;
-        if (moduleNum === 225) return `[MODULE:225] Система статусов заказов с трекингом.`;
-        if (moduleNum === 224) return `[MODULE:224] Автоматический прием платежей.`;
-      }
-      return `[MODULE:${moduleNum}] Полезный модуль для вашего бизнеса.`;
-    });
-    
-    const detailedFallbackResponse = `${fallbackResponse}\n\n${fallbackExplanations.join('\n\n')}`;
-    
-    // Убираем дублирующие строки с номерами модулей в конце ответа
-    const cleanFallbackResponse = detailedFallbackResponse.replace(/\n\n\[MODULE:\d+\]( \[MODULE:\d+\])*$/g, '');
+    const moduleReferences = basicModules
+      .filter(num => !alreadyShownModules.includes(num))
+      .map(num => `[MODULE:${num}]`)
+      .join(' ');
     
     return {
-      response: cleanFallbackResponse,
-      recommendedModules: filteredModules
+      response: `🚀 Рекомендую универсальные модули для вашего бизнеса:\n\n${moduleReferences}`,
+      recommendedModules: basicModules.filter(num => !alreadyShownModules.includes(num))
     };
   }
 }
