@@ -24,18 +24,18 @@ export async function generateAIResponse(
       .map(m => `#${m.number}: ${m.name} - ${m.description} (${m.category})`)
       .join('\n');
     
-    const prompt = `Рекомендуй 4 модуля для бизнеса: ${userText}
+    const prompt = `Ты эксперт по адаптации модулей. Найди 4 лучших модуля для "${userText}". ${alreadyShownModules.length > 0 ? `Исключи: ${alreadyShownModules.join(', ')}` : ''}
 
-${alreadyShownModules.length > 0 ? `НЕ рекомендуй уже показанные: ${alreadyShownModules.join(', ')}` : ''}
-
-Доступно:
+Модули:
 ${modulesList}
 
-Формат ответа (СТРОГО без эмодзи):
-[MODULE:225] - Объяснение без эмодзи
-[MODULE:230] - Объяснение без эмодзи  
-[MODULE:232] - Объяснение без эмодзи
-[MODULE:238] - Объяснение без эмодзи`;
+ОБЯЗАТЕЛЬНО предложи 4 модуля! Адаптируй их под бизнес креативно.
+
+Формат (БЕЗ эмодзи):
+[MODULE:225] - Как применить для этого бизнеса
+[MODULE:230] - Как применить для этого бизнеса
+[MODULE:232] - Как применить для этого бизнеса
+[MODULE:238] - Как применить для этого бизнеса`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash-exp", 
