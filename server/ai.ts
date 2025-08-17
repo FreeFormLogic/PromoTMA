@@ -1,5 +1,4 @@
 const GEMINI_API_KEY = process.env.GOOGLE_API_KEY;
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
 
 if (!GEMINI_API_KEY) {
   console.error('GOOGLE_API_KEY не найден в переменных окружения');
@@ -15,178 +14,158 @@ interface BusinessAnalysis {
   persona: string;
 }
 
-export async function analyzeBusinessContext(messages: { role: 'user' | 'assistant'; content: string }[]): Promise<BusinessAnalysis> {
-  try {
-    const prompt = `Проанализируй бизнес на основе диалога и верни JSON:
-    
-Диалог: ${messages.map(m => `${m.role}: ${m.content}`).join('\n')}
-
-Верни JSON в формате:
-{
-  "industry": "отрасль",
-  "size": "small|medium|large", 
-  "challenges": ["вызов1", "вызов2"],
-  "goals": ["цель1", "цель2"],
-  "relevantCategories": ["категория1", "категория2"],
-  "keywords": ["ключевое1", "ключевое2"],
-  "persona": "описание типа бизнеса"
-}`;
-
-    const response = await fetch(GEMINI_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-goog-api-key': GEMINI_API_KEY!
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `Ты - эксперт по бизнес-анализу. Изучай любую нишу и отвечай только валидным JSON без дополнительного текста.\n\n${prompt}`
-          }]
-        }],
-        generationConfig: {
-          maxOutputTokens: 1200,
-          temperature: 0.1
-        }
-      })
-    });
-
-    const data = await response.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (content) {
-      let responseText = content.trim();
-      
-      // Remove markdown code blocks if present
-      if (responseText.startsWith('```json')) {
-        responseText = responseText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-      } else if (responseText.startsWith('```')) {
-        responseText = responseText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-      }
-      
-      return JSON.parse(responseText);
-    }
-    
-    throw new Error('Invalid response format');
-  } catch (error) {
-    console.error('Error analyzing business context:', error);
-    return {
-      industry: 'general',
-      size: 'medium',
-      challenges: [],
-      goals: [],
-      relevantCategories: [],
-      keywords: [],
-      persona: 'general business'
-    };
+// Простая система анализа бизнеса на основе ключевых слов
+function analyzeBusinessFromText(text: string): BusinessAnalysis {
+  const lowerText = text.toLowerCase();
+  
+  // Определяем индустрию по ключевым словам
+  let industry = 'general';
+  let persona = 'general business';
+  let relevantCategories: string[] = [];
+  
+  if (lowerText.includes('турагентство') || lowerText.includes('туризм') || lowerText.includes('тур')) {
+    industry = 'tourism';
+    persona = 'турагентство';
+    relevantCategories = ['E-COMMERCE', 'CRM', 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ'];
+  } else if (lowerText.includes('пицц') || lowerText.includes('ресторан') || lowerText.includes('кафе')) {
+    industry = 'restaurant';
+    persona = 'ресторан/пиццерия';
+    relevantCategories = ['ОТРАСЛЕВЫЕ РЕШЕНИЯ', 'E-COMMERCE'];
+  } else if (lowerText.includes('салон') || lowerText.includes('красота') || lowerText.includes('парикмахер')) {
+    industry = 'beauty';
+    persona = 'салон красоты';
+    relevantCategories = ['ОТРАСЛЕВЫЕ РЕШЕНИЯ', 'CRM'];
+  } else if (lowerText.includes('медицин') || lowerText.includes('клиник') || lowerText.includes('врач')) {
+    industry = 'medical';
+    persona = 'медицинская клиника';
+    relevantCategories = ['ОТРАСЛЕВЫЕ РЕШЕНИЯ', 'CRM'];
   }
+  
+  return {
+    industry,
+    size: 'medium',
+    challenges: [],
+    goals: [],
+    relevantCategories,
+    keywords: text.split(' '),
+    persona
+  };
+}
+
+// Подсчет релевантности модуля для бизнеса
+function calculateModuleRelevance(module: any, analysis: BusinessAnalysis): number {
+  let score = 0;
+  
+  // Отраслевые модули получают высокие баллы для соответствующих отраслей
+  if (analysis.industry === 'tourism') {
+    // Для турагентств
+    if ([13, 8, 42, 197].includes(module.number)) score += 100;
+    if ([224, 15, 25].includes(module.number)) score += 80;
+  } else if (analysis.industry === 'restaurant') {
+    // Для ресторанов/пиццерий - отраслевые модули
+    if ([236, 237, 238].includes(module.number)) score += 110;
+    if ([225, 8, 224].includes(module.number)) score += 80;
+  } else if (analysis.industry === 'beauty') {
+    // Для салонов красоты
+    if (module.number === 240) score += 110;
+    if ([8, 224, 15].includes(module.number)) score += 80;
+  } else if (analysis.industry === 'medical') {
+    // Для медицинских клиник
+    if (module.number === 239) score += 110;
+    if ([8, 224, 15].includes(module.number)) score += 80;
+  }
+  
+  // Универсально полезные модули
+  if ([1, 224, 13, 8].includes(module.number)) score += 50;
+  
+  // Модули по категориям
+  if (analysis.relevantCategories.includes(module.category)) {
+    score += 30;
+  }
+  
+  return score;
+}
+
+export async function analyzeBusinessContext(messages: { role: 'user' | 'assistant'; content: string }[]): Promise<BusinessAnalysis> {
+  const userMessages = messages.filter(m => m.role === 'user').map(m => m.content).join(' ');
+  return analyzeBusinessFromText(userMessages);
 }
 
 export async function generateAIResponse(messages: { role: 'user' | 'assistant'; content: string }[], alreadyShownModules: number[] = []): Promise<{ response: string; recommendedModules: number[] }> {
   try {
     const { storage } = await import('./storage');
     const allModules = await storage.getAllModules();
-    console.log(`🤖 Отправляем ВСЕ ${allModules.length} модулей в AI для правильной обработки`);
     
-    // Get conversation context
-    const conversationText = messages.map(m => `${m.role}: ${m.content}`).join('\n');
     const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content || '';
+    const analysis = analyzeBusinessFromText(lastUserMessage);
+    
+    console.log(`🎯 Анализ бизнеса: ${analysis.persona} (${analysis.industry})`);
     
     // Фильтруем модули, которые уже показывали
     const availableModules = allModules.filter(m => !alreadyShownModules.includes(m.number));
     
-    console.log(`📤 AI анализирует ${availableModules.length} доступных модулей`);
+    // Подсчитываем релевантность каждого модуля
+    const scoredModules = availableModules.map(module => ({
+      ...module,
+      relevanceScore: calculateModuleRelevance(module, analysis)
+    }));
     
-    // Создаем сокращенный промпт для AI (из-за лимитов API)
-    const prompt = `
-Ты - эксперт по бизнес-анализу и подбору IT-решений. 
-
-Пользователь описал свой бизнес: "${lastUserMessage}"
-
-ВАЖНЫЕ ПРАВИЛА:
-- Для ТУРАГЕНТСТВА рекомендуй: 13 (Программа лояльности), 8 (Интеграция с CRM), 42 (Push-уведомления), 197 (GoPay и OVO)
-- Для ПИЦЦЕРИИ/РЕСТОРАНА: 236, 237, 238 (отраслевые для еды)
-- Для САЛОНА КРАСОТЫ: 240 (отраслевой для красоты)
-- Для МЕДКЛИНИКИ: 239 (отраслевой для медицины)
-
-У меня есть ${availableModules.length} модулей в разных категориях: E-COMMERCE, ИНТЕГРАЦИИ, CRM, ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ, ИНДОНЕЗИЯ, ОТРАСЛЕВЫЕ РЕШЕНИЯ.
-
-Выбери 4 САМЫХ ПОДХОДЯЩИХ номера модулей для "${lastUserMessage}" и объясни выбор.
-
-Ответь в JSON формате:
-{
-  "response": "Персонализированный ответ с объяснением",
-  "recommendedModules": [номер1, номер2, номер3, номер4]
-}`;
-
-    // Отправляем запрос в Gemini AI
-    const response = await fetch(GEMINI_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-goog-api-key': GEMINI_API_KEY!
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: prompt }]
-        }],
-        generationConfig: {
-          maxOutputTokens: 2000,
-          temperature: 0.1
-        }
-      })
-    });
-
-    const data = await response.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    // Сортируем по релевантности и берем топ-4
+    const recommendedModules = scoredModules
+      .sort((a, b) => b.relevanceScore - a.relevanceScore)
+      .slice(0, 4)
+      .map(m => m.number);
     
-    if (content) {
-      let responseText = content.trim();
-      
-      // Убираем markdown блоки если есть
-      if (responseText.startsWith('```json')) {
-        responseText = responseText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-      } else if (responseText.startsWith('```')) {
-        responseText = responseText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-      }
-      
-      try {
-        const aiResult = JSON.parse(responseText);
-        console.log(`🎯 AI выбрал модули:`, aiResult.recommendedModules);
-        console.log(`💬 AI ответ:`, aiResult.response);
-        
-        return {
-          response: aiResult.response || 'Подобрал подходящие модули для вашего бизнеса:',
-          recommendedModules: aiResult.recommendedModules || []
-        };
-      } catch (parseError) {
-        console.error('Ошибка парсинга ответа AI:', parseError);
-        throw parseError;
-      }
+    console.log(`🏆 Топ-4 модуля для ${analysis.persona}:`, recommendedModules);
+    
+    // Генерируем персонализированный ответ
+    let response = '';
+    switch (analysis.industry) {
+      case 'tourism':
+        response = '🌴 Для турагентства рекомендую модули, которые помогут увеличить продажи и улучшить сервис:';
+        break;
+      case 'restaurant':
+        response = '🍕 Для ресторана/пиццерии подобрал специализированные решения:';
+        break;
+      case 'beauty':
+        response = '💄 Для салона красоты рекомендую модули для записи клиентов и лояльности:';
+        break;
+      case 'medical':
+        response = '🏥 Для медицинской клиники выбрал модули для управления пациентами:';
+        break;
+      default:
+        response = 'Подобрал подходящие модули для вашего бизнеса:';
     }
     
-    throw new Error('Пустой ответ от AI');
+    return {
+      response,
+      recommendedModules
+    };
+    
   } catch (error) {
     console.error('🚨 Ошибка AI:', error);
     
-    // Простой fallback если AI не работает
+    // Простой fallback на основе ключевых слов
     const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content?.toLowerCase() || '';
-    console.log(`🔄 Используем простой fallback для: "${lastUserMessage}"`);
     
     let fallbackModules: number[] = [];
     let fallbackResponse = '';
     
-    if (lastUserMessage.includes('пицц') || lastUserMessage.includes('кафе') || lastUserMessage.includes('ресторан')) {
-      fallbackModules = [238, 236, 237, 225];
-      fallbackResponse = `🍕 Для пиццерии рекомендую специализированные модули:`;
+    if (lastUserMessage.includes('турагентство') || lastUserMessage.includes('туризм')) {
+      fallbackModules = [13, 8, 42, 197];
+      fallbackResponse = '🌴 Для турагентства рекомендую эти модули:';
+    } else if (lastUserMessage.includes('пицц') || lastUserMessage.includes('ресторан')) {
+      fallbackModules = [236, 237, 238, 225];
+      fallbackResponse = '🍕 Для ресторана/пиццерии:';
     } else if (lastUserMessage.includes('салон') || lastUserMessage.includes('красота')) {
-      fallbackModules = [240, 8, 224, 15]; 
-      fallbackResponse = `💄 Для салона красоты подойдут эти модули:`;
+      fallbackModules = [240, 8, 224, 15];
+      fallbackResponse = '💄 Для салона красоты:';
     } else if (lastUserMessage.includes('медицин') || lastUserMessage.includes('клиник')) {
-      fallbackModules = [239, 8, 224, 15]; 
-      fallbackResponse = `🏥 Для медицинской клиники:`;
+      fallbackModules = [239, 8, 224, 15];
+      fallbackResponse = '🏥 Для медицинской клиники:';
     } else {
       fallbackModules = [1, 224, 15, 13];
-      fallbackResponse = `Для вашего бизнеса рекомендую эти модули:`;
+      fallbackResponse = 'Для вашего бизнеса рекомендую:';
     }
     
     return {
