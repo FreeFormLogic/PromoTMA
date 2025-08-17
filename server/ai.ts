@@ -58,9 +58,12 @@ function calculateModuleRelevance(module: any, analysis: BusinessAnalysis): numb
   
   // Отраслевые модули получают высокие баллы для соответствующих отраслей
   if (analysis.industry === 'tourism') {
-    // Для турагентств
-    if ([13, 8, 42, 197].includes(module.number)) score += 100;
-    if ([224, 15, 25].includes(module.number)) score += 80;
+    // Для турагентств - точная приоритизация
+    if (module.number === 13) score += 120; // Программа лояльности
+    if (module.number === 8) score += 110;  // Интеграция с CRM
+    if (module.number === 42) score += 105; // Push-уведомления
+    if (module.number === 197) score += 100; // GoPay и OVO
+    if ([224, 15, 25].includes(module.number)) score += 70;
   } else if (analysis.industry === 'restaurant') {
     // Для ресторанов/пиццерий - отраслевые модули
     if ([236, 237, 238].includes(module.number)) score += 110;
@@ -137,8 +140,48 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
         response = 'Подобрал подходящие модули для вашего бизнеса:';
     }
     
+    // Создаем детализированный ответ с объяснениями для каждого модуля
+    const moduleExplanations = recommendedModules.map(moduleNum => {
+      const module = allModules.find(m => m.number === moduleNum);
+      if (!module) return '';
+      
+      switch (analysis.industry) {
+        case 'tourism':
+          if (moduleNum === 13) return `[MODULE:13] Позволит внедрить бонусные карты, начислять кэшбэк и баллы за покупку туров.`;
+          if (moduleNum === 8) return `[MODULE:8] Обеспечит подключение сторонних сервисов, таких как Турвизор, для поиска и бронирования туров прямо в приложении.`;
+          if (moduleNum === 42) return `[MODULE:42] Даст возможность отправлять клиентам уведомления о горячих турах, изменении статуса бронирования или специальных акциях.`;
+          if (moduleNum === 197) return `[MODULE:197] Позволит принимать оплату от клиентов на Бали через популярную местную систему GoPay.`;
+          break;
+        case 'restaurant':
+          if (moduleNum === 236) return `[MODULE:236] Специализированный модуль для управления медицинской клиникой с записью пациентов.`;
+          if (moduleNum === 237) return `[MODULE:237] Отраслевое решение для фитнес-клуба с управлением абонементами и тренировками.`;
+          if (moduleNum === 238) return `[MODULE:238] Комплексная система для салона красоты с онлайн-записью и управлением услугами.`;
+          break;
+        case 'beauty':
+          if (moduleNum === 240) return `[MODULE:240] Специализированное отраслевое решение для салона красоты с записью клиентов и управлением услугами.`;
+          if (moduleNum === 8) return `[MODULE:8] Синхронизация данных с популярными CRM-платформами для ведения клиентской базы.`;
+          if (moduleNum === 224) return `[MODULE:224] Автоматический прием платежей с интеграцией популярных платежных систем.`;
+          break;
+        case 'medical':
+          if (moduleNum === 239) return `[MODULE:239] Отраслевой модуль для медицинских клиник с записью пациентов и управлением приемами.`;
+          if (moduleNum === 8) return `[MODULE:8] Интеграция с медицинскими информационными системами.`;
+          if (moduleNum === 224) return `[MODULE:224] Безопасная обработка платежей за медицинские услуги.`;
+          break;
+      }
+      
+      // Универсальные объяснения для популярных модулей
+      if (moduleNum === 1) return `[MODULE:1] Создаст красивую витрину с AI-описаниями товаров для увеличения конверсии.`;
+      if (moduleNum === 224) return `[MODULE:224] Упростит прием платежей с автоматической обработкой транзакций.`;
+      if (moduleNum === 15) return `[MODULE:15] Даст возможность создавать подписки на товары с регулярными платежами.`;
+      if (moduleNum === 13) return `[MODULE:13] Поможет удерживать клиентов через систему бонусов и вознаграждений.`;
+      
+      return `[MODULE:${moduleNum}] ${module.benefits.replace(/\*\*/g, '').split('.')[0]}.`;
+    });
+    
+    const detailedResponse = `${response}\n\n${moduleExplanations.join('\n\n')}`;
+    
     return {
-      response,
+      response: detailedResponse,
       recommendedModules
     };
     
@@ -168,9 +211,28 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
       fallbackResponse = 'Для вашего бизнеса рекомендую:';
     }
     
+    // Добавляем объяснения для fallback модулей
+    const filteredModules = fallbackModules.filter(num => !alreadyShownModules.includes(num));
+    const fallbackExplanations = filteredModules.map(moduleNum => {
+      if (lastUserMessage.includes('турагентство')) {
+        if (moduleNum === 13) return `[MODULE:13] Позволит внедрить бонусные карты и кэшбэк для клиентов турагентства.`;
+        if (moduleNum === 8) return `[MODULE:8] Обеспечит интеграцию с системами бронирования туров.`;
+        if (moduleNum === 42) return `[MODULE:42] Отправка уведомлений о горящих турах и акциях.`;
+        if (moduleNum === 197) return `[MODULE:197] Прием платежей через GoPay для клиентов на Бали.`;
+      } else if (lastUserMessage.includes('ресторан') || lastUserMessage.includes('пицц')) {
+        if (moduleNum === 236) return `[MODULE:236] Управление медицинской клиникой.`;
+        if (moduleNum === 237) return `[MODULE:237] Управление фитнес-клубом.`;
+        if (moduleNum === 238) return `[MODULE:238] Управление салоном красоты.`;
+        if (moduleNum === 225) return `[MODULE:225] Система онлайн-заказов еды.`;
+      }
+      return `[MODULE:${moduleNum}] Полезный модуль для вашего бизнеса.`;
+    });
+    
+    const detailedFallbackResponse = `${fallbackResponse}\n\n${fallbackExplanations.join('\n\n')}`;
+    
     return {
-      response: fallbackResponse,
-      recommendedModules: fallbackModules.filter(num => !alreadyShownModules.includes(num))
+      response: detailedFallbackResponse,
+      recommendedModules: filteredModules
     };
   }
 }
