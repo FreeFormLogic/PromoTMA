@@ -3,105 +3,83 @@ const GEMINI_API_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent";
 const GEMINI_API_KEY = process.env.GOOGLE_API_KEY;
 
-export interface BusinessAnalysis {
-  industry: string;
-  size: string;
-  challenges: string[];
-  goals: string[];
-  relevantCategories: string[];
-  keywords: string[];
-  persona: string;
-}
+// Вспомогательная функция для вызова API для одного чанка
+async function getRecommendationsForChunk(
+  chunk: string,
+  messages: { role: "user" | "assistant"; content: string }[],
+  alreadyShownModules: number[],
+) {
+  const systemPrompt = `
+Ты — элитный бизнес-архитектор. Твоя задача — проанализировать диалог с клиентом и, опираясь на предоставленный ЧАСТИЧНЫЙ СПИСОК модулей, выбрать из него 2-3 САМЫХ подходящих решения.
 
-export async function analyzeBusinessContext(
-  messages: string[],
-): Promise<BusinessAnalysis> {
-  try {
-    const prompt = `Ты - эксперт по бизнес-анализу с глубоким пониманием различных отраслей. Проанализируй разговор и извлеки полную картину бизнеса клиента.
+ЧАСТИЧНЫЙ СПИСОК МОДУЛЕЙ:
+---
+${chunk}
+---
 
-ТВОЯ ЗАДАЧА - ИЗУЧИТЬ НИШУ КЛИЕНТА:
-1. Определи тип бизнеса и его специфику
-2. Выяви болевые точки и потребности
-3. Пойми бизнес-модель и процессы
-4. Найди возможности для цифровизации
+ТВОЯ ЗАДАЧА:
+1.  Изучи диалог, чтобы понять суть бизнеса клиента.
+2.  Выбери из списка выше только те модули, которые являются ИДЕАЛЬНЫМ попаданием в потребности клиента.
+3.  Для каждого выбранного модуля напиши новое, короткое и убедительное объяснение (15-20 слов), которое напрямую показывает клиенту ценность этого решения для его бизнеса.
 
-ГЛУБОКИЙ АНАЛИЗ ЛЮБОЙ НИШИ
+САМЫЕ СТРОГИЕ ПРАВИЛА ФОРМАТИРОВАНИЯ:
+-   Твой ответ должен состоять ТОЛЬКО из строк формата \`[MODULE:НОМЕР] Твой новый, адаптированный текст.\`.
+-   **ОПИСАНИЕ ВСЕГДА ИДЕТ ПОСЛЕ ID МОДУЛЯ.**
+-   Никаких вступлений ("Вот, что я подобрал..."), никаких прощаний, только строки с модулями.
+-   Не предлагай модули из этого списка уже показанных: [${alreadyShownModules.join(
+    ", ",
+  )}].
 
-ДЛЯ КАЖДОЙ НИШИ АНАЛИЗИРУЙ:
-- Ключевые процессы и workflow
-- Типичные проблемы и узкие места
-- Потребности в автоматизации
-- Возможности роста через цифровизацию
+Пример для клиента "пиццерия":
+\`[MODULE:145] Организует прием заказов на доставку и самовывоз, управляя статусами от готовки до вручения.\`
+\`[MODULE:5] Даст возможность клиентам оплачивать заказы онлайн картой или через Telegram Pay.\`
 
-Верни подробный JSON:
-- industry: точное описание ниши
-- size: размер бизнеса
-- challenges: детальные проблемы конкретной ниши
-- goals: специфические цели для данного типа бизнеса
-- relevantCategories: категории модулей для этой ниши
-- keywords: профессиональные термины ниши
-- persona: детальный профиль клиента и его бизнеса
+Проанализируй диалог и предоставь свой ответ строго по правилам.
+`;
 
-Разговор:
-${messages.join("\n")}
-
-Отвечай только валидным JSON без дополнительного текста.`;
-
-    const response = await fetch(GEMINI_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-goog-api-key": GEMINI_API_KEY!,
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: `Ты - эксперт по бизнес-анализу. Изучай любую нишу и отвечай только валидным JSON без дополнительного текста.\n\n${prompt}`,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          maxOutputTokens: 1200,
-          temperature: 0.1,
+  const apiResponse = await fetch(GEMINI_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-goog-api-key": GEMINI_API_KEY!,
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          parts: [
+            {
+              text: `${systemPrompt}\n\nДиалог:\n${messages
+                .map(
+                  (msg) =>
+                    `${
+                      msg.role === "user" ? "Клиент" : "Ассистент"
+                    }: ${msg.content}`,
+                )
+                .join("\n")}`,
+            },
+          ],
         },
-      }),
-    });
+      ],
+      generationConfig: {
+        maxOutputTokens: 1024,
+        temperature: 0.2,
+      },
+    }),
+  });
 
-    const data = await response.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (content) {
-      let responseText = content.trim();
-
-      // Remove markdown code blocks if present
-      if (responseText.startsWith("```json")) {
-        responseText = responseText
-          .replace(/^```json\s*/, "")
-          .replace(/\s*```$/, "");
-      } else if (responseText.startsWith("```")) {
-        responseText = responseText
-          .replace(/^```\s*/, "")
-          .replace(/\s*```$/, "");
-      }
-
-      return JSON.parse(responseText);
-    }
-
-    throw new Error("Invalid response format");
-  } catch (error) {
-    console.error("Error analyzing business context:", error);
-    return {
-      industry: "general",
-      size: "medium",
-      challenges: [],
-      goals: [],
-      relevantCategories: [],
-      keywords: [],
-      persona: "general business",
-    };
+  if (!apiResponse.ok) {
+    const errorText = await apiResponse.text();
+    console.error(
+      "Gemini API Error (Chunk Processing):",
+      apiResponse.status,
+      errorText,
+    );
+    // Не бросаем ошибку, а возвращаем пустой результат, чтобы не ломать весь процесс
+    return "";
   }
+
+  const apiData = await apiResponse.json();
+  return apiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
 }
 
 export async function generateAIResponse(
@@ -111,132 +89,66 @@ export async function generateAIResponse(
   try {
     const { storage } = await import("./storage");
     const allModules = await storage.getAllModules();
-    console.log(`🔍 AI processing ${allModules.length} modules`);
+    console.log(`🤖 AI processing ${allModules.length} total modules.`);
 
-    // Форматируем все модули для передачи в промпт
-    const modulesDatabase = allModules
-      .map(
-        (m) =>
-          `Module ${m.id}: ${m.title} - ${m.features.join(" ")} - ${
-            m.description
-          }`,
-      )
-      .join("\n");
+    // 1. Форматируем все модули в строки
+    const formattedModules = allModules.map(
+      (m) => `[MODULE:${m.id}] ${m.title} - ${m.description}`,
+    );
 
-    const systemPrompt = `
-Ты — высококлассный бизнес-архитектор. Твоя задача — проанализировать диалог с клиентом и, опираясь на предоставленную базу модулей, предложить ему самые подходящие решения.
-
-**БАЗА ДОСТУПНЫХ МОДУЛЕЙ:**
----
-${modulesDatabase}
----
-
-**ТВОЯ ЗАДАЧА:**
-
-1.  **Изучи диалог:** Пойми суть бизнеса клиента, его цели и проблемы.
-2.  **Выбери лучшее:** Из БАЗЫ МОДУЛЕЙ выше выбери 3-5 самых релевантных для этого клиента. Не придумывай модули, используй только те, что есть в списке.
-3.  **Перепиши описание:** Для каждого выбранного модуля напиши новое, короткое и убедительное объяснение (до 20 слов), которое напрямую обращается к бизнесу клиента и показывает, как именно этот модуль решит его задачу.
-
-**САМЫЕ СТРОГИЕ ПРАВИЛА ФОРМАТИРОВАНИЯ:**
-
--   Твой ответ должен состоять **ТОЛЬКО** из строк формата \`[MODULE:НОМЕР] Твой новый, адаптированный текст.\`.
--   **ОПИСАНИЕ ВСЕГДА ИДЕТ ПОСЛЕ ID МОДУЛЯ.**
--   Никаких вступлений ("Вот, что я подобрал..."), никаких прощаний, никаких заголовков или лишних символов. Только строки с модулями.
--   Никогда не предлагай модули из этого списка уже показанных: [${alreadyShownModules.join(
-      ", ",
-    )}].
-
-**Пример для клиента "турагентство":**
-\`[MODULE:28] Позволит вашим клиентам бронировать туры онлайн в удобное для них время, без звонков и ожидания.\`
-\`[MODULE:1] Создаст привлекательную витрину с вашими лучшими предложениями по отелям и направлениям.\`
-\`[MODULE:152] Будет автоматически отправлять клиентам напоминания о предстоящей поездке и информацию о рейсе.\`
-\`[MODULE:5] Даст возможность безопасно принимать онлайн-оплату за путевки прямо в приложении.\`
-
-Проанализируй диалог и предоставь свой ответ строго по правилам.
-`;
-
-    const apiResponse = await fetch(GEMINI_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-goog-api-key": GEMINI_API_KEY!,
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: `${systemPrompt}\n\nДиалог:\n${messages
-                  .map(
-                    (msg) =>
-                      `${
-                        msg.role === "user" ? "Пользователь" : "Ассистент"
-                      }: ${msg.content}`,
-                  )
-                  .join("\n")}`,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          maxOutputTokens: 2048,
-          temperature: 0.2,
-        },
-      }),
-    });
-
-    if (!apiResponse.ok) {
-      const errorText = await apiResponse.text();
-      console.error("Gemini API Error:", apiResponse.status, errorText);
-      throw new Error(`API failed: ${apiResponse.status} - ${errorText}`);
+    // 2. Делим на чанки (куски) адекватного размера
+    const CHUNK_SIZE = 80; // Оптимальный размер чанка, чтобы не превышать лимиты
+    const chunks: string[] = [];
+    for (let i = 0; i < formattedModules.length; i += CHUNK_SIZE) {
+      chunks.push(formattedModules.slice(i, i + CHUNK_SIZE).join("\n"));
     }
+    console.log(`📦 Split modules into ${chunks.length} chunks.`);
 
-    const apiData = await apiResponse.json();
-    console.log("Full API Response:", JSON.stringify(apiData, null, 2));
+    // 3. Отправляем параллельные запросы для каждого чанка
+    const promises = chunks.map((chunk) =>
+      getRecommendationsForChunk(chunk, messages, alreadyShownModules),
+    );
+    const results = await Promise.all(promises);
+    console.log(`✅ Received responses from all chunks.`);
 
-    const aiContent = apiData.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!aiContent) {
-      console.error("No AI content found in response:", apiData);
-      console.error("Candidates:", apiData.candidates);
-      throw new Error("No AI response content");
-    }
-
-    console.log("AI Response Preview:", aiContent.substring(0, 200));
-
-    // Очистка ответа от возможных артефактов, хотя новый промпт должен минимизировать их.
-    let cleanedContent = aiContent.trim();
-
-    const moduleMatches = cleanedContent.match(/\[MODULE:(\d+)\]/gi) || [];
-    const recommendedModules: number[] = [];
-
-    for (const match of moduleMatches) {
-      const numberMatch = match.match(/\[MODULE:(\d+)\]/i);
-      if (numberMatch) {
-        const moduleNumber = parseInt(numberMatch[1]);
-        if (!alreadyShownModules.includes(moduleNumber)) {
-          recommendedModules.push(moduleNumber);
-        }
-      }
-    }
-
-    // Фильтруем ответ, чтобы оставить только строки, содержащие [MODULE:X]
-    const responseLines = cleanedContent
+    // 4. Собираем и очищаем результаты
+    const combinedResponse = results.join("\n").trim();
+    const finalLines = combinedResponse
       .split("\n")
-      .filter((line) => line.includes("[MODULE:"))
-      .join("\n");
+      .filter((line) => line.startsWith("[MODULE:") && line.trim() !== "");
+
+    if (finalLines.length === 0) {
+      console.warn("AI did not return any valid module recommendations.");
+      throw new Error("No modules recommended by AI.");
+    }
+
+    const response = finalLines.join("\n");
+
+    const recommendedModules = finalLines
+      .map((line) => {
+        const match = line.match(/\[MODULE:(\d+)\]/);
+        return match ? parseInt(match[1]) : null;
+      })
+      .filter(
+        (id): id is number => id !== null && !alreadyShownModules.includes(id),
+      );
 
     return {
-      response: responseLines,
-      recommendedModules: Array.from(new Set(recommendedModules)).sort(
+      response,
+      recommendedModules: [...new Set(recommendedModules)].sort(
         (a, b) => a - b,
       ),
     };
   } catch (error) {
-    console.error("AI Error:", error);
+    console.error("AI Main Logic Error:", error);
     return {
       response: "Извините, произошла ошибка при генерации ответа.",
       recommendedModules: [],
     };
   }
+}
+
+// Пустая функция analyzeBusinessContext, так как основная логика теперь в generateAIResponse
+export async function analyzeBusinessContext(messages: string[]): Promise<any> {
+  return Promise.resolve({});
 }
