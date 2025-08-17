@@ -270,7 +270,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             role: m.role,
             content: m.content
           })),
-          alreadyShownModules: currentlyDisplayedModules.map(m => m.number)
+          alreadyShownModules: chatModules.map(m => m.number)
         })
       });
       const responseData = await response.json();
