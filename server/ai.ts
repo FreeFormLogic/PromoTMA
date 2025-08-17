@@ -60,6 +60,11 @@ function analyzeBusinessFromText(text: string): BusinessAnalysis {
              lowerText.includes('консультаци') || lowerText.includes('услуг')) {
     industry = 'professional';
     relevantCategories = ['CRM', 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ', 'MARKETING'];
+  } else if (lowerText.includes('вязан') || lowerText.includes('рукодел') || lowerText.includes('handmade') ||
+             lowerText.includes('хендмейд') || lowerText.includes('игрушк') || lowerText.includes('творчеств') ||
+             lowerText.includes('мастер') || lowerText.includes('ремесл') || lowerText.includes('craft')) {
+    industry = 'handmade';
+    relevantCategories = ['E-COMMERCE', 'MARKETING', 'CRM'];
   }
   
   return {
@@ -125,6 +130,17 @@ function calculateModuleRelevance(module: any, analysis: BusinessAnalysis, origi
     // Модули с бронированием/записью получают дополнительные баллы
     if (moduleText.includes('запись') || moduleText.includes('бронирован') || moduleText.includes('расписан')) {
       score += 100;
+    }
+  } else if (analysis.industry === 'handmade') {
+    // Для рукоделия приоритет на e-commerce, но с упором на креативность
+    const handmadeModules = [224, 232, 230]; // Платежи, предзаказы, повторные заказы
+    if (handmadeModules.includes(module.number)) {
+      score += 70;
+    }
+    // Дополнительные баллы за модули, подходящие для творческих товаров
+    if (moduleText.includes('предзаказ') || moduleText.includes('резервиров') || 
+        moduleText.includes('портфолио') || moduleText.includes('галерея')) {
+      score += 50;
     }
   } else {
     // Для других бизнесов базовые универсальные модули
