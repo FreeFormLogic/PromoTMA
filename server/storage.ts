@@ -468,7 +468,7 @@ export class DatabaseStorage implements IStorage {
         messagesCount: sql`messages_count + 1`,
         tokensInput: sql`tokens_input + ${messageData.tokensInput}`,
         tokensOutput: sql`tokens_output + ${messageData.tokensOutput}`,
-        totalCostUsd: sql`total_cost_usd + ${messageData.costUsd}`
+        costUsd: sql`cost_usd + ${messageData.costUsd}`
       })
       .where(eq(aiChatSessions.id, sessionId));
   }

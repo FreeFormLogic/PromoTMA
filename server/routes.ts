@@ -8,6 +8,7 @@ import { analyzeBusinessContext, generateAIResponse, calculateModuleRelevance, g
 const telegramAuthSchema = z.object({
   id: z.number(),
   first_name: z.string(),
+  last_name: z.string().optional(),
   username: z.string().optional(),
   photo_url: z.string().optional(),
   auth_date: z.number(),
@@ -127,12 +128,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!user) {
         // Create new user with Telegram data
-        user = await storage.addToWhitelist(authData.id.toString(), {
+        const newUser = await storage.addToWhitelist(authData.id.toString(), {
           firstName: authData.first_name,
           lastName: authData.last_name,
           username: authData.username,
           isActive: true
         });
+        
+        if (newUser.success) {
+          user = await storage.getUserByTelegramId(authData.id.toString());
+        } else {
+          return res.status(500).json({ message: newUser.message });
+        }
       }
       
       return res.json({ user, message: "Авторизация успешна" });
@@ -663,7 +670,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ai-chat/session', async (req, res) => {
     try {
       const { telegramId, userAgent, ipAddress } = req.body;
-      const sessionId = await storage.createAiChatSession(telegramId, userAgent, ipAddress);
+      const sessionId = await storage.createAiChatSession(telegramId);
       res.json({ sessionId });
     } catch (error) {
       res.status(500).json({ error: 'Failed to create chat session' });
@@ -673,7 +680,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ai-chat/message', async (req, res) => {
     try {
       const { sessionId, telegramId, role, content, tokensUsed, cost, model, metadata } = req.body;
-      await storage.saveAiChatMessage(sessionId, telegramId, role, content, tokensUsed, cost, model, metadata);
+      await storage.saveAiChatMessage(sessionId, { role, content, tokensInput: tokensUsed || 0, tokensOutput: 0, costUsd: cost || 0 });
       await storage.updateUserStats(telegramId);
       res.json({ success: true });
     } catch (error) {

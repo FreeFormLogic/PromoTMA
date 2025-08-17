@@ -6,6 +6,7 @@ This project is a full-stack web application serving as a Telegram Mini Apps dir
 - ✅ **Fixed Authorization System**: Dynamic whitelist checking from server-side, removing hardcoded dependencies
 - ✅ **Added User Access**: User 666024781 manually added to server-side whitelist for immediate access
 - ✅ **NEW USERS ADDED**: Users 5954190315 and 7459692034 granted full access (all sections except admin panel and partner program)
+- ✅ **FIXED ACCESS ISSUE**: Resolved "Доступ запрещен" error for users 7459692034 and 5954190315 - added them to both server whitelist database and client-side ALLOWED_USER_IDS list
 - ✅ **Implemented Comprehensive Analytics**: Full Yandex.Metrika integration with webvisor tracking all user text inputs and interactions
 - ✅ **Enhanced AI Chat Analytics**: Complete tracking of all chat interactions, module selections, and user behaviors
 - ✅ **Complete "Ваше преимущество" Redesign**: Full rebuild based on detailed specifications - dark theme (bg-gray-900), dual-tab structure ("Преимущества для Клиента" + "Аргументы для Продавца"), expandable cards with detailed ROI data, accordion objection handling, comparison table, target verticals, and persuasive sales content with specific financial figures

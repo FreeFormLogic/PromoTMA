@@ -35,7 +35,9 @@ const ALLOWED_USER_IDS = [
   893850026,
   1577419391,
   5201551014,
-  666024781
+  666024781,
+  7459692034,  // Добавлен новый пользователь
+  5954190315   // Добавлен новый пользователь
 ];
 
 export function TelegramAuth({ onAuth }: TelegramAuthProps) {
