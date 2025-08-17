@@ -35,11 +35,18 @@ The AI chat system provides intelligent, database-driven module recommendations 
   - Generates personalized explanations adapted to user's specific business context
   - Works for any type of business (tested with restaurants, tourism, clothing stores, etc.)
   - Prioritizes industry-specific modules when relevant, but maintains flexibility for all business types
+- **Service Business Intelligence**: Enhanced AI to properly handle service-based businesses (psychologists, lawyers, consultants, coaches) by:
+  - Classifying service professionals correctly as "services" or "professional" industries
+  - Prioritizing modules with booking/appointment features (medical clinic #239, beauty salon #240)
+  - Reducing scores for irrelevant e-commerce modules while maintaining payment processing
+  - Adding personalized emojis for different service types (🧠 for psychologists, ⚖️ for lawyers)
+- **Clean Response Format**: Streamlined AI responses to show only module references without duplicate descriptions, letting module cards display full details
 - **Access Control Updates**: Disabled Partners section for all users by default. Updated database (10 users affected) and schema to set `accessPartners = false` by default for new users.
 - **Bug Fixes**: 
   - Fixed AI module duplication issue where each module appeared multiple times in responses due to redundant module tags in API responses
   - Enhanced business type detection to properly recognize food delivery keywords ("суши", "доставка") as restaurant business
   - Fixed semantic analysis to use original user text instead of processed persona for better keyword matching
+  - Corrected service business module recommendations to use existing modules (239, 240) instead of non-existent ones
 
 # External Dependencies
 

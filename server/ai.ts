@@ -52,6 +52,14 @@ function analyzeBusinessFromText(text: string): BusinessAnalysis {
              lowerText.includes('волонтер') || lowerText.includes('помо')) {
     industry = 'nonprofit';
     relevantCategories = ['CRM', 'MARKETING', 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ'];
+  } else if (lowerText.includes('психолог') || lowerText.includes('терапевт') || lowerText.includes('консультант') ||
+             lowerText.includes('коуч') || lowerText.includes('тренер') || lowerText.includes('обучение')) {
+    industry = 'services';
+    relevantCategories = ['CRM', 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ', 'MARKETING'];
+  } else if (lowerText.includes('юрист') || lowerText.includes('адвокат') || lowerText.includes('нотариус') ||
+             lowerText.includes('консультаци') || lowerText.includes('услуг')) {
+    industry = 'professional';
+    relevantCategories = ['CRM', 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ', 'MARKETING'];
   }
   
   return {
@@ -103,10 +111,27 @@ function calculateModuleRelevance(module: any, analysis: BusinessAnalysis, origi
     }
   }
   
-  // 4. Универсальные модули получают базовые баллы
-  const universalModules = [224, 225, 13, 15, 42, 8]; // Платежи, трекинг, лояльность, уведомления
-  if (universalModules.includes(module.number)) {
-    score += 50;
+  // 4. Универсальные модули для разных типов бизнеса
+  if (analysis.industry === 'services' || analysis.industry === 'professional') {
+    // Для услуг (психологи, юристы, коучи) приоритет на медицинскую клинику (есть запись), платежи
+    const serviceModules = [239, 240, 224]; // Медицинская клиника (запись к врачам), салон красоты (запись к мастерам), платежи
+    if (serviceModules.includes(module.number)) {
+      score += 120; // Высокий приоритет для модулей с записью
+    }
+    // Меньше баллов за e-commerce модули кроме платежей
+    if (module.category === 'E-COMMERCE' && module.number !== 224) {
+      score -= 60;
+    }
+    // Модули с бронированием/записью получают дополнительные баллы
+    if (moduleText.includes('запись') || moduleText.includes('бронирован') || moduleText.includes('расписан')) {
+      score += 100;
+    }
+  } else {
+    // Для других бизнесов базовые универсальные модули
+    const universalModules = [224, 225]; // Платежи, трекинг
+    if (universalModules.includes(module.number)) {
+      score += 50;
+    }
   }
   
   // 5. Локальная специфика (Индонезия/Бали)
@@ -125,6 +150,12 @@ function calculateModuleRelevance(module: any, analysis: BusinessAnalysis, origi
   }
   if (userText.includes('клиент') || userText.includes('crm')) {
     if (module.category === 'CRM') score += 60;
+  }
+  if (userText.includes('запись') || userText.includes('бронирован') || userText.includes('встреч')) {
+    if (module.number === 239 || module.number === 240) score += 120; // Модули с записью
+  }
+  if (userText.includes('консультаци') || userText.includes('сеанс') || userText.includes('услуг')) {
+    if (module.category === 'CRM' || module.category === 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ') score += 60;
   }
   
   // 7. Штраф за нерелевантные игровые модули для серьезного бизнеса
@@ -181,6 +212,11 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
       businessTypeEmoji = '💄';
     } else if (lastUserMessage.toLowerCase().includes('медицин') || lastUserMessage.toLowerCase().includes('клиник')) {
       businessTypeEmoji = '🏥';
+    } else if (lastUserMessage.toLowerCase().includes('психолог') || lastUserMessage.toLowerCase().includes('консультант') || 
+               lastUserMessage.toLowerCase().includes('коуч') || lastUserMessage.toLowerCase().includes('терапевт')) {
+      businessTypeEmoji = '🧠';
+    } else if (lastUserMessage.toLowerCase().includes('юрист') || lastUserMessage.toLowerCase().includes('адвокат')) {
+      businessTypeEmoji = '⚖️';
     } else {
       businessTypeEmoji = '🚀';
     }
