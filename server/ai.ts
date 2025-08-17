@@ -27,7 +27,8 @@ function analyzeBusinessFromText(text: string): BusinessAnalysis {
     industry = 'tourism';
     persona = 'турагентство';
     relevantCategories = ['E-COMMERCE', 'CRM', 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ'];
-  } else if (lowerText.includes('пицц') || lowerText.includes('ресторан') || lowerText.includes('кафе')) {
+  } else if (lowerText.includes('пицц') || lowerText.includes('ресторан') || lowerText.includes('кафе') || 
+             lowerText.includes('суши') || lowerText.includes('доставка еды') || lowerText.includes('еда')) {
     industry = 'restaurant';
     persona = 'ресторан/пиццерия';
     relevantCategories = ['ОТРАСЛЕВЫЕ РЕШЕНИЯ', 'E-COMMERCE'];
@@ -53,9 +54,9 @@ function analyzeBusinessFromText(text: string): BusinessAnalysis {
 }
 
 // Универсальный подсчет релевантности модуля на основе анализа текста
-function calculateModuleRelevance(module: any, analysis: BusinessAnalysis): number {
+function calculateModuleRelevance(module: any, analysis: BusinessAnalysis, originalText: string): number {
   let score = 0;
-  const userText = analysis.persona.toLowerCase();
+  const userText = originalText.toLowerCase();
   
   // Универсальный семантический анализ по ключевым словам в названии и описании модуля
   const moduleText = `${module.name} ${module.description} ${module.benefits}`.toLowerCase();
@@ -74,7 +75,8 @@ function calculateModuleRelevance(module: any, analysis: BusinessAnalysis): numb
     if (userText.includes('турагентство') || userText.includes('туризм') || userText.includes('тур')) {
       if (module.number === 261) score += 300; // Управление турагентством
     }
-    if (userText.includes('ресторан') || userText.includes('пицц') || userText.includes('кафе') || userText.includes('еда')) {
+    if (userText.includes('ресторан') || userText.includes('пицц') || userText.includes('кафе') || 
+        userText.includes('еда') || userText.includes('суши') || userText.includes('доставка')) {
       if ([236, 237, 238].includes(module.number)) score += 200;
     }
     if (userText.includes('салон') || userText.includes('красот') || userText.includes('парикмахер')) {
@@ -142,7 +144,7 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     // Подсчитываем релевантность каждого модуля
     const scoredModules = availableModules.map(module => ({
       ...module,
-      relevanceScore: calculateModuleRelevance(module, analysis)
+      relevanceScore: calculateModuleRelevance(module, analysis, lastUserMessage)
     }));
     
     // Сортируем по релевантности и берем топ-4
@@ -208,9 +210,10 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     if (lastUserMessage.includes('турагентство') || lastUserMessage.includes('туризм')) {
       fallbackModules = [261, 13, 8, 42]; // Отраслевой модуль турагентства в приоритете
       fallbackResponse = '🌴 Для турагентства рекомендую специализированные модули:';
-    } else if (lastUserMessage.includes('пицц') || lastUserMessage.includes('ресторан')) {
+    } else if (lastUserMessage.includes('пицц') || lastUserMessage.includes('ресторан') || 
+               lastUserMessage.includes('суши') || lastUserMessage.includes('доставка еды')) {
       fallbackModules = [236, 237, 238, 225];
-      fallbackResponse = '🍕 Для ресторана/пиццерии:';
+      fallbackResponse = '🍕 Для ресторана/доставки еды:';
     } else if (lastUserMessage.includes('салон') || lastUserMessage.includes('красота')) {
       fallbackModules = [240, 8, 224, 15];
       fallbackResponse = '💄 Для салона красоты:';
@@ -231,7 +234,8 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
         if (moduleNum === 8) return `[MODULE:8] Обеспечит интеграцию с системами бронирования туров.`;
         if (moduleNum === 42) return `[MODULE:42] Отправка уведомлений о горящих турах и акциях.`;
         if (moduleNum === 197) return `[MODULE:197] Прием платежей через GoPay для клиентов на Бали.`;
-      } else if (lastUserMessage.includes('ресторан') || lastUserMessage.includes('пицц')) {
+      } else if (lastUserMessage.includes('ресторан') || lastUserMessage.includes('пицц') || 
+                 lastUserMessage.includes('суши') || lastUserMessage.includes('доставка еды')) {
         if (moduleNum === 236) return `[MODULE:236] Полная автоматизация ресторана с передачей заказов на кухню.`;
         if (moduleNum === 237) return `[MODULE:237] Система доставки с GPS-трекингом курьеров.`;
         if (moduleNum === 238) return `[MODULE:238] Специализированное решение для пиццерий с конструктором.`;

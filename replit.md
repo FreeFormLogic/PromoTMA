@@ -36,7 +36,10 @@ The AI chat system provides intelligent, database-driven module recommendations 
   - Works for any type of business (tested with restaurants, tourism, clothing stores, etc.)
   - Prioritizes industry-specific modules when relevant, but maintains flexibility for all business types
 - **Access Control Updates**: Disabled Partners section for all users by default. Updated database (10 users affected) and schema to set `accessPartners = false` by default for new users.
-- **Bug Fixes**: Fixed AI module duplication issue where each module appeared multiple times in responses due to redundant module tags in API responses.
+- **Bug Fixes**: 
+  - Fixed AI module duplication issue where each module appeared multiple times in responses due to redundant module tags in API responses
+  - Enhanced business type detection to properly recognize food delivery keywords ("суши", "доставка") as restaurant business
+  - Fixed semantic analysis to use original user text instead of processed persona for better keyword matching
 
 # External Dependencies
 
