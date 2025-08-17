@@ -42,11 +42,12 @@ The AI chat system provides intelligent, database-driven module recommendations 
   - Adding personalized emojis for different service types (🧠 for psychologists, ⚖️ for lawyers)
 - **Clean Response Format**: Streamlined AI responses to show only module references without duplicate descriptions, letting module cards display full details
 - **Access Control Updates**: Disabled Partners section for all users by default. Updated database (10 users affected) and schema to set `accessPartners = false` by default for new users.
-- **AI Intelligence Upgrade**: Replaced hardcoded business classification with Gemini-powered intelligent analysis:
-  - Now uses Gemini 2.0 Flash for dynamic business type detection instead of keyword matching
-  - Provides accurate classification for complex cases like "Вязание игрушек" (correctly identified as handmade)
-  - Generates appropriate emojis based on AI analysis (🧶 for handmade, 🧠 for services, etc.)
-  - Maintains fallback system for reliability while leveraging AI for superior accuracy
+- **AI Intelligence Overhaul**: Completely replaced hardcoded logic with pure Gemini intelligence:
+  - Gemini receives full database of all 260+ modules and makes autonomous decisions
+  - No more pre-defined business classifications - AI analyzes each case independently
+  - Smart recommendations: Taxi → GPS tracking + payments, Crafts → e-commerce + pre-orders
+  - AI provides business-specific explanations for each recommended module
+  - System now works universally for any business type without manual rules
 - **Bug Fixes**: 
   - Fixed AI module duplication issue where each module appeared multiple times in responses due to redundant module tags in API responses
   - Enhanced business type detection to properly recognize food delivery keywords ("суши", "доставка") as restaurant business

@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import crypto from "crypto";
-import { analyzeBusinessContext, generateAIResponse, calculateModuleRelevance, generateChatResponse } from "./ai";
+import { generateAIResponse } from "./ai";
 
 const telegramAuthSchema = z.object({
   id: z.number(),
@@ -250,20 +250,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Chat endpoints
-  app.post("/api/ai/analyze", async (req, res) => {
-    try {
-      const { messages } = req.body;
-      if (!messages || !Array.isArray(messages)) {
-        return res.status(400).json({ message: "Messages array is required" });
-      }
-      
-      const analysis = await analyzeBusinessContext(messages);
-      res.json(analysis);
-    } catch (error) {
-      console.error("Error analyzing business context:", error);
-      res.status(500).json({ message: "Ошибка анализа контекста" });
-    }
-  });
 
   app.post("/api/ai/chat", async (req, res) => {
     try {
