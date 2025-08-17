@@ -213,16 +213,14 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
 
   const analyzeAndUpdateModules = async (messageHistory: string[]) => {
     try {
-      // Analyze business context
-      const analysisResponse = await apiRequest('POST', '/api/ai/analyze', { 
-        messages: messageHistory 
-      });
-      const analysisData = await analysisResponse.json();
+      // Business analysis is temporarily disabled
+      // The AI chat already provides module recommendations
+      console.log('Business analysis skipped - using AI recommendations instead');
       
-      setAnalysis(analysisData);
-      onAnalysisUpdate(analysisData);
+      // Reset analysis state
+      setAnalysis(null);
+      onAnalysisUpdate(null);
       
-      // Skip getting modules here since we'll get them from the AI chat response
     } catch (error) {
       console.error('Error analyzing business:', error);
     }
