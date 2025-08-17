@@ -1,8 +1,12 @@
+import { GoogleGenAI } from "@google/genai";
+
 const GEMINI_API_KEY = process.env.GOOGLE_API_KEY;
 
 if (!GEMINI_API_KEY) {
   console.error('GOOGLE_API_KEY не найден в переменных окружения');
 }
+
+const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY || '' });
 
 interface BusinessAnalysis {
   industry: string;
@@ -14,68 +18,81 @@ interface BusinessAnalysis {
   persona: string;
 }
 
-// Универсальная система анализа бизнеса
-function analyzeBusinessFromText(text: string): BusinessAnalysis {
-  const lowerText = text.toLowerCase();
-  
-  // Всегда анализируем весь текст для выявления ключевых слов
-  const keywords = text.split(/\s+/).filter(word => word.length > 2);
-  
-  // Определяем индустрию и релевантные категории
-  let industry = 'universal';
-  let persona = text.slice(0, 50); // Используем сам запрос как персону
-  let relevantCategories: string[] = ['E-COMMERCE', 'MARKETING', 'CRM', 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ'];
-  
-  // Добавляем отраслевые решения если обнаружены специфичные ключевые слова
-  if (lowerText.includes('турагентство') || lowerText.includes('туризм') || lowerText.includes('тур') ||
-      lowerText.includes('путешеств') || lowerText.includes('отел') || lowerText.includes('hotel')) {
-    industry = 'tourism';
-    relevantCategories.unshift('ОТРАСЛЕВЫЕ РЕШЕНИЯ');
-  } else if (lowerText.includes('пицц') || lowerText.includes('ресторан') || lowerText.includes('кафе') || 
-             lowerText.includes('суши') || lowerText.includes('доставка') || lowerText.includes('еда') ||
-             lowerText.includes('бар') || lowerText.includes('фастфуд') || lowerText.includes('столов')) {
-    industry = 'restaurant';
-    relevantCategories.unshift('ОТРАСЛЕВЫЕ РЕШЕНИЯ');
-  } else if (lowerText.includes('салон') || lowerText.includes('красот') || lowerText.includes('парикмахер') ||
-             lowerText.includes('спа') || lowerText.includes('маникюр') || lowerText.includes('косметолог')) {
-    industry = 'beauty';
-    relevantCategories.unshift('ОТРАСЛЕВЫЕ РЕШЕНИЯ');
-  } else if (lowerText.includes('медицин') || lowerText.includes('клиник') || lowerText.includes('врач') ||
-             lowerText.includes('стоматолог') || lowerText.includes('больниц') || lowerText.includes('здоров')) {
-    industry = 'medical';
-    relevantCategories.unshift('ОТРАСЛЕВЫЕ РЕШЕНИЯ');
-  } else if (lowerText.includes('магазин') || lowerText.includes('shop') || lowerText.includes('бутик') ||
-             lowerText.includes('торгов') || lowerText.includes('продаж')) {
-    industry = 'retail';
-    relevantCategories = ['E-COMMERCE', 'MARKETING', 'CRM'];
-  } else if (lowerText.includes('приют') || lowerText.includes('благотвор') || lowerText.includes('фонд') ||
-             lowerText.includes('волонтер') || lowerText.includes('помо')) {
-    industry = 'nonprofit';
-    relevantCategories = ['CRM', 'MARKETING', 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ'];
-  } else if (lowerText.includes('психолог') || lowerText.includes('терапевт') || lowerText.includes('консультант') ||
-             lowerText.includes('коуч') || lowerText.includes('тренер') || lowerText.includes('обучение')) {
-    industry = 'services';
-    relevantCategories = ['CRM', 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ', 'MARKETING'];
-  } else if (lowerText.includes('юрист') || lowerText.includes('адвокат') || lowerText.includes('нотариус') ||
-             lowerText.includes('консультаци') || lowerText.includes('услуг')) {
-    industry = 'professional';
-    relevantCategories = ['CRM', 'ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ', 'MARKETING'];
-  } else if (lowerText.includes('вязан') || lowerText.includes('рукодел') || lowerText.includes('handmade') ||
-             lowerText.includes('хендмейд') || lowerText.includes('игрушк') || lowerText.includes('творчеств') ||
-             lowerText.includes('мастер') || lowerText.includes('ремесл') || lowerText.includes('craft')) {
-    industry = 'handmade';
-    relevantCategories = ['E-COMMERCE', 'MARKETING', 'CRM'];
+// AI-powered анализ бизнеса через Gemini
+async function analyzeBusinessFromText(text: string): Promise<BusinessAnalysis> {
+  try {
+    const prompt = `Analyze this business type and return ONLY valid JSON:
+
+Business: "${text}"
+
+Return JSON format:
+{
+  "industry": "one of: tourism, restaurant, beauty, medical, services, professional, handmade, retail, nonprofit, universal",
+  "size": "medium",
+  "challenges": ["business challenges"],
+  "goals": ["business goals"], 
+  "relevantCategories": ["module categories"],
+  "keywords": ["key terms"],
+  "persona": "brief business description"
+}
+
+Rules:
+- restaurants/cafes: industry="restaurant", relevantCategories=["ОТРАСЛЕВЫЕ РЕШЕНИЯ", "E-COMMERCE"]
+- tourism/travel: industry="tourism", relevantCategories=["ОТРАСЛЕВЫЕ РЕШЕНИЯ", "CRM"]
+- beauty/spa: industry="beauty", relevantCategories=["ОТРАСЛЕВЫЕ РЕШЕНИЯ", "CRM"]  
+- medical/clinic: industry="medical", relevantCategories=["ОТРАСЛЕВЫЕ РЕШЕНИЯ", "CRM"]
+- psychologists/coaches: industry="services", relevantCategories=["CRM", "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]
+- lawyers/consultants: industry="professional", relevantCategories=["CRM", "ДОПОЛНИТЕЛЬНЫЕ СЕРВИСЫ"]
+- handmade/crafts: industry="handmade", relevantCategories=["E-COMMERCE", "MARKETING"]
+- other: industry="universal", relevantCategories=["E-COMMERCE", "MARKETING", "CRM"]`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash-exp",
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "object",
+          properties: {
+            industry: { type: "string" },
+            size: { type: "string" },
+            challenges: { type: "array", items: { type: "string" } },
+            goals: { type: "array", items: { type: "string" } },
+            relevantCategories: { type: "array", items: { type: "string" } },
+            keywords: { type: "array", items: { type: "string" } },
+            persona: { type: "string" }
+          }
+        }
+      },
+      contents: prompt,
+    });
+
+    const result = JSON.parse(response.text || '{}');
+    console.log('✅ Gemini business analysis result:', result);
+    
+    // Добавляем значения по умолчанию если их нет
+    return {
+      industry: result.industry || 'universal',
+      size: result.size || 'medium',
+      challenges: result.challenges || [],
+      goals: result.goals || [],
+      relevantCategories: result.relevantCategories || ['E-COMMERCE', 'MARKETING', 'CRM'],
+      keywords: result.keywords || text.split(/\s+/).filter(word => word.length > 2),
+      persona: result.persona || text.slice(0, 50)
+    };
+  } catch (error) {
+    console.log('🚨 Gemini analysis failed, using fallback:', error.message);
+    // Простой fallback если Gemini недоступен
+    const keywords = text.split(/\s+/).filter(word => word.length > 2);
+    return {
+      industry: 'universal',
+      size: 'medium',
+      challenges: [],
+      goals: [],
+      relevantCategories: ['E-COMMERCE', 'MARKETING', 'CRM'],
+      keywords,
+      persona: text.slice(0, 50)
+    };
   }
-  
-  return {
-    industry,
-    size: 'medium',
-    challenges: [],
-    goals: [],
-    relevantCategories,
-    keywords,
-    persona
-  };
 }
 
 // Универсальный подсчет релевантности модуля на основе анализа текста
@@ -184,7 +201,7 @@ function calculateModuleRelevance(module: any, analysis: BusinessAnalysis, origi
 
 export async function analyzeBusinessContext(messages: { role: 'user' | 'assistant'; content: string }[]): Promise<BusinessAnalysis> {
   const userMessages = messages.filter(m => m.role === 'user').map(m => m.content).join(' ');
-  return analyzeBusinessFromText(userMessages);
+  return await analyzeBusinessFromText(userMessages);
 }
 
 export async function generateAIResponse(messages: { role: 'user' | 'assistant'; content: string }[], alreadyShownModules: number[] = []): Promise<{ response: string; recommendedModules: number[] }> {
@@ -193,7 +210,7 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     const allModules = await storage.getAllModules();
     
     const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content || '';
-    const analysis = analyzeBusinessFromText(lastUserMessage);
+    const analysis = await analyzeBusinessFromText(lastUserMessage);
     
     console.log(`🎯 Анализ бизнеса: ${analysis.persona} (${analysis.industry})`);
     
@@ -217,24 +234,19 @@ export async function generateAIResponse(messages: { role: 'user' | 'assistant';
     // Генерируем краткий ответ с модулями без описаний (они будут в карточках)
     const moduleReferences = recommendedModules.map(num => `[MODULE:${num}]`).join(' ');
     
-    // Определяем тип бизнеса для персонализированного приветствия
-    let businessTypeEmoji = '';
-    if (lastUserMessage.toLowerCase().includes('ресторан') || lastUserMessage.toLowerCase().includes('суши') || 
-        lastUserMessage.toLowerCase().includes('пицц') || lastUserMessage.toLowerCase().includes('еда')) {
-      businessTypeEmoji = '🍕';
-    } else if (lastUserMessage.toLowerCase().includes('турагентство') || lastUserMessage.toLowerCase().includes('туризм')) {
-      businessTypeEmoji = '🌴';
-    } else if (lastUserMessage.toLowerCase().includes('салон') || lastUserMessage.toLowerCase().includes('красот')) {
-      businessTypeEmoji = '💄';
-    } else if (lastUserMessage.toLowerCase().includes('медицин') || lastUserMessage.toLowerCase().includes('клиник')) {
-      businessTypeEmoji = '🏥';
-    } else if (lastUserMessage.toLowerCase().includes('психолог') || lastUserMessage.toLowerCase().includes('консультант') || 
-               lastUserMessage.toLowerCase().includes('коуч') || lastUserMessage.toLowerCase().includes('терапевт')) {
-      businessTypeEmoji = '🧠';
-    } else if (lastUserMessage.toLowerCase().includes('юрист') || lastUserMessage.toLowerCase().includes('адвокат')) {
-      businessTypeEmoji = '⚖️';
-    } else {
-      businessTypeEmoji = '🚀';
+    // Определяем эмодзи на основе AI анализа
+    let businessTypeEmoji = '🚀';
+    switch (analysis.industry) {
+      case 'restaurant': businessTypeEmoji = '🍕'; break;
+      case 'tourism': businessTypeEmoji = '✈️'; break;
+      case 'beauty': businessTypeEmoji = '💄'; break;
+      case 'medical': businessTypeEmoji = '🏥'; break;
+      case 'services': businessTypeEmoji = '🧠'; break;
+      case 'professional': businessTypeEmoji = '⚖️'; break;
+      case 'handmade': businessTypeEmoji = '🧶'; break;
+      case 'retail': businessTypeEmoji = '🛍️'; break;
+      case 'nonprofit': businessTypeEmoji = '❤️'; break;
+      default: businessTypeEmoji = '🚀'; break;
     }
     
     const cleanResponse = `${businessTypeEmoji} Для вашего бизнеса рекомендую модули, которые помогут увеличить продажи и улучшить сервис:\n\n${moduleReferences}`;
