@@ -128,23 +128,6 @@ class ChatErrorBoundary extends ReactComponent<{children: React.ReactNode}, {has
 function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize, currentlyDisplayedModules = [], isFullScreen = false }: AIChatProps & { isFullScreen?: boolean }) {
   const [, setLocation] = useLocation();
   
-  // Force sync on every component mount/render
-  const forceSync = () => {
-    try {
-      const savedMessages = localStorage.getItem('aiChatMessages');
-      if (savedMessages) {
-        const parsed = JSON.parse(savedMessages);
-        if (parsed && Array.isArray(parsed)) {
-          persistentMessages = parsed;
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.error('Force sync failed:', e);
-    }
-    return persistentMessages;
-  };
-  
   // Initialize from localStorage first
   const initializeFromStorage = () => {
     try {
@@ -175,39 +158,27 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     }
   };
 
-  const [messages, setMessages] = useState<Message[]>(() => {
-    const syncedMessages = forceSync();
-    return syncedMessages.length > 0 ? syncedMessages : initializeFromStorage();
-  });
+  const [messages, setMessages] = useState<Message[]>(() => initializeFromStorage());
   
-  // Sync messages with localStorage when component mounts or becomes visible
+  // Restore messages only when navigating back to chat
   useEffect(() => {
-    const syncMessages = () => {
-      try {
-        const savedMessages = localStorage.getItem('aiChatMessages');
-        if (savedMessages) {
-          const parsed = JSON.parse(savedMessages);
-          // Only update if we have significantly fewer messages (avoid overwriting during message send)
-          if (parsed.length > messages.length + 1) {
-            console.log('🔄 Syncing chat history:', parsed.length, 'vs current', messages.length);
-            setMessages(parsed);
-            persistentMessages = parsed;
-          }
-        }
-      } catch (e) {
-        console.error('Failed to sync messages:', e);
-      }
-    };
-    
-    // Only sync on initial mount, not during message updates
-    if (messages.length <= 1) {
-      syncMessages();
-    }
-    
-    // Listen for custom event from navigation
     const handleNavigation = () => {
-      console.log('🔄 Navigation event detected, syncing chat...');
-      setTimeout(syncMessages, 100);
+      console.log('🔄 Navigation event - restoring chat history');
+      setTimeout(() => {
+        try {
+          const savedMessages = localStorage.getItem('aiChatMessages');
+          if (savedMessages) {
+            const parsed = JSON.parse(savedMessages);
+            if (parsed && Array.isArray(parsed) && parsed.length > messages.length) {
+              console.log('🔄 Restoring', parsed.length, 'messages');
+              setMessages(parsed);
+              persistentMessages = parsed;
+            }
+          }
+        } catch (e) {
+          console.error('Failed to restore messages:', e);
+        }
+      }, 50);
     };
     
     window.addEventListener('chatNavigationEvent', handleNavigation);
@@ -215,7 +186,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     return () => {
       window.removeEventListener('chatNavigationEvent', handleNavigation);
     };
-  }, []); // Empty dependency to avoid interference with message updates
+  }, [messages.length]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<BusinessAnalysis | null>(null);
@@ -310,6 +281,23 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     // Track user text input for Yandex.Metrika webvisor
     trackTextInput('ai_chat_message', input.trim(), 'chat_input');
     trackAIChat('send_message', { messageLength: input.trim().length });
+    
+    // Always get the latest messages from localStorage before sending
+    let currentMessages = messages;
+    try {
+      const savedMessages = localStorage.getItem('aiChatMessages');
+      if (savedMessages) {
+        const parsed = JSON.parse(savedMessages);
+        if (parsed && Array.isArray(parsed) && parsed.length > messages.length) {
+          console.log('🔄 Using saved messages:', parsed.length, 'vs current:', messages.length);
+          currentMessages = parsed;
+          setMessages(parsed);
+          persistentMessages = parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Error loading saved messages:', e);
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -318,7 +306,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       timestamp: Date.now()
     };
 
-    const updatedMessages = [...messages, userMessage];
+    const updatedMessages = [...currentMessages, userMessage];
     setMessages(updatedMessages);
     persistentMessages = updatedMessages;
     localStorage.setItem('aiChatMessages', JSON.stringify(updatedMessages));
@@ -328,7 +316,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
 
     try {
       // Prepare message history for AI
-      const messageHistory = [...messages, userMessage].map(m => m.content);
+      const messageHistory = [...currentMessages, userMessage].map(m => m.content);
       
       // Analyze business context and update modules
       await analyzeAndUpdateModules(messageHistory);
@@ -341,7 +329,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           'x-telegram-user-id': window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || 'unknown'
         },
         body: JSON.stringify({
-          messages: [...messages, userMessage].map(m => ({
+          messages: [...currentMessages, userMessage].map(m => ({
             role: m.role,
             content: m.content
           })),
@@ -403,6 +391,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         persistentMessages = errorMessages;
         localStorage.setItem('aiChatMessages', JSON.stringify(errorMessages));
         console.log('💾 Saved error message, total:', errorMessages.length);
+        
+        // Force immediate persistence
+        persistentMessages = errorMessages;
       }
     } finally {
       setIsLoading(false);
