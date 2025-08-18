@@ -34,9 +34,7 @@ ${chunk}
 `;
 
   try {
-    const result = await model.generateContent(
-      `${systemPrompt}\n\nДиалог:\n${messages.map((msg) => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`,
-    );
+    const result = await model.generateContent(`${systemPrompt}\n\nДиалог:\n${messages.map(msg => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`);
     return result.response.text();
   } catch (error) {
     console.error("Gemini chunk processing error:", error);
@@ -72,31 +70,22 @@ export async function generateAIResponse(
       getRecommendationsForChunk(chunk, messages, alreadyShownModules),
     );
     const results = await Promise.all(promises);
-    console.log(
-      `🧠 Stage 2: Received preliminary recommendations from all chunks.`,
-    );
+    console.log(`🧠 Stage 2: Received preliminary recommendations from all chunks.`);
 
-    const candidateModuleNumbers =
-      results
-        .join("\n")
-        .match(/\[MODULE:(\d+)\]/g)
-        ?.map((match) => parseInt(match.match(/(\d+)/)![0])) || [];
+    const candidateModuleNumbers = results
+      .join("\n")
+      .match(/\[MODULE:(\d+)\]/g)
+      ?.map(match => parseInt(match.match(/(\d+)/)![0])) || [];
 
     if (candidateModuleNumbers.length === 0) {
       throw new Error("AI did not select any candidate modules.");
     }
 
     const uniqueCandidateNumbers = [...new Set(candidateModuleNumbers)];
-    const candidateModules = allModules.filter((m) =>
-      uniqueCandidateNumbers.includes(m.number),
-    );
-    const finalModuleDatabase = candidateModules
-      .map((m) => `[MODULE:${m.number}] ${m.name} - ${m.description}`)
-      .join("\n");
+    const candidateModules = allModules.filter(m => uniqueCandidateNumbers.includes(m.number));
+    const finalModuleDatabase = candidateModules.map(m => `[MODULE:${m.number}] ${m.name} - ${m.description}`).join("\n");
 
-    console.log(
-      `🎯 Stage 2: Aggregated ${candidateModules.length} unique candidate modules.`,
-    );
+    console.log(`🎯 Stage 2: Aggregated ${candidateModules.length} unique candidate modules.`);
 
     // --- ЭТАП 3: Финальный запрос к AI для выбора лучших из лучших и написания описаний ---
     const finalPrompt = `Ты — гениальный бизнес-консультант. Ты уже проанализировал всю базу модулей и отобрал лучших кандидатов. Теперь твоя задача — выбрать 4-5 самых идеальных и написать для них продающие описания.
@@ -117,37 +106,27 @@ ${finalModuleDatabase}
 -   Никаких вступлений, прощаний или лишнего текста. Каждый модуль и его описание должны быть на новой строке.
 `;
 
-    console.log(
-      "🚀 Stage 3: Sending final request to AI for ranking and description generation...",
-    );
-    const finalResult = await model.generateContent(
-      `${finalPrompt}\n\nДиалог:\n${messages.map((msg) => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`,
-    );
+    console.log("🚀 Stage 3: Sending final request to AI for ranking and description generation...");
+    const finalResult = await model.generateContent(`${finalPrompt}\n\nДиалог:\n${messages.map(msg => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`);
     const aiContent = finalResult.response.text();
     console.log("✅ Stage 3: Received final AI response.");
 
-    const responseLines = aiContent
-      .trim()
-      .split("\n")
-      .filter((line) => line.includes("[MODULE:"));
+    const responseLines = aiContent.trim().split("\n").filter(line => line.includes("[MODULE:"));
     if (responseLines.length === 0) {
       throw new Error("Final AI response did not contain valid module lines.");
     }
 
     const finalResponse = responseLines.join("\n");
-    const recommendedModules = responseLines
-      .map((line) => {
+    const recommendedModules = responseLines.map(line => {
         const match = line.match(/\[MODULE:(\d+)\]/i);
         return match ? parseInt(match[1]) : 0;
-      })
-      .filter((id) => id > 0 && !alreadyShownModules.includes(id));
+    }).filter(id => id > 0 && !alreadyShownModules.includes(id));
 
     return {
       response: finalResponse,
-      recommendedModules: [...new Set(recommendedModules)].sort(
-        (a, b) => a - b,
-      ),
+      recommendedModules: [...new Set(recommendedModules)].sort((a, b) => a - b),
     };
+
   } catch (error) {
     console.error("AI Main Logic Error:", error);
     return {
@@ -160,5 +139,5 @@ ${finalModuleDatabase}
 // Эта функция больше не нужна, так как вся логика перенесена в generateAIResponse.
 // Оставляем ее пустой для совместимости, если она где-то вызывается.
 export async function analyzeBusinessContext(messages: string[]): Promise<any> {
-  return Promise.resolve({});
+    return Promise.resolve({});
 }
