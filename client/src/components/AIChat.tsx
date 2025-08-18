@@ -108,6 +108,19 @@ class ChatErrorBoundary extends ReactComponent<{children: React.ReactNode}, {has
   constructor(props: {children: React.ReactNode}) {
     super(props);
     this.state = { hasError: false };
+    
+    // Global error handler for unhandled promise rejections from extensions
+    window.addEventListener('unhandledrejection', (event) => {
+      const error = event.reason;
+      if (error?.stack?.includes('extension') || 
+          error?.message?.includes('extension') ||
+          error?.stack?.includes('chrome-extension') ||
+          error?.stack?.includes('binance') ||
+          error?.stack?.includes('egjidjbpglichdcondbcbdnbeeppgdph')) {
+        console.log('Browser extension promise rejection ignored:', error);
+        event.preventDefault(); // Prevent the error from showing
+      }
+    });
   }
 
   static getDerivedStateFromError(error: any) {
@@ -677,7 +690,14 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                   content: 'Предложи больше функций',
                   timestamp: Date.now()
                 };
-                setMessages(prev => [...prev, userMessage]);
+                
+                setMessages(prev => {
+                  const updated = [...prev, userMessage];
+                  console.log('🔘 "Больше функций" - сохраняем', updated.length, 'сообщений');
+                  persistentMessages = updated;
+                  saveMessages(updated);
+                  return updated;
+                });
                 setIsLoading(true);
                 
                 setTimeout(async () => {
@@ -689,7 +709,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                         'x-telegram-user-id': window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || 'unknown'
                       },
                       body: JSON.stringify({
-                        messages: [...messages, userMessage],
+                        messages: [...persistentMessages, userMessage],
                         alreadyShownModules: currentlyDisplayedModules || []
                       })
                     });
@@ -709,7 +729,13 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       timestamp: Date.now()
                     };
                     
-                    setMessages(prev => [...prev, botMessage]);
+                    setMessages(prev => {
+                      const updated = [...prev, botMessage];
+                      console.log('🔘 "Больше функций" ответ AI - сохраняем', updated.length, 'сообщений');
+                      persistentMessages = updated;
+                      saveMessages(updated);
+                      return updated;
+                    });
                   } catch (error) {
                     console.error('Chat error:', error);
                   } finally {
