@@ -1,7 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
-import { storage } from "./storage";
 
-// Инициализируем AI с вашим ключом
+// Инициализируем AI с вашим ключом  
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 /**
@@ -33,13 +32,19 @@ ${chunk}
   try {
     const result = await genAI.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: `${systemPrompt}\n\nДиалог:\n${messages.map(msg => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`,
+      contents: `${systemPrompt}\n\nДиалог:\n${messages.map((msg: any) => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`,
     });
     return result.text || "";
   } catch (error) {
     console.error("Gemini chunk processing error:", error);
     return ""; // Возвращаем пустую строку в случае ошибки, чтобы не прерывать весь процесс
   }
+}
+
+// Эта функция больше не нужна, так как вся логика перенесена в generateAIResponse.
+// Оставляем ее пустой для совместимости, если она где-то вызывается.
+export async function analyzeBusinessContext(messages: string[]): Promise<any> {
+    return Promise.resolve({});
 }
 
 /**
@@ -50,6 +55,7 @@ export async function generateAIResponse(
   alreadyShownModules: number[] = [],
 ): Promise<{ response: string; recommendedModules: number[] }> {
   try {
+    const { storage } = await import("./storage");
     // --- ЭТАП 1: Подготовка и разделение всей базы модулей на части ---
     const allModules = await storage.getAllModules();
     console.log(`🤖 Stage 1: Processing all ${allModules.length} modules.`);
@@ -97,37 +103,37 @@ ${finalModuleDatabase}
 
 ТВОЯ ЗАДАЧА:
 1.  Изучи диалог с клиентом еще раз.
-2.  Выбери из списка кандидатов 4-5 САМЫХ лучших модуля, включая отраслевые, если они подходят.
+2.  Выбери из списка кандидатов 4-5 САМЫХ лучших модуля.
 3.  Для каждого напиши новое, короткое и убедительное объяснение (15-20 слов), показывая, как модуль решит задачу клиента.
 
 САМЫЕ СТРОГИЕ ПРАВИЛА ФОРМАТИРОВАНИЯ:
 -   Твой ответ должен состоять ТОЛЬКО из строк формата \`[MODULE:НОМЕР] Твой новый, адаптированный текст.\`.
 -   ОПИСАНИЕ ВСЕГДА ИДЕТ ПОСЛЕ ID МОДУЛЯ.
--   Никаких вступлений, прощаний или лишнего текста. Каждый модуль и его описание должны быть на новой строке.
+-   Никаких вступлений, прощаний или лишнего текста.
 `;
     
     console.log("🚀 Stage 3: Sending final request to AI for ranking and description generation...");
     const finalResult = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: `${finalPrompt}\n\nДиалог:\n${messages.map(msg => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`,
+      model: "gemini-2.5-flash", 
+      contents: `${finalPrompt}\n\nДиалог:\n${messages.map((msg: any) => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`,
     });
     const aiContent = finalResult.text || "";
     console.log("✅ Stage 3: Received final AI response.");
 
-    const responseLines = aiContent.trim().split("\n").filter(line => line.includes("[MODULE:"));
+    const responseLines = aiContent.trim().split("\n").filter((line: string) => line.includes("[MODULE:"));
     if (responseLines.length === 0) {
       throw new Error("Final AI response did not contain valid module lines.");
     }
 
     const finalResponse = responseLines.join("\n");
-    const recommendedModules = responseLines.map(line => {
+    const recommendedModules = responseLines.map((line: string) => {
         const match = line.match(/\[MODULE:(\d+)\]/i);
         return match ? parseInt(match[1]) : 0;
-    }).filter(id => id > 0 && !alreadyShownModules.includes(id));
+    }).filter((id: number) => id > 0 && !alreadyShownModules.includes(id));
 
     return {
       response: finalResponse,
-      recommendedModules: Array.from(new Set(recommendedModules)).sort((a, b) => a - b),
+      recommendedModules: Array.from(new Set(recommendedModules)).sort((a: number, b: number) => a - b),
     };
 
   } catch (error) {
@@ -137,10 +143,4 @@ ${finalModuleDatabase}
       recommendedModules: [],
     };
   }
-}
-
-// Эта функция больше не нужна, так как вся логика перенесена в generateAIResponse.
-// Оставляем ее пустой для совместимости, если она где-то вызывается.
-export async function analyzeBusinessContext(messages: string[]): Promise<any> {
-    return Promise.resolve({});
 }
