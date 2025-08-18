@@ -560,10 +560,15 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           const parts = name.split(/[-—–]/).map(p => p.trim()).filter(Boolean);
           if (parts.length > 1) {
             // first part is actual name, rest joined is description
-            // reset name to first part
-            // but keep original name variable separate from module title lookup
             desc = parts.slice(1).join(' - ');
             // update name to actual title (first part)
+            // This ensures module lookup uses clean title if needed
+            // but we still rely on ID for lookup, so it's mostly cosmetic
+            // Assign name to first part
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // (we reassign below when pushing)
+            // @ts-ignore
+            name = parts[0];
           }
         }
 
@@ -571,20 +576,17 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         if (!desc) {
           let j = i + 1;
           const collected: string[] = [];
+          // Collect all lines until the next module marker. Include blank lines so multi-line
+          // descriptions are preserved; we'll trim at the end.
           while (j < lines.length && !moduleRegex.test(lines[j])) {
-            // stop collecting when we hit an explicit empty line that likely separates blocks
-            if (lines[j].trim() === '') {
-              // advance past the blank and break
-              j++;
-              break;
-            }
-            collected.push(lines[j].trim());
+            collected.push(lines[j]);
             j++;
           }
           if (collected.length > 0) {
-            desc = collected.join(' ');
+            // Join with newlines to preserve paragraph breaks
+            desc = collected.join('\n').trim();
           }
-          i = j;
+          i = j; // advance pointer to next module or end
         } else {
           // If desc extracted from inline, we still move pointer to next line
           i = i + 1;
