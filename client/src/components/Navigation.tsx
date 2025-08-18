@@ -55,15 +55,25 @@ export function Navigation() {
                 
                 return (
                   <Link key={item.path} href={item.path}>
-                    <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer ${
-                      isActive && item.path === '/ai-chat'
-                        ? 'bg-green-600 text-white' 
-                        : isActive 
-                        ? 'bg-blue-600 text-white'
-                        : item.path === '/ai-chat'
-                        ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                    }`}>
+                    <div 
+                      className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors cursor-pointer ${
+                        isActive && item.path === '/ai-chat'
+                          ? 'bg-green-600 text-white' 
+                          : isActive 
+                          ? 'bg-blue-600 text-white'
+                          : item.path === '/ai-chat'
+                          ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
+                          : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                      }`}
+                      onClick={() => {
+                        // Trigger chat sync event when navigating to AI chat
+                        if (item.path === '/ai-chat') {
+                          setTimeout(() => {
+                            window.dispatchEvent(new CustomEvent('chatNavigationEvent'));
+                          }, 100);
+                        }
+                      }}
+                    >
                       <Icon className="w-4 h-4" />
                       <span className="text-sm font-medium">{item.label}</span>
                     </div>
@@ -136,7 +146,15 @@ export function Navigation() {
                         ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
                         : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                     }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      // Trigger chat sync event when navigating to AI chat from mobile menu
+                      if (item.path === '/ai-chat') {
+                        setTimeout(() => {
+                          window.dispatchEvent(new CustomEvent('chatNavigationEvent'));
+                        }, 100);
+                      }
+                    }}
                   >
                     <Icon className="w-5 h-5" />
                     <span className="font-medium">{item.label}</span>
