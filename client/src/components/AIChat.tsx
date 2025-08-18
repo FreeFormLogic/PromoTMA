@@ -581,25 +581,27 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       );
     }
 
-    // Add each module with its description
+    // Add each module with its description (sequential display)
     foundModules.forEach((module, index) => {
       if (!module) return; // Skip undefined modules
 
       const description = descriptionLines[index] || '';
 
-      renderedParts.push(
-        <div key={`module-pair-${index}`} className="mb-6">
-          {/* Module card */}
-          <div className="mb-2">
-            <ModuleCard module={module} />
-          </div>
-
-          {/* Description right under module */}
-          {description && (
-            <div className="text-sm text-gray-600 ml-4 mb-4">
-              {description}
+      // Show description first (if exists), then module card
+      if (description) {
+        renderedParts.push(
+          <div key={`description-${index}`} className="mb-4">
+            <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+              {formatText(description)}
             </div>
-          )}
+          </div>
+        );
+      }
+
+      // Then show module card
+      renderedParts.push(
+        <div key={`module-${index}`} className="mb-6">
+          <ModuleCard module={module} />
         </div>
       );
     });
