@@ -56,10 +56,18 @@ interface AIChatProps {
 // Safe localStorage operations
 const saveMessages = (messages: Message[]) => {
   try {
+    console.log('💾 Saving messages:', messages.map(m => `${m.role}: ${m.content.substring(0, 50)}...`));
     localStorage.setItem('aiChatMessages', JSON.stringify(messages));
-    console.log('💾 Saved', messages.length, 'messages to localStorage');
+    console.log('💾 Successfully saved', messages.length, 'messages to localStorage');
+    
+    // Verify save worked
+    const saved = localStorage.getItem('aiChatMessages');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      console.log('✅ Verification: localStorage now contains', parsed.length, 'messages');
+    }
   } catch (e) {
-    console.error('Failed to save messages:', e);
+    console.error('❌ Failed to save messages:', e);
   }
 };
 
@@ -155,35 +163,7 @@ class ChatErrorBoundary extends ReactComponent<{children: React.ReactNode}, {has
 function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize, currentlyDisplayedModules = [], isFullScreen = false }: AIChatProps & { isFullScreen?: boolean }) {
   const [, setLocation] = useLocation();
   
-  // Initialize from localStorage first
-  const initializeFromStorage = () => {
-    try {
-      const savedMessages = localStorage.getItem('aiChatMessages');
-      const savedSelectedModules = localStorage.getItem('selectedModules');
-      
-      if (savedMessages) {
-        const parsed = JSON.parse(savedMessages);
-        persistentMessages = parsed;
-        return parsed;
-      } else {
-        // Track chat initialization for new users
-        trackAIChat('open_chat', { isNewUser: true });
-        
-        const defaultMessage = [{
-          id: '1',
-          role: 'assistant' as const,
-          content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
-          timestamp: Date.now()
-        }];
-        persistentMessages = defaultMessage;
-        localStorage.setItem('aiChatMessages', JSON.stringify(defaultMessage));
-        return defaultMessage;
-      }
-    } catch (e) {
-      console.error('Failed to load from storage:', e);
-      return persistentMessages;
-    }
-  };
+
 
   const [messages, setMessages] = useState<Message[]>(() => {
     const loaded = loadMessages();
@@ -191,25 +171,16 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     return loaded;
   });
   
-  // Restore messages only when navigating back to chat
+  // Always sync with localStorage when component mounts
   useEffect(() => {
     const handleNavigation = () => {
       console.log('🔄 Navigation event - restoring chat history');
-      setTimeout(() => {
-        try {
-          const savedMessages = localStorage.getItem('aiChatMessages');
-          if (savedMessages) {
-            const parsed = JSON.parse(savedMessages);
-            if (parsed && Array.isArray(parsed) && parsed.length > messages.length) {
-              console.log('🔄 Restoring', parsed.length, 'messages');
-              setMessages(parsed);
-              persistentMessages = parsed;
-            }
-          }
-        } catch (e) {
-          console.error('Failed to restore messages:', e);
-        }
-      }, 50);
+      const savedMessages = loadMessages();
+      if (savedMessages.length > messages.length) {
+        console.log('🔄 Restoring', savedMessages.length, 'messages vs current', messages.length);
+        setMessages(savedMessages);
+        persistentMessages = savedMessages;
+      }
     };
     
     window.addEventListener('chatNavigationEvent', handleNavigation);
@@ -217,7 +188,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     return () => {
       window.removeEventListener('chatNavigationEvent', handleNavigation);
     };
-  }, [messages.length]);
+  }, []);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<BusinessAnalysis | null>(null);
@@ -314,20 +285,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     trackAIChat('send_message', { messageLength: input.trim().length });
     
     // Always get the latest messages from localStorage before sending
-    let currentMessages = messages;
-    try {
-      const savedMessages = localStorage.getItem('aiChatMessages');
-      if (savedMessages) {
-        const parsed = JSON.parse(savedMessages);
-        if (parsed && Array.isArray(parsed) && parsed.length > messages.length) {
-          console.log('🔄 Using saved messages:', parsed.length, 'vs current:', messages.length);
-          currentMessages = parsed;
-          setMessages(parsed);
-          persistentMessages = parsed;
-        }
-      }
-    } catch (e) {
-      console.error('Error loading saved messages:', e);
+    const currentMessages = loadMessages();
+    if (currentMessages.length !== messages.length) {
+      console.log('🔄 Syncing before send:', currentMessages.length, 'vs current:', messages.length);
+      setMessages(currentMessages);
     }
 
     const userMessage: Message = {
@@ -338,6 +299,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     };
 
     const updatedMessages = [...currentMessages, userMessage];
+    console.log('📨 Sending user message. Current count:', currentMessages.length, 'New count:', updatedMessages.length);
     setMessages(updatedMessages);
     persistentMessages = updatedMessages;
     saveMessages(updatedMessages);
@@ -382,6 +344,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       };
 
       const finalMessages = [...updatedMessages, assistantMessage];
+      console.log('🤖 Adding AI response. Previous count:', updatedMessages.length, 'Final count:', finalMessages.length);
       setMessages(finalMessages);
       persistentMessages = finalMessages;
       saveMessages(finalMessages);
