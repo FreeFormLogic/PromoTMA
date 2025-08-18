@@ -53,15 +53,42 @@ interface AIChatProps {
   currentlyDisplayedModules?: any[];
 }
 
-// Global state for chat persistence
-let persistentMessages: Message[] = [
-  {
-    id: '1',
-    role: 'assistant',
-    content: 'Привет! Я помогу создать ваное собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
-    timestamp: Date.now()
+// Safe localStorage operations
+const saveMessages = (messages: Message[]) => {
+  try {
+    localStorage.setItem('aiChatMessages', JSON.stringify(messages));
+    console.log('💾 Saved', messages.length, 'messages to localStorage');
+  } catch (e) {
+    console.error('Failed to save messages:', e);
   }
-];
+};
+
+const loadMessages = (): Message[] => {
+  try {
+    const saved = localStorage.getItem('aiChatMessages');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        console.log('📱 Loaded', parsed.length, 'messages from localStorage');
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load messages:', e);
+  }
+  // Return default welcome message if no saved messages
+  return [
+    {
+      id: '1',
+      role: 'assistant',
+      content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
+      timestamp: Date.now()
+    }
+  ];
+};
+
+// Global state for chat persistence
+let persistentMessages: Message[] = loadMessages();
 
 // Error Boundary Component to handle external extension errors
 class ChatErrorBoundary extends ReactComponent<{children: React.ReactNode}, {hasError: boolean}> {
@@ -158,7 +185,11 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     }
   };
 
-  const [messages, setMessages] = useState<Message[]>(() => initializeFromStorage());
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const loaded = loadMessages();
+    persistentMessages = loaded;
+    return loaded;
+  });
   
   // Restore messages only when navigating back to chat
   useEffect(() => {
@@ -309,8 +340,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     const updatedMessages = [...currentMessages, userMessage];
     setMessages(updatedMessages);
     persistentMessages = updatedMessages;
-    localStorage.setItem('aiChatMessages', JSON.stringify(updatedMessages));
-    console.log('💾 Saved user message, total:', updatedMessages.length);
+    saveMessages(updatedMessages);
     setInput('');
     setIsLoading(true);
 
@@ -354,8 +384,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       const finalMessages = [...updatedMessages, assistantMessage];
       setMessages(finalMessages);
       persistentMessages = finalMessages;
-      localStorage.setItem('aiChatMessages', JSON.stringify(finalMessages));
-      console.log('💾 Saved AI response, total:', finalMessages.length);
+      saveMessages(finalMessages);
 
       // If AI recommended specific modules, get them and add to chat display (prevent duplicates)
       if (responseData.recommendedModules && responseData.recommendedModules.length > 0 && allModules) {
@@ -389,11 +418,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         const errorMessages = [...updatedMessages, errorMessage];
         setMessages(errorMessages);
         persistentMessages = errorMessages;
-        localStorage.setItem('aiChatMessages', JSON.stringify(errorMessages));
-        console.log('💾 Saved error message, total:', errorMessages.length);
-        
-        // Force immediate persistence
-        persistentMessages = errorMessages;
+        saveMessages(errorMessages);
       }
     } finally {
       setIsLoading(false);
