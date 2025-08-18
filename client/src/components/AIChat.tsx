@@ -548,8 +548,8 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       const line = lines[i];
       const match = line.match(moduleRegex);
       if (match) {
-        const id = parseInt(match[1], 10);
-        const name = match[2]?.trim() || undefined;
+  const id = parseInt(match[1], 10);
+  let name = match[2]?.trim() || undefined;
 
         // Extract description.
         // 1) If the same line contains extra text after the module label, use that (split by dash or long dash)
@@ -562,12 +562,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             // first part is actual name, rest joined is description
             desc = parts.slice(1).join(' - ');
             // update name to actual title (first part)
-            // This ensures module lookup uses clean title if needed
-            // but we still rely on ID for lookup, so it's mostly cosmetic
-            // Assign name to first part
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            // (we reassign below when pushing)
-            // @ts-ignore
+            // This is cosmetic; we still rely on ID for module lookup
             name = parts[0];
           }
         }
