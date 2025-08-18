@@ -27,7 +27,7 @@ A comprehensive design system is implemented using Radix UI primitives, featurin
 The application manages data entities including Modules (Mini App components, over 260 entries), Industries, USPs, Objections, Users (authorization status), and AI Chat Analytics. AI chat tracking includes comprehensive statistics such as token usage, costs, session duration, message history, and user activity patterns with real-time cost calculation.
 
 ## UI/UX Decisions
-The platform utilizes a strict blue/white color scheme. It features enhanced mobile navigation with a bottom-right floating button and bottom-screen menu. The AI chat provides gradual, personalized module recommendations, prevents duplicates, and offers real-time business insights. Module modals include gradient backgrounds and markdown formatting support. The pricing display is standardized. A unified modal system is used across AI chat and the module catalog for consistent content display.
+The platform utilizes a strict blue/white color scheme. It features enhanced mobile navigation with a bottom-right floating button and bottom-screen menu. The AI chat provides gradual, personalized module recommendations, prevents duplicates, and offers real-time business insights. Module modals include gradient backgrounds and markdown formatting support. The pricing display is standardized. A unified modal system is used across AI chat and the module catalog for consistent content display. **Recent Update (Aug 18, 2025)**: Fixed AI chat module display to show descriptions sequentially before module cards instead of separating descriptions from modules, providing better user experience with clearer module-description pairing.
 
 # External Dependencies
 
