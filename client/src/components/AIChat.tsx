@@ -551,15 +551,43 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         const id = parseInt(match[1], 10);
         const name = match[2]?.trim() || undefined;
 
-        // Find next non-empty line as description
+        // Extract description.
+        // 1) If the same line contains extra text after the module label, use that (split by dash or long dash)
+        // 2) Otherwise, collect subsequent lines until next module marker or an empty line
         let desc = '';
-        let j = i + 1;
-        while (j < lines.length && lines[j].trim() === '') j++;
-        if (j < lines.length && lines[j].trim() !== '' && !moduleRegex.test(lines[j])) {
-          desc = lines[j].trim();
-          i = j + 1; // advance past description
+        if (name && /[-—–]/.test(name)) {
+          // If name contains a separator, split into title and description
+          const parts = name.split(/[-—–]/).map(p => p.trim()).filter(Boolean);
+          if (parts.length > 1) {
+            // first part is actual name, rest joined is description
+            // reset name to first part
+            // but keep original name variable separate from module title lookup
+            desc = parts.slice(1).join(' - ');
+            // update name to actual title (first part)
+          }
+        }
+
+        // If we didn't get description from same line, gather following non-module lines as description
+        if (!desc) {
+          let j = i + 1;
+          const collected: string[] = [];
+          while (j < lines.length && !moduleRegex.test(lines[j])) {
+            // stop collecting when we hit an explicit empty line that likely separates blocks
+            if (lines[j].trim() === '') {
+              // advance past the blank and break
+              j++;
+              break;
+            }
+            collected.push(lines[j].trim());
+            j++;
+          }
+          if (collected.length > 0) {
+            desc = collected.join(' ');
+          }
+          i = j;
         } else {
-          i = j; // no description found, continue
+          // If desc extracted from inline, we still move pointer to next line
+          i = i + 1;
         }
 
         modulePairs.push({ id, name, description: desc });
