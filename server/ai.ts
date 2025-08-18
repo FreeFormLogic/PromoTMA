@@ -185,23 +185,91 @@ ${messages.map((msg) => `${msg.role === "user" ? "Пользователь" : "�
       .replace(/\*+/g, "")
       .trim();
 
-    // Извлекаем все упоминания [MODULE:ID] из полного текста
-    const matchesIterator = cleanedContent.matchAll(/\[MODULE:(\d+)\]/g);
-    const allMatches: number[] = [];
-    if (matchesIterator) {
-      for (const m of matchesIterator) {
-        const id = Number((m as RegExpMatchArray)[1]);
-        if (!Number.isNaN(id)) allMatches.push(id);
+    // Попытаемся извлечь пары: [MODULE:id] + описание (следующая непустая строка/параграф)
+    const pairs: { id: number; moduleLine: string; description: string }[] = [];
+
+    // Собираем позиции всех строк с [MODULE:ID]
+    const moduleLineRegex = /\[MODULE:(\d+)\][^\n\r]*/g;
+    let m: RegExpExecArray | null;
+    const modulePositions: { index: number; id: number; moduleLine: string }[] = [];
+    while ((m = moduleLineRegex.exec(cleanedContent)) !== null) {
+      const id = Number(m[1]);
+      modulePositions.push({ index: m.index, id, moduleLine: (m[0] || '').trim() });
+    }
+
+    for (let i = 0; i < modulePositions.length; i++) {
+      const start = modulePositions[i].index;
+      const end = i + 1 < modulePositions.length ? modulePositions[i + 1].index : cleanedContent.length;
+      const afterModule = cleanedContent.slice(start, end);
+      const rest = afterModule.replace(modulePositions[i].moduleLine, "").trim();
+
+      // Описание - первый параграф или первая непустая строка после строки с модулем
+      let description = "";
+      if (rest) {
+        const paragraphMatch = rest.match(/^[^\r\n]+(?:\r?\n(?!\r?\n)[^\r\n]+)*/);
+        if (paragraphMatch) description = paragraphMatch[0].trim();
+      }
+
+      pairs.push({ id: modulePositions[i].id, moduleLine: modulePositions[i].moduleLine, description });
+    }
+
+    // Fallback: если пары не найдены, пробуем ассоциацию по параграфам (это поможет, если AI выводит описание до метки)
+    if (pairs.length === 0) {
+      const paragraphs = cleanedContent.split(/\n\s*\n/).map((p: string) => p.trim()).filter((s: string) => Boolean(s));
+      for (let i = 0; i < paragraphs.length; i++) {
+        const ids = Array.from(paragraphs[i].matchAll(/\[MODULE:(\d+)\]/g)).map(x => Number((x as RegExpMatchArray)[1]));
+        if (ids.length > 0) {
+          let description = "";
+          if (i + 1 < paragraphs.length && !/\[MODULE:(\d+)\]/.test(paragraphs[i + 1])) {
+            description = paragraphs[i + 1];
+          } else if (i - 1 >= 0 && !/\[MODULE:(\d+)\]/.test(paragraphs[i - 1])) {
+            // Описание может идти перед меткой
+            description = paragraphs[i - 1];
+          }
+          for (const id of ids) {
+            const moduleLineMatch = paragraphs[i].match(/\[MODULE:\d+\][^\n]*/);
+            pairs.push({ id, moduleLine: moduleLineMatch ? moduleLineMatch[0] : `[MODULE:${id}]`, description });
+          }
+        }
       }
     }
 
-    if (allMatches.length === 0) {
+    if (pairs.length === 0) {
       throw new Error("Final AI response did not contain valid module lines.");
     }
 
-    const uniqueIds = Array.from(new Set(allMatches));
-    const recommendedModules = uniqueIds.filter((id) => !alreadyShownModules.includes(id)).sort((a, b) => a - b);
-    const finalResponse = cleanedContent.trim();
+    // Уникальные id и фильтрация уже показанных
+    const uniqueIds = Array.from(new Set(pairs.map(p => p.id)));
+    const recommendedModules = uniqueIds.filter(id => !alreadyShownModules.includes(id)).sort((a, b) => a - b);
+
+    // Восстанавливаем порядок вывода: вводный текст (до первой метки), затем для каждой пары модуль + описание и пустая строка
+    const firstModuleIndex = cleanedContent.search(/\[MODULE:(\d+)\]/);
+    let intro = "";
+    if (firstModuleIndex > 0) {
+      intro = cleanedContent.slice(0, firstModuleIndex).trim();
+    }
+
+    const rebuiltLines: string[] = [];
+    if (intro) rebuiltLines.push(intro);
+
+    for (const p of pairs) {
+      rebuiltLines.push(p.moduleLine);
+      if (p.description) rebuiltLines.push(p.description);
+      rebuiltLines.push("");
+    }
+
+    // Попробуем сохранить вопрос от AI, если он есть в конце; иначе добавим стандартный
+    const tail = cleanedContent.slice(Math.max(...pairs.map(p => cleanedContent.lastIndexOf(p.moduleLine))) + 1).trim();
+    if (tail && /\?$/.test(tail)) {
+      rebuiltLines.push(tail);
+    } else if (tail && !/\[MODULE:(\d+)\]/.test(tail)) {
+      // если tail содержит текст без меток, добавляем его (вдруг это вопрос)
+      rebuiltLines.push(tail);
+    } else {
+      rebuiltLines.push("Хотите увидеть модули по отрасли, по цене или по приоритету?");
+    }
+
+    const finalResponse = rebuiltLines.join("\n").trim();
 
     return {
       response: finalResponse,
