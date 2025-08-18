@@ -1,3 +1,5 @@
+// PromoTMA/server/ai.ts
+
 // Используем Gemini 2.5 Pro через прямые HTTP запросы
 const GEMINI_API_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent";
@@ -11,16 +13,56 @@ export interface BusinessAnalysis {
   keywords: string[];
 }
 
+/**
+ * Выполняет сетевой запрос к API с логикой повторных попыток при сбоях.
+ */
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries = 3,
+): Promise<any> {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url, options);
+
+      if (response.ok) {
+        return await response.json();
+      }
+
+      // Обработка ошибки превышения лимитов (rate limiting)
+      if (response.status === 429 && i < maxRetries - 1) {
+        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000; // Экспоненциальная задержка
+        console.warn(
+          `Rate limit hit. Retrying in ${Math.round(delay / 1000)}s... (Attempt ${i + 1}/${maxRetries})`,
+        );
+        await new Promise((res) => setTimeout(res, delay));
+        continue; // Переходим к следующей попытке
+      }
+
+      // Другие ошибки сервера
+      const errorText = await response.text();
+      console.error(
+        `API call failed with status ${response.status}:`,
+        errorText,
+      );
+      throw new Error(`API call failed with status ${response.status}`);
+    } catch (error) {
+      console.error(`Fetch attempt ${i + 1} failed:`, error);
+      if (i === maxRetries - 1) throw error; // Бросаем ошибку после последней попытки
+    }
+  }
+  throw new Error("API call failed after multiple retries.");
+}
+
 export async function analyzeBusinessContext(
   messages: string[],
 ): Promise<BusinessAnalysis> {
-  try {
-    const prompt = `Ты - эксперт по бизнес-анализу. Проанализируй диалог и извлеки суть бизнеса клиента.
+  const prompt = `Ты - эксперт по бизнес-анализу. Проанализируй диалог и извлеки суть бизнеса клиента.
 
 ТВОЯ ЗАДАЧА:
 1. Определи нишу бизнеса (industry).
 2. Выяви ключевые проблемы (challenges) и цели (goals).
-3. Определи самые важные категории модулей для этого бизнеса (relevantCategories), например: E-COMMERCE, МАРКЕТИНГ, БРОНИРОВАНИЕ, CRM.
+3. Определи самые важные категории модулей (relevantCategories), например: E-COMMERCE, МАРКЕТИНГ, БРОНИРОВАНИЕ, CRM.
 4. Сгенерируй ключевые слова (keywords), описывающие этот бизнес.
 
 ДИАЛОГ:
@@ -35,7 +77,8 @@ ${messages.join("\n")}
   "keywords": ["пицца", "доставка", "меню", "онлайн-заказ", "Бали", "туристы"]
 }`;
 
-    const response = await fetch(GEMINI_API_URL, {
+  try {
+    const options = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -49,24 +92,24 @@ ${messages.join("\n")}
           responseMimeType: "application/json",
         },
       }),
-    });
+    };
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Error in analyzeBusinessContext API call:", errorText);
-      throw new Error(`API call failed with status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await fetchWithRetry(GEMINI_API_URL, options);
     const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
     if (!content) {
+      console.error(
+        "No content in analysis response:",
+        JSON.stringify(data, null, 2),
+      );
       throw new Error("No content in analysis response");
     }
     return JSON.parse(content);
   } catch (error) {
-    console.error("Error analyzing business context:", error);
+    console.error("Failed to analyze business context:", error);
+    // Возвращаем базовую структуру в случае критической ошибки
     return {
-      industry: "general",
+      industry: "general business",
       challenges: [],
       goals: [],
       relevantCategories: ["E-COMMERCE", "МАРКЕТИНГ"],
@@ -75,7 +118,6 @@ ${messages.join("\n")}
   }
 }
 
-// Упрощенная функция для оценки релевантности модуля
 function calculateModuleRelevance(
   module: any,
   analysis: BusinessAnalysis,
@@ -84,7 +126,6 @@ function calculateModuleRelevance(
   const searchText =
     `${module.title} ${module.description} ${module.category}`.toLowerCase();
 
-  // +50 очков за совпадение по категории
   if (
     analysis.relevantCategories.some((cat) =>
       searchText.includes(cat.toLowerCase()),
@@ -92,14 +133,11 @@ function calculateModuleRelevance(
   ) {
     score += 50;
   }
-
-  // +20 очков за каждое совпадение по ключевому слову
   for (const keyword of analysis.keywords) {
     if (searchText.includes(keyword.toLowerCase())) {
       score += 20;
     }
   }
-
   return score;
 }
 
@@ -110,15 +148,15 @@ export async function generateAIResponse(
   try {
     const userMessages = messages.map((m) => m.content);
 
-    // --- ЭТАП 1: Глубокий анализ бизнеса клиента ---
-    console.log("🚀 Starting business analysis...");
+    // --- ЭТАП 1: Анализ бизнеса ---
+    console.log("🚀 Stage 1: Starting business analysis...");
     const analysis = await analyzeBusinessContext(userMessages);
-    console.log("✅ Analysis complete:", analysis);
+    console.log("✅ Stage 1: Analysis complete:", analysis);
 
+    // --- ЭТАП 2: Локальный отбор релевантных модулей ---
     const { storage } = await import("./storage");
     const allModules = await storage.getAllModules();
 
-    // --- ЭТАП 2: Локальный пред-отбор самых релевантных модулей ---
     const scoredModules = allModules
       .map((module) => ({
         ...module,
@@ -129,14 +167,11 @@ export async function generateAIResponse(
           !alreadyShownModules.includes(module.id) && module.relevanceScore > 0,
       );
 
-    // Сортируем по релевантности и берем топ-40
     scoredModules.sort((a, b) => b.relevanceScore - a.relevanceScore);
     const topModules = scoredModules.slice(0, 40);
 
     if (topModules.length === 0) {
-      console.warn(
-        "⚠️ No relevant modules found after local filtering. Aborting.",
-      );
+      console.warn("⚠️ No relevant modules found after local filtering.");
       return {
         response:
           "К сожалению, я не смог подобрать подходящие модули. Попробуйте описать ваш бизнес подробнее.",
@@ -147,14 +182,12 @@ export async function generateAIResponse(
     const modulesDatabase = topModules
       .map((m) => `[MODULE:${m.id}] ${m.title} - ${m.description}`)
       .join("\n");
-
     console.log(
-      `🧠 Found ${topModules.length} relevant modules to send for final recommendation.`,
+      `🧠 Stage 2: Selected ${topModules.length} relevant modules to send for final recommendation.`,
     );
 
     // --- ЭТАП 3: Финальный запрос к Gemini с лучшими модулями ---
-    const systemPrompt = `
-Ты — гениальный бизнес-консультант. Твоя задача — изучить диалог, проанализировать предоставленный СПИСОК ЛУЧШИХ МОДУЛЕЙ и выбрать из него 4-5 самых идеальных решений для клиента.
+    const systemPrompt = `Ты — гениальный бизнес-консультант. Твоя задача — изучить диалог, проанализировать предоставленный СПИСОК ЛУЧШИХ МОДУЛЕЙ и выбрать из него 4-5 самых идеальных решений для клиента.
 
 СПИСОК ЛУЧШИХ МОДУЛЕЙ (уже отсортированы по релевантности):
 ---
@@ -170,15 +203,9 @@ ${modulesDatabase}
 -   Твой ответ должен состоять ТОЛЬКО из строк формата \`[MODULE:НОМЕР] Твой новый, адаптированный текст.\`.
 -   ОПИСАНИЕ ВСЕГДА ИДЕТ ПОСЛЕ ID МОДУЛЯ.
 -   Никаких вступлений, прощаний или лишнего текста.
-
-Пример для клиента "пиццерия":
-\`[MODULE:145] Организует прием заказов на доставку и самовывоз, управляя статусами от готовки до вручения.\`
-\`[MODULE:5] Даст возможность клиентам оплачивать заказы онлайн картой или через Telegram Pay.\`
-
-Проанализируй диалог и предоставь свой ответ строго по правилам.
 `;
 
-    const apiResponse = await fetch(GEMINI_API_URL, {
+    const options = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -189,53 +216,52 @@ ${modulesDatabase}
           {
             parts: [
               {
-                text: `${systemPrompt}\n\nДиалог:\n${messages
-                  .map(
-                    (msg) =>
-                      `${
-                        msg.role === "user" ? "Клиент" : "Ассистент"
-                      }: ${msg.content}`,
-                  )
-                  .join("\n")}`,
+                text: `${systemPrompt}\n\nДиалог:\n${messages.map((msg) => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`,
               },
             ],
           },
         ],
-        generationConfig: {
-          maxOutputTokens: 2048,
-          temperature: 0.25, // Чуть больше креативности для лучших описаний
-        },
+        generationConfig: { maxOutputTokens: 2048, temperature: 0.25 },
       }),
-    });
+    };
 
-    if (!apiResponse.ok) {
-      const errorText = await apiResponse.text();
-      console.error(
-        "Gemini API Error (Final Recommendation):",
-        apiResponse.status,
-        errorText,
-      );
-      throw new Error(`API failed: ${apiResponse.status} - ${errorText}`);
+    console.log("🚀 Stage 3: Sending final recommendation request to AI...");
+    const data = await fetchWithRetry(GEMINI_API_URL, options);
+
+    const candidate = data.candidates?.[0];
+    if (!candidate) {
+      const blockReason = data.promptFeedback?.blockReason;
+      if (blockReason) {
+        console.error(
+          `Request blocked by safety filters. Reason: ${blockReason}`,
+        );
+        throw new Error(`Safety filters blocked the request: ${blockReason}`);
+      }
+      throw new Error("No candidates in final recommendation response.");
     }
 
-    const apiData = await apiResponse.json();
-    const aiContent = apiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (candidate.finishReason === "SAFETY") {
+      console.error(
+        "Response stopped due to safety filters. Check module descriptions for problematic content.",
+      );
+      throw new Error("Response stopped by safety filters.");
+    }
 
+    const aiContent = candidate.content?.parts?.[0]?.text;
     if (!aiContent) {
       console.error(
-        "No AI content found in final recommendation response:",
-        apiData,
+        "No AI content text found in final recommendation response:",
+        JSON.stringify(data, null, 2),
       );
-      throw new Error("No AI response content");
+      throw new Error("No AI response content text found");
     }
 
-    console.log("AI Response Preview:", aiContent.substring(0, 200));
+    console.log("✅ Stage 3: Received AI response.");
 
-    const cleanedContent = aiContent.trim();
-    const responseLines = cleanedContent
+    const responseLines = aiContent
+      .trim()
       .split("\n")
       .filter((line) => line.includes("[MODULE:"));
-
     if (responseLines.length === 0) {
       console.warn("AI returned content, but no valid module lines found.");
       return {
@@ -246,11 +272,10 @@ ${modulesDatabase}
     }
 
     const finalResponse = responseLines.join("\n");
-
     const recommendedModules = responseLines
       .map((line) => {
-        const numberMatch = line.match(/\[MODULE:(\d+)\]/i);
-        return numberMatch ? parseInt(numberMatch[1]) : 0;
+        const match = line.match(/\[MODULE:(\d+)\]/i);
+        return match ? parseInt(match[1]) : 0;
       })
       .filter((id) => id > 0 && !alreadyShownModules.includes(id));
 
