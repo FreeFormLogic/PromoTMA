@@ -87,7 +87,7 @@ class ChatErrorBoundary extends ReactComponent<{children: React.ReactNode}, {has
   componentDidCatch(error: any, errorInfo: any) {
     // Log error but don't break the app
     console.warn('AIChat Error Boundary caught error:', error, errorInfo);
-    
+
     // Check if it's a browser extension error and ignore it
     if (error?.stack?.includes('extension') || 
         error?.message?.includes('extension') ||
@@ -132,7 +132,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     try {
       const savedMessages = localStorage.getItem('aiChatMessages');
       const savedSelectedModules = localStorage.getItem('selectedModules');
-      
+
       if (savedMessages) {
         const parsed = JSON.parse(savedMessages);
         persistentMessages = parsed;
@@ -140,7 +140,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       } else {
         // Track chat initialization for new users
         trackAIChat('open_chat', { isNewUser: true });
-        
+
         const defaultMessage = [{
           id: '1',
           role: 'assistant' as const,
@@ -218,10 +218,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         messages: messageHistory 
       });
       const analysisData = await analysisResponse.json();
-      
+
       setAnalysis(analysisData);
       onAnalysisUpdate(analysisData);
-      
+
       // Skip getting modules here since we'll get them from the AI chat response
     } catch (error) {
       console.error('Error analyzing business:', error);
@@ -254,10 +254,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     try {
       // Prepare message history for AI
       const messageHistory = [...messages, userMessage].map(m => m.content);
-      
+
       // Analyze business context and update modules
       await analyzeAndUpdateModules(messageHistory);
-      
+
       // Get AI response with recommended modules
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
@@ -298,13 +298,13 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         const recommendedModuleDetails = allModules.filter(module => 
           responseData.recommendedModules.includes(module.number)
         );
-        
+
         // Prevent duplicates by checking what's already shown
         const newModules = recommendedModuleDetails.filter(module => 
           !currentlyDisplayedModules.some(displayed => displayed.id === module.id) &&
           !chatModules.some(chatModule => chatModule.id === module.id)
         );
-        
+
         if (newModules.length > 0) {
           setChatModules(prev => [...prev, ...newModules]);
           onModulesUpdate([...currentlyDisplayedModules, ...newModules]);
@@ -312,7 +312,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      
+
       // Don't add error message if it's a network/auth error that might cause navigation issues
       const errorStr = String(error);
       if (!errorStr.includes('401') && !errorStr.includes('Unauthorized')) {
@@ -369,19 +369,27 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
   const ModuleCard = ({ module }: { module: Module }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [buttonState, setButtonState] = useState(false);
-    
-    // Remove duplicate selection check - using buttonState instead
-    
-    // Initialize button state on mount only
+
+    // Keep buttonState in sync with localStorage and external changes
     useEffect(() => {
-      const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-      const currentState = !!savedModules.find((m: any) => m.id === module.id);
-      setButtonState(currentState);
-    }, []);
+      const readState = () => {
+        const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+        const currentState = !!savedModules.find((m: any) => m.id === module.id);
+        setButtonState(currentState);
+      };
+
+      // initial read
+      readState();
+
+      const handler = () => readState();
+      window.addEventListener('moduleSelectionChanged', handler as EventListener);
+
+      return () => window.removeEventListener('moduleSelectionChanged', handler as EventListener);
+    }, [module?.id]);
     const IconComponent = Sparkles; // Use sparkles icon for now
-    
+
     // Remove global listener - we update directly in click handler
-    
+
     return (
       <>
         <Card 
@@ -412,14 +420,14 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 </div>
               </div>
             </div>
-            
+
             {/* Description closer to title */}
             <div className="mb-3">
               <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
                 {module.description.replace(/\*\*/g, '').trim()}
               </p>
             </div>
-            
+
             {/* Benefit and arrow */}
             <div className="flex items-center justify-between">
               <div 
@@ -436,7 +444,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     // Simplified module toggle with immediate visual feedback
                     const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
                     const moduleExists = savedModules.find((m: any) => m.id === module.id);
-                    
+
                     let newModules;
                     if (moduleExists) {
                       newModules = savedModules.filter((m: any) => m.id !== module.id);
@@ -453,17 +461,17 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                         isPopular: (module as any).isPopular || false
                       }];
                     }
-                    
+
                     // Save and update state immediately
                     localStorage.setItem('selectedModules', JSON.stringify(newModules));
                     setSelectedModules(newModules);
-                    
+
                     // Update button state immediately 
                     setButtonState(!moduleExists);
-                    
+
                     // Notify other components
                     window.dispatchEvent(new CustomEvent('moduleSelectionChanged'));
-                    
+
                     // Close modal after selection (handled by ModuleModal now)
                   }}
                   className={`w-8 h-8 p-0 rounded-full ${
@@ -478,7 +486,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             </div>
           </div>
         </Card>
-        
+
         {/* Use shared ModuleModal for consistent UI */}
         <ModuleModal 
           module={{...module, isPopular: (module as any).isPopular || false}} 
@@ -493,16 +501,16 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     if (selectedModules.length < 3) {
       return;
     }
-    
+
     const prototypeDescription = `Прототип приложения создан!\n\nВыбранные модули (${selectedModules.length}):\n${selectedModules.map(m => `• Модуль ${m.number}: ${m.name}`).join('\n')}\n\nВаше приложение будет включать: ${selectedModules.map(m => m.category).filter((c, i, arr) => arr.indexOf(c) === i).join(', ')}\n\nГотово к передаче в разработку! Хотите обсудить детали дизайна или дополнительные функции?`;
-    
+
     const prototypeMessage: Message = {
       id: Date.now().toString(),
       role: 'assistant',
       content: prototypeDescription,
       timestamp: Date.now()
     };
-    
+
     setMessages(prev => [...prev, prototypeMessage]);
   };
 
@@ -518,76 +526,107 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       return formatText(content);
     }
 
-    // Split content by [MODULE:NUMBER] pattern and replace with inline module cards
-    const parts = content.split(/(\[MODULE:\d+\])/g);
-    const hasModules = parts.some(part => part.match(/\[MODULE:\d+\]/));
-    
-    // Debug logging
-    if (hasModules) {
-      console.log('🔍 Found modules in message:', parts.filter(p => p.match(/\[MODULE:\d+\]/)));
-      console.log('🔍 Available modules count:', allModules?.length);
-      console.log('🔍 First few modules:', allModules?.slice(0, 3).map(m => `${m.number}: ${m.name}`));
+    // Parse content sequentially to preserve order: intro -> [MODULE:id] + description -> ... -> final question
+    const lines = content.split('\n');
+
+    const introLines: string[] = [];
+    const modulePairs: { id: number; name?: string; description?: string }[] = [];
+    let i = 0;
+
+    const moduleRegex = /\[MODULE:(\d+)\]\s*(.*)/;
+
+    // Collect intro lines until first [MODULE:...] marker
+    while (i < lines.length) {
+      const line = lines[i];
+      if (moduleRegex.test(line)) break;
+      introLines.push(line);
+      i++;
     }
-    
-    // Find all modules first
-    const moduleMatches = content.match(/\[MODULE:\d+\]/g) || [];
-    const foundModules = moduleMatches.map(match => {
-      const moduleNumber = parseInt(match.match(/\d+/)?.[0] || '0');
-      return allModules.find(m => m.number === moduleNumber);
-    }).filter(Boolean);
-    
-    console.log('Found modules:', foundModules.map(m => m?.name));
-    
-    if (foundModules.length === 0) {
-      // No modules, just format text normally
-      return formatText(content);
-    }
-    
-    // Parse content to extract module-description pairs
-    const renderedParts: any[] = [];
-    
-    // Split content by lines and process each module with its description
-    const contentLines = content.split('\n').filter(line => line.trim());
-    
-    contentLines.forEach((line, index) => {
-      const moduleMatch = line.match(/\[MODULE:(\d+)\]\s*(.*)/);
-      
-      if (moduleMatch) {
-        const moduleNumber = parseInt(moduleMatch[1]);
-        const description = moduleMatch[2]?.trim() || '';
-        const module = allModules.find(m => m.number === moduleNumber);
-        
-        if (module) {
-          renderedParts.push(
-            <div key={`module-pair-${moduleNumber}`} className="mb-6">
-              {/* Module card */}
-              <div className="mb-2">
-                <ModuleCard module={module} />
-              </div>
-              
-              {/* Description right under module */}
-              {description && (
-                <div className="text-sm text-gray-600 ml-4 mb-4">
-                  {description}
-                </div>
-              )}
-            </div>
-          );
+
+    // Now collect module blocks in order
+    while (i < lines.length) {
+      const line = lines[i];
+      const match = line.match(moduleRegex);
+      if (match) {
+        const id = parseInt(match[1], 10);
+        const name = match[2]?.trim() || undefined;
+
+        // Find next non-empty line as description
+        let desc = '';
+        let j = i + 1;
+        while (j < lines.length && lines[j].trim() === '') j++;
+        if (j < lines.length && lines[j].trim() !== '' && !moduleRegex.test(lines[j])) {
+          desc = lines[j].trim();
+          i = j + 1; // advance past description
+        } else {
+          i = j; // no description found, continue
         }
-      } else if (line.trim() && !line.includes('[MODULE:')) {
-        // Regular text content (introduction, etc.)
-        renderedParts.push(
-          <div key={`text-${index}`} className="mb-4">
-            {formatText(line)}
-          </div>
-        );
+
+        modulePairs.push({ id, name, description: desc });
+      } else {
+        // If a non-module line appears here, skip it (could be trailing question)
+        i++;
       }
+    }
+
+    // Remaining lines after modules (possible question/direction)
+    const trailingIndex = lines.findIndex((ln, idx) => idx > 0 && moduleRegex.test(lines[idx - 1]));
+    const afterModulesStart = modulePairs.length > 0 ? lines.indexOf(`[MODULE:${modulePairs[modulePairs.length - 1].id}]`) : -1;
+
+    // Build rendered parts
+    const renderedParts: any[] = [];
+
+    // Add introduction (trimmed)
+    const cleanedIntro = introLines.join('\n').trim();
+    if (cleanedIntro) {
+      renderedParts.push(
+        <div key="intro" className="mb-6">
+          {formatText(cleanedIntro)}
+        </div>
+      );
+    }
+
+    // Render modules in the order found
+    modulePairs.forEach((pair, idx) => {
+      const moduleObj = allModules.find(m => m.number === pair.id);
+      if (!moduleObj) return;
+
+      renderedParts.push(
+        <div key={`module-pair-${idx}`} className="mb-6">
+          <div className="mb-2">
+            <ModuleCard module={moduleObj} />
+          </div>
+          {pair.description && (
+            <div className="text-sm text-gray-600 ml-4 mb-4">
+              {formatText(pair.description)}
+            </div>
+          )}
+        </div>
+      );
     });
+
+    // Try to extract trailing question or direction (lines after last module description)
+    const lastModuleLineIndex = (() => {
+      for (let idx = lines.length - 1; idx >= 0; idx--) {
+        if (moduleRegex.test(lines[idx])) return idx;
+      }
+      return -1;
+    })();
+
+    const trailingLines = lastModuleLineIndex >= 0 ? lines.slice(lastModuleLineIndex + 2).map(l => l.trim()).filter(Boolean) : [];
+    const trailingText = trailingLines.join('\n').trim();
+    if (trailingText) {
+      renderedParts.push(
+        <div key="trailing-question" className="mt-4 pt-3 border-t border-gray-200">
+          {formatText(trailingText)}
+        </div>
+      );
+    }
 
     // Add clickable text at the end if this message has modules
     const shouldShowActions = isAssistant && (foundModules.length > 0 || hasDisplayedModules);
     console.log('🔍 Should show actions:', shouldShowActions, { hasModules: foundModules.length > 0, hasDisplayedModules, currentlyDisplayedModules: currentlyDisplayedModules?.length });
-    
+
     if (shouldShowActions) {
       renderedParts.push(
         <div key="actions" className="mt-4 pt-3 border-t border-gray-200">
@@ -602,7 +641,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 };
                 setMessages(prev => [...prev, userMessage]);
                 setIsLoading(true);
-                
+
                 setTimeout(async () => {
                   try {
                     const response = await fetch('/api/ai/chat', {
@@ -616,22 +655,22 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                         alreadyShownModules: currentlyDisplayedModules || []
                       })
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     if (data.recommendedModules && data.recommendedModules.length > 0) {
                       console.log('🔍 Updating modules:', data.recommendedModules);
                       onModulesUpdate(data.recommendedModules);
                       setChatModules(data.recommendedModules);
                     }
-                    
+
                     const botMessage: Message = {
                       id: Date.now().toString() + '_bot',
                       role: 'assistant',
                       content: data.response,
                       timestamp: Date.now()
                     };
-                    
+
                     setMessages(prev => [...prev, botMessage]);
                   } catch (error) {
                     console.error('Chat error:', error);
@@ -644,7 +683,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             >
               Больше функций
             </span>
-            
+
             {selectedModules.length > 0 && (
               <span
                 onClick={() => window.location.href = '/my-app'}
@@ -653,7 +692,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 Мое App ({selectedModules.length})
               </span>
             )}
-            
+
             {/* Reset button - not shown after first message */}
             {messages.length > 2 && (
               <span
@@ -667,30 +706,30 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         </div>
       );
     }
-    
+
     return renderedParts;
   };
 
   // Function to format text with bold support, headers and preserve line breaks
   const formatText = (text: string) => {
     if (!text) return text;
-    
+
     // Remove duplicate module names that end with ** (legacy issue fix)
     // Pattern: Remove lines that are just module names ending with **
     let cleanedText = text.replace(/^([А-Яа-я\s\-\d]+)\*\*$/gm, '');
-    
+
     // Also remove pattern like "**[MODULE:X] Module Name**" that creates duplicates
     cleanedText = cleanedText.replace(/\*\*\[MODULE:\d+\]\s*([^\*]+)\*\*/g, '');
-    
+
     // Remove pattern "** - " that appears before module descriptions
     cleanedText = cleanedText.replace(/^\*\* - /gm, '');
-    
+
     // Remove standalone "**" at the beginning of lines
     cleanedText = cleanedText.replace(/^\*\*$/gm, '');
-    
+
     // First handle headers (## text) and bold (**text**)
     const lines = cleanedText.split('\n');
-    
+
     return (
       <>
         {lines.map((line, lineIndex) => {
@@ -699,25 +738,25 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
             // Count consecutive empty lines to apply proper spacing
             const nextLine = lines[lineIndex + 1];
             const prevLine = lines[lineIndex - 1];
-            
+
             // If this is space within a module (after module title)
             if (prevLine && nextLine && 
                 prevLine.trim().startsWith('Модуль ') && 
                 !nextLine.trim().startsWith('Модуль ')) {
               return <div key={lineIndex} className="mb-1"></div>; // Small gap after module title
             }
-            
+
             // If this is space between modules (prev line ends with period, next line starts with "Модуль")
             if (prevLine && nextLine && 
                 prevLine.trim().endsWith('.') && 
                 nextLine.trim().startsWith('Модуль ')) {
               return <div key={lineIndex} className="mb-6"></div>; // Much bigger gap between modules
             }
-            
+
             // Default spacing for other empty lines
             return lineIndex < lines.length - 1 ? <br key={lineIndex} /> : null;
           }
-          
+
           // Handle headers
           if (line.startsWith('## ')) {
             const headerText = line.slice(3);
@@ -727,10 +766,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
               </h3>
             );
           }
-          
+
           // Handle bold text within the line
           const parts = line.split(/(\*\*.*?\*\*)/g);
-          
+
           return (
             <span key={lineIndex}>
               {parts.map((part, partIndex) => {
@@ -844,7 +883,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                         })}
                       </p>
 
-                      
+
 
                     </div>
                   </motion.div>
@@ -860,9 +899,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
               }
             })}
           </AnimatePresence>
-          
 
-          
+
+
           {isLoading && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -875,7 +914,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
               <div className="bg-muted rounded-xl px-3 py-2 shadow-sm border border-border">
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-3 w-3 animate-spin" />
-                  <span className="text-xs text-muted-foreground">AI думает: ~1 минута</span>
+                  <span className="text-xs text-muted-foreground">AI печатает...</span>
                 </div>
               </div>
             </motion.div>
@@ -920,7 +959,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           </Button>
         </div>
       </div>
-      
+
       {/* Reset Dialog */}
       <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <DialogContent className="sm:max-w-md">
@@ -946,7 +985,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 </label>
               </div>
             </div>
-            
+
             <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2">
               <Button 
                 variant="outline" 
@@ -958,7 +997,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 variant="destructive"
                 onClick={() => {
                   trackUserInteraction('reset_chat_confirmed', resetModulesToo ? 'with_modules' : 'only_chat');
-                  
+
                   // Reset chat
                   const welcomeMessage = {
                     id: '1',
@@ -966,16 +1005,16 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
                     timestamp: Date.now()
                   };
-                  
+
                   setMessages([welcomeMessage]);
                   persistentMessages = [welcomeMessage];
                   setChatModules([]);
-                  
+
                   if (resetModulesToo) {
                     setSelectedModules([]);
                     localStorage.removeItem('selectedModules');
                   }
-                  
+
                   localStorage.removeItem('aiChatMessages');
                   onModulesUpdate([]);
                   setShowResetDialog(false);
