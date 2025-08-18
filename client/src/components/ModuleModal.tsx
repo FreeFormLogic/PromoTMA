@@ -153,27 +153,32 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
 
   const handleConnectModule = () => {
     if (!module) return;
-    
+
     const currentModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
     const currentlySelected = currentModules.some((m: any) => m.id === module.id);
-    
+
     if (currentlySelected) {
       // Удаляем модуль если уже выбран
       const updatedModules = currentModules.filter((m: any) => m.id !== module.id);
       localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+      // update local state first
       setIsSelected(false);
     } else {
       // Добавляем модуль в выбранные
       const updatedModules = [...currentModules, module];
       localStorage.setItem('selectedModules', JSON.stringify(updatedModules));
+      // update local state first
       setIsSelected(true);
     }
-    
+
     // Обновляем интерфейс
+    // Dispatch change BEFORE closing modal so other components receive update immediately
     window.dispatchEvent(new CustomEvent('moduleSelectionChanged'));
-    
-    // Закрыть модальное окно после выбора без задержки
-    onClose();
+
+    // Close modal after a tiny tick to allow other components to react (avoid race conditions)
+    setTimeout(() => {
+      onClose();
+    }, 0);
   };
   // Используем реальные данные модуля из базы данных (как в AI чате)
   const details = {
@@ -216,7 +221,7 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
           <DialogDescription className="sr-only">
             Детальная информация о модуле {module.name}
           </DialogDescription>
-          
+
           <div className="flex items-center gap-2 mt-2">
             {module.isPopular && (
               <Badge className="bg-orange-100 text-orange-800">Популярный</Badge>
@@ -231,7 +236,7 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
               {details.description}
             </div>
           </div>
-          
+
           {/* Features section with proper formatting like AI chat */}
           <div>
             <h3 className="font-bold text-lg mb-3">Основные возможности:</h3>
@@ -249,7 +254,7 @@ export function ModuleModal({ module, isOpen, onClose }: ModuleModalProps) {
               ))}
             </div>
           </div>
-          
+
           {/* Benefits section like AI chat */}
           {details.impact && (
             <div>
