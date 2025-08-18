@@ -170,6 +170,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     }
   });
   const [chatModules, setChatModules] = useState<Module[]>([]);
+  const [messageComments, setMessageComments] = useState<Record<string, Record<number, string>>>({});
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [resetModulesToo, setResetModulesToo] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -284,7 +285,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: responseData.response,
+  content: responseData.response,
         timestamp: Date.now()
       };
 
@@ -293,6 +294,15 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       persistentMessages = finalMessages;
       localStorage.setItem('aiChatMessages', JSON.stringify(finalMessages));
 
+      // If server returned a structured map of module descriptions/comments, store it keyed by message id
+      try {
+        const descMap = responseData.moduleDescriptions || responseData.comments || responseData.module_comments || null;
+        if (descMap && typeof descMap === 'object') {
+          setMessageComments(prev => ({ ...prev, [assistantMessage.id]: descMap }));
+        }
+      } catch (e) {
+        // ignore
+      }
       // If AI recommended specific modules, get them and add to chat display (prevent duplicates)
       if (responseData.recommendedModules && responseData.recommendedModules.length > 0 && allModules) {
         const recommendedModuleDetails = allModules.filter(module => 
@@ -514,7 +524,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     setMessages(prev => [...prev, prototypeMessage]);
   };
 
-  const renderMessageWithModules = (content: string, isAssistant: boolean, hasDisplayedModules: boolean = false) => {
+  const renderMessageWithModules = (content: string, isAssistant: boolean, hasDisplayedModules: boolean = false, messageId?: string) => {
     // Safety check for content
     if (!content || typeof content !== 'string') {
       console.warn('Error rendering message:', content);
@@ -529,8 +539,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     // Parse content sequentially to preserve order: intro -> [MODULE:id] + description -> ... -> final question
     const lines = content.split('\n');
 
-    const introLines: string[] = [];
-    const modulePairs: { id: number; name?: string; description?: string }[] = [];
+  const introLines: string[] = [];
+  const modulePairs: { id: number; name?: string; description?: string }[] = [];
+  const serverComments = messageId ? (messageComments[messageId] || null) : null;
     let i = 0;
 
     const moduleRegex = /\[MODULE:(\d+)\]\s*(.*)/;
@@ -616,14 +627,16 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       const moduleObj = allModules.find(m => m.number === pair.id);
       if (!moduleObj) return;
 
+      const serverDesc = serverComments && serverComments[pair.id] ? serverComments[pair.id] : undefined;
+
       renderedParts.push(
         <div key={`module-pair-${idx}`} className="mb-6">
           <div className="mb-2">
             <ModuleCard module={moduleObj} />
           </div>
-          {pair.description && (
+          {(serverDesc || pair.description) && (
             <div className="text-sm text-gray-600 ml-4 mb-4">
-              {formatText(pair.description)}
+              {formatText(serverDesc || pair.description || '')}
             </div>
           )}
         </div>
@@ -696,7 +709,13 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                       timestamp: Date.now()
                     };
 
-                    setMessages(prev => [...prev, botMessage]);
+                      setMessages(prev => [...prev, botMessage]);
+                      try {
+                        const descMap = data.moduleDescriptions || data.comments || data.module_comments || null;
+                        if (descMap && typeof descMap === 'object') {
+                          setMessageComments(prev => ({ ...prev, [botMessage.id]: descMap }));
+                        }
+                      } catch (e) {}
                   } catch (error) {
                     console.error('Chat error:', error);
                   } finally {
@@ -896,7 +915,8 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                         {renderMessageWithModules(
                           message.content, 
                           message.role === 'assistant', 
-                          message.role === 'assistant' && currentlyDisplayedModules && currentlyDisplayedModules.length > 0
+                          message.role === 'assistant' && currentlyDisplayedModules && currentlyDisplayedModules.length > 0,
+                          message.id
                         )}
                       </div>
                       <p className={`text-[10px] mt-1 ${
