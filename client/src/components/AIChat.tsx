@@ -169,6 +169,22 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       return [];
     }
   });
+  
+  // Listen for module selection changes from other components
+  useEffect(() => {
+    const handleStorageChange = () => {
+      try {
+        const stored = localStorage.getItem('selectedModules');
+        const modules = stored ? JSON.parse(stored) : [];
+        setSelectedModules(modules);
+      } catch {
+        setSelectedModules([]);
+      }
+    };
+    
+    window.addEventListener('moduleSelectionChanged', handleStorageChange);
+    return () => window.removeEventListener('moduleSelectionChanged', handleStorageChange);
+  }, []);
   const [chatModules, setChatModules] = useState<Module[]>([]);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [resetModulesToo, setResetModulesToo] = useState(true);
@@ -372,12 +388,22 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     
     // Remove duplicate selection check - using buttonState instead
     
-    // Initialize button state on mount only
+    // Initialize button state on mount and listen for changes
     useEffect(() => {
       const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
       const currentState = !!savedModules.find((m: any) => m.id === module.id);
       setButtonState(currentState);
-    }, []);
+      
+      // Listen for changes from other components
+      const handleStorageChange = () => {
+        const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+        const newState = !!savedModules.find((m: any) => m.id === module.id);
+        setButtonState(newState);
+      };
+      
+      window.addEventListener('moduleSelectionChanged', handleStorageChange);
+      return () => window.removeEventListener('moduleSelectionChanged', handleStorageChange);
+    }, [module.id]);
     const IconComponent = Sparkles; // Use sparkles icon for now
     
     // Remove global listener - we update directly in click handler
