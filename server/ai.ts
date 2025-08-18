@@ -45,7 +45,7 @@ ${conversationText}
 
   try {
     const result = await model.generateContent(prompt, {
-      responseMimeType: "application/json",
+        responseMimeType: "application/json",
     });
     const responseText = result.response.text();
     const analysis = JSON.parse(responseText);
@@ -67,19 +67,11 @@ ${conversationText}
 /**
  * Локальная функция для оценки релевантности модуля на основе анализа AI.
  */
-function calculateModuleRelevance(
-  module: any,
-  analysis: BusinessAnalysis,
-): number {
+function calculateModuleRelevance(module: any, analysis: BusinessAnalysis): number {
   let score = 0;
-  const searchText =
-    `${module.name} ${module.description} ${module.category}`.toLowerCase();
+  const searchText = `${module.name} ${module.description} ${module.category}`.toLowerCase();
 
-  if (
-    analysis.relevantCategories.some((cat) =>
-      searchText.includes(cat.toLowerCase()),
-    )
-  ) {
+  if (analysis.relevantCategories.some(cat => searchText.includes(cat.toLowerCase()))) {
     score += 50;
   }
   for (const keyword of analysis.keywords) {
@@ -105,20 +97,14 @@ export async function generateAIResponse(
 
     // --- ЭТАП 2: Локальный отбор самых релевантных модулей из ВСЕЙ базы ---
     const allModules = await storage.getAllModules();
-    console.log(
-      `🧠 Stage 2: Filtering all ${allModules.length} modules based on AI analysis...`,
-    );
+    console.log(`🧠 Stage 2: Filtering all ${allModules.length} modules based on AI analysis...`);
 
     const scoredModules = allModules
-      .map((module) => ({
+      .map(module => ({
         ...module,
         relevanceScore: calculateModuleRelevance(module, analysis),
       }))
-      .filter(
-        (module) =>
-          !alreadyShownModules.includes(module.number) &&
-          module.relevanceScore > 0,
-      );
+      .filter(module => !alreadyShownModules.includes(module.number) && module.relevanceScore > 0);
 
     scoredModules.sort((a, b) => b.relevanceScore - a.relevanceScore);
     const topModules = scoredModules.slice(0, 40); // Берем топ-40 для финального анализа
@@ -126,18 +112,13 @@ export async function generateAIResponse(
     if (topModules.length === 0) {
       console.warn("⚠️ No relevant modules found after local filtering.");
       return {
-        response:
-          "К сожалению, я не смог подобрать подходящие модули. Попробуйте описать ваш бизнес подробнее.",
+        response: "К сожалению, я не смог подобрать подходящие модули. Попробуйте описать ваш бизнес подробнее.",
         recommendedModules: [],
       };
     }
 
-    const modulesDatabase = topModules
-      .map((m) => `[MODULE:${m.number}] ${m.name} - ${m.description}`)
-      .join("\n");
-    console.log(
-      `🎯 Stage 2: Selected ${topModules.length} most relevant modules for final recommendation.`,
-    );
+    const modulesDatabase = topModules.map(m => `[MODULE:${m.number}] ${m.name} - ${m.description}`).join("\n");
+    console.log(`🎯 Stage 2: Selected ${topModules.length} most relevant modules for final recommendation.`);
 
     // --- ЭТАП 3: Финальный запрос к Gemini для написания красивых описаний ---
     const systemPrompt = `Ты — гениальный бизнес-консультант. Твоя задача — изучить диалог, проанализировать предоставленный СПИСОК ЛУЧШИХ МОДУЛЕЙ и выбрать из него 4-5 самых идеальных решений для клиента.
@@ -159,39 +140,26 @@ ${modulesDatabase}
 `;
 
     console.log("🚀 Stage 3: Sending final recommendation request to AI...");
-    const result = await model.generateContent(
-      `${systemPrompt}\n\nДиалог:\n${messages.map((msg) => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`,
-    );
+    const result = await model.generateContent(`${systemPrompt}\n\nДиалог:\n${messages.map(msg => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`);
     const aiContent = result.response.text();
 
     console.log("✅ Stage 3: Received AI response.");
 
-    const responseLines = aiContent
-      .trim()
-      .split("\n")
-      .filter((line) => line.includes("[MODULE:"));
+    const responseLines = aiContent.trim().split("\n").filter(line => line.includes("[MODULE:"));
     if (responseLines.length === 0) {
       console.warn("AI returned content, but no valid module lines found.");
-      return {
-        response:
-          "Мне не удалось подобрать точные рекомендации. Пожалуйста, расскажите о вашем бизнесе немного больше.",
-        recommendedModules: [],
-      };
+      return { response: "Мне не удалось подобрать точные рекомендации. Пожалуйста, расскажите о вашем бизнесе немного больше.", recommendedModules: [] };
     }
 
     const finalResponse = responseLines.join("\n");
-    const recommendedModules = responseLines
-      .map((line) => {
+    const recommendedModules = responseLines.map(line => {
         const match = line.match(/\[MODULE:(\d+)\]/i);
         return match ? parseInt(match[1]) : 0;
-      })
-      .filter((id) => id > 0 && !alreadyShownModules.includes(id));
+    }).filter(id => id > 0 && !alreadyShownModules.includes(id));
 
     return {
       response: finalResponse,
-      recommendedModules: [...new Set(recommendedModules)].sort(
-        (a, b) => a - b,
-      ),
+      recommendedModules: [...new Set(recommendedModules)].sort((a, b) => a - b),
     };
   } catch (error) {
     console.error("AI Main Logic Error:", error);
