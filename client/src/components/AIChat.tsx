@@ -187,9 +187,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         const savedMessages = localStorage.getItem('aiChatMessages');
         if (savedMessages) {
           const parsed = JSON.parse(savedMessages);
-          // Only update if there are differences and we have fewer messages
-          if (parsed.length > messages.length || JSON.stringify(parsed) !== JSON.stringify(messages)) {
-            console.log('🔄 Syncing chat history:', parsed.length, 'messages');
+          // Only update if we have significantly fewer messages (avoid overwriting during message send)
+          if (parsed.length > messages.length + 1) {
+            console.log('🔄 Syncing chat history:', parsed.length, 'vs current', messages.length);
             setMessages(parsed);
             persistentMessages = parsed;
           }
@@ -199,33 +199,23 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       }
     };
     
-    // Sync immediately when component mounts or remounts
-    syncMessages();
+    // Only sync on initial mount, not during message updates
+    if (messages.length <= 1) {
+      syncMessages();
+    }
     
     // Listen for custom event from navigation
     const handleNavigation = () => {
       console.log('🔄 Navigation event detected, syncing chat...');
-      setTimeout(syncMessages, 100); // Increased delay
-    };
-    
-    // Listen for storage events from other tabs/windows
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'aiChatMessages') {
-        console.log('🔄 Storage change detected, syncing chat...');
-        syncMessages();
-      }
+      setTimeout(syncMessages, 100);
     };
     
     window.addEventListener('chatNavigationEvent', handleNavigation);
-    window.addEventListener('focus', syncMessages);
-    window.addEventListener('storage', handleStorageChange);
     
     return () => {
       window.removeEventListener('chatNavigationEvent', handleNavigation);
-      window.removeEventListener('focus', syncMessages);
-      window.removeEventListener('storage', handleStorageChange);
     };
-  }, [messages.length]); // Depend on message count to trigger sync when needed
+  }, []); // Empty dependency to avoid interference with message updates
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<BusinessAnalysis | null>(null);
@@ -332,6 +322,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     setMessages(updatedMessages);
     persistentMessages = updatedMessages;
     localStorage.setItem('aiChatMessages', JSON.stringify(updatedMessages));
+    console.log('💾 Saved user message, total:', updatedMessages.length);
     setInput('');
     setIsLoading(true);
 
@@ -376,6 +367,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       setMessages(finalMessages);
       persistentMessages = finalMessages;
       localStorage.setItem('aiChatMessages', JSON.stringify(finalMessages));
+      console.log('💾 Saved AI response, total:', finalMessages.length);
 
       // If AI recommended specific modules, get them and add to chat display (prevent duplicates)
       if (responseData.recommendedModules && responseData.recommendedModules.length > 0 && allModules) {
@@ -406,9 +398,11 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
           content: 'Извините, произошла ошибка. Попробуйте еще раз.',
           timestamp: Date.now()
         };
-        setMessages(prev => [...prev, errorMessage]);
-        persistentMessages = [...persistentMessages, errorMessage];
-        localStorage.setItem('aiChatMessages', JSON.stringify([...persistentMessages, errorMessage]));
+        const errorMessages = [...updatedMessages, errorMessage];
+        setMessages(errorMessages);
+        persistentMessages = errorMessages;
+        localStorage.setItem('aiChatMessages', JSON.stringify(errorMessages));
+        console.log('💾 Saved error message, total:', errorMessages.length);
       }
     } finally {
       setIsLoading(false);
