@@ -623,9 +623,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       );
     }
 
-    // Add clickable text at the end if this message has modules
-    const shouldShowActions = isAssistant && (foundModules.length > 0 || hasDisplayedModules);
-    console.log('🔍 Should show actions:', shouldShowActions, { hasModules: foundModules.length > 0, hasDisplayedModules, currentlyDisplayedModules: currentlyDisplayedModules?.length });
+  // Add clickable text at the end if this message has modules
+  const shouldShowActions = isAssistant && (modulePairs.length > 0 || hasDisplayedModules);
+  console.log('🔍 Should show actions:', shouldShowActions, { hasModules: modulePairs.length > 0, hasDisplayedModules, currentlyDisplayedModules: currentlyDisplayedModules?.length });
 
     if (shouldShowActions) {
       renderedParts.push(
