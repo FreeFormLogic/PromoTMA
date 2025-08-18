@@ -300,9 +300,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalCost = inputCost + outputCost;
       
       // Создаем сессию для AI чата если ее нет
-      const telegramId = req.headers['x-telegram-user-id'] as string || 'unknown';
+      const telegramId = req.headers['x-telegram-user-id'] as string || `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       let sessionId = req.headers['x-session-id'] as string;
-      if (!sessionId) {
+      
+      // Если session-id передан, но сессия не существует в базе, создаем новую
+      if (sessionId) {
+        try {
+          const existingSession = await storage.getSessionById(sessionId);
+          if (!existingSession) {
+            console.log('Session not found, creating new one:', sessionId);
+            sessionId = await storage.createAiChatSession(telegramId, sessionId);
+          }
+        } catch (error) {
+          console.log('Error checking session, creating new one:', error);
+          sessionId = await storage.createAiChatSession(telegramId);
+        }
+      } else {
         sessionId = await storage.createAiChatSession(telegramId);
       }
       

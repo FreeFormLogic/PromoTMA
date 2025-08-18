@@ -47,7 +47,8 @@ export interface IStorage {
   canUserAccessPage(telegramId: string, page: string): Promise<boolean>;
 
   // AI Chat Statistics methods
-  createAiChatSession(telegramId: string): Promise<string>;
+  createAiChatSession(telegramId: string, customSessionId?: string): Promise<string>;
+  getSessionById(sessionId: string): Promise<any | null>;
   saveAiChatMessage(sessionId: string, messageData: { role: 'user' | 'assistant'; content: string; tokensInput: number; tokensOutput: number; costUsd: number }): Promise<void>;
   endAiChatSession(sessionId: string): Promise<void>;
   logAiChatMessage(sessionId: string, telegramId: string, role: 'user' | 'assistant', content: string, tokensInput: number, tokensOutput: number, cost: number, metadata?: any): Promise<void>;
@@ -450,8 +451,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   // AI Chat Statistics methods
-  async createAiChatSession(telegramId: string): Promise<string> {
-    const sessionId = `session_${telegramId}_${Date.now()}`;
+  async createAiChatSession(telegramId: string, customSessionId?: string): Promise<string> {
+    const sessionId = customSessionId || `session_${telegramId}_${Date.now()}`;
     const sessionData = {
       id: sessionId,
       telegramId: telegramId
@@ -459,6 +460,16 @@ export class DatabaseStorage implements IStorage {
 
     await db.insert(aiChatSessions).values(sessionData);
     return sessionId;
+  }
+
+  async getSessionById(sessionId: string): Promise<any | null> {
+    try {
+      const [session] = await db.select().from(aiChatSessions).where(eq(aiChatSessions.id, sessionId)).limit(1);
+      return session || null;
+    } catch (error) {
+      console.error('Error getting session by ID:', error);
+      return null;
+    }
   }
 
   async saveAiChatMessage(sessionId: string, messageData: { 

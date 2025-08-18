@@ -92,7 +92,7 @@ const loadMessages = (): Message[] => {
   console.log('🆕 Creating default welcome message');
   return [
     {
-      id: '1',
+      id: `welcome_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       role: 'assistant',
       content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
       timestamp: Date.now()
@@ -181,7 +181,30 @@ class ChatErrorBoundary extends ReactComponent<{children: React.ReactNode}, {has
 function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize, currentlyDisplayedModules = [], isFullScreen = false }: AIChatProps & { isFullScreen?: boolean }) {
   const [, setLocation] = useLocation();
   
-
+  // Управление сессией чата - создаем уникальную сессию для каждого пользователя
+  const [sessionId, setSessionId] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem('aiChatSessionId');
+      if (saved) {
+        return saved;
+      }
+    } catch (e) {
+      console.error('Failed to load session ID:', e);
+    }
+    
+    // Создаем уникальную сессию для незарегистрированных пользователей
+    const telegramUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    const userId = telegramUser?.id?.toString() || `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newSessionId = `session_${userId}_${Date.now()}`;
+    
+    try {
+      localStorage.setItem('aiChatSessionId', newSessionId);
+    } catch (e) {
+      console.error('Failed to save session ID:', e);
+    }
+    
+    return newSessionId;
+  });
 
   const [messages, setMessages] = useState<Message[]>(() => {
     const loaded = loadMessages();
@@ -315,7 +338,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     }
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       role: 'user',
       content: input.trim(),
       timestamp: Date.now()
@@ -337,11 +360,15 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       await analyzeAndUpdateModules(messageHistory);
       
       // Get AI response with recommended modules
+      const telegramUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      const userId = telegramUser?.id?.toString() || `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'x-telegram-user-id': window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || 'unknown'
+          'x-telegram-user-id': userId,
+          'x-session-id': sessionId
         },
         body: JSON.stringify({
           messages: [...currentMessages, userMessage].map(m => ({
@@ -360,7 +387,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       });
 
       const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: `assistant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         role: 'assistant',
         content: responseData.response,
         timestamp: Date.now()
@@ -396,7 +423,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       const errorStr = String(error);
       if (!errorStr.includes('401') && !errorStr.includes('Unauthorized')) {
         const errorMessage: Message = {
-          id: (Date.now() + 1).toString(),
+          id: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           role: 'assistant',
           content: 'Извините, произошла ошибка. Попробуйте еще раз.',
           timestamp: Date.now()
@@ -1062,9 +1089,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 onClick={() => {
                   trackUserInteraction('reset_chat_confirmed', resetModulesToo ? 'with_modules' : 'only_chat');
                   
-                  // Reset chat
+                  // Reset chat with unique ID
                   const welcomeMessage = {
-                    id: '1',
+                    id: `welcome_reset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     role: 'assistant' as const,
                     content: 'Привет! Я помогу создать ваше собственное приложение для бизнеса.\n\n**Как это работает:**\n• Расскажите о вашем бизнесе\n• Я покажу подходящие модули\n• Нажимайте **плюсики** на модулях, чтобы добавить их в ваше приложение\n• Соберите 3-30 модулей для создания прототипа\n\nРасскажите, чем вы занимаетесь и какие задачи хотите решить?',
                     timestamp: Date.now()
@@ -1078,6 +1105,13 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                     setSelectedModules([]);
                     localStorage.removeItem('selectedModules');
                   }
+                  
+                  // Создаем новую сессию при сбросе чата
+                  const telegramUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+                  const userId = telegramUser?.id?.toString() || `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                  const newSessionId = `session_${userId}_${Date.now()}`;
+                  setSessionId(newSessionId);
+                  localStorage.setItem('aiChatSessionId', newSessionId);
                   
                   localStorage.removeItem('aiChatMessages');
                   onModulesUpdate([]);
