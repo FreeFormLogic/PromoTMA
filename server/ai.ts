@@ -1,4 +1,7 @@
-// Smart module recommendation system without external AI dependency
+import { GoogleGenAI } from "@google/genai";
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+
 export interface BusinessAnalysis {
   industry: string;
   challenges: string[];
@@ -87,54 +90,47 @@ const BUSINESS_PATTERNS = {
 };
 
 export async function analyzeBusinessContext(messages: string[]): Promise<BusinessAnalysis> {
-  console.log("🚀 Stage 1: Starting smart business analysis...");
+  console.log("🧠 Analyzing business context with Gemini AI...");
   
-  const messageText = messages.join(" ").toLowerCase();
-  console.log(`🔍 Analyzing text: "${messageText}"`);
+  const conversationText = messages.join("\n");
   
-  let detectedBusiness = null;
-  
-  // Smart pattern matching with scoring
-  let bestMatch = null;
-  let bestScore = 0;
-  
-  for (const [businessType, pattern] of Object.entries(BUSINESS_PATTERNS)) {
-    const matchCount = pattern.keywords.filter(keyword => 
-      messageText.includes(keyword.toLowerCase())
-    ).length;
-    
-    if (matchCount > 0) {
-      console.log(`🎯 ${businessType}: found ${matchCount} matches with keywords: ${pattern.keywords.filter(k => messageText.includes(k.toLowerCase())).join(', ')}`);
-    }
-    
-    if (matchCount > bestScore) {
-      bestScore = matchCount;
-      bestMatch = { type: businessType, ...pattern, score: matchCount };
-    }
-  }
-  
-  if (bestMatch) {
-    detectedBusiness = bestMatch;
-  }
-  
-  // Fallback to general business
-  if (!detectedBusiness) {
-    detectedBusiness = {
-      type: "general",
-      categories: ["E-COMMERCE", "МАРКЕТИНГ", "CRM"],
-      recommendedModules: [1, 5, 18, 46]
+  const prompt = `Проанализируй разговор с клиентом и определи:
+
+РАЗГОВОР:
+${conversationText}
+
+Ответь ТОЛЬКО в формате JSON:
+{
+  "industry": "тип бизнеса (restaurant, travel, retail, beauty, fitness, medical, education, auto, real_estate, logistics, legal или general)",
+  "challenges": ["основные вызовы бизнеса"],
+  "goals": ["цели и задачи"],
+  "relevantCategories": ["подходящие категории модулей"],
+  "keywords": ["ключевые слова из разговора"]
+}`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      config: {
+        responseMimeType: "application/json",
+      },
+      contents: prompt,
+    });
+
+    const result = JSON.parse(response.text || "{}");
+    console.log(`✅ Gemini analysis complete: ${result.industry}`);
+    return result;
+  } catch (error) {
+    console.error("❌ Gemini analysis failed:", error);
+    // Fallback to simple detection
+    return {
+      industry: "general",
+      challenges: ["Общие бизнес-задачи"],
+      goals: ["Автоматизация процессов"],
+      relevantCategories: ["E-COMMERCE", "МАРКЕТИНГ", "CRM"],
+      keywords: []
     };
   }
-  
-  console.log(`✅ Stage 1: Detected business type: ${detectedBusiness.type}`);
-  
-  return {
-    industry: detectedBusiness.type,
-    challenges: [],
-    goals: [],
-    relevantCategories: detectedBusiness.categories,
-    keywords: []
-  };
 }
 
 export async function generateAIResponse(
