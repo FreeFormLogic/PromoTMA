@@ -127,6 +127,24 @@ class ChatErrorBoundary extends ReactComponent<{children: React.ReactNode}, {has
 
 function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = false, onToggleMinimize, currentlyDisplayedModules = [], isFullScreen = false }: AIChatProps & { isFullScreen?: boolean }) {
   const [, setLocation] = useLocation();
+  
+  // Force sync on every component mount/render
+  const forceSync = () => {
+    try {
+      const savedMessages = localStorage.getItem('aiChatMessages');
+      if (savedMessages) {
+        const parsed = JSON.parse(savedMessages);
+        if (parsed && Array.isArray(parsed)) {
+          persistentMessages = parsed;
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Force sync failed:', e);
+    }
+    return persistentMessages;
+  };
+  
   // Initialize from localStorage first
   const initializeFromStorage = () => {
     try {
@@ -157,7 +175,10 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     }
   };
 
-  const [messages, setMessages] = useState<Message[]>(() => initializeFromStorage());
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const syncedMessages = forceSync();
+    return syncedMessages.length > 0 ? syncedMessages : initializeFromStorage();
+  });
   
   // Sync messages with localStorage when component mounts or becomes visible
   useEffect(() => {
@@ -166,8 +187,9 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
         const savedMessages = localStorage.getItem('aiChatMessages');
         if (savedMessages) {
           const parsed = JSON.parse(savedMessages);
-          // Only update if there are differences
-          if (JSON.stringify(parsed) !== JSON.stringify(messages)) {
+          // Only update if there are differences and we have fewer messages
+          if (parsed.length > messages.length || JSON.stringify(parsed) !== JSON.stringify(messages)) {
+            console.log('🔄 Syncing chat history:', parsed.length, 'messages');
             setMessages(parsed);
             persistentMessages = parsed;
           }
@@ -182,17 +204,28 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     
     // Listen for custom event from navigation
     const handleNavigation = () => {
-      setTimeout(syncMessages, 50); // Small delay to ensure localStorage is updated
+      console.log('🔄 Navigation event detected, syncing chat...');
+      setTimeout(syncMessages, 100); // Increased delay
+    };
+    
+    // Listen for storage events from other tabs/windows
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'aiChatMessages') {
+        console.log('🔄 Storage change detected, syncing chat...');
+        syncMessages();
+      }
     };
     
     window.addEventListener('chatNavigationEvent', handleNavigation);
     window.addEventListener('focus', syncMessages);
+    window.addEventListener('storage', handleStorageChange);
     
     return () => {
       window.removeEventListener('chatNavigationEvent', handleNavigation);
       window.removeEventListener('focus', syncMessages);
+      window.removeEventListener('storage', handleStorageChange);
     };
-  }, []); // Empty dependency to run only on mount
+  }, [messages.length]); // Depend on message count to trigger sync when needed
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<BusinessAnalysis | null>(null);
