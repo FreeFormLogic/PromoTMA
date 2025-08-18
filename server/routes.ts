@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import crypto from "crypto";
-import { analyzeBusinessContext, generateAIResponse } from "./ai-gemini";
+import { analyzeBusinessContext, generateAIResponse, calculateModuleRelevance, generateChatResponse } from "./ai";
 
 const telegramAuthSchema = z.object({
   id: z.number(),
@@ -20,38 +20,38 @@ const telegramAuthSchema = z.object({
 function verifyTelegramAuth(authData: any): boolean {
   const { hash, ...data } = authData;
   const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-  
+
   if (!BOT_TOKEN) {
     console.error("TELEGRAM_BOT_TOKEN not found");
     return false;
   }
-  
+
   // Create data-check-string
   const dataCheckArr = Object.keys(data)
     .sort()
     .map(key => `${key}=${data[key]}`)
     .join('\n');
-  
+
   // Create secret key
   const secretKey = crypto.createHash('sha256').update(BOT_TOKEN).digest();
-  
+
   // Create hash
   const calculatedHash = crypto
     .createHmac('sha256', secretKey)
     .update(dataCheckArr)
     .digest('hex');
-  
+
   return calculatedHash === hash;
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  
+
   // Оптимизированная проверка whitelist для одного пользователя
   app.get("/api/admin/whitelist/:userId", async (req, res) => {
     try {
       const { userId } = req.params;
       const user = await storage.getUserByTelegramId(userId);
-      
+
       if (user && user.isActive) {
         res.json({ 
           isActive: true,
@@ -73,7 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/simple", async (req, res) => {
     try {
       const { username } = req.body;
-      
+
       if (!username) {
         return res.status(400).json({ 
           message: "Имя пользователя обязательно" 
@@ -82,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Find or create user
       let user = await storage.authenticateTelegramUser(username);
-      
+
       if (!user) {
         // Create new user if not exists
         user = await storage.createUser({
@@ -92,7 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isAuthorized: true
         });
       }
-      
+
       return res.json({ user, message: "Авторизация успешна" });
     } catch (error) {
       console.error("Auth error:", error);
@@ -104,19 +104,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/telegram", async (req, res) => {
     try {
       const authData = telegramAuthSchema.parse(req.body);
-      
+
       // Verify Telegram authentication data hash for security
       if (!verifyTelegramAuth(authData)) {
         return res.status(401).json({ 
           message: "Неверная подпись Telegram. Попробуйте войти заново." 
         });
       }
-      
+
       // Check auth date (should be within 24 hours)
       const authDate = new Date(authData.auth_date * 1000);
       const now = new Date();
       const hoursDiff = (now.getTime() - authDate.getTime()) / (1000 * 60 * 60);
-      
+
       if (hoursDiff > 24) {
         return res.status(401).json({ 
           message: "Данные авторизации устарели. Попробуйте войти заново." 
@@ -125,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Find or create user based on Telegram ID (more secure than username)
       let user = await storage.getUserByTelegramId(authData.id.toString());
-      
+
       if (!user) {
         // Create new user with Telegram data
         const newUser = await storage.addToWhitelist(authData.id.toString(), {
@@ -134,14 +134,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: authData.username,
           isActive: true
         });
-        
+
         if (newUser.success) {
           user = await storage.getUserByTelegramId(authData.id.toString());
         } else {
           return res.status(500).json({ message: newUser.message });
         }
       }
-      
+
       return res.json({ user, message: "Авторизация успешна" });
     } catch (error) {
       console.error("Auth error:", error);
@@ -263,7 +263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ message: "Messages array is required" });
       }
-      
+
       const analysis = await analyzeBusinessContext(messages);
       res.json(analysis);
     } catch (error) {
@@ -278,34 +278,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ message: "Messages array is required" });
       }
-      
+
       console.log('AI Chat Debug:');
       console.log('- Messages received:', messages.length);
       console.log('- Already shown modules:', alreadyShownModules.length);
       console.log('- Raw messages format:', messages.map(m => `${m.role}: "${m.content}"`));
-      
+
       // Use generateAIResponse with already shown modules tracking
       const result = await generateAIResponse(messages, alreadyShownModules);
-      
+
       console.log('- AI recommended module numbers:', result.recommendedModules);
-      
+
       // Расчет токенов для Claude 4.0 (примерно 4 символа = 1 токен)
       const userMessage = messages[messages.length - 1]?.content || '';
       const inputTokens = Math.ceil(userMessage.length / 4);
       const outputTokens = Math.ceil(result.response.length / 4);
-      
+
       // Цены для Claude Sonnet 4.0: $3/1M input tokens, $15/1M output tokens  
       const inputCost = (inputTokens / 1000000) * 3;
       const outputCost = (outputTokens / 1000000) * 15;
       const totalCost = inputCost + outputCost;
-      
+
       // Создаем сессию для AI чата если ее нет
       const telegramId = req.headers['x-telegram-user-id'] as string || 'unknown';
       let sessionId = req.headers['x-session-id'] as string;
       if (!sessionId) {
         sessionId = await storage.createAiChatSession(telegramId);
       }
-      
+
       // Сохраняем сообщение пользователя
       await storage.saveAiChatMessage(sessionId, {
         role: 'user',
@@ -314,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tokensOutput: 0,
         costUsd: inputCost
       });
-      
+
       // Сохраняем ответ AI
       await storage.saveAiChatMessage(sessionId, {
         role: 'assistant', 
@@ -323,7 +323,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tokensOutput: outputTokens,
         costUsd: outputCost
       });
-      
+
       // Get recommended module details with validation  
       const allModules = await storage.getAllModules();
       const recommendedModules = result.recommendedModules
@@ -337,14 +337,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .filter(Boolean);
 
       console.log('- Found recommended modules:', recommendedModules.map(m => m ? `#${m.number}: ${m.name}` : 'undefined'));
-      
+
       res.json({
         response: result.response,
-        recommendedModules
+  recommendedModules,
+  moduleDescriptions: result.moduleDescriptions || {}
       });
     } catch (error) {
       console.error("Error generating AI response:", error);
-      
+
       // Handle rate limiting specifically
       if ((error as any).status === 429 || (error as any).message?.includes('rate_limit')) {
         return res.json({
@@ -352,7 +353,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           recommendedModules: []
         });
       }
-      
+
       // Handle overload errors
       if ((error as any).status === 529 || (error as any).message?.includes('overloaded')) {
         return res.json({
@@ -360,7 +361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           recommendedModules: []
         });
       }
-      
+
       // Generic error
       res.json({
         response: "Извините, произошла ошибка. Попробуйте еще раз.",
@@ -375,21 +376,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!moduleNumbers || !Array.isArray(moduleNumbers)) {
         return res.status(400).json({ message: "Module numbers array is required" });
       }
-      
+
       const modules = await storage.getAllModules();
-      
+
       // Filter modules to only include those recommended by AI
       const relevantModules = modules.filter(module => 
         moduleNumbers.includes(module.number)
       );
-      
+
       // Sort by the order they were recommended
       relevantModules.sort((a, b) => {
         const aIndex = moduleNumbers.indexOf(a.number);
         const bIndex = moduleNumbers.indexOf(b.number);
         return aIndex - bIndex;
       });
-      
+
       res.json(relevantModules);
     } catch (error) {
       console.error("Error getting relevant modules:", error);
@@ -411,7 +412,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/whitelist", async (req, res) => {
     try {
       const { telegramId, userData } = req.body;
-      
+
       if (!telegramId || !/^\d+$/.test(telegramId)) {
         return res.status(400).json({ message: "Некорректный Telegram ID" });
       }
@@ -431,7 +432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/whitelist/bulk", async (req, res) => {
     try {
       const { userIds } = req.body;
-      
+
       if (!Array.isArray(userIds) || userIds.length === 0) {
         return res.status(400).json({ message: "Список пользователей не может быть пустым" });
       }
@@ -467,7 +468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/admin/whitelist/:telegramId", async (req, res) => {
     try {
       const { telegramId } = req.params;
-      
+
       if (!telegramId || !/^\d+$/.test(telegramId)) {
         return res.status(400).json({ message: "Некорректный Telegram ID" });
       }
@@ -489,7 +490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { telegramId } = req.params;
       const updates = req.body;
-      
+
       if (!telegramId || !/^\d+$/.test(telegramId)) {
         return res.status(400).json({ message: "Некорректный Telegram ID" });
       }
@@ -511,7 +512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { telegramId } = req.params;
       const permissions = req.body;
-      
+
       if (!telegramId || !/^\d+$/.test(telegramId)) {
         return res.status(400).json({ message: "Некорректный Telegram ID" });
       }
@@ -531,7 +532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/whitelist/:telegramId", async (req, res) => {
     try {
       const { telegramId } = req.params;
-      
+
       if (!telegramId || !/^\d+$/.test(telegramId)) {
         return res.status(400).json({ message: "Некорректный Telegram ID" });
       }
@@ -552,14 +553,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/check/:telegramId", async (req, res) => {
     try {
       const { telegramId } = req.params;
-      
+
       if (!telegramId || !/^\d+$/.test(telegramId)) {
         return res.status(400).json({ message: "Некорректный Telegram ID" });
       }
 
       const isAuthorized = await storage.isUserAuthorized(telegramId);
       const permissions = await storage.getUserPermissions(telegramId);
-      
+
       res.json({ 
         isAuthorized,
         permissions: permissions || null
@@ -574,7 +575,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/page-access/:telegramId/:page", async (req, res) => {
     try {
       const { telegramId, page } = req.params;
-      
+
       if (!telegramId || !/^\d+$/.test(telegramId)) {
         return res.status(400).json({ message: "Некорректный Telegram ID" });
       }
@@ -592,7 +593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/referrals/:telegramId', async (req, res) => {
     try {
       const { telegramId } = req.params;
-      
+
       if (!telegramId || !/^\d+$/.test(telegramId)) {
         return res.status(400).json({ message: "Некорректный Telegram ID" });
       }
@@ -608,13 +609,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/referrals/register', async (req, res) => {
     try {
       const { referralCode, newUserName, newUserPhone } = req.body;
-      
+
       if (!referralCode || !newUserName || !newUserPhone) {
         return res.status(400).json({ message: "Все поля обязательны для заполнения" });
       }
 
       const result = await storage.registerViaReferral(referralCode, newUserName, newUserPhone);
-      
+
       if (result.success) {
         res.json(result);
       } else {
@@ -714,7 +715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { telegramId } = req.params;
       const userStats = await storage.getUserStats(telegramId);
       const chatHistory = await storage.getUserChatHistory(telegramId, 100);
-      
+
       res.json({
         userStats,
         chatHistory
