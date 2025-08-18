@@ -875,7 +875,7 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
               <div className="bg-muted rounded-xl px-3 py-2 shadow-sm border border-border">
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-3 w-3 animate-spin" />
-                  <span className="text-xs text-muted-foreground">AI печатает...</span>
+                  <span className="text-xs text-muted-foreground">AI думает: ~1 минута</span>
                 </div>
               </div>
             </motion.div>
