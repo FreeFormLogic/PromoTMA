@@ -543,57 +543,45 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
       return formatText(content);
     }
     
-    // Split content into lines for processing
-    const lines = content.replace(/\[MODULE:\d+\]/g, '').split('\n').filter(line => line.trim());
-    
-    // Find introduction (everything before first description)
-    const introLines: string[] = [];
-    const descriptionLines: string[] = [];
-    
-    let foundDescriptions = false;
-    lines.forEach(line => {
-      if (line.includes('Позволит') || line.includes('Поможет') || line.includes('Обеспечит') || 
-          line.includes('Даст') || line.includes('Создаст') || line.includes('Упростит') ||
-          line.toLowerCase().includes('возможность') || line.toLowerCase().includes('система')) {
-        foundDescriptions = true;
-        descriptionLines.push(line.trim());
-      } else if (!foundDescriptions) {
-        introLines.push(line.trim());
-      }
-    });
-    
+    // Parse content to extract module-description pairs
     const renderedParts: any[] = [];
     
-    // Add introduction
-    if (introLines.length > 0) {
-      renderedParts.push(
-        <div key="intro" className="mb-6">
-          {formatText(introLines.join('\n\n'))}
-        </div>
-      );
-    }
+    // Split content by lines and process each module with its description
+    const contentLines = content.split('\n').filter(line => line.trim());
     
-    // Add each module with its description
-    foundModules.forEach((module, index) => {
-      if (!module) return; // Skip undefined modules
+    contentLines.forEach((line, index) => {
+      const moduleMatch = line.match(/\[MODULE:(\d+)\]\s*(.*)/);
       
-      const description = descriptionLines[index] || '';
-      
-      renderedParts.push(
-        <div key={`module-pair-${index}`} className="mb-6">
-          {/* Module card */}
-          <div className="mb-2">
-            <ModuleCard module={module} />
-          </div>
-          
-          {/* Description right under module */}
-          {description && (
-            <div className="text-sm text-gray-600 ml-4 mb-4">
-              {description}
+      if (moduleMatch) {
+        const moduleNumber = parseInt(moduleMatch[1]);
+        const description = moduleMatch[2]?.trim() || '';
+        const module = allModules.find(m => m.number === moduleNumber);
+        
+        if (module) {
+          renderedParts.push(
+            <div key={`module-pair-${moduleNumber}`} className="mb-6">
+              {/* Module card */}
+              <div className="mb-2">
+                <ModuleCard module={module} />
+              </div>
+              
+              {/* Description right under module */}
+              {description && (
+                <div className="text-sm text-gray-600 ml-4 mb-4">
+                  {description}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      );
+          );
+        }
+      } else if (line.trim() && !line.includes('[MODULE:')) {
+        // Regular text content (introduction, etc.)
+        renderedParts.push(
+          <div key={`text-${index}`} className="mb-4">
+            {formatText(line)}
+          </div>
+        );
+      }
     });
 
     // Add clickable text at the end if this message has modules
