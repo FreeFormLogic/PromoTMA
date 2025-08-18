@@ -74,10 +74,14 @@ const saveMessages = (messages: Message[]) => {
 const loadMessages = (): Message[] => {
   try {
     const saved = localStorage.getItem('aiChatMessages');
+    console.log('🔍 Raw localStorage data:', saved?.substring(0, 200) + '...');
     if (saved) {
       const parsed = JSON.parse(saved);
+      console.log('📱 Loaded', parsed.length, 'messages from localStorage:');
+      parsed.forEach((msg: Message, i: number) => {
+        console.log(`  ${i + 1}. ${msg.role}: ${msg.content.substring(0, 50)}...`);
+      });
       if (Array.isArray(parsed) && parsed.length > 0) {
-        console.log('📱 Loaded', parsed.length, 'messages from localStorage');
         return parsed;
       }
     }
@@ -85,6 +89,7 @@ const loadMessages = (): Message[] => {
     console.error('Failed to load messages:', e);
   }
   // Return default welcome message if no saved messages
+  console.log('🆕 Creating default welcome message');
   return [
     {
       id: '1',
@@ -285,7 +290,12 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
     trackAIChat('send_message', { messageLength: input.trim().length });
     
     // Always get the latest messages from localStorage before sending
+    console.log('🔍 BEFORE SEND - Current messages state:', messages.length);
+    console.log('🔍 BEFORE SEND - Messages in state:', messages.map(m => `${m.role}: ${m.content.substring(0, 30)}...`));
+    
     const currentMessages = loadMessages();
+    console.log('🔍 BEFORE SEND - Messages from localStorage:', currentMessages.length);
+    
     if (currentMessages.length !== messages.length) {
       console.log('🔄 Syncing before send:', currentMessages.length, 'vs current:', messages.length);
       setMessages(currentMessages);
