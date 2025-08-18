@@ -1,39 +1,6 @@
 # Overview
 
-This project is a full-stack web application serving as a Telegram Mini Apps directory and showcase platform. Its primary purpose is to function as a business catalog and marketing tool, highlighting modular Mini App solutions. The platform enables users to explore various app modules, industry-specific solutions, pricing models, and development processes, targeting businesses seeking rapid Telegram Mini App deployment using pre-built components.
-
-## Recent Updates (August 2025)
-- ✅ **Fixed Authorization System**: Dynamic whitelist checking from server-side, removing hardcoded dependencies
-- ✅ **Added User Access**: User 666024781 manually added to server-side whitelist for immediate access
-- ✅ **NEW USERS ADDED**: Users 5954190315 and 7459692034 granted full access (all sections except admin panel and partner program)
-- ✅ **FIXED ACCESS ISSUE**: Resolved "Доступ запрещен" error for users 7459692034 and 5954190315 - added them to both server whitelist database and client-side ALLOWED_USER_IDS list
-- ✅ **Implemented Comprehensive Analytics**: Full Yandex.Metrika integration with webvisor tracking all user text inputs and interactions
-- ✅ **Enhanced AI Chat Analytics**: Complete tracking of all chat interactions, module selections, and user behaviors
-- ✅ **Complete "Ваше преимущество" Redesign**: Full rebuild based on detailed specifications - dark theme (bg-gray-900), dual-tab structure ("Преимущества для Клиента" + "Аргументы для Продавца"), expandable cards with detailed ROI data, accordion objection handling, comparison table, target verticals, and persuasive sales content with specific financial figures
-- ✅ **AI Chat Statistics System**: Complete AI usage tracking with token counting, cost calculation, and session management. New database tables (aiChatSessions, aiChatMessages, aiChatUserStats) for storing detailed chat history. Admin panel enhanced with AI statistics dashboard showing per-user token usage, costs, session data. Automatic cost calculation based on Claude Sonnet 4.0 pricing model ($3/$15 per 1M tokens)
-- ✅ **Fixed Category Grouping**: Reorganized module categories into logical groups - E-commerce, Marketing, Finance, Education, Entertainment, Booking, Business, AI & Automation, Integrations, Communications, Analytics, Security, Local services, and Additional services
-- ✅ **Updated AI Constructor Menu**: Enhanced floating menu in AI chat with complete navigation including all main sections: Home, Modules, Industries, My Telegram Mini App, Your Advantage, Partners
-- ✅ **FIXED AI CRITICAL ERROR**: Resolved JSON parsing issue preventing AI chat functionality - restored full database processing of all 244 modules with complete descriptions, features, and benefits
-- ✅ **AI Conversation Continuity**: Implemented intelligent tracking to prevent module repetition - AI now suggests new relevant modules based on conversation context
-- ✅ **Indonesian Payment Integration**: AI now correctly identifies and suggests Indonesia-specific modules (120: GoPay/OVO, 123: DANA/LinkAja, 125: BCA/Mandiri banks) for Bali/Indonesia business contexts
-- ✅ **FIXED Module Display Issues**: Eliminated duplicate module names ending with ** and removed extra symbols (** - ) appearing before module descriptions. Enhanced AI prompt to prevent formatting issues and added client-side text cleaning for legacy compatibility
-- ✅ **Streamlined UI Design**: Removed "Компактный вид" toggle from modules page, now displays catalog view by default. Stacked AI-конструктор and Каталог модулей buttons vertically on main page. Removed duplicate "Быстрый запуск" content block for cleaner interface
-- ✅ **Fixed Module Clickability**: Removed blue category navigation from modules header, added click functionality to all module cards in catalog view with proper modal display integration
-- ✅ **Fixed Business Goal Filtering**: Changed from OR-logic to AND-logic for business goal filters - now properly narrows down results instead of expanding them
-- ✅ **Fixed Module Modal Content**: Replaced old hardcoded module data with actual database content - modals now show current descriptions, features, and benefits instead of outdated content with images
-- ✅ **UNIVERSAL AI ANALYSIS SYSTEM**: Completely redesigned AI module selection from niche-specific hardcoded rules to universal semantic analysis. AI now intelligently analyzes ANY business niche by: 1) Deep study of industry specifics and terminology, 2) Comprehensive scanning of all 260+ modules in database, 3) Semantic matching of business processes ↔ module capabilities, 4) Pain point resolution scoring, 5) Categorical relevance analysis. System works universally for any industry without hardcoded rules.
-- ✅ **REMOVED HARDCODED PATTERNS**: Deleted all industry-specific patterns and rules from AI system. AI now thinks independently without predefined templates, analyzing each business context naturally through conversation understanding rather than matching against hardcoded industry knowledge.
-- ✅ **CRITICAL AI SYSTEM RESTORATION**: Completely fixed AI chat functionality after "Invalid response format" errors. Resolved TypeScript caching issues, rewrote generateAIResponse function from scratch, and restored full AI capabilities. System now processes 242 modules flawlessly, provides intelligent business analysis for any industry, and correctly formats responses with proper capitalization. Special Indonesia/Bali business logic working perfectly with local payment modules (120, 123, 125).
-- ✅ **AI QUALITY BREAKTHROUGH**: Successfully optimized Gemini API integration by eliminating massive prompt size issue. Removed full 242-module database transmission, implemented smart business analysis system, and achieved perfect formatting without asterisks or duplicate names. AI now provides contextually relevant recommendations (e.g., Module 165 "Restaurant Management" for cafes) with clean [MODULE:X] format and complete database-extracted details.
-- ✅ **REMOVED EDUCATION MODULE 66**: Permanently deleted "Система непрерывного образования" module from database, seed files, and AI prompts as requested. Fixed LSP errors and database consistency.
-- ✅ **UNIFIED MODAL SYSTEM**: Complete modal unification achieved - both AI chat and ModuleCatalog now use identical ModuleModal component for consistent user experience and content display across entire platform. Custom Dialog system in AI chat replaced with shared ModuleModal.
-- ✅ **DATABASE FULLY RESTORED**: Successfully restored database from corrupted 171 modules to 231 modules, fixed all broken createModule entries in seedModules.ts, confirmed module 66 properly removed, and verified Indonesia-specific modules (8 total) are intact.
-- ✅ **TARGET ACHIEVED: 260+ MODULES**: Successfully expanded database from 231 to 260 modules, adding 29 specialized business modules including medical clinics, fitness centers, beauty salons, hotels, auto service, dentistry, legal firms, logistics, education centers, real estate, recruiting, warehouse management, support tickets, invoicing, fiscal receipts, 1C integration, landing builders, table booking, pre-orders, subscriptions, MLM commissions, admin chatbots, white labeling, document management, AI translators, geo-marketing, quality control, environmental monitoring, and franchise management systems.
-- ✅ **AI CHAT IMPROVEMENTS**: Fixed formatting issues with excessive spacing between modules in AI responses. Enhanced ModuleModal with proper "Connect Module" functionality - modules can now be properly added/removed from selected modules with localStorage persistence and visual feedback showing current connection status.
-- ✅ **AI STATISTICS TRACKING**: Added proper Telegram user ID header transmission from client to server for AI chat session tracking. Implemented saveAiChatMessage function in storage.ts to properly save chat messages with token counting and cost calculation. Fixed database integration for AI chat statistics with proper session management.
-- ✅ **AI CHAT DISPLAY OVERHAUL**: Completely restructured AI message rendering - introduction text displays separately first, then each module paired with its description below and proper spacing. Fixed module connection buttons to work reliably with single click and immediate visual feedback. Simplified state management to use localStorage as single source of truth.
-- ✅ **ТРЁХЭТАПНАЯ GEMINI СИСТЕМА**: Полностью внедрена интеллектуальная система анализа всех 259 модулей через Gemini ИИ без локальных паттернов. Этап 1: разделение модулей на оптимальные пакеты. Этап 2: параллельный анализ всех пакетов и отбор кандидатов. Этап 3: финальный выбор лучших модулей и генерация персонализированных описаний. Время обработки 40-50 секунд обеспечивает максимальную точность рекомендаций.
-- ✅ **УЛУЧШЕННАЯ GEMINI СИСТЕМА**: Обновлены промпты с акцентом на отраслевые решения ("включая отраслевые, если они подходят"), улучшено форматирование описаний (15-20 слов, строгая структура), добавлена географическая интеллектуальность для автоматического выбора локальных платежных систем. Система автоматически выбирает специализированные модули (238 для салонов, 119-120 для Бали) и создает контекстные описания решения задач клиента.
+This project is a full-stack web application designed as a Telegram Mini Apps directory and showcase platform. Its core purpose is to serve as a business catalog and marketing tool, highlighting modular Mini App solutions. The platform enables users to explore various app modules, industry-specific solutions, pricing models, and development processes, primarily targeting businesses seeking rapid Telegram Mini App deployment using pre-built components. The platform aims to provide a universal AI analysis system for module selection, capable of intelligently analyzing any business niche by semantically matching business processes with module capabilities.
 
 # User Preferences
 
@@ -42,25 +9,25 @@ Preferred communication style: Simple, everyday language.
 # System Architecture
 
 ## Frontend Architecture
-The client is built with React and TypeScript, leveraging a modern component-based architecture. It uses Tailwind CSS with shadcn/ui for consistent UI, Wouter for lightweight routing, and TanStack React Query for server state management. Vite is used for fast development and optimized builds.
+The client is built with React and TypeScript, using a component-based architecture. It leverages Tailwind CSS with shadcn/ui for consistent UI, Wouter for routing, and TanStack React Query for server state management. Vite is used for development and optimized builds.
 
 ## Backend Architecture
-The server follows a RESTful API design pattern using Express.js with TypeScript. It features modular route structures for authentication, modules, and industry data, integrating seamlessly with the Vite development environment.
+The server follows a RESTful API design pattern using Express.js with TypeScript. It features modular route structures and integrates with the Vite development environment.
 
 ## Authentication System
-The application employs a simplified, one-click authentication system. It uses local storage for client-side session persistence with a 24-hour expiry, automatically generating unique users. A dedicated admin panel at `/admin` (password protected) manages whitelist access for specific Telegram IDs. The system strictly blocks unauthorized users.
+The application uses a simplified, one-click authentication system with local storage for client-side session persistence (24-hour expiry) and automatic unique user generation. An admin panel manages a server-side whitelist for specific Telegram IDs, ensuring only authorized users can access the platform.
 
 ## Database and ORM
-Drizzle ORM is used for type-safe database operations and migrations, with schema definitions centralized and Zod integration for runtime type validation.
+Drizzle ORM is used for type-safe database operations and migrations. Schema definitions are centralized with Zod integration for runtime type validation.
 
 ## Component Architecture
-A comprehensive design system is implemented using Radix UI primitives, with CSS custom properties for theming and dark mode support. It features a mobile-first responsive design using Tailwind CSS and built-in accessibility through Radix UI components.
+A comprehensive design system is implemented using Radix UI primitives, featuring CSS custom properties for theming and dark mode support. It supports a mobile-first responsive design using Tailwind CSS and includes built-in accessibility through Radix UI components.
 
 ## Data Management
-The application manages data entities including Modules (Mini App components), Industries (industry-specific solutions), USPs, Objections (FAQ), Users (authorization status), and AI Chat Analytics. The module database has been expanded to 260+ entries across various categories like additional services, automation, industry solutions, analytics, security, communications, social commerce, and AI-driven solutions. AI chat tracking includes comprehensive statistics: token usage, costs, session duration, message history, and user activity patterns with real-time cost calculation based on Claude model pricing.
+The application manages data entities including Modules (Mini App components, over 260 entries), Industries, USPs, Objections, Users (authorization status), and AI Chat Analytics. AI chat tracking includes comprehensive statistics such as token usage, costs, session duration, message history, and user activity patterns with real-time cost calculation.
 
 ## UI/UX Decisions
-The platform enforces a strict blue/white color scheme. It features enhanced mobile navigation with a bottom-right floating button and bottom-screen menu opening. The AI chat provides gradual, personalized module recommendations, preventing duplicates and offering real-time business insights. Module modals include gradient backgrounds and markdown formatting support. The pricing display is standardized at $10,000.
+The platform utilizes a strict blue/white color scheme. It features enhanced mobile navigation with a bottom-right floating button and bottom-screen menu. The AI chat provides gradual, personalized module recommendations, prevents duplicates, and offers real-time business insights. Module modals include gradient backgrounds and markdown formatting support. The pricing display is standardized. A unified modal system is used across AI chat and the module catalog for consistent content display.
 
 # External Dependencies
 
@@ -89,5 +56,5 @@ The platform enforces a strict blue/white color scheme. It features enhanced mob
 - **connect-pg-simple**: PostgreSQL session store.
 
 ## Analytics
-- **Google Analytics**: For user tracking (G-FMM4BECLK5).
-- **Yandex.Metrika**: With webvisor, clickmap, and ecommerce tracking (103742841).
+- **Google Analytics**: For user tracking.
+- **Yandex.Metrika**: With webvisor, clickmap, and ecommerce tracking.
