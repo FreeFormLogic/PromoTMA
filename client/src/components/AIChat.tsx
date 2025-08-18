@@ -685,6 +685,19 @@ function AIChatComponent({ onAnalysisUpdate, onModulesUpdate, isMinimized = fals
                 Сбросить
               </span>
             )}
+
+            {/* Refresh button for testing */}
+            <span
+              onClick={() => {
+                // Force re-render by updating component state
+                const currentMessages = [...messages];
+                setMessages([]);
+                setTimeout(() => setMessages(currentMessages), 50);
+              }}
+              className="text-green-600 hover:text-green-700 cursor-pointer hover:underline font-medium"
+            >
+              Обновить отображение
+            </span>
           </div>
         </div>
       );
