@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import crypto from "crypto";
-import { analyzeBusinessContext, generateAIResponse, calculateModuleRelevance, generateChatResponse } from "./ai";
+import { analyzeBusinessContext, generateAIResponse } from "./ai";
 
 const telegramAuthSchema = z.object({
   id: z.number(),
