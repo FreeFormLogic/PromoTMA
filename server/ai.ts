@@ -4,133 +4,100 @@ import { storage } from "./storage";
 
 // Инициализируем AI с вашим ключом
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Используем быструю и эффективную модель
-
-export interface BusinessAnalysis {
-  industry: string;
-  challenges: string[];
-  goals: string[];
-  relevantCategories: string[];
-  keywords: string[];
-}
+// Используем быструю и эффективную модель, чтобы избежать тайм-аутов
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 /**
- * ЭТАП 1: AI анализирует диалог и определяет суть бизнеса.
+ * Вспомогательная функция для получения рекомендаций по одному "пакету" модулей.
  */
-export async function analyzeBusinessContext(
-  messages: string[],
-): Promise<BusinessAnalysis> {
-  console.log("🚀 Stage 1: Starting business analysis with Gemini...");
-  const conversationText = messages.join("\n");
+async function getRecommendationsForChunk(
+  chunk: string,
+  messages: { role: "user" | "assistant"; content: string }[],
+  alreadyShownModules: number[],
+): Promise<string> {
+  const systemPrompt = `Ты — элитный бизнес-архитектор. Проанализируй диалог с клиентом и, опираясь на предоставленный ЧАСТИЧНЫЙ СПИСОК модулей, выбери из него 2-3 САМЫХ подходящих решения.
 
-  const prompt = `Ты - эксперт по бизнес-анализу. Проанализируй диалог и извлеки суть бизнеса клиента. Исправь возможные опечатки.
+ЧАСТИЧНЫЙ СПИСОК МОДУЛЕЙ:
+---
+${chunk}
+---
 
 ТВОЯ ЗАДАЧА:
-1. Определи нишу бизнеса (industry).
-2. Выяви ключевые проблемы (challenges) и цели (goals).
-3. Определи самые важные категории модулей (relevantCategories), например: E-COMMERCE, МАРКЕТИНГ, БРОНИРОВАНИЕ, CRM, ТУРИЗМ.
-4. Сгенерируй ключевые слова (keywords), описывающие этот бизнес.
+1.  Изучи диалог, чтобы понять суть бизнеса клиента.
+2.  Выбери из списка выше только те модули, которые являются ИДЕАЛЬНЫМ попаданием в потребности клиента.
+3.  Для каждого выбранного модуля просто верни его номер в формате [MODULE:НОМЕР]. Не пиши описание.
 
-ДИАЛОГ:
-${conversationText}
-
-Отвечай только валидным JSON без дополнительного текста. Пример для "турагентство":
-{
-  "industry": "Туристическое агентство",
-  "challenges": ["Подбор туров", "Коммуникация с клиентами", "Прием оплат"],
-  "goals": ["Увеличить продажи туров", "Автоматизировать бронирование"],
-  "relevantCategories": ["БРОНИРОВАНИЕ", "CRM", "ФИНТЕХ", "E-COMMERCE"],
-  "keywords": ["туры", "отели", "путевки", "бронирование", "клиенты", "путешествия"]
-}`;
+ПРАВИЛА ФОРМАТИРОВАНИЯ:
+-   Твой ответ должен состоять ТОЛЬКО из строк формата \`[MODULE:НОМЕР]\`.
+-   Никаких вступлений, прощаний или лишнего текста.
+-   Не предлагай модули, которые уже были показаны: [${alreadyShownModules.join(", ")}].
+`;
 
   try {
-    const result = await model.generateContent(prompt, {
-        responseMimeType: "application/json",
-    });
-    const responseText = result.response.text();
-    const analysis = JSON.parse(responseText);
-    console.log("✅ Stage 1: Analysis complete:", analysis);
-    return analysis;
+    const result = await model.generateContent(`${systemPrompt}\n\nДиалог:\n${messages.map(msg => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`);
+    return result.response.text();
   } catch (error) {
-    console.error("❌ Gemini analysis failed:", error);
-    // В случае сбоя возвращаем общие параметры для поиска
-    return {
-      industry: "general business",
-      challenges: [],
-      goals: [],
-      relevantCategories: ["E-COMMERCE", "МАРКЕТИНГ"],
-      keywords: [],
-    };
+    console.error("Gemini chunk processing error:", error);
+    return ""; // Возвращаем пустую строку в случае ошибки, чтобы не прерывать весь процесс
   }
 }
 
 /**
- * Локальная функция для оценки релевантности модуля на основе анализа AI.
- */
-function calculateModuleRelevance(module: any, analysis: BusinessAnalysis): number {
-  let score = 0;
-  const searchText = `${module.name} ${module.description} ${module.category}`.toLowerCase();
-
-  if (analysis.relevantCategories.some(cat => searchText.includes(cat.toLowerCase()))) {
-    score += 50;
-  }
-  for (const keyword of analysis.keywords) {
-    if (searchText.includes(keyword.toLowerCase())) {
-      score += 20;
-    }
-  }
-  return score;
-}
-
-/**
- * Основная функция, которая генерирует ответ для чата.
+ * Основная функция, которая генерирует финальный ответ для чата.
  */
 export async function generateAIResponse(
   messages: { role: "user" | "assistant"; content: string }[],
   alreadyShownModules: number[] = [],
 ): Promise<{ response: string; recommendedModules: number[] }> {
   try {
-    const userMessages = messages.map((m) => m.content);
-
-    // --- ЭТАП 1: Глубокий анализ бизнеса клиента ---
-    const analysis = await analyzeBusinessContext(userMessages);
-
-    // --- ЭТАП 2: Локальный отбор самых релевантных модулей из ВСЕЙ базы ---
+    // --- ЭТАП 1: Подготовка и разделение всей базы модулей на части ---
     const allModules = await storage.getAllModules();
-    console.log(`🧠 Stage 2: Filtering all ${allModules.length} modules based on AI analysis...`);
+    console.log(`🤖 Stage 1: Processing all ${allModules.length} modules.`);
 
-    const scoredModules = allModules
-      .map(module => ({
-        ...module,
-        relevanceScore: calculateModuleRelevance(module, analysis),
-      }))
-      .filter(module => !alreadyShownModules.includes(module.number) && module.relevanceScore > 0);
+    const formattedModules = allModules.map(
+      (m) => `[MODULE:${m.number}] ${m.name} - ${m.description}`,
+    );
 
-    scoredModules.sort((a, b) => b.relevanceScore - a.relevanceScore);
-    const topModules = scoredModules.slice(0, 40); // Берем топ-40 для финального анализа
+    const CHUNK_SIZE = 60; // Оптимальный размер "пакета"
+    const chunks: string[] = [];
+    for (let i = 0; i < formattedModules.length; i += CHUNK_SIZE) {
+      chunks.push(formattedModules.slice(i, i + CHUNK_SIZE).join("\n"));
+    }
+    console.log(`📦 Stage 1: Split modules into ${chunks.length} chunks.`);
 
-    if (topModules.length === 0) {
-      console.warn("⚠️ No relevant modules found after local filtering.");
-      return {
-        response: "К сожалению, я не смог подобрать подходящие модули. Попробуйте описать ваш бизнес подробнее.",
-        recommendedModules: [],
-      };
+    // --- ЭТАП 2: Параллельный анализ всех частей и сбор кандидатов ---
+    const promises = chunks.map((chunk) =>
+      getRecommendationsForChunk(chunk, messages, alreadyShownModules),
+    );
+    const results = await Promise.all(promises);
+    console.log(`🧠 Stage 2: Received preliminary recommendations from all chunks.`);
+
+    const candidateModuleNumbers = results
+      .join("\n")
+      .match(/\[MODULE:(\d+)\]/g)
+      ?.map(match => parseInt(match.match(/(\d+)/)![0])) || [];
+
+    if (candidateModuleNumbers.length === 0) {
+      throw new Error("AI did not select any candidate modules.");
     }
 
-    const modulesDatabase = topModules.map(m => `[MODULE:${m.number}] ${m.name} - ${m.description}`).join("\n");
-    console.log(`🎯 Stage 2: Selected ${topModules.length} most relevant modules for final recommendation.`);
+    const uniqueCandidateNumbers = [...new Set(candidateModuleNumbers)];
+    const candidateModules = allModules.filter(m => uniqueCandidateNumbers.includes(m.number));
+    const finalModuleDatabase = candidateModules.map(m => `[MODULE:${m.number}] ${m.name} - ${m.description}`).join("\n");
 
-    // --- ЭТАП 3: Финальный запрос к Gemini для написания красивых описаний ---
-    const systemPrompt = `Ты — гениальный бизнес-консультант. Твоя задача — изучить диалог, проанализировать предоставленный СПИСОК ЛУЧШИХ МОДУЛЕЙ и выбрать из него 4-5 самых идеальных решений для клиента.
+    console.log(`🎯 Stage 2: Aggregated ${candidateModules.length} unique candidate modules.`);
 
-СПИСОК ЛУЧШИХ МОДУЛЕЙ (уже отсортированы по релевантности):
+    // --- ЭТАП 3: Финальный запрос к AI для выбора лучших из лучших и написания описаний ---
+    const finalPrompt = `Ты — гениальный бизнес-консультант. Ты уже проанализировал всю базу модулей и отобрал лучших кандидатов. Теперь твоя задача — выбрать 4-5 самых идеальных и написать для них продающие описания.
+
+СПИСОК ЛУЧШИХ МОДУЛЕЙ-КАНДИДАТОВ:
 ---
-${modulesDatabase}
+${finalModuleDatabase}
 ---
 
 ТВОЯ ЗАДАЧА:
-1.  Изучи диалог, чтобы понять бизнес клиента (${analysis.industry}). Его цели: ${analysis.goals.join(", ")}.
-2.  Выбери из списка выше 4-5 САМЫХ подходящих модуля.
+1.  Изучи диалог с клиентом еще раз.
+2.  Выбери из списка кандидатов 4-5 САМЫХ лучших модуля.
 3.  Для каждого напиши новое, короткое и убедительное объяснение (15-20 слов), показывая, как модуль решит задачу клиента.
 
 САМЫЕ СТРОГИЕ ПРАВИЛА ФОРМАТИРОВАНИЯ:
@@ -139,16 +106,14 @@ ${modulesDatabase}
 -   Никаких вступлений, прощаний или лишнего текста.
 `;
 
-    console.log("🚀 Stage 3: Sending final recommendation request to AI...");
-    const result = await model.generateContent(`${systemPrompt}\n\nДиалог:\n${messages.map(msg => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`);
-    const aiContent = result.response.text();
-
-    console.log("✅ Stage 3: Received AI response.");
+    console.log("🚀 Stage 3: Sending final request to AI for ranking and description generation...");
+    const finalResult = await model.generateContent(`${finalPrompt}\n\nДиалог:\n${messages.map(msg => `${msg.role === "user" ? "Клиент" : "Ассистент"}: ${msg.content}`).join("\n")}`);
+    const aiContent = finalResult.response.text();
+    console.log("✅ Stage 3: Received final AI response.");
 
     const responseLines = aiContent.trim().split("\n").filter(line => line.includes("[MODULE:"));
     if (responseLines.length === 0) {
-      console.warn("AI returned content, but no valid module lines found.");
-      return { response: "Мне не удалось подобрать точные рекомендации. Пожалуйста, расскажите о вашем бизнесе немного больше.", recommendedModules: [] };
+      throw new Error("Final AI response did not contain valid module lines.");
     }
 
     const finalResponse = responseLines.join("\n");
@@ -161,6 +126,7 @@ ${modulesDatabase}
       response: finalResponse,
       recommendedModules: [...new Set(recommendedModules)].sort((a, b) => a - b),
     };
+
   } catch (error) {
     console.error("AI Main Logic Error:", error);
     return {
@@ -168,4 +134,10 @@ ${modulesDatabase}
       recommendedModules: [],
     };
   }
+}
+
+// Эта функция больше не нужна, так как вся логика перенесена в generateAIResponse.
+// Оставляем ее пустой для совместимости, если она где-то вызывается.
+export async function analyzeBusinessContext(messages: string[]): Promise<any> {
+    return Promise.resolve({});
 }
