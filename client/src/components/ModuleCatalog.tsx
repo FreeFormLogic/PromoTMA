@@ -16,38 +16,27 @@ interface ModuleCardProps {
 const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
   const IconComponent = Sparkles; // Use sparkles icon like in AI chat
   const [buttonState, setButtonState] = useState(false);
-
-  // Check if module is selected (read from localStorage on render)
-  const savedModulesForRender = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-  const isSelected = !!savedModulesForRender.find((m: any) => m.id === module.id);
-
-  // Initialize and keep button state in sync with localStorage and global events
+  
+  // Check if module is selected
+  const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+  const isSelected = !!savedModules.find((m: any) => m.id === module.id);
+  
+  // Initialize button state on mount only
   useEffect(() => {
-    const readState = () => {
-      const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
-      const currentState = !!savedModules.find((m: any) => m.id === module.id);
-      setButtonState(currentState);
-    };
-
-    // Initial read for this module (runs on mount and when module changes)
-    readState();
-
-    // Listen for external changes (other components) and update immediately
-    const handler = () => readState();
-    window.addEventListener('moduleSelectionChanged', handler as EventListener);
-
-    return () => window.removeEventListener('moduleSelectionChanged', handler as EventListener);
-  }, [module?.id]);
-
+    const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
+    const currentState = !!savedModules.find((m: any) => m.id === module.id);
+    setButtonState(currentState);
+  }, []);
+  
   // Remove global listener - we update directly in click handler
-
+  
   const handleModuleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-
+    
     // Get current state from localStorage
     const savedModules = JSON.parse(localStorage.getItem('selectedModules') || '[]');
     const moduleExists = savedModules.find((m: any) => m.id === module.id);
-
+    
     let newModules;
     if (moduleExists) {
       newModules = savedModules.filter((m: any) => m.id !== module.id);
@@ -57,17 +46,17 @@ const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
         isPopular: (module as any).isPopular || false
       }];
     }
-
+    
     // Save and update immediately
     localStorage.setItem('selectedModules', JSON.stringify(newModules));
-
+    
     // Update button state immediately 
     setButtonState(!moduleExists);
-
+    
     // Notify other components
     window.dispatchEvent(new CustomEvent('moduleSelectionChanged'));
   };
-
+  
   return (
     <Card 
       className={`group cursor-pointer transition-all duration-300 border mb-3 ${
@@ -97,12 +86,12 @@ const ModuleCard = ({ module, onClick }: ModuleCardProps) => {
             </div>
           </div>
         </div>
-
+        
         {/* Description */}
         <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
           {module.description.replace(/\*\*/g, '')}
         </p>
-
+        
         {/* Benefit and arrow */}
         <div className="flex items-center justify-between">
           <div 
@@ -146,10 +135,10 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
   // Извлекаем бизнес-цели из преимуществ модулей
   const businessGoals = useMemo(() => {
     const goals = new Set<string>();
-
+    
     allModulesData.forEach(module => {
       const benefits = module.benefits?.toLowerCase() || '';
-
+      
       // Ключевые слова для определения бизнес-целей
       if (benefits.includes('продаж') || benefits.includes('прибыл')) {
         goals.add('Увеличение продаж');
@@ -214,7 +203,7 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
   // Группировка по категориям
   const groupedModules = useMemo(() => {
     const groups: { [key: string]: Module[] } = {};
-
+    
     filteredModules.forEach(module => {
       const category = module.category || 'Без категории';
       if (!groups[category]) {
@@ -314,7 +303,7 @@ const ModuleCatalog = ({ allModulesData }: ModuleCatalogProps) => {
                 )}
               </Button>
             </CollapsibleTrigger>
-
+            
             <CollapsibleContent className="space-y-4 mt-4">
               <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
                 {modules.map(module => (

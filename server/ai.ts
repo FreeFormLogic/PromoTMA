@@ -107,7 +107,7 @@ ${messages.join("\n")}
 export async function generateAIResponse(
   messages: { role: "user" | "assistant"; content: string }[],
   alreadyShownModules: number[] = [],
-): Promise<{ response: string; recommendedModules: number[]; moduleDescriptions?: Record<number, string> }> {
+): Promise<{ response: string; recommendedModules: number[] }> {
   try {
     const { storage } = await import("./storage");
     const allModules = await storage.getAllModules();
@@ -118,21 +118,17 @@ export async function generateAIResponse(
       .map((m) => `[MODULE:${m.number}] ${m.name} - ${m.description}`)
       .join("\n");
 
-   const finalPrompt = `Ты — гениальный бизнес-консультант. У тебя есть полный список доступных модулей для решения бизнес-задач.
+    const finalPrompt = `Ты — гениальный бизнес-консультант. У тебя есть полный список доступных модулей для решения бизнес-задач.
 
-ВАЖНО: ответ должен содержать две части в следующем порядке:
-1) Человеко-читаемый текст — вводная рекомендация и затем блоки модулей в формате
-  [MODULE:НОМЕР] Название модуля\n   Короткое продающее описание (15-25 слов)\n\n
-2) Сразу после текста ОБЯЗАТЕЛЬНО добавь строго валидный JSON, помещённый между маркерами
-  ###MODULE_JSON_START### и ###MODULE_JSON_END### (без дополнительных символов вокруг).
-  JSON должен иметь вид:
-  {
-    "moduleDescriptions": {"<номер>": "<полное описание>", ...},
-    "recommendedModules": [номер, ...]
-  }
-  JSON обязателен: если описаний нет — верни пустой объект "{}" или пустую структуру как выше.
+ИНСТРУКЦИЯ (СТРОГОЕ СОБЛЮДЕНИЕ):
+1) Сначала выдай 1-2 предложения вводного текста с общей рекомендацией для клиента.
+2) Затем для каждого выбранного модуля выведи:
+   - Первая строка: [MODULE:НОМЕР] Название модуля
+   - Вторая строка: короткое продающее описание (15-20 слов), показывающее, как модуль решит задачу клиента.
+   - Затем одна пустая строка (разделитель между модулями).
+3) В конце ОБЯЗАТЕЛЬНО добавь один вопрос, задающий направление для показа следующих модулей (например: "Хотите увидеть модули по отрасли, по цене или по приоритету?").
 
-Нельзя использовать markdown-оформление для основного вывода. Человеко-читаемый текст может быть в произвольной форме, но JSON должен быть валидным и корректно парситься.
+Никаких других строк, меток, нумерации или пояснений. Нельзя использовать markdown-оформление (тройные обратные кавычки, **, * и т.п.).
 
 СПИСОК ВСЕХ МОДУЛЕЙ (используй его для выбора и привязывай описания к реальным именам и номерам):
 ---
@@ -182,79 +178,12 @@ ${messages.map((msg) => `${msg.role === "user" ? "Пользователь" : "�
 
     console.log("AI Response Preview:", aiContent.substring(0, 200));
 
-    // Попытаемся сначала извлечь машинно-читабельный JSON между маркерами, если он есть.
-    let cleanedContentRaw = aiContent;
-    let extractedJson: any = null;
-    try {
-      const jsonBlockMatch = aiContent.match(/###MODULE_JSON_START###+([\s\S]*?)###MODULE_JSON_END###/);
-      if (jsonBlockMatch && jsonBlockMatch[1]) {
-        const jsonText = jsonBlockMatch[1].trim();
-        try {
-          extractedJson = JSON.parse(jsonText);
-          // Remove JSON block from human-readable content
-          cleanedContentRaw = aiContent.replace(jsonBlockMatch[0], '').trim();
-        } catch (jsonErr) {
-          // If JSON parse failed, try to find any JSON object that contains moduleDescriptions
-          const fallbackJsonMatch = aiContent.match(/(\{[\s\S]*?\})/);
-          if (fallbackJsonMatch) {
-            try {
-              extractedJson = JSON.parse(fallbackJsonMatch[1]);
-              cleanedContentRaw = aiContent.replace(fallbackJsonMatch[1], '').trim();
-            } catch (e) {
-              // leave extractedJson null and fallback to text parsing below
-              extractedJson = null;
-            }
-          }
-        }
-      } else {
-        // No explicit markers — try to find any JSON object with moduleDescriptions key
-        const anyJsonMatch = aiContent.match(/(\{[\s\S]*?"moduleDescriptions"[\s\S]*?\})/);
-        if (anyJsonMatch) {
-          try {
-            extractedJson = JSON.parse(anyJsonMatch[1]);
-            cleanedContentRaw = aiContent.replace(anyJsonMatch[1], '').trim();
-          } catch (e) {
-            extractedJson = null;
-          }
-        }
-      }
-    } catch (e) {
-      console.warn('JSON extraction attempt failed:', e);
-      extractedJson = null;
-    }
-
     // Небольшая очистка: убираем окружение markdown и лишние символы, но сохраняем структуру текста
-    let cleanedContent = cleanedContentRaw
+    let cleanedContent = aiContent
       .replace(/^```[\s\S]*?```$/gm, "")
       .replace(/\*\*/g, "")
       .replace(/\*+/g, "")
       .trim();
-
-    // If JSON provided moduleDescriptions, use it directly and skip fragile parsing where possible
-    const moduleDescriptionsFromAI: Record<number, string> | undefined = (() => {
-      try {
-        if (extractedJson && extractedJson.moduleDescriptions && typeof extractedJson.moduleDescriptions === 'object') {
-          const map: Record<number, string> = {};
-          for (const k of Object.keys(extractedJson.moduleDescriptions)) {
-            const num = Number(k);
-            if (!Number.isNaN(num)) map[num] = String(extractedJson.moduleDescriptions[k]);
-          }
-          return map;
-        }
-        // Also support older possible keys
-        if (extractedJson && extractedJson.module_comments && typeof extractedJson.module_comments === 'object') {
-          const map: Record<number, string> = {};
-          for (const k of Object.keys(extractedJson.module_comments)) {
-            const num = Number(k);
-            if (!Number.isNaN(num)) map[num] = String(extractedJson.module_comments[k]);
-          }
-          return map;
-        }
-      } catch (e) {
-        return undefined;
-      }
-      return undefined;
-    })();
 
     // Попытаемся извлечь пары: [MODULE:id] + описание (следующая непустая строка/параграф)
     const pairs: { id: number; moduleLine: string; description: string }[] = [];
@@ -312,18 +241,6 @@ ${messages.map((msg) => `${msg.role === "user" ? "Пользователь" : "�
     // Уникальные id и фильтрация уже показанных
     const uniqueIds = Array.from(new Set(pairs.map(p => p.id)));
     const recommendedModules = uniqueIds.filter(id => !alreadyShownModules.includes(id)).sort((a, b) => a - b);
-      // Build map of module descriptions from parsed pairs (prefer first occurrence)
-      const moduleDescriptionsFromPairs: Record<number, string> = {};
-      for (const p of pairs) {
-        if (!moduleDescriptionsFromPairs[p.id] && p.description) {
-          moduleDescriptionsFromPairs[p.id] = p.description;
-        }
-      }
-
-      // If AI provided structured moduleDescriptions, prefer it (it may contain fuller descriptions)
-      const moduleDescriptions: Record<number, string> = (moduleDescriptionsFromAI && Object.keys(moduleDescriptionsFromAI).length > 0)
-        ? moduleDescriptionsFromAI
-        : moduleDescriptionsFromPairs;
 
     // Восстанавливаем порядок вывода: вводный текст (до первой метки), затем для каждой пары модуль + описание и пустая строка
     const firstModuleIndex = cleanedContent.search(/\[MODULE:(\d+)\]/);
@@ -357,14 +274,12 @@ ${messages.map((msg) => `${msg.role === "user" ? "Пользователь" : "�
     return {
       response: finalResponse,
       recommendedModules,
-      moduleDescriptions,
     };
   } catch (error) {
     console.error("AI Error:", error);
     return {
       response: "Извините, произошла ошибка при генерации ответа.",
       recommendedModules: [],
-  moduleDescriptions: {},
     };
   }
 }
